@@ -1,0 +1,58 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold" style="color: var(--primary-brown);">Moji psi 🐕</h2>
+    <a href="{% url 'pridat_psa' %}" class="btn btn-primary px-4 shadow-sm" style="border-radius: 12px; background-color: var(--primary-brown); border: none;">
+        ➕ Přidat nového psa
+    </a>
+</div>
+
+<div class="row g-4">
+    {% for pes in psi %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm" style="border-radius: 20px; overflow: hidden; transition: transform 0.2s;">
+            {% if pes.fotka %}
+                <img src="{{ pes.fotka.url }}" class="card-img-top" alt="{{ pes.jmeno }}" style="height: 220px; object-fit: cover;">
+            {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 220px; background-color: #e9ecef !important;">
+                    <span style="font-size: 4rem;">🐶</span>
+                </div>
+            {% endif %}
+            
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h4 class="card-title fw-bold mb-0">{{ pes.jmeno }}</h4>
+                    <span class="badge bg-tan text-dark" style="background-color: var(--light-tan);">{{ pes.vek }} let</span>
+                </div>
+                <p class="text-muted mb-3"><b>Rasa:</b> {{ pes.rasa }}</p>
+                
+                <hr class="opacity-10">
+                
+                <div class="small text-muted">
+                    <div class="mb-1">💉 Očkování: <b>{{ pes.posledni_ockovani|date:"d. m. Y"|default:"Neuvedeno" }}</b></div>
+                    <div class="mb-3">💊 Odčervení: <b>{{ pes.posledni_odcerveni|date:"d. m. Y"|default:"Neuvedeno" }}</b></div>
+                </div>
+
+                <div class="d-flex gap-2 mt-2">
+                    <a href="{% url 'upravit_psa' pes.pk %}" class="btn btn-sm btn-outline-warning flex-grow-1" style="border-radius: 10px;">Upravit</a>
+                    <a href="{% url 'smazat_psa' pes.pk %}" class="btn btn-sm btn-outline-danger flex-grow-1" style="border-radius: 10px;">Smazat</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <div style="font-size: 5rem; opacity: 0.3;">🦮</div>
+        <h3 class="mt-3 text-muted">Zatím tu nemáte žádného psa</h3>
+        <p class="text-muted">Klikněte na tlačítko nahoře a přidejte svého prvního parťáka.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+    .card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}

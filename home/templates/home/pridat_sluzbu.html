@@ -1,0 +1,65 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2 class="mb-4">📍 Přidat novou službu</h2>
+
+    <div class="row">
+        <div class="col-md-5">
+            <div class="card p-4 shadow-sm" style="border-radius: 20px; border: none;">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}  <button type="submit" class="btn btn-brown w-100 mt-3">Odeslat ke schválení</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card shadow-sm p-0" style="border-radius: 20px; overflow: hidden; border: none;">
+                <div id="map" style="height: 600px; width: 100%; background-color: #f8f9fa;"></div>
+            </div>
+            <p class="text-muted mt-2 small text-center">💡 Klikněte do mapy pro automatické vyplnění souřadnic.</p>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Inicializace mapy (střed Česka)
+        var map = L.map('map').setView([49.8, 15.5], 7);
+
+        // 2. Načtení mapových dlaždic
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        var marker;
+
+        // 3. Funkce pro kliknutí do mapy
+        map.on('click', function(e) {
+            var lat = e.latlng.lat.toFixed(6);
+            var lon = e.latlng.lng.toFixed(6);
+
+            // Vyplnění políček ve formuláři (Django jim dává ID automaticky)
+            // Pokud se tvoje pole v modelu jmenují jinak, uprav ty názvy v závorkách:
+            document.getElementById('id_zemepisna_sirka').value = lat;
+            document.getElementById('id_zemepisna_delka').value = lon;
+
+            // Přidání nebo posunutí špendlíku
+            if (marker) {
+                marker.setLatLng(e.latlng);
+            } else {
+                marker = L.marker(e.latlng).addTo(map);
+            }
+        });
+
+        // 4. Oprava pro správné vykreslení velikosti
+        setTimeout(function() {
+            map.invalidateSize();
+        }, 300);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-sm p-4 p-md-5" style="border-radius: 20px; border: none; background-color: white;">
+        <h1 style="color: var(--primary-brown); border-bottom: 2px solid var(--light-tan); padding-bottom: 10px;">🍪 Nastavení cookies</h1>
+
+        <p class="mt-4 text-muted">Poslední aktualizace: 5. února 2026</p>
+
+        <section class="mt-4">
+            <h4 style="color: var(--primary-brown);">Vaše volba</h4>
+            <p>Respektujeme vaše soukromí. Pokud si nepřejete ukládání volitelných cookies, můžete je odmítnout. Portál bude i nadále fungovat v základním režimu (přihlášení a zabezpečení).</p>
+        </section>
+
+        <section class="mt-4">
+            <h4 style="color: var(--primary-brown);">Jaké cookies používáme?</h4>
+            <ul>
+                <li><strong>Nezbytné:</strong> Nutné pro přihlášení a zabezpečení webu. (Nelze vypnout)</li>
+                <li><strong>Funkční a analytické:</strong> Pamatují si vaše preference a pomáhají nám web zlepšovat.</li>
+            </ul>
+        </section>
+
+        <div class="mt-5 d-flex justify-content-center gap-3">
+            <a href="{% url 'home' %}" class="btn btn-success px-4 shadow-sm">Přijmout vše</a>
+
+            <a href="{% url 'home' %}" class="btn btn-outline-secondary px-4">Odmítnout volitelné</a>
+        </div>
+
+        <p class="text-center mt-4 small text-muted">
+            Kliknutím na "Odmítnout" budou používány pouze technické cookies nezbytné pro provoz webu.
+        </p>
+    </div>
+</div>
+{% endblock %}

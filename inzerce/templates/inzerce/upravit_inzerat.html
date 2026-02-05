@@ -1,0 +1,24 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm" style="border-radius: 20px; border: none;">
+                <div class="card-body p-5">
+                    <h2 class="mb-4" style="color: var(--primary-brown);">✏️ Upravit inzerát</h2>
+                    <hr>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-success px-4">Uložit změny</button>
+                            <a href="{% url 'seznam_inzeratu' %}" class="btn btn-outline-secondary">Zrušit</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<div class="container" style="max-width: 600px; margin-top: 50px;">
+    <div class="card" style="background-color: var(--light-tan); border: none; border-radius: 20px; padding: 30px;">
+        <h2 style="color: var(--primary-brown); text-align: center;">🐾 Přidat nového pejska</h2>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            
+            <button type="submit" class="btn" style="background-color: var(--primary-brown); color: white; width: 100%; border-radius: 10px; padding: 10px; font-weight: bold;">
+                Uložit pejska
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

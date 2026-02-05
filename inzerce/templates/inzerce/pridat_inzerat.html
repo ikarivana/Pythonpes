@@ -1,0 +1,18 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm p-4" style="border-radius: 20px;">
+                <h2 class="mb-4">➕ Nový inzerát</h2>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-success w-100 mt-3">Zveřejnit inzerát</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

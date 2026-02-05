@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-md-5">
+            <div class="card h-100 p-4 shadow-sm" style="border-radius: 20px; border: none; background-color: var(--primary-brown); color: white;">
+                <h2 class="mb-4">Kontaktujte nás 🐾</h2>
+                <p>Máte dotaz k portálu nebo nápad na vylepšení? Dejte nám vědět!</p>
+                
+                <div class="mt-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <span style="font-size: 1.5rem;" class="me-3">📧</span>
+                        <span>info@pes.cz</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <span style="font-size: 1.5rem;" class="me-3">📍</span>
+                        <span>Praha, Česká republika</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span style="font-size: 1.5rem;" class="me-3">📱</span>
+                        <span>+420 123 456 789</span>
+                    </div>
+                </div>
+                
+                <div class="mt-auto pt-5">
+                    <p class="small opacity-75">Těšíme se na vaše zprávy. Odpovídáme obvykle do 24 hodin.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card h-100 p-4 shadow-sm" style="border-radius: 20px; border: none; background-color: white;">
+                {% if success %}
+                    <div class="text-center py-5">
+                        <div style="font-size: 4rem; color: green;">✔️</div>
+                        <h3>Zpráva odeslána!</h3>
+                        <p>Děkujeme. Brzy se vám ozveme zpět.</p>
+                        <a href="{% url 'kontakt' %}" class="btn btn-brown mt-3">Poslat další zprávu</a>
+                    </div>
+                {% else %}
+                    <h3 style="color: var(--primary-brown);" class="mb-4">Napište nám</h3>
+                    <form method="post">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">{{ field.label }}</label>
+                                {{ field }}
+                            </div>
+                        {% endfor %}
+                        <button type="submit" class="btn btn-brown w-100 py-3 mt-2">Odeslat zprávu</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

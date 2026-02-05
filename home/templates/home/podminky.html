@@ -1,0 +1,35 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-sm p-4 p-md-5" style="border-radius: 20px; border: none; background-color: white;">
+        <h1 style="color: var(--primary-brown); border-bottom: 2px solid var(--light-tan); padding-bottom: 10px;">📄 Podmínky užití portálu pes.cz</h1>
+        
+        <p class="mt-4 text-muted">Poslední aktualizace: 5. února 2026</p>
+
+        <section class="mt-4">
+            <h4 style="color: var(--primary-brown);">1. Úvodní ustanovení</h4>
+            <p>Portál pes.cz slouží k evidenci psů, správě očkování a vyhledávání služeb pro chovatele. Registrací uživatel souhlasí s těmito podmínkami.</p>
+        </section>
+
+        <section class="mt-4">
+            <h4 style="color: var(--primary-brown);">2. Registrace a placená verze</h4>
+            <p>Základní verze portálu je zdarma. Placená verze pro chovné stanice a majitele více psů bude zpoplatněna dle aktuálního ceníku. Uživatel je povinen uvádět pravdivé údaje.</p>
+        </section>
+
+        <section class="mt-4">
+            <h4 style="color: var(--primary-brown);">3. Odpovědnost</h4>
+            <p>Provozovatel neodpovídá za správnost údajů v Mapě služeb (veteriny, hotely). Údaje o očkování a odčervení mají pouze informativní charakter a nenahrazují odborné posouzení veterináře.</p>
+        </section>
+
+        <section class="mt-4">
+            <h4 style="color: var(--primary-brown);">4. Ochrana osobních údajů (GDPR)</h4>
+            <p>Vaše údaje (e-mail, jméno) zpracováváme pouze za účelem provozu aplikace a zasílání notifikací. Nikdy je nepředáváme třetím stranám.</p>
+        </section>
+
+        <div class="mt-5 text-center">
+            <a href="{% url 'home' %}" class="btn btn-brown px-4">Zpět na hlavní stranu</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

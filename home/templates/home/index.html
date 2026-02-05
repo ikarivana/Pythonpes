@@ -1,0 +1,117 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<style>
+    .home-card {
+        border: none;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+        background: white;
+        text-decoration: none;
+        color: inherit !important;
+        overflow: hidden;
+    }
+
+    .home-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(139, 69, 19, 0.15) !important;
+        background-color: #fff;
+    }
+
+    .home-card:hover h4 {
+        color: var(--primary-brown);
+    }
+
+    .icon-circle {
+        width: 80px;
+        height: 80px;
+        background-color: var(--bg-beige);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        margin: 0 auto 20px;
+        transition: transform 0.3s ease;
+    }
+
+    .home-card:hover .icon-circle {
+        transform: scale(1.1) rotate(10deg);
+    }
+
+    .hero-section {
+        background: linear-gradient(135deg, #8B4513 0%, #5D2E0A 100%);
+        border-radius: 30px;
+        padding: 60px 20px;
+        color: white;
+        margin-bottom: 40px;
+        text-align: center;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .stat-badge {
+        background: rgba(255,255,255,0.2);
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="hero-section">
+    <h1 class="display-4 fw-bold mb-3">Vítejte v Psím Deníku 🐾</h1>
+    <p class="lead mb-4">Vše důležité o vašich čtyřnohých kamarádech na jednom místě.</p>
+    {% if not user.is_authenticated %}
+    <div class="d-flex justify-content-center gap-3">
+        <a href="{% url 'login' %}" class="btn btn-light btn-lg px-4 fw-bold"
+           style="color: var(--primary-brown); border-radius: 15px;">Přihlásit se</a>
+        <a href="#" class="btn btn-outline-light btn-lg px-4" style="border-radius: 15px;">Registrace</a>
+    </div>
+    {% else %}
+    <div class="d-inline-block stat-badge">
+        Dnes je {{ "now"|date:"j. F Y" }} – čas na procházku! 🌳
+    </div>
+    {% endif %}
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <a href="{% url 'seznam_psu' %}" class="card h-100 p-4 text-center home-card shadow-sm">
+            <div class="icon-circle">🐕</div>
+            <h4 class="fw-bold">Moji psi</h4>
+            <p class="text-muted">Správa profilů, historie očkování a zdravotní záznamy vašich mazlíčků.</p>
+            <div class="mt-auto">
+                <span class="text-decoration-underline small">Otevřít seznam</span>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a href="{% url 'mapa_sluzeb' %}" class="card h-100 p-4 text-center home-card shadow-sm">
+            <div class="icon-circle">📍</div>
+            <h4 class="fw-bold">Mapa služeb</h4>
+            <p class="text-muted">Najděte nejbližší veterinu, psí park nebo cvičiště ve vašem okolí.</p>
+            <div class="mt-auto text-primary small fw-bold">Otevřít mapu</div>
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a href="{% url 'terminy' %}" class="card h-100 p-4 text-center home-card shadow-sm">
+            <div class="icon-circle">📅</div>
+            <h4 class="fw-bold">Termíny</h4>
+            <p class="text-muted">Hlídání termínů odčervení, přeočkování a pravidelných kontrol.</p>
+            <div class="mt-auto text-success small fw-bold">Otevřít kalendář</div>
+        </a>
+    </div>
+</div>
+
+<div class="mt-5 p-4 bg-white shadow-sm d-flex align-items-center"
+     style="border-radius: 20px; border-left: 8px solid var(--primary-brown);">
+    <div class="fs-2 me-3">📢</div>
+    <div>
+        <h5 class="mb-1 fw-bold">Rychlý tip:</h5>
+        <p class="mb-0 text-muted">Věděli jste, že správná péče o chrup psa může prodloužit jeho život až o 3 roky?
+            Nezapomeňte na pravidelné čištění!</p>
+    </div>
+</div>
+
+{% endblock %}
