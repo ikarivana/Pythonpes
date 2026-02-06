@@ -48,13 +48,17 @@
 
         <div class="list-group flex-grow-1">
             <a href="{% url 'home' %}" class="list-group-item">🏠 Hlavní strana</a>
-
+            <a href="{% url 'seznam_zdi' %}" class="list-group-item">📸 Zdi plemen</a>
             <a href="{% url 'seznam_inzeratu' %}" class="list-group-item">🛍️ Inzerce / Bazar</a>
 
             {% if user.is_authenticated %}
-            <a href="{% url 'seznam_psu' %}" class="list-group-item">🐕 Moji psi</a>
-            <a href="{% url 'pridat_psa' %}" class="list-group-item">➕ Přidat psa</a>
-            <a href="{% url 'terminy' %}" class="list-group-item">📅 Termíny</a>
+            <hr style="border-color: rgba(255,255,255,0.1); margin: 5px 15px;">
+
+            <a href="{% url 'profil' %}" class="list-group-item fw-bold"
+               style="background-color: rgba(255,255,255,0.1) !important; color: #ffc107 !important;">
+                👤 Můj profil & Správa
+            </a>
+
             <a href="{% url 'mapa_sluzeb' %}" class="list-group-item">📍 Mapa služeb</a>
             {% endif %}
         </div>

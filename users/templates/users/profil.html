@@ -1,0 +1,140 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<style>
+    .home-card {
+        transition: all 0.3s ease;
+        background: white;
+        text-decoration: none;
+        color: inherit !important;
+    }
+    .home-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(139, 69, 19, 0.1) !important;
+    }
+    .btn-outline-brown {
+        color: var(--primary-brown);
+        border-color: var(--primary-brown);
+        border-radius: 10px;
+    }
+    .btn-outline-brown:hover {
+        background-color: var(--primary-brown);
+        color: white;
+    }
+</style>
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 style="color: var(--primary-brown); font-weight: bold;">👤 Profil uživatele: {{ user.username }}</h2>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0 p-3 h-100" style="border-radius: 20px;">
+                <div class="card-body text-center">
+                    <div class="icon-circle mb-3" style="width: 100px; height: 100px; font-size: 3rem; background-color: var(--bg-beige); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                        👤
+                    </div>
+                    <h4>{{ user.first_name }} {{ user.last_name|default:"" }}</h4>
+                    <p class="text-muted small">@{{ user.username }}</p>
+                    <div class="text-start mt-4">
+                        <p class="mb-2"><strong>Status:</strong> {% if profil.je_premium %}👑 Premium{% else %}Standard{% endif %}</p>
+                        <p class="mb-3"><strong>Tel:</strong> {{ profil.telefon|default:"Neuveden" }}</p>
+                    </div>
+                    <a href="#" class="btn btn-outline-brown w-100 mt-2">Upravit údaje</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 mb-4" style="border-radius: 20px;">
+                <div class="card-body">
+                    <h5 class="fw-bold" style="color: var(--primary-brown);">❤️ Moje srdíčka</h5>
+                    <div class="list-group list-group-flush">
+                        {% for post in libi_se_mi %}
+                        <a href="{% url 'zed_plemene' post.plemeno.slug %}" class="list-group-item list-group-item-action border-0 px-0 d-flex justify-content-between align-items-center">
+                            <span>Příspěvek u: <strong>{{ post.plemeno.nazev }}</strong></span>
+                            <small class="text-muted">{{ post.datum_pridani|date:"j.n.Y" }}</small>
+                        </a>
+                        {% empty %}
+                        <p class="text-muted small mt-2">Zatím jsi nedal žádné srdíčko.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 mb-4" style="border-radius: 20px;">
+                <div class="card-body">
+                    <h5 class="fw-bold" style="color: var(--primary-brown);">💬 Moje komentáře</h5>
+                    <div class="list-group list-group-flush">
+                        {% for kom in komentare %}
+                        <div class="list-group-item border-0 px-0">
+                            <small class="d-block text-muted">{{ kom.datum_pridani|date:"j.n.Y H:i" }} ({{ kom.prispevek.plemeno.nazev }})</small>
+                            <p class="mb-0 small">"{{ kom.text }}"</p>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted small mt-2">Zatím jsi nic nekomentoval.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 mb-4" style="border-radius: 20px; border-left: 6px solid var(--primary-brown);">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3" style="color: var(--primary-brown);">🐶 Moje psí centrum</h5>
+                    <div class="row g-3 text-center">
+                        <div class="col-md-4">
+                            <a href="{% url 'seznam_psu' %}" class="btn btn-light w-100 py-3 border shadow-sm h-100 home-card" style="border-radius: 15px;">
+                                <span class="fs-2 d-block mb-1">🐕</span>
+                                <span class="fw-bold">Moji psi</span>
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{% url 'pridat_psa' %}" class="btn btn-light w-100 py-3 border shadow-sm h-100 home-card" style="border-radius: 15px;">
+                                <span class="fs-2 d-block mb-1">➕</span>
+                                <span class="fw-bold">Přidat psa</span>
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{% url 'terminy' %}" class="btn btn-light w-100 py-3 border shadow-sm h-100 home-card" style="border-radius: 15px;">
+                                <span class="fs-2 d-block mb-1">📅</span>
+                                <span class="fw-bold">Termíny</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 mb-5" style="border-radius: 20px;">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3" style="color: var(--primary-brown);">🛍️ Moje inzeráty v bazaru</h5>
+                    <div class="list-group list-group-flush">
+                        {% for inzerat in moje_inzeraty %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 border-bottom">
+                                <div>
+                                    <strong class="text-dark">{{ inzerat.titulek }}</strong>
+                                    <br><small class="text-success fw-bold">{{ inzerat.cena }} Kč</small>
+                                </div>
+                                <a href="{% url 'detail_inzeratu' inzerat.id %}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;">Zobrazit</a>
+                            </div>
+                        {% empty %}
+                            <p class="text-muted small">Zatím neprodáváš nic v bazaru.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

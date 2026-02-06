@@ -1,0 +1,104 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<style>
+    :root {
+        --bg-cream: #fffaf5;
+        --card-border: #eaddcf;
+        --text-dark: #4a3728;
+    }
+
+    .form-card {
+        background: white;
+        border: 1px solid var(--card-border);
+        border-radius: 30px;
+        padding: 40px;
+        box-shadow: 0 15px 35px rgba(74, 55, 40, 0.05);
+        max-width: 700px;
+        margin: 40px auto;
+    }
+
+    .form-label {
+        color: var(--text-dark);
+        font-weight: 700;
+        margin-left: 5px;
+        margin-bottom: 8px;
+    }
+
+    .form-control, .form-select {
+        border-radius: 15px;
+        border: 1px solid var(--card-border);
+        padding: 12px 20px;
+        background-color: var(--bg-cream);
+        transition: all 0.3s;
+    }
+
+    .form-control:focus {
+        background-color: white;
+        border-color: var(--primary-brown);
+        box-shadow: 0 0 0 4px rgba(74, 55, 40, 0.1);
+    }
+
+    .btn-submit {
+        background-color: var(--primary-brown);
+        color: white;
+        border: none;
+        border-radius: 15px;
+        padding: 15px;
+        font-weight: 800;
+        width: 100%;
+        margin-top: 20px;
+        transition: 0.3s;
+    }
+
+    .btn-submit:hover {
+        filter: brightness(110%);
+        transform: translateY(-2px);
+    }
+
+    .type-badge {
+        display: inline-block;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0" style="border-radius: 20px;">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">{{ info.ikona }} Přidat {{ info.titul }}</h2>
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <strong>Chyba ve formuláři:</strong>
+                                {{ form.errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Název</label>
+                            {{ form.nazev }}
+                        </div>
+
+                        <button type="submit" class="btn btn-dark w-100 py-3 mt-3" style="border-radius: 12px;">
+                            Vytvořit {{ info.titul }}
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <a href="{% url 'seznam_zdi' %}" class="text-muted small">Zpět na seznam</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

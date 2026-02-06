@@ -1,0 +1,31 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0 text-center p-4" style="border-radius: 25px;">
+                <div class="mb-3">
+                    <span class="fs-1">⚠️</span>
+                </div>
+                <h2 class="fw-bold mb-3" style="color: var(--primary-brown);">Opravdu smazat?</h2>
+                <p class="text-muted mb-4">
+                    Tento příspěvek bude nenávratně odstraněn. Jste si jistí?
+                </p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger btn-lg" style="border-radius: 15px;">
+                            Ano, smazat navždy
+                        </button>
+                        <a href="{{ request.META.get('HTTP_REFERER', '/') }}" class="btn btn-light" style="border-radius: 15px;">
+                            Zrušit a vrátit se
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
