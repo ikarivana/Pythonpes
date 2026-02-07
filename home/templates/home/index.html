@@ -73,34 +73,32 @@
     {% endif %}
 </div>
 
-<div class="row g-4">
-    <div class="col-md-4">
-        <a href="{% url 'seznam_psu' %}" class="card h-100 p-4 text-center home-card shadow-sm">
-            <div class="icon-circle">🐕</div>
-            <h4 class="fw-bold">Moji psi</h4>
-            <p class="text-muted">Správa profilů, historie očkování a zdravotní záznamy vašich mazlíčků.</p>
-            <div class="mt-auto">
-                <span class="text-decoration-underline small">Otevřít seznam</span>
-            </div>
-        </a>
+<div class="row mt-4 px-3">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm text-center p-4" style="border-radius: 25px;">
+            <div class="fs-1 mb-2">📦</div>
+            <h4 class="fw-bold">Inzerce / Bazar</h4>
+            <p class="text-muted small">Najděte nový domov pro štěňátka nebo nakupte výbavu od ostatních pejskařů.</p>
+            <a href="{% url 'seznam_inzeratu' %}" class="mt-auto fw-bold text-decoration-none" style="color: #28a745;">Otevřít bazar</a>
+        </div>
     </div>
 
-    <div class="col-md-4">
-        <a href="{% url 'mapa_sluzeb' %}" class="card h-100 p-4 text-center home-card shadow-sm">
-            <div class="icon-circle">📍</div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm text-center p-4" style="border-radius: 25px;">
+            <div class="fs-1 mb-2">📍</div>
             <h4 class="fw-bold">Mapa služeb</h4>
-            <p class="text-muted">Najděte nejbližší veterinu, psí park nebo cvičiště ve vašem okolí.</p>
-            <div class="mt-auto text-primary small fw-bold">Otevřít mapu</div>
-        </a>
+            <p class="text-muted small">Najděte nejbližší veterinu, psí park nebo cvičiště ve vašem okolí.</p>
+            <a href="{% url 'mapa_sluzeb' %}" class="mt-auto fw-bold text-decoration-none" style="color: #007bff;">Otevřít mapu</a>
+        </div>
     </div>
 
-    <div class="col-md-4">
-        <a href="{% url 'terminy' %}" class="card h-100 p-4 text-center home-card shadow-sm">
-            <div class="icon-circle">📅</div>
-            <h4 class="fw-bold">Termíny</h4>
-            <p class="text-muted">Hlídání termínů odčervení, přeočkování a pravidelných kontrol.</p>
-            <div class="mt-auto text-success small fw-bold">Otevřít kalendář</div>
-        </a>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm text-center p-4" style="border-radius: 25px;">
+            <div class="fs-1 mb-2">👤</div>
+            <h4 class="fw-bold">Můj profil & Správa</h4>
+            <p class="text-muted small">Upravte své údaje, spravujte své inzeráty a prohlédněte si seznam svých psů.</p>
+            <a href="{% url 'profil' %}" class="mt-auto fw-bold text-decoration-none" style="color: #8B4513;">Přejít na profil</a>
+        </div>
     </div>
 </div>
 

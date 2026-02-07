@@ -9,6 +9,7 @@ urlpatterns = [
     path('upravit/<int:pk>/', views.upravit_psa, name='upravit_psa'),
     path('smazat/<int:pk>/', views.smazat_psa, name='smazat_psa'),
     path('terminy/', views.terminy, name='terminy'),
+    path('ockovani/pridat/<int:pes_id>/', views.pridat_ockovani, name='pridat_ockovani'),
 
     # --- LOGIN / LOGOUT ---
     path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),

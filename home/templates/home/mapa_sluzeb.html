@@ -2,12 +2,11 @@
 
 {% block content %}
 <style>
-    /* Zajištění, že mapa má vždy pevnou výšku a je vidět */
     #map {
         height: 600px !important;
         width: 100%;
         border-bottom: 5px solid var(--light-tan);
-        background-color: #e5e3df; /* Tradiční barva prázdné mapy */
+        background-color: #e5e3df;
         z-index: 1;
         display: block;
     }
@@ -16,18 +15,10 @@
         #map { height: 70vh !important; }
     }
 
-    /* Oprava pro zobrazení dlaždic Leafletu */
-    .leaflet-container {
-        outline: 0;
-    }
-
-    .leaflet-popup-content-wrapper {
-        border-radius: 12px;
-        padding: 5px;
-    }
+    .leaflet-popup-content-wrapper { border-radius: 12px; padding: 5px; }
 
     .btn-call {
-        background-color: var(--primary-brown);
+        background-color: #8B4513; /* primary-brown */
         color: white !important;
         display: block;
         text-align: center;
@@ -43,26 +34,32 @@
         border-radius: 50px;
         font-size: 0.8rem;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        color: white;
     }
 </style>
 
 <div class="p-4 bg-white">
-    <h2 style="color: var(--primary-brown); font-weight: bold;">📍 Interaktivní mapa služeb</h2>
+    <h2 style="color: #8B4513; font-weight: bold;" class="mb-4">📍 Interaktivní mapa služeb</h2>
 
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+    <div class="d-flex justify-content-between align-items-center w-100 mb-3" style="gap: 20px;">
+
         <div class="d-flex flex-wrap gap-2">
-            <span class="badge" style="background-color: red;">Veterina</span>
-            <span class="badge" style="background-color: blue;">Obchody</span>
-            <span class="badge" style="background-color: orange;">Hotely</span>
-            <span class="badge" style="background-color: green;">Wellness</span>
-            <span class="badge" style="background-color: purple;">Cvičáky</span>
-            <span class="badge" style="background-color: darkred;">Útulky</span>
+            <button class="badge border-0" style="background-color: #8B4513; cursor: pointer;" onclick="filtrujMapu('vse')">Vše</button>
+            <button class="badge border-0" style="background-color: red; cursor: pointer;" onclick="filtrujMapu('veterina')">Veterina</button>
+            <button class="badge border-0" style="background-color: blue; cursor: pointer;" onclick="filtrujMapu('obchod')">Obchody</button>
+            <button class="badge border-0" style="background-color: orange; cursor: pointer;" onclick="filtrujMapu('hotel')">Hotely</button>
+            <button class="badge border-0" style="background-color: green; cursor: pointer;" onclick="filtrujMapu('wellness')">Wellness</button>
+            <button class="badge border-0" style="background-color: purple; cursor: pointer;" onclick="filtrujMapu('cvicak')">Cvičáky</button>
+            <button class="badge border-0" style="background-color: darkred; cursor: pointer;" onclick="filtrujMapu('utulek')">Útulky</button>
+            <button class="badge border-0" style="background-color: #ff69b4; cursor: pointer;" onclick="filtrujMapu('chovna_stanice')">Chovné stanice</button>
         </div>
 
-        <a href="{% url 'pridat_sluzbu' %}" class="btn fw-bold text-white shadow-sm"
-           style="background-color: #28a745; border-radius: 10px; padding: 10px 20px;">
-            ➕ Navrhnout novou službu
-        </a>
+        <div class="text-end" style="min-width: 220px;">
+            <a href="{% url 'pridat_sluzbu' %}" class="btn fw-bold text-white shadow-sm"
+               style="background-color: #28a745; border-radius: 10px; padding: 10px 20px; white-space: nowrap;">
+                ➕ Navrhnout novou službu
+            </a>
+        </div>
     </div>
 
     <div class="card shadow-sm p-0" style="border-radius: 20px; overflow: hidden; border: none;">
@@ -70,40 +67,39 @@
     </div>
 </div>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<div class="card shadow-sm p-0" style="border-radius: 20px; overflow: hidden; border: none;">
+    <div id="map"></div>
+</div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    // Inicializace mapy až po načtení dokumentu
-    document.addEventListener('DOMContentLoaded', function() {
-        // 1. Inicializace mapy
-        var map = L.map('map', {
-            center: [49.8, 15.5],
-            zoom: 7,
-            // Tato volba pomáhá u některých prohlížečů s vykreslením
-            tap: false
-        });
+    var allMarkers = []; // Sem si uložíme všechny špendlíky
+    var map; // Proměnná pro mapu
 
-        // 2. Podklad mapy (OpenStreetMap)
+    // Tato funkce zajistí, že se zobrazí jen to, co chceme
+    function filtrujMapu(kategorie) {
+        allMarkers.forEach(function(item) {
+            if (kategorie === 'vse' || item.typ === kategorie) {
+                item.marker.addTo(map);
+            } else {
+                map.removeLayer(item.marker);
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Vytvoření mapy
+        map = L.map('map', { center: [49.8, 15.5], zoom: 7 });
+
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            attribution: '&copy; OpenStreetMap contributors'
+            attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // 3. Funkce pro barvy
-        function getMarkerColor(typ) {
-            const barvy = {
-                'veterina': 'red',
-                'obchod': 'blue',
-                'hotel': 'orange',
-                'wellness': 'green',
-                'cvicak': 'purple',
-                'utulek': 'darkred'
-            };
-            return barvy[typ] || 'cadetblue';
-        }
-
-        // 4. Funkce pro ikony
+        // Tato funkce teď dostane jen barvy, které GitHub umí
         function createIcon(color) {
             return new L.Icon({
                 iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
@@ -115,50 +111,46 @@
             });
         }
 
-        // 5. Načtení dat (zajištění proti chybě, pokud by data nepřišla)
-        var sluzby = {{ sluzby_json|safe|default:"[]" }};
+        var sluzby = {{ sluzby_json|safe }};
+        var currentUserId = {{ request.user.id|default:"null" }};
 
-        // 6. Vykreslení špendlíků
         sluzby.forEach(function(s) {
             if (s.lat && s.lon) {
-                var color = getMarkerColor(s.typ_slug);
-                var icon = createIcon(color);
+                // OPRAVENÉ MAPOVÁNÍ BAREV:
+                // GitHub zná: blue, gold, red, green, orange, yellow, violet, grey, black
+                const barvy = {
+                    'veterina': 'red',
+                    'obchod': 'blue',
+                    'hotel': 'orange',
+                    'wellness': 'green',
+                    'cvicak': 'violet',       // opraveno z purple
+                    'utulek': 'black',        // opraveno z darkred
+                    'chovna_stanice': 'gold'   // opraveno z pink
+                };
 
-                var marker = L.marker([s.lat, s.lon], {icon: icon}).addTo(map);
+                // Pokud barvu nenajde, dáme 'blue' (standardní špendlík)
+                var colorName = barvy[s.typ_slug] || 'blue';
 
+                var marker = L.marker([s.lat, s.lon], {icon: createIcon(colorName)}).addTo(map);
+
+                // Uložíme marker pro pozdější filtrování
+                allMarkers.push({ marker: marker, typ: s.typ_slug });
+
+                // Popup obsah s tvým stylem
                 var popupContent = `
-                    <div style="min-width: 200px; font-family: sans-serif;">
-                        <strong style="font-size: 1.1rem; color: #8B4513;">${s.nazev}</strong><br>
-                        <small style="color: #666;">${s.typ}</small><br>
-                        <hr style="margin: 8px 0;">
-                        <p style="margin: 0; font-size: 0.9rem;"><strong>Adresa:</strong> ${s.adresa}</p>
-                        <p style="margin: 5px 0 10px 0; font-size: 0.85rem; font-style: italic;">${s.popis}</p>
-                        <div class="d-grid gap-2">
-                            ${s.telefon ? `<a href="tel:${s.telefon}" class="btn-call">📞 Zavolat</a>` : ''}
-                            <div class="d-flex justify-content-between gap-1" style="margin-top:5px;">
-                                <a href="/mapa/upravit/${s.id}/" class="btn btn-sm btn-outline-secondary" style="flex: 1; font-size: 0.75rem;">✏️ Upravit</a>
-                                <a href="/mapa/smazat/${s.id}/" class="btn btn-sm btn-outline-danger" style="flex: 1; font-size: 0.75rem;">🗑️ Smazat</a>
-                            </div>
-                        </div>
+                    <div style="min-width: 150px;">
+                        <strong style="color: #8B4513;">${s.nazev}</strong><br>
+                        <small>${s.typ}</small><br>
+                        <hr style="margin: 5px 0;">
+                        ${s.adresa}
                     </div>
                 `;
                 marker.bindPopup(popupContent);
             }
         });
 
-        // AGRESIVNÍ OPRAVA BÍLÉHO ČTVERCE
-        // 1. Okamžitě po načtení
-        map.invalidateSize();
-
-        // 2. Po krátké pauze (kdy už Bootstrap dokreslil kartu)
-        setTimeout(function() {
-            map.invalidateSize();
-        }, 300);
-
-        // 3. Při jakémkoliv překreslení okna
-        window.addEventListener('resize', function() {
-            map.invalidateSize();
-        });
+        // Oprava šedé plochy
+        setTimeout(function() { map.invalidateSize(); }, 400);
     });
 </script>
 {% endblock %}

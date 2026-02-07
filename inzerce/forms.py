@@ -17,14 +17,20 @@ class InzeratForm(forms.ModelForm):
 
     class Meta:
         model = Inzerat
-        fields = ['kategorie', 'titulek', 'text', 'cena', 'mesto', 'telefon', 'obrazek', 'video']
+        # Přidali jsme 'kraj' do seznamu polí
+        fields = ['kategorie', 'titulek', 'text', 'cena', 'kraj', 'mesto', 'telefon', 'obrazek', 'video']
+
         widgets = {
-            'text': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
-            'titulek': forms.TextInput(attrs={'class': 'form-control'}),
+            'titulek': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Co prodáváte?'}),
+            'text': forms.Textarea(attrs={'rows': 4, 'class': 'form-control', 'placeholder': 'Popište podrobněji...'}),
             'kategorie': forms.Select(attrs={'class': 'form-select'}),
-            'cena': forms.NumberInput(attrs={'class': 'form-control'}),
-            'mesto': forms.TextInput(attrs={'class': 'form-control'}),
-            'telefon': forms.TextInput(attrs={'class': 'form-control'}),
+            'cena': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Kč'}),
+
+            # NOVÉ: Výběr kraje (Select)
+            'kraj': forms.Select(attrs={'class': 'form-select'}),
+
+            'mesto': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Např. Tábor'}),
+            'telefon': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+420...'}),
 
             # Podpora pro přímé focení/natáčení z mobilu
             'obrazek': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*', 'capture': 'environment'}),

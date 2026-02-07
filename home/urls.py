@@ -10,4 +10,5 @@ urlpatterns = [
     path('kontakt/', views.kontakt, name='kontakt'),
     path('podminky/', views.podminky, name='podminky'),
     path('cookies/', views.cookies, name='cookies'),
+    path('cenik/', views.cenik, name='cenik'),
 ]

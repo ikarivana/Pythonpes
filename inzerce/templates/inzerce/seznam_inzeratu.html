@@ -1,43 +1,109 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 style="color: #5d4037; font-weight: bold;">🐶 Psí bazar</h2>
+<div class="d-flex flex-row justify-content-between align-items-center mb-4">
+        <h2 style="color: #5d4037; font-weight: bold;" class="mb-0 fs-3">🐶 Psí bazar</h2>
         {% if user.is_authenticated %}
-            <a href="{% url 'pridat_inzerat' %}" class="btn btn-success shadow-sm">➕ Vložit inzerát</a>
+            <a href="{% url 'pridat_inzerat' %}"
+               class="btn btn-sm shadow-sm fw-bold px-3 py-2"
+               style="background-color: #8b6b61; color: white; border-radius: 10px; border: none; font-size: 0.9rem;">
+                <span class="d-none d-sm-inline">➕ Vložit inzerát</span>
+                <span class="d-inline d-sm-none">➕ Přidat</span>
+            </a>
         {% endif %}
+    </div>
+
+    <div class="p-3 mb-4 border-0 shadow-sm" style="background-color: #f8f5f2; border-radius: 20px;">
+        <form method="get" class="row g-2 align-items-center">
+
+            <div class="col-12 col-md-3">
+                <select name="kraj" class="form-select border-0 shadow-sm py-2" style="border-radius: 12px;">
+                    <option value="">🌍 Celá ČR</option>
+                    {% for kod, nazev in kraje %}
+                        <option value="{{ kod }}" {% if request.GET.kraj == kod %}selected{% endif %}>{{ nazev }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-12 col-md-3">
+                <select name="kategorie" class="form-select border-0 shadow-sm py-2" style="border-radius: 12px;">
+                    <option value="">📦 Všechny kategorie</option>
+                    <option value="stenata" {% if request.GET.kategorie == "stenata" %}selected{% endif %}>Štěňata</option>
+                    <option value="psi_feny" {% if request.GET.kategorie == "psi_feny" %}selected{% endif %}>Dospělí psi a feny</option>
+                    <option value="kryti" {% if request.GET.kategorie == "kryti" %}selected{% endif %}>Krytí / Chov</option>
+                    <option value="potreby" {% if request.GET.kategorie == "potreby" %}selected{% endif %}>Potřeby a hračky</option>
+                    <option value="krmivo" {% if request.GET.kategorie == "krmivo" %}selected{% endif %}>Krmivo</option>
+                    <option value="oblecky" {% if request.GET.kategorie == "oblecky" %}selected{% endif %}>Oblečky</option>
+                    <option value="ztraty" {% if request.GET.kategorie == "ztraty" %}selected{% endif %}>Ztráty a nálezy</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-3">
+                <select name="typ" class="form-select border-0 shadow-sm py-2" style="border-radius: 12px;">
+                    <option value="">🐾 Pohlaví: Vše</option>
+                    <option value="pes" {% if request.GET.typ == "pes" %}selected{% endif %}>Pes ♂️</option>
+                    <option value="fena" {% if request.GET.typ == "fena" %}selected{% endif %}>Fena ♀️</option>
+                    <option value="stene" {% if request.GET.typ == "stene" %}selected{% endif %}>Štěně 🍼</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-3">
+                <button type="submit" class="btn w-100 fw-bold text-white shadow-sm py-2" style="background-color: #5d4037; border-radius: 12px;">
+                    🔍 Vyhledat
+                </button>
+            </div>
+
+            {% if request.GET.kraj or request.GET.kategorie or request.GET.typ %}
+            <div class="col-12 text-center mt-2">
+                <a href="{% url 'seznam_inzeratu' %}" class="text-decoration-none small text-muted fw-bold">
+                    ❌ Zrušit všechny filtry
+                </a>
+            </div>
+            {% endif %}
+        </form>
     </div>
 
     <div class="row">
         {% for inzerat in inzeraty %}
-        <div class="col-md-4 mb-4">
+        <div class="col-12 col-md-6 col-lg-4 mb-4">
             <div class="card h-100 shadow-sm border-0" style="border-radius: 15px; overflow: hidden;">
 
                 {% if inzerat.obrazek %}
-                    <img src="{{ inzerat.obrazek.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                    <img src="{{ inzerat.obrazek.url }}" class="card-img-top" style="height: 220px; object-fit: cover;">
                 {% elif not inzerat.video %}
-                    <div class="bg-light text-center py-5" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                    <div class="bg-light text-center py-5" style="height: 220px; display: flex; align-items: center; justify-content: center;">
                         <span class="text-muted">🖼️ Bez náhledu</span>
                     </div>
                 {% endif %}
 
-                <div class="card-body">
+                <div class="card-body d-flex flex-column">
                     {% if inzerat.video %}
                     <div class="ratio ratio-16x9 mb-3">
                         <video controls class="rounded shadow-sm bg-dark">
                             <source src="{{ inzerat.video.url }}" type="video/mp4">
-                            Váš prohlížeč nepodporuje přehrávání videa.
                         </video>
                     </div>
                     {% endif %}
 
-                    <span class="badge bg-info text-dark mb-2">{{ inzerat.get_kategorie_display }}</span>
+                    <div class="d-flex flex-wrap gap-1 mb-2">
+                        <span class="badge bg-info text-dark">{{ inzerat.get_kategorie_display }}</span>
+
+                        {% if inzerat.pohlavi == 'fena' %}
+                            <span class="badge bg-danger">♀️ Fena</span>
+                        {% elif inzerat.pohlavi == 'pes' %}
+                            <span class="badge bg-primary">♂️ Pes</span>
+                        {% elif inzerat.pohlavi == 'stene' %}
+                            <span class="badge bg-warning text-dark">🍼 Štěně</span>
+                        {% endif %}
+
+                        <span class="badge bg-light text-muted border small">{{ inzerat.get_kraj_display }}</span>
+                    </div>
+
                     <h5 class="card-title fw-bold text-dark">{{ inzerat.titulek }}</h5>
                     <p class="card-text text-muted small">{{ inzerat.text|truncatechars:100 }}</p>
 
-                    <div class="d-flex justify-content-between align-items-center mt-3">
-                        <span class="text-success fw-bold" style="font-size: 1.1rem;">
+                    <div class="d-flex justify-content-between align-items-center mt-auto pt-3">
+                        <span class="text-success fw-bold" style="font-size: 1.15rem;">
                             {% if inzerat.cena %}{{ inzerat.cena }} Kč{% else %}Dohodou{% endif %}
                         </span>
                         <span class="text-muted small">📍 {{ inzerat.mesto }}</span>
@@ -47,7 +113,8 @@
                 {% if inzerat.autor == user or user.is_superuser %}
                 <div class="card-footer bg-white border-0 d-flex gap-2 p-3">
                     <a href="{% url 'upravit_inzerat' inzerat.pk %}" class="btn btn-warning btn-sm flex-grow-1 fw-bold">Upravit</a>
-                    <a href="{% url 'smazat_inzerat' inzerat.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Opravdu chcete inzerát smazat?')">
+                    <a href="{% url 'smazat_inzerat' inzerat.pk %}" class="btn btn-danger btn-sm"
+                       onclick="return confirm('Opravdu chcete inzerát smazat?')">
                         🗑️
                     </a>
                 </div>
@@ -56,8 +123,8 @@
         </div>
         {% empty %}
         <div class="col-12 text-center py-5">
-            <h4 class="text-muted">Zatím tu není žádný inzerát.</h4>
-            <p>Buďte první a přidejte inzerát!</p>
+            <h4 class="text-muted">Nebyly nalezeny žádné inzeráty.</h4>
+            <a href="{% url 'seznam_inzeratu' %}" class="btn btn-link">Zobrazit celou nabídku</a>
         </div>
         {% endfor %}
     </div>

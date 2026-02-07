@@ -1,17 +1,73 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<div class="container" style="max-width: 600px; margin-top: 50px;">
-    <div class="card" style="background-color: var(--light-tan); border: none; border-radius: 20px; padding: 30px;">
-        <h2 style="color: var(--primary-brown); text-align: center;">🐾 Přidat nového pejska</h2>
-        
+<style>
+    /* Styly pro hezčí inputy na mobilu */
+    input, select, textarea {
+        width: 100%;
+        padding: 12px;
+        margin-top: 5px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        box-sizing: border-box; /* Důležité pro mobilní zobrazení */
+    }
+    label {
+        font-weight: bold;
+        color: var(--primary-brown);
+        margin-left: 5px;
+    }
+    .info-limit {
+        background-color: #fff3cd;
+        color: #856404;
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+        text-align: center;
+        border: 1px solid #ffeeba;
+    }
+</style>
+
+<div class="container" style="max-width: 600px; margin-top: 20px; margin-bottom: 50px;">
+
+    {% if not request.user.profil.je_premium %}
+    <div class="info-limit">
+        💡 Máte verzi zdarma. Toto je váš <strong>1. a jediný</strong> pejsek.
+        Pro více psů navštivte <a href="{% url 'cenik' %}">ceník</a>.
+    </div>
+    {% endif %}
+
+    <div class="card shadow" style="background-color: #fdfaf5; border: none; border-radius: 25px; padding: 25px;">
+        <h2 style="color: var(--primary-brown); text-align: center; margin-bottom: 25px;">🐾 Přidat pejska</h2>
+
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.as_p }}
-            
-            <button type="submit" class="btn" style="background-color: var(--primary-brown); color: white; width: 100%; border-radius: 10px; padding: 10px; font-weight: bold;">
-                Uložit pejska
-            </button>
+            <button type="submit" class="btn btn-brown">Přidat do smečky</button>
+        </form>
+
+        {% for field in form %}
+        <div class="field-container">
+            <label>{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <div style="color: red; font-size: 0.8rem; margin-top: -10px; margin-bottom: 10px;">
+                {{ field.errors }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <div style="background-color: #eee; padding: 15px; border-radius: 15px; margin-top: 10px; margin-bottom: 20px;">
+            <label for="id_nove_plemeno">Nenašli jste plemeno? Napište ho:</label>
+            <input type="text" name="nove_plemeno" id="id_nove_plemeno" placeholder="Např. Maruňský teriér">
+        </div>
+
+        <button type="submit" class="btn"
+                style="background-color: var(--primary-brown); color: white; width: 100%; border-radius: 15px; padding: 15px; font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            Uložit pejska do deníku
+        </button>
         </form>
     </div>
 </div>

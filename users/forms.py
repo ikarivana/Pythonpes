@@ -1,25 +1,44 @@
 from django import forms
-from .models import Pes, Prispevek, Plemeno
+from .models import Pes, Prispevek, Plemeno, Ockovani
 
 
 class PesForm(forms.ModelForm):
     class Meta:
         model = Pes
-        # Vybereme pole, která chce majitel vyplňovat
-        fields = ['jmeno', 'rasa', 'vek', 'popis', 'fotka', 'cip',]#'posledni_ockovani', 'posledni_odcerveni']
-
-        # Přidáme kalendář pro data (standardně je to jen textové pole)
+        fields = [
+            'jmeno', 'rasa', 'vek', 'popis', 'fotka',
+            'cip', 'posledni_ockovani', 'posledni_odcerveni'
+        ]
+        # Tady necháme jen to, co NENÍ třída (aby to bylo přehledné)
         widgets = {
+            'popis': forms.Textarea(attrs={'rows': 3}),
             'posledni_ockovani': forms.DateInput(attrs={'type': 'date'}),
             'posledni_odcerveni': forms.DateInput(attrs={'type': 'date'}),
-            'popis': forms.Textarea(attrs={'rows': 3}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Tady můžeme přidat CSS třídy pro náš hnědý design
+        # Tento cyklus projde VŠECHNA pole a přidá jim tvoji hnědou třídu
+        for field in self.fields.values():
+            # Použijeme update, abychom nesmazali type="date" u kalendářů
+            field.widget.attrs.update({'class': 'form-control custom-brown-input'})
+
+class OckovaniForm(forms.ModelForm):
+    class Meta:
+        model = Ockovani
+        fields = ['datum', 'nazev_vakciny', 'poznamka']
+        widgets = {
+            'datum': forms.DateInput(attrs={'type': 'date'}),
+            'nazev_vakciny': forms.TextInput(attrs={'placeholder': 'Např. Vzteklina (Rabisin)'}),
+            'poznamka': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Doplňující info...'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs.update({'class': 'form-control custom-brown-input'})
+
+
 
 
 class PrispevekForm(forms.ModelForm):
