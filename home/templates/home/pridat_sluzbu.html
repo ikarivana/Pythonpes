@@ -2,23 +2,41 @@
 
 {% block content %}
 <div class="container-fluid mt-4">
-    <h2 class="mb-4">📍 Přidat novou službu</h2>
+    <div class="d-flex align-items-center mb-4">
+        <a href="{% url 'mapa_sluzeb' %}" class="text-decoration-none me-3" style="color: #8B4513; transition: 0.3s;" title="Zpět na mapu">
+            <span style="font-size: 2rem;">←</span>
+        </a>
+        <h2 class="mb-0" style="color: #8B4513; font-weight: bold;">📍 Přidat novou službu</h2>
+    </div>
 
     <div class="row">
         <div class="col-md-5">
             <div class="card p-4 shadow-sm" style="border-radius: 20px; border: none;">
+                <button type="button" class="btn btn-outline-primary mb-3 fw-bold" onclick="najdiMne()" style="border-color: #8B4513; color: #8B4513;">
+                    📍 Zaměřit moji polohu (GPS)
+                </button>
+
                 <form method="post">
                     {% csrf_token %}
-                    {{ form.as_p }}  <button type="submit" class="btn btn-brown w-100 mt-3">Odeslat ke schválení</button>
+                    {{ form.as_p }}
+
+                    <div class="d-flex gap-2 mt-3">
+                        <button type="submit" class="btn fw-bold flex-grow-1" style="background-color: #8B4513; color: white; border-radius: 10px; padding: 10px;">
+                            Odeslat záznam
+                        </button>
+                        <a href="{% url 'mapa_sluzeb' %}" class="btn btn-outline-secondary d-flex align-items-center" style="border-radius: 10px; padding: 0 20px;">
+                            Zrušit
+                        </a>
+                    </div>
                 </form>
             </div>
         </div>
 
         <div class="col-md-7">
             <div class="card shadow-sm p-0" style="border-radius: 20px; overflow: hidden; border: none;">
-                <div id="map" style="height: 600px; width: 100%; background-color: #f8f9fa;"></div>
+                <div id="map-picker" style="height: 600px; width: 100%; background-color: #f8f9fa;"></div>
             </div>
-            <p class="text-muted mt-2 small text-center">💡 Klikněte do mapy pro automatické vyplnění souřadnic.</p>
+            <p class="text-muted mt-2 small text-center">💡 Klikněte do mapy pro automatické vyplnění souřadnic nebo použijte tlačítko GPS.</p>
         </div>
     </div>
 </div>
@@ -27,38 +45,57 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // 1. Inicializace mapy (střed Česka)
-        var map = L.map('map').setView([49.8, 15.5], 7);
+    var mapPicker;
+    var marker;
 
-        // 2. Načtení mapových dlaždic
+    function setCoords(lat, lon) {
+        var latField = document.getElementById('id_lat');
+        var lonField = document.getElementById('id_lon');
+
+        if (latField && lonField) {
+            latField.value = lat.toFixed(6);
+            lonField.value = lon.toFixed(6);
+        }
+
+        if (marker) {
+            marker.setLatLng([lat, lon]);
+        } else {
+            marker = L.marker([lat, lon], {draggable: true}).addTo(mapPicker);
+            marker.on('dragend', function(e) {
+                var pos = marker.getLatLng();
+                setCoords(pos.lat, pos.lng);
+            });
+        }
+    }
+
+    function najdiMne() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var lat = position.coords.latitude;
+                var lon = position.coords.longitude;
+                mapPicker.setView([lat, lon], 16);
+                setCoords(lat, lon);
+            }, function() {
+                alert("Nepodařilo se získat polohu. Povolte prosím GPS.");
+            });
+        } else {
+            alert("Váš prohlížeč nepodporuje geolokaci.");
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        mapPicker = L.map('map-picker').setView([49.8, 15.5], 7);
+
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
-        }).addTo(map);
+        }).addTo(mapPicker);
 
-        var marker;
-
-        // 3. Funkce pro kliknutí do mapy
-        map.on('click', function(e) {
-            var lat = e.latlng.lat.toFixed(6);
-            var lon = e.latlng.lng.toFixed(6);
-
-            // Vyplnění políček ve formuláři (Django jim dává ID automaticky)
-            // Pokud se tvoje pole v modelu jmenují jinak, uprav ty názvy v závorkách:
-            document.getElementById('id_zemepisna_sirka').value = lat;
-            document.getElementById('id_zemepisna_delka').value = lon;
-
-            // Přidání nebo posunutí špendlíku
-            if (marker) {
-                marker.setLatLng(e.latlng);
-            } else {
-                marker = L.marker(e.latlng).addTo(map);
-            }
+        mapPicker.on('click', function(e) {
+            setCoords(e.latlng.lat, e.latlng.lng);
         });
 
-        // 4. Oprava pro správné vykreslení velikosti
         setTimeout(function() {
-            map.invalidateSize();
+            mapPicker.invalidateSize();
         }, 300);
     });
 </script>

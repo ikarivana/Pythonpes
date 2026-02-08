@@ -5,85 +5,112 @@
     #map {
         height: 600px !important;
         width: 100%;
-        border-bottom: 5px solid var(--light-tan);
-        background-color: #e5e3df;
+        border-radius: 20px;
+        border: 2px solid #e5e3df;
         z-index: 1;
-        display: block;
     }
-
-    @media (max-width: 768px) {
-        #map { height: 70vh !important; }
-    }
-
-    .leaflet-popup-content-wrapper { border-radius: 12px; padding: 5px; }
 
     .btn-call {
-        background-color: #8B4513; /* primary-brown */
+        background-color: #8B4513;
         color: white !important;
         display: block;
         text-align: center;
-        padding: 5px;
-        border-radius: 5px;
+        padding: 8px;
+        border-radius: 8px;
         text-decoration: none;
         margin-top: 10px;
         font-weight: bold;
     }
 
-    .badge {
-        padding: 8px 12px;
-        border-radius: 50px;
-        font-size: 0.8rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        color: white;
+    /* Červené tlačítko pro nebezpečí v popupu */
+    .btn-danger-map {
+        background-color: #d32f2f;
+        color: white !important;
+        border: none;
+        width: 100%;
+        padding: 8px;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 10px;
+        text-align: center;
+        display: block;
     }
+
+    .badge-filter {
+        padding: 10px 18px;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: 0.3s;
+        font-weight: 500;
+    }
+
+    .badge-filter:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+
+    @keyframes pulse-red {
+        0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7); }
+        70% { box-shadow: 0 0 0 15px rgba(211, 47, 47, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
+    }
+    .pulse-danger { animation: pulse-red 2s infinite; border: 2px solid white; }
 </style>
 
 <div class="p-4 bg-white">
     <h2 style="color: #8B4513; font-weight: bold;" class="mb-4">📍 Interaktivní mapa služeb</h2>
 
-    <div class="d-flex justify-content-between align-items-center w-100 mb-3" style="gap: 20px;">
-
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div class="d-flex flex-wrap gap-2">
-            <button class="badge border-0" style="background-color: #8B4513; cursor: pointer;" onclick="filtrujMapu('vse')">Vše</button>
-            <button class="badge border-0" style="background-color: red; cursor: pointer;" onclick="filtrujMapu('veterina')">Veterina</button>
-            <button class="badge border-0" style="background-color: blue; cursor: pointer;" onclick="filtrujMapu('obchod')">Obchody</button>
-            <button class="badge border-0" style="background-color: orange; cursor: pointer;" onclick="filtrujMapu('hotel')">Hotely</button>
-            <button class="badge border-0" style="background-color: green; cursor: pointer;" onclick="filtrujMapu('wellness')">Wellness</button>
-            <button class="badge border-0" style="background-color: purple; cursor: pointer;" onclick="filtrujMapu('cvicak')">Cvičáky</button>
-            <button class="badge border-0" style="background-color: darkred; cursor: pointer;" onclick="filtrujMapu('utulek')">Útulky</button>
-            <button class="badge border-0" style="background-color: #ff69b4; cursor: pointer;" onclick="filtrujMapu('chovna_stanice')">Chovné stanice</button>
+            <button class="badge-filter" style="background-color: #8B4513;" onclick="filtrujMapu('vse')">Vše</button>
+            <button class="badge-filter pulse-danger" style="background-color: #d32f2f;" onclick="filtrujMapu('nebezpeci')">⚠️ NEBEZPEČÍ</button>
+            <button class="badge-filter" style="background-color: #212121;" onclick="filtrujMapu('veterina')">Veterina</button>
+            <button class="badge-filter" style="background-color: #1976d2;" onclick="filtrujMapu('obchod')">Obchody</button>
+            <button class="badge-filter" style="background-color: #f57c00;" onclick="filtrujMapu('hotel')">Hotely</button>
+            <button class="badge-filter" style="background-color: #388e3c;" onclick="filtrujMapu('wellness')">Wellness</button>
+            <button class="badge-filter" style="background-color: #7b1fa2;" onclick="filtrujMapu('cvicak')">Cvičáky</button>
+            <button class="badge-filter" style="background-color: #757575;" onclick="filtrujMapu('utulek')">Útulky</button>
+            <button class="badge-filter" style="background-color: #ffc107; color: black;" onclick="filtrujMapu('chovna_stanice')">Chovné stanice</button>
         </div>
 
-        <div class="text-end" style="min-width: 220px;">
-            <a href="{% url 'pridat_sluzbu' %}" class="btn fw-bold text-white shadow-sm"
-               style="background-color: #28a745; border-radius: 10px; padding: 10px 20px; white-space: nowrap;">
-                ➕ Navrhnout novou službu
-            </a>
-        </div>
+        <a href="{% url 'pridat_sluzbu' %}" class="btn fw-bold text-white shadow-sm"
+           style="background-color: #28a745; border-radius: 12px; padding: 12px 25px;">
+            ➕ Přidat záznam
+        </a>
     </div>
 
-    <div class="card shadow-sm p-0" style="border-radius: 20px; overflow: hidden; border: none;">
+    <div class="card shadow-lg p-0" style="border-radius: 20px; overflow: hidden; border: none;">
         <div id="map"></div>
     </div>
-</div>
-
-<div class="card shadow-sm p-0" style="border-radius: 20px; overflow: hidden; border: none;">
-    <div id="map"></div>
-</div>
 </div>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    var allMarkers = []; // Sem si uložíme všechny špendlíky
-    var map; // Proměnná pro mapu
+    var allMarkers = [];
+    var map;
+    var sluzby = {{ sluzby_json|safe }};
 
-    // Tato funkce zajistí, že se zobrazí jen to, co chceme
+    // Funkce pro nahlášení neaktuálnosti (musí být globální pro onclick v popupu)
+    function nahlasitNeaktualni(id) {
+        if (confirm("Opravdu je toto varování již neaktuální? Pomůžete tím ostatním pejskařům.")) {
+            fetch(`/mapa/nahlasit-neaktualni/${id}/`)
+                .then(response => {
+                    if (response.ok) {
+                        alert("Děkujeme za nahlášení!");
+                        location.reload();
+                    }
+                });
+        }
+    }
+
+    // Funkce pro filtrování
     function filtrujMapu(kategorie) {
         allMarkers.forEach(function(item) {
             if (kategorie === 'vse' || item.typ === kategorie) {
-                item.marker.addTo(map);
+                map.addLayer(item.marker);
             } else {
                 map.removeLayer(item.marker);
             }
@@ -91,15 +118,14 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        // Vytvoření mapy
-        map = L.map('map', { center: [49.8, 15.5], zoom: 7 });
+        // 1. Inicializace mapy
+        map = L.map('map').setView([49.8, 15.5], 7);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // Tato funkce teď dostane jen barvy, které GitHub umí
+        // 2. Funkce pro vytváření barevných ikon
         function createIcon(color) {
             return new L.Icon({
                 iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
@@ -111,46 +137,50 @@
             });
         }
 
-        var sluzby = {{ sluzby_json|safe }};
-        var currentUserId = {{ request.user.id|default:"null" }};
+        const barvyMap = {
+            'nebezpeci': 'red',
+            'veterina': 'black',
+            'veterinar': 'black',
+            'obchod': 'blue',
+            'hotel': 'orange',
+            'wellness': 'green',
+            'cvicak': 'violet',
+            'utulek': 'grey',
+            'chovna_stanice': 'gold'
+        };
 
+        // 3. Vykreslení špendlíků
         sluzby.forEach(function(s) {
-            if (s.lat && s.lon) {
-                // OPRAVENÉ MAPOVÁNÍ BAREV:
-                // GitHub zná: blue, gold, red, green, orange, yellow, violet, grey, black
-                const barvy = {
-                    'veterina': 'red',
-                    'obchod': 'blue',
-                    'hotel': 'orange',
-                    'wellness': 'green',
-                    'cvicak': 'violet',       // opraveno z purple
-                    'utulek': 'black',        // opraveno z darkred
-                    'chovna_stanice': 'gold'   // opraveno z pink
-                };
+            var lat = parseFloat(s.lat);
+            var lon = parseFloat(s.lon);
 
-                // Pokud barvu nenajde, dáme 'blue' (standardní špendlík)
-                var colorName = barvy[s.typ_slug] || 'blue';
+            if (!isNaN(lat) && !isNaN(lon)) {
+                var colorName = barvyMap[s.typ_slug] || 'blue';
+                var marker = L.marker([lat, lon], { icon: createIcon(colorName) }).addTo(map);
 
-                var marker = L.marker([s.lat, s.lon], {icon: createIcon(colorName)}).addTo(map);
-
-                // Uložíme marker pro pozdější filtrování
                 allMarkers.push({ marker: marker, typ: s.typ_slug });
 
-                // Popup obsah s tvým stylem
+                var isDanger = s.typ_slug === 'nebezpeci';
+
                 var popupContent = `
-                    <div style="min-width: 150px;">
-                        <strong style="color: #8B4513;">${s.nazev}</strong><br>
-                        <small>${s.typ}</small><br>
-                        <hr style="margin: 5px 0;">
-                        ${s.adresa}
+                    <div style="min-width: 160px;">
+                        <strong style="color: ${isDanger ? 'red' : '#8B4513'}; font-size: 1.1rem;">
+                            ${isDanger ? '⚠️ ' + s.nazev : s.nazev}
+                        </strong><br>
+                        <small style="background: #f0f0f0; padding: 2px 5px; border-radius: 4px;">${s.typ}</small>
+                        <hr style="margin: 8px 0;">
+                        <p style="margin: 0; font-size: 0.9rem;">${s.adresa}</p>
+                        ${isDanger ?
+                            `<button onclick="nahlasitNeaktualni(${s.id})" class="btn-danger-map">❌ Již neaktuální</button>` :
+                            (s.telefon ? `<a href="tel:${s.telefon}" class="btn-call">📞 Zavolat</a>` : '')
+                        }
                     </div>
                 `;
                 marker.bindPopup(popupContent);
             }
         });
 
-        // Oprava šedé plochy
-        setTimeout(function() { map.invalidateSize(); }, 400);
+        setTimeout(function() { map.invalidateSize(); }, 500);
     });
 </script>
 {% endblock %}

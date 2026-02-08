@@ -38,6 +38,21 @@
             border-radius: 10px !important;
             margin-bottom: 10px;
         }
+        /* Responzivita pro mobily */
+@media (max-width: 768px) {
+    #wrapper { flex-direction: column; }
+    #sidebar-wrapper {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+    .sidebar-heading { padding: 1rem; }
+    .list-group { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+    .list-group-item { padding: 10px; font-size: 0.9rem; }
+    #page-content-wrapper { padding: 20px; }
+}
+
+
     </style>
 </head>
 <body>
@@ -47,21 +62,24 @@
         <div class="sidebar-heading">PES.CZ 🐾</div>
 
         <div class="list-group flex-grow-1">
-            <a href="{% url 'home' %}" class="list-group-item">🏠 Hlavní strana</a>
-            <a href="{% url 'seznam_zdi' %}" class="list-group-item">📸 Zdi plemen</a>
-            <a href="{% url 'seznam_inzeratu' %}" class="list-group-item">🛍️ Inzerce / Bazar</a>
+    <a href="{% url 'home' %}" class="list-group-item">🏠 Hlavní strana</a>
+    <a href="{% url 'seznam_zdi' %}" class="list-group-item">📸 Zdi plemen</a>
+    <a href="{% url 'seznam_inzeratu' %}" class="list-group-item">🛍️ Inzerce / Bazar</a>
 
-            {% if user.is_authenticated %}
-            <hr style="border-color: rgba(255,255,255,0.1); margin: 5px 15px;">
+    {# Odkaz na kontakt pro všechny uživatele #}
+    <a href="{% url 'kontakt' %}" class="list-group-item">📧 Kontakt</a>
 
-            <a href="{% url 'profil' %}" class="list-group-item fw-bold"
-               style="background-color: rgba(255,255,255,0.1) !important; color: #ffc107 !important;">
-                👤 Můj profil & Správa
-            </a>
+    {% if user.is_authenticated %}
+    <hr style="border-color: rgba(255,255,255,0.1); margin: 5px 15px;">
 
-            <a href="{% url 'mapa_sluzeb' %}" class="list-group-item">📍 Mapa služeb</a>
-            {% endif %}
-        </div>
+    <a href="{% url 'profil' %}" class="list-group-item fw-bold"
+       style="background-color: rgba(255,255,255,0.1) !important; color: #ffc107 !important;">
+        👤 Můj profil & Správa
+    </a>
+
+    <a href="{% url 'mapa_sluzeb' %}" class="list-group-item">📍 Mapa služeb</a>
+    {% endif %}
+</div>
         <div class="p-3" style="background-color: rgba(0,0,0,0.1);">
             {% if user.is_authenticated %}
             <small class="d-block mb-2 text-center text-white-50">Uživatel: {{ user.username }}</small>

@@ -6,6 +6,9 @@
 ``` bash
 pip install django
 ```
+# Veškete důležité instalace
+## [requirements.txt](requirements.txt)
+
 ``` bash
 pip freeze > requirements.txt
 ``` 

@@ -72,6 +72,50 @@
     </div>
     {% endif %}
 </div>
+{% if ztraceni_psi %}
+<div class="container px-0 mb-5">
+    <div class="alert shadow-lg border-0 p-0 overflow-hidden"
+         style="border-radius: 25px; background: #fff5f5; border: 2px solid #ff4d4d !important;">
+        <div class="row g-0">
+            <div class="col-md-2 bg-danger d-flex align-items-center justify-content-center text-white py-3">
+                <div class="text-center">
+                    <div style="font-size: 2.5rem;">🚨</div>
+                    <div class="fw-bold text-uppercase small">Hledá se!</div>
+                </div>
+            </div>
+            <div class="col-md-10 p-4">
+                <div class="d-flex flex-wrap gap-4 align-items-center">
+                    {% for pes in ztraceni_psi %}
+                    <div class="d-flex align-items-center gap-3">
+                        {% if pes.fotka %}
+                        <img src="{{ pes.fotka.url }}" class="rounded-circle shadow-sm"
+                             style="width: 70px; height: 70px; object-fit: cover; border: 3px solid white;">
+                        {% else %}
+                        <div class="rounded-circle bg-white d-flex align-items-center justify-content-center shadow-sm"
+                             style="width: 70px; height: 70px; font-size: 1.5rem;">🐕
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h4 class="mb-0 fw-bold text-danger">{{ pes.jmeno }}</h4>
+                            <p class="mb-0 text-muted small"><strong>Plemeno:</strong> {{ pes.rasa }}</p>
+                            <a href="{% url 'nouzovy_profil' pes.id %}"
+                               class="btn btn-sm btn-outline-danger mt-1 py-0 px-3"
+                               style="border-radius: 10px; font-size: 0.8rem;">
+                                Pomoci najít 🐾
+                            </a>
+                        </div>
+                    </div>
+                    {% if not forloop.last %}
+                    <div class="vr d-none d-md-block" style="height: 50px; opacity: 0.1;"></div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 
 <div class="row mt-4 px-3">
     <div class="col-md-4 mb-4">
@@ -79,7 +123,8 @@
             <div class="fs-1 mb-2">📦</div>
             <h4 class="fw-bold">Inzerce / Bazar</h4>
             <p class="text-muted small">Najděte nový domov pro štěňátka nebo nakupte výbavu od ostatních pejskařů.</p>
-            <a href="{% url 'seznam_inzeratu' %}" class="mt-auto fw-bold text-decoration-none" style="color: #28a745;">Otevřít bazar</a>
+            <a href="{% url 'seznam_inzeratu' %}" class="mt-auto fw-bold text-decoration-none" style="color: #28a745;">Otevřít
+                bazar</a>
         </div>
     </div>
 
@@ -88,7 +133,8 @@
             <div class="fs-1 mb-2">📍</div>
             <h4 class="fw-bold">Mapa služeb</h4>
             <p class="text-muted small">Najděte nejbližší veterinu, psí park nebo cvičiště ve vašem okolí.</p>
-            <a href="{% url 'mapa_sluzeb' %}" class="mt-auto fw-bold text-decoration-none" style="color: #007bff;">Otevřít mapu</a>
+            <a href="{% url 'mapa_sluzeb' %}" class="mt-auto fw-bold text-decoration-none" style="color: #007bff;">Otevřít
+                mapu</a>
         </div>
     </div>
 
@@ -97,7 +143,8 @@
             <div class="fs-1 mb-2">👤</div>
             <h4 class="fw-bold">Můj profil & Správa</h4>
             <p class="text-muted small">Upravte své údaje, spravujte své inzeráty a prohlédněte si seznam svých psů.</p>
-            <a href="{% url 'profil' %}" class="mt-auto fw-bold text-decoration-none" style="color: #8B4513;">Přejít na profil</a>
+            <a href="{% url 'profil' %}" class="mt-auto fw-bold text-decoration-none" style="color: #8B4513;">Přejít na
+                profil</a>
         </div>
     </div>
 </div>

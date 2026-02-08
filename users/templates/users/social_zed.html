@@ -3,156 +3,159 @@
 {% block content %}
 <style>
     :root {
-        --bg-cream: #fffaf5;
-        --card-border: #eaddcf;
+        --primary-brown: #8b5e3c;
         --text-dark: #4a3728;
+        --light-tan: #fdfaf5;
+        --card-border: #eaddcf;
     }
+
+    html { scroll-behavior: smooth; }
 
     .nav-card {
         background: white;
-        border: 1px solid var(--card-border);
+        border: 2px solid var(--card-border);
         border-radius: 20px;
-        padding: 25px;
+        padding: 20px;
         text-align: center;
         text-decoration: none;
         color: var(--text-dark);
-        transition: all 0.3s ease;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        display: block;
+        transition: 0.3s;
         height: 100%;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
     }
-
     .nav-card:hover {
-        transform: translateY(-5px);
+        background: var(--light-tan);
         border-color: var(--primary-brown);
-        box-shadow: 0 10px 25px rgba(74, 55, 40, 0.1);
+        transform: translateY(-5px);
         color: var(--primary-brown);
-    }
-
-    .search-section {
-        background-color: white;
-        border-radius: 50px;
-        padding: 10px 25px;
-        border: 1px solid var(--card-border);
-        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
     }
 
     .section-header {
+        font-weight: bold;
         color: var(--primary-brown);
-        font-weight: 800;
-        font-size: 1.2rem;
-        margin-bottom: 25px;
-        margin-top: 50px;
-        display: flex;
-        align-items: center;
+        margin-top: 40px;
+        margin-bottom: 20px;
+        border-left: 4px solid var(--primary-brown);
+        padding-left: 15px;
     }
 
-    .section-header::before {
-        content: "";
-        display: inline-block;
-        width: 4px;
-        height: 24px;
-        background: var(--primary-brown);
-        margin-right: 12px;
-        border-radius: 10px;
+    .action-link-box {
+        border: 2px solid var(--primary-brown);
+        border-radius: 15px;
+        background: white;
+        text-decoration: none;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        padding: 15px 20px;
+        transition: 0.3s;
+        height: 100%;
+    }
+    .action-link-box:hover {
+        background: var(--light-tan);
+        transform: scale(1.02);
+        color: var(--primary-brown);
     }
 
     .breed-item {
         background: white;
+        padding: 12px;
         border: 1px solid var(--card-border);
-        border-radius: 15px;
-        padding: 15px;
+        border-radius: 12px;
+        display: block;
         text-align: center;
         text-decoration: none;
         color: var(--text-dark);
         font-weight: 600;
         transition: 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
     }
+    .breed-item:hover { background: var(--light-tan); border-color: var(--primary-brown); }
 
-    .breed-item:hover {
-        background: var(--bg-cream);
-        border-color: var(--primary-brown);
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
         color: var(--primary-brown);
+        font-weight: 600;
+        margin-bottom: 20px;
     }
 </style>
 
-<div class="container mt-5">
+<div class="container mt-4">
+    <a href="{% url 'home' %}" class="btn-back">⬅ Zpět na hlavní stranu</a>
+
     <div class="text-center mb-5">
-        <h1 class="fw-bold" style="color: var(--primary-brown);">🐾 Sociální síť plemen</h1>
-        <p class="text-muted">Sdílejte zážitky, hledejte akce a propojte se s ostatními.</p>
+        <h1 class="fw-bold" style="color: var(--primary-brown);">🐾 Sociální síť</h1>
     </div>
 
     <div class="row g-4 mb-5">
-        <div class="col-md-4">
-            <a href="{% url 'pridat_polozku' 'ostatni' %}" class="nav-card">
-                <span style="font-size: 2.5rem;">🐕</span>
-                <h5 class="fw-bold mt-2">Přidat Plemeno</h5>
-                <small class="text-muted">Vytvořit novou zeď pro plemeno</small>
+        <div class="col-md-3 col-6">
+            <a href="{% url 'pridat_polozku' 'ostatni' %}" class="nav-card shadow-sm">
+                <span style="font-size: 1.5rem;">🐕</span>
+                <h6 class="fw-bold mt-2 mb-0">Přidat Plemeno</h6>
             </a>
         </div>
-        <div class="col-md-4">
-            <a href="{% url 'pridat_polozku' 'vystavy' %}" class="nav-card">
-                <span style="font-size: 2.5rem;">🏆</span>
-                <h5 class="fw-bold mt-2">Přidat Výstavu</h5>
-                <small class="text-muted">Místo, datum a propozice</small>
+        <div class="col-md-3 col-6">
+            <a href="{% url 'pridat_polozku' 'vystavy' %}" class="nav-card shadow-sm">
+                <span style="font-size: 1.5rem;">🏆</span>
+                <h6 class="fw-bold mt-2 mb-0">Přidat Výstavu</h6>
             </a>
         </div>
-        <div class="col-md-4">
-            <a href="{% url 'pridat_polozku' 'lovecka' %}" class="nav-card">
-                <span style="font-size: 2.5rem;">🌿</span>
-                <h5 class="fw-bold mt-2">Přidat Loveckou akci</h5>
-                <small class="text-muted">Zkoušky, hony a výcvik</small>
+        <div class="col-md-3 col-6">
+            <a href="{% url 'pridat_polozku' 'lovecka' %}" class="nav-card shadow-sm">
+                <span style="font-size: 1.5rem;">🌿</span>
+                <h6 class="fw-bold mt-2 mb-0">Lovecká akce</h6>
+            </a>
+        </div>
+        <div class="col-md-3 col-6">
+            <a href="{% url 'zed_plemene' 'psi-hriste' %}" class="nav-card shadow-sm">
+                <span style="font-size: 1.5rem;">🎾</span>
+                <h6 class="fw-bold mt-2 mb-0">Psí hřiště</h6>
             </a>
         </div>
     </div>
 
-    <div class="row justify-content-center mb-5">
-        <div class="col-md-8">
-            <form method="get" class="search-section d-flex align-items-center">
-                <input type="text" name="q" class="form-control border-0 bg-transparent" placeholder="Hledejte konkrétní název..." value="{{ query|default:'' }}">
-                <button type="submit" class="btn btn-brown rounded-pill px-4">Vyhledat</button>
-            </form>
+    <h4 class="section-header">Hlídání a venčení</h4>
+    <div class="row g-3 mb-5">
+        <div class="col-md-6">
+            <a href="{% url 'zed_plemene' 'venceni' %}" class="action-link-box shadow-sm">
+                <span style="font-size: 2rem; margin-right: 15px;">🦮</span>
+                <div>
+                    <h5 class="fw-bold mb-0">VENČENÍ</h5>
+                    <small class="text-muted">Domluvte si parťáka na venčení</small>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6">
+            <a href="{% url 'zed_plemene' 'hlidani' %}" class="action-link-box shadow-sm">
+                <span style="font-size: 2rem; margin-right: 15px;">🏠</span>
+                <div>
+                    <h5 class="fw-bold mb-0">HLÍDÁNÍ</h5>
+                    <small class="text-muted">Najděte spolehlivé hlídání</small>
+                </div>
+            </a>
         </div>
     </div>
 
     <h4 class="section-header">Aktuální zdi plemen</h4>
     <div class="row g-3 mb-4">
         {% for p in plemena_bežna %}
-            <div class="col-md-3 col-6">
-                <a href="{% url 'zed_plemene' p.slug %}" class="breed-item shadow-sm">
-                    {{ p.nazev }}
-                </a>
-            </div>
-        {% empty %}
-            <p class="text-muted ms-3">Zatím žádné zdi k zobrazení.</p>
+            {% if p.slug != 'psi-hriste' %} <div class="col-md-3 col-6"><a href="{% url 'zed_plemene' p.slug %}" class="breed-item shadow-sm">{{ p.nazev }}</a></div>
+            {% endif %}
         {% endfor %}
     </div>
 
-    <h4 class="section-header" style="color: #c2a15e;">Probíhající Výstavy</h4>
+    <h4 class="section-header">Probíhající Výstavy</h4>
     <div class="row g-3 mb-4">
         {% for p in plemena_vystavy %}
-            <div class="col-md-3 col-6">
-                <a href="{% url 'zed_plemene' p.slug %}" class="breed-item shadow-sm">
-                    🏆 {{ p.nazev }}
-                </a>
-            </div>
+            <div class="col-md-3 col-6"><a href="{% url 'zed_plemene' p.slug %}" class="breed-item shadow-sm">🏆 {{ p.nazev }}</a></div>
         {% endfor %}
     </div>
 
-    <h4 class="section-header" style="color: #6d8c69;">Lovecké akce</h4>
+    <h4 class="section-header">Lovecké akce</h4>
     <div class="row g-3 mb-5">
         {% for p in plemena_lovecka %}
-            <div class="col-md-3 col-6">
-                <a href="{% url 'zed_plemene' p.slug %}" class="breed-item shadow-sm">
-                    🌿 {{ p.nazev }}
-                </a>
-            </div>
+            <div class="col-md-3 col-6"><a href="{% url 'zed_plemene' p.slug %}" class="breed-item shadow-sm">🌿 {{ p.nazev }}</a></div>
         {% endfor %}
     </div>
 </div>
