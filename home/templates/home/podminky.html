@@ -1,32 +1,89 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="card shadow-sm p-4 p-md-5" style="border-radius: 20px; border: none; background-color: white;">
-        <h1 style="color: var(--primary-brown); border-bottom: 2px solid var(--light-tan); padding-bottom: 10px;">📄 Podmínky užití portálu pes.cz</h1>
-        
-        <p class="mt-4 text-muted">Poslední aktualizace: {% now "j. F Y" %}</p>
+<div class="py-2">
+    <h1 class="fw-bold mb-4" style="font-family: 'Playfair Display', serif; color: var(--brown-dark); border-bottom: 3px solid var(--accent-gold); padding-bottom: 15px;">
+        Všeobecné obchodní podmínky (VOP)
+    </h1>
 
-        <section class="mt-4">
-            <h4 style="color: var(--primary-brown);">1. Provozovatel a úvodní ustanovení</h4>
+    <p class="text-muted small mb-5">Verze platná od: 1. 1. 2026</p>
+
+    <div class="legal-text" style="line-height: 1.8; color: #333; font-size: 0.95rem; text-align: justify;">
+
+        <section class="mb-5">
+            <h4 class="fw-bold" style="color: var(--brown-mid);">1. Úvodní ustanovení a definice</h4>
             <p>
-                Portál pes.cz (dále jen „Portál“) je provozován: <strong>[Vaše Jméno / IČO]</strong>, se sídlem [Vaše Adresa] (dále jen „Provozovatel“).
-                Portál slouží k evidenci psů, správě očkování a vyhledávání služeb pro chovatele.
-                Užíváním Portálu nebo registrací uživatel stvrzuje svůj souhlas s těmito podmínkami.
+                Tyto Všeobecné obchodní podmínky (dále jen „VOP“) upravují vzájemná práva a povinnosti mezi Provozovatelem, kterým je
+                <strong>{{ kontaktni_info.jmeno }}</strong>, IČO: {{ kontaktni_info.ico }}, se sídlem {{ kontaktni_info.adresa }} (dále jen „Provozovatel“),
+                a uživateli internetového portálu <strong>e.pes.cz</strong> (dále jen „Portál“).
+            </p>
+            <p>
+                Uživatelem se rozumí každá fyzická nebo právnická osoba, která Portál navštíví nebo využívá jeho služby (dále jen „Uživatel“).
+                Registrací nebo užíváním Portálu Uživatel vyjadřuje bezvýhradný souhlas s těmito VOP.
             </p>
         </section>
 
-        <section class="mt-4">
-            <h4 style="color: var(--primary-brown);">2. Registrace a placené verze</h4>
+        <section class="mb-5">
+            <h4 class="fw-bold" style="color: var(--brown-mid);">2. Rozsah poskytovaných služeb</h4>
             <p>
-                Základní verze portálu je poskytována zdarma. Provozovatel si vyhrazuje právo na zavedení placených prémiových funkcí
-                (např. pro chovné stanice a profesionály) nebo zpoplatnění mobilní aplikace v obchodech Google Play a App Store dle aktuálního ceníku.
-                Uživatel je povinen uvádět pravdivé údaje.
+                Portál nabízí služby digitální správy dat o psech, komunitní funkce (Zdi plemen) a inzertní prostor (Bazar).
+                Provozovatel poskytuje Portál ve verzi „Free“ (zdarma) a verzi „Premium“ (zpoplatněná dle aktuálního ceníku).
+                Provozovatel si vyhrazuje právo měnit rozsah služeb nebo Portál dočasně odstavit z důvodu údržby.
             </p>
         </section>
 
-        <section class="mt-4">
-            <h4 style="color: var(--primary-brown);">3. Inzerce a bazar</h4>
+        <section class="mb-5">
+            <h4 class="fw-bold" style="color: var(--brown-mid);">3. Podmínky inzerce a Bazaru</h4>
             <p>
-                Provozovatel je pouze poskytovatelem prostoru pro inzerci. Neneseme odpovědnost za pravdivost inzerátů,
-                zdravotní stav nabízených zvířat ani za průběh obchodních transakcí mezi uživateli.
+                Portál slouží pouze jako <strong>technická platforma pro propojení poptávky a nabídky</strong>. Provozovatel není prodávajícím ani kupujícím u žádného inzerátu.
+            </p>
+            <div class="p-4 my-3 bg-light border-start border-4 border-danger shadow-sm">
+                <p class="mb-0"><strong>Vyloučení odpovědnosti:</strong> Provozovatel neodpovídá za správnost, úplnost a pravdivost údajů v inzerci, ani za kvalitu, zdravotní stav či původ nabízených zvířat. Veškeré obchodní vztahy vznikají přímo mezi Uživateli. Provozovatel nenese odpovědnost za případné škody či vady plnění vzniklé z těchto vztahů.</p>
+            </div>
+            <p>Uživatel se zavazuje inzerovat v souladu se zákonem č. 246/1992 Sb., na ochranu zvířat proti týrání.</p>
+        </section>
+
+        <section class="mb-5">
+            <h4 class="fw-bold" style="color: var(--brown-mid);">4. Práva a povinnosti Uživatele</h4>
+            <p>
+                Uživatel je povinen chránit své přístupové údaje. Provozovatel nenese odpovědnost za jejich zneužití.
+                Uživatel nesmí na Portál nahrávat obsah, který porušuje autorská práva třetích osob, je vulgární, urážlivý nebo diskriminační.
+                Provozovatel je oprávněn bez předchozího upozornění smazat jakýkoliv obsah či uživatelský účet, který porušuje tyto VOP.
+            </p>
+        </section>
+
+        <section class="mb-5">
+            <h4 class="fw-bold" style="color: var(--brown-mid);">5. Platební podmínky a odstoupení</h4>
+            <p>
+                Cena za Premium služby je uvedena v ceníku. Vzhledem k tomu, že se jedná o digitální obsah poskytovaný okamžitě,
+                Uživatel výslovně souhlasí s tím, že ztrácí právo na odstoupení od smlouvy ve 14denní lhůtě po započetí plnění (aktivaci služeb),
+                pokud mu byly služby zpřístupněny před uplynutím této lhůty.
+            </p>
+        </section>
+
+        <section class="mb-5">
+            <h4 class="fw-bold" style="color: var(--brown-mid);">6. Ochrana osobních údajů (GDPR)</h4>
+            <p>
+                Provozovatel zpracovává osobní údaje Uživatele za účelem správy účtu a plnění smlouvy.
+                Podrobné informace o zpracování údajů a právech Uživatele jsou obsaženy v samostatném dokumentu
+                <strong>Zásady ochrany osobních údajů</strong>.
+            </p>
+        </section>
+
+        <section class="mb-5">
+            <h4 class="fw-bold" style="color: var(--brown-mid);">7. Závěrečná ustanovení</h4>
+            <p>
+                Tyto VOP se řídí právním řádem České republiky. Případné spory budou řešeny věcně a místně příslušnými soudy ČR.
+                Provozovatel si vyhrazuje právo na změnu VOP; o změně budou registrovaní Uživatelé informováni e-mailem minimálně 15 dní před nabytím účinnosti.
+            </p>
+        </section>
+
+        <div class="text-center mt-5 pt-4 border-top">
+            <p class="mb-4 fw-bold text-muted small">Máte dotazy k podmínkám? <a href="{% url 'kontakt' %}" class="text-decoration-none" style="color: var(--accent-gold);">Kontaktujte nás</a>.</p>
+            <a href="{% url 'home' %}" class="btn px-5 py-3 fw-bold text-white shadow" style="background: linear-gradient(135deg, var(--brown-dark), var(--brown-mid)); border: none; border-radius: 50px;">
+                STVRZUJI SOUHLAS A CHCI POKRAČOVAT
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

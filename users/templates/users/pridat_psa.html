@@ -2,101 +2,169 @@
 
 {% block content %}
 <style>
-    /* Základní styly pro formulář */
-    .field-container label { font-weight: bold; color: #5d2e0a; margin-bottom: 5px; display: block; }
-
-    .field-container input,
-    .field-container select,
-    .field-container textarea {
-        width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 15px;
-        border: 1px solid #ced4da; border-radius: 12px; box-sizing: border-box;
-        background-color: white;
+    .section-title {
+        color: #8B4513;
+        font-weight: bold;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #f1ede4;
+        padding-bottom: 5px;
     }
 
-    /* Červený nouzový box pro režim "Hledá se" */
+    .field-container { margin-bottom: 20px; }
+    .field-container label { font-weight: 600; color: #5d4037; display: block; margin-bottom: 5px; }
+
+    /* Stylování inputů aby ladily k designu */
+    .field-container input, .field-container select, .field-container textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+    }
+
     .missing-mode-box {
         background-color: #fff5f5;
         border: 2px solid #feb2b2;
-        border-radius: 18px;
+        border-radius: 20px;
         padding: 20px;
         margin-bottom: 25px;
-        transition: all 0.3s ease;
     }
 
-    .missing-mode-box:has(input:checked) {
-        border-color: #f56565;
-        box-shadow: 0 0 15px rgba(245, 101, 101, 0.2);
+    /* Styl pro zamčená pole */
+    .premium-lock-overlay {
+        background-color: rgba(255, 255, 255, 0.6);
+        border: 1px dashed #c5a059;
+        border-radius: 15px;
+        padding: 20px;
+        position: relative;
+        text-align: center;
     }
+    .lock-icon { color: #c5a059; font-size: 1.2rem; margin-bottom: 10px; }
 
-    /* Styl pro přepínač (switch) */
-    .form-check-input:checked {
-        background-color: #dc3545 !important;
-        border-color: #dc3545 !important;
-    }
-
-    .error-text { color: #dc3545; font-size: 0.85rem; margin-top: -10px; margin-bottom: 10px; }
+    .btn-brown:hover { background-color: #6F370F !important; }
 </style>
 
-<div class="container" style="max-width: 600px; margin-top: 20px; margin-bottom: 50px;">
+<div class="container" style="max-width: 700px; margin-top: 20px; margin-bottom: 50px;">
 
-    {# Horní info karta pro verzi zdarma #}
+    {# Horní info pro verzi zdarma #}
     {% if not request.user.profil.je_premium %}
     <div class="alert shadow-sm mb-4 d-flex align-items-center" style="border-radius: 15px; border: none; background-color: #fff3cd; color: #856404;">
         <span style="font-size: 1.5rem; margin-right: 15px;">💡</span>
         <div>
-            <strong>Verze zdarma:</strong><br>
-            Registrujete svého prvního a jediného pejska.
+            <strong>Tip:</strong> S Premium verzí můžete přidat neomezeně psů a získat profi rodokmen.
         </div>
     </div>
     {% endif %}
 
     <div class="card shadow-sm border-0" style="background-color: #fdfaf5; border-radius: 25px; padding: 30px;">
-        <h2 style="color: #8B4513; text-align: center; margin-bottom: 5px; font-weight: bold;">🐕 Nový parťák</h2>
-        <p class="text-center text-muted mb-4">Vytvořte profil pro svého psa</p>
+        <h2 style="color: #8B4513; text-align: center; margin-bottom: 5px; font-weight: bold;">
+            {% if editace %}⚙️ Úprava profilu{% else %}🐕 Nový parťák{% endif %}
+        </h2>
+        <p class="text-center text-muted mb-4 small">Vyplňte údaje o vašem pejskovi</p>
 
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
-            {% for field in form %}
-                {% if field.name == 'je_ztraceny' %}
-                    {# Box pro aktivaci nouzového režimu #}
-                    <div class="missing-mode-box">
-                        <div class="form-check form-switch d-flex justify-content-between align-items-center p-0">
-                            <div style="padding-left: 10px;">
-                                <label class="form-check-label fw-bold text-danger mb-0" for="{{ field.id_for_label }}">
-                                    🚨 REŽIM "HLEDÁ SE"
-                                </label>
-                                <small class="d-block text-muted">Aktivujte jen v případě ztráty!</small>
-                            </div>
-                            <div style="transform: scale(1.6); padding-right: 15px;">
-                                {{ field }}
-                            </div>
-                        </div>
+            {# 1. NOUZOVÝ REŽIM (Vždy nahoře) #}
+            <div class="missing-mode-box shadow-sm">
+                <div class="form-check form-switch d-flex justify-content-between align-items-center p-0">
+                    <div style="padding-left: 10px;">
+                        <label class="form-check-label fw-bold text-danger mb-0" for="{{ form.je_ztraceny.id_for_label }}">
+                            🚨 REŽIM "HLEDÁ SE"
+                        </label>
+                        <small class="d-block text-muted">Aktivujte jen v případě ztráty!</small>
                     </div>
-                {% else %}
-                    <div class="field-container">
-                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                        {{ field }}
-                        {% if field.errors %}
-                            <div class="error-text">{{ field.errors|striptags }}</div>
-                        {% endif %}
+                    <div style="transform: scale(1.6); padding-right: 15px;">
+                        {{ form.je_ztraceny }}
                     </div>
-                {% endif %}
-            {% endfor %}
-
-            {# BOX PRO NOVÉ PLEMENO - skryto pomocí JS #}
-            <div id="extra-plemeno-div" style="background-color: #f1ede4; padding: 20px; border-radius: 18px; margin: 10px 0 25px 0; display: none;">
-                <label for="id_nove_plemeno" style="margin-bottom: 8px; display: block; font-weight: bold;">✨ Nenašli jste plemeno v seznamu?</label>
-                <input type="text" name="nove_plemeno" id="id_nove_plemeno" class="form-control" placeholder="Např. Maruňský teriér" style="background: white; border-radius: 10px; border: 1px solid #ced4da; width: 100%; padding: 10px;">
-                <small class="text-muted">Plemeno prověříme a brzy jej přidáme do seznamu.</small>
+                </div>
             </div>
 
-            <button type="submit" class="btn btn-brown w-100 py-3 fw-bold shadow-sm"
-                    style="background-color: #8B4513; color: white; border-radius: 15px; font-size: 1.1rem; border: none; margin-top: 10px;">
-                Přidat pejska
+            <h4 class="section-title">📍 Základní údaje</h4>
+
+            <div class="row">
+                <div class="col-md-6 field-container">
+                    <label>{{ form.jmeno.label }}</label>
+                    {{ form.jmeno }}
+                </div>
+                <div class="col-md-6 field-container">
+                    <label>Věk (roky)</label>
+                    {{ form.vek }}
+                </div>
+            </div>
+
+            <div class="field-container">
+                <label>{{ form.rasa.label }}</label>
+                {{ form.rasa }}
+            </div>
+
+            {# BOX PRO NOVÉ PLEMENO (Zobrazí se přes JS) #}
+            <div id="extra-plemeno-div" style="background-color: #f1ede4; padding: 20px; border-radius: 18px; margin-bottom: 25px; display: none;">
+                <label style="font-weight: bold;">✨ Jiné plemeno:</label>
+                <input type="text" name="nove_plemeno" class="form-control" placeholder="Např. Maruňský teriér">
+            </div>
+
+            <div class="field-container">
+                <label>{{ form.fotka.label }}</label>
+                {{ form.fotka }}
+            </div>
+
+            <div class="field-container">
+                <label>{{ form.cip.label }} (povinné)</label>
+                {{ form.cip }}
+            </div>
+
+            {# 2. PREMIUM SEKCE: ZDRAVÍ A RODOKMEN #}
+            <h4 class="section-title">
+                🧬 Zdraví a Rodokmen
+                {% if not request.user.profil.je_premium %} <small>🔒</small> {% endif %}
+            </h4>
+
+            {% if request.user.profil.je_premium %}
+                <div class="row">
+                    <div class="col-md-6 field-container">
+                        <label>{{ form.rtg_hd.label }}</label>
+                        {{ form.rtg_hd }}
+                    </div>
+                    <div class="col-md-6 field-container">
+                        <label>{{ form.rtg_ed.label }}</label>
+                        {{ form.rtg_ed }}
+                    </div>
+                </div>
+                <div class="field-container">
+                    <label>{{ form.genetika_dna.label }}</label>
+                    {{ form.genetika_dna }}
+                </div>
+
+                <h4 class="section-title">🌳 Předci (pro rodokmen)</h4>
+                <div class="row">
+                    <div class="col-md-6 field-container">
+                        <label>{{ form.otec.label }}</label>
+                        {{ form.otec }}
+                    </div>
+                    <div class="col-md-6 field-container">
+                        <label>{{ form.matka.label }}</label>
+                        {{ form.matka }}
+                    </div>
+                </div>
+            {% else %}
+                <div class="premium-lock-overlay shadow-sm">
+                    <div class="lock-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <p class="mb-2 text-dark fw-bold">Prémiové funkce jsou uzamčeny</p>
+                    <p class="small text-muted mb-3">
+                        Pole pro RTG výsledky, DNA testy a rodokmen jsou dostupné pouze v Premium verzi.
+                    </p>
+                    <a href="{% url 'cenik' %}" class="btn btn-sm btn-outline-warning rounded-pill">Aktivovat Premium</a>
+                </div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-brown w-100 py-3 fw-bold shadow-sm mt-4"
+                    style="background-color: #8B4513; color: white; border-radius: 15px; font-size: 1.1rem; border: none;">
+                {% if editace %}Uložit změny{% else %}Přidat pejska{% endif %}
             </button>
 
-            {# Tlačítko zpět na seznam #}
             <a href="{% url 'seznam_psu' %}" class="btn btn-link w-100 mt-2 text-decoration-none" style="color: #6c757d; text-align: center; display: block;">
                 Zrušit a zpět na seznam
             </a>
@@ -105,28 +173,21 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // JavaScript pro dynamické zobrazení pole "Nové plemeno"
-    const rasaSelect = document.querySelector('select[name="rasa"]');
-    const extraPlemenoDiv = document.getElementById('extra-plemeno-div');
+    // Jednoduchý skript pro zobrazení pole pro vlastní plemeno, pokud je vybráno "Jiné"
+    document.addEventListener('DOMContentLoaded', function() {
+        const rasaSelect = document.querySelector('[name="rasa"]');
+        const extraDiv = document.getElementById('extra-plemeno-div');
 
-    function togglePlemeno() {
-        if (!rasaSelect || !extraPlemenoDiv) return;
-
-        const vybranyText = rasaSelect.options[rasaSelect.selectedIndex].text;
-
-        // Pokud vybrané plemeno obsahuje "Jiné", zobrazíme box pro ruční zápis
-        if (vybranyText.includes("Jiné") || vybranyText.includes("Nenalezeno")) {
-            extraPlemenoDiv.style.display = 'block';
-        } else {
-            extraPlemenoDiv.style.display = 'none';
+        if (rasaSelect) {
+            rasaSelect.addEventListener('change', function() {
+                if (this.value === 'jine') { // Předpokládám, že v selectu máš hodnotu 'jine'
+                    extraDiv.style.display = 'block';
+                } else {
+                    extraDiv.style.display = 'none';
+                }
+            });
         }
-    }
-
-    if (rasaSelect) {
-        rasaSelect.addEventListener('change', togglePlemeno);
-        togglePlemeno(); // Spustit i při prvním načtení
-    }
-});
+    });
 </script>
+
 {% endblock %}

@@ -2,138 +2,189 @@
 
 {% block content %}
 <style>
-    .home-card {
-        transition: all 0.3s ease;
-        background: white;
-        text-decoration: none;
-        color: inherit !important;
+    :root {
+        --soft-bg: #fdfcfb;
+        --gold-gradient: linear-gradient(45deg, #c5a059, #e9d5a1);
+        --brown-deep: #3e2723;
+        --glass-shadow: 0 8px 32px rgba(0,0,0,0.05);
     }
-    .home-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(139, 69, 19, 0.1) !important;
-    }
-    .btn-outline-brown {
-        color: var(--primary-brown);
-        border-color: var(--primary-brown);
-        border-radius: 10px;
-    }
-    .btn-outline-brown:hover {
-        background-color: var(--primary-brown);
+
+    /* BANNER */
+    .profile-banner {
+        background: linear-gradient(135deg, #4e342e 0%, #6d4c41 100%);
+        border-radius: 30px;
+        padding: 50px 20px;
         color: white;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        margin-bottom: -40px;
+        z-index: 1;
     }
+
+    .avatar-wrapper {
+        width: 120px; height: 120px;
+        background: white;
+        border-radius: 50%;
+        margin: 0 auto 15px;
+        display: flex; align-items: center; justify-content: center;
+        border: 5px solid rgba(197, 160, 89, 0.5);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+    .avatar-wrapper i { font-size: 3.5rem; color: var(--brown-deep); }
+
+    /* KARTY */
+    .p-card {
+        background: white;
+        border-radius: 25px;
+        border: 1px solid rgba(0,0,0,0.03);
+        box-shadow: var(--glass-shadow);
+        padding: 25px;
+        height: 100%;
+        transition: 0.3s;
+    }
+    .p-card:hover { transform: translateY(-5px); }
+
+    .p-label {
+        font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
+        color: #a1887f; font-weight: 700; margin-bottom: 5px; display: block;
+    }
+
+    .p-value { font-weight: 600; color: var(--brown-deep); font-size: 1.05rem; }
+
+    /* TLAČÍTKA */
+    .btn-edit {
+        background: var(--gold-gradient);
+        border: none; color: #3e2723;
+        font-weight: 700; border-radius: 15px;
+        padding: 12px; width: 100%;
+        transition: 0.3s;
+    }
+    .btn-edit:hover { filter: brightness(1.1); transform: scale(1.02); }
+
+    .list-item-custom {
+        border: none; background: #fbf9f7;
+        margin-bottom: 10px; border-radius: 15px;
+        padding: 15px;
+    }
+
+    .hover-light:hover { background: #fdfcfb; transform: scale(1.05); transition: 0.2s; }
 </style>
 
-<div class="container">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h2 style="color: var(--primary-brown); font-weight: bold;">👤 Profil uživatele: {{ user.username }}</h2>
-            <hr>
+<div class="container pb-5">
+    <div class="profile-banner">
+        <div class="avatar-wrapper">
+            <i class="fas fa-user-circle"></i>
         </div>
+        <h2 class="fw-bold mb-1" style="font-family: 'Playfair Display', serif;">{{ user.username }}</h2>
+        <p class="opacity-75 mb-3">{{ user.email }}</p>
+
+        {% if profil.je_premium %}
+            <div class="premium-badge">
+                <i class="fas fa-crown"></i> PREMIUM CHOVATEL
+            </div>
+        {% endif %}
     </div>
 
-    <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm border-0 p-3 h-100" style="border-radius: 20px;">
-                <div class="card-body text-center">
-                    <div class="icon-circle mb-3" style="width: 100px; height: 100px; font-size: 3rem; background-color: var(--bg-beige); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                        👤
-                    </div>
-                    <h4>{{ user.first_name }} {{ user.last_name|default:"" }}</h4>
-                    <p class="text-muted small">@{{ user.username }}</p>
-                    <div class="text-start mt-4">
-                        <p class="mb-2"><strong>Status:</strong> {% if profil.je_premium %}👑 Premium{% else %}Standard{% endif %}</p>
-                        <p class="mb-3"><strong>Tel:</strong> {{ profil.telefon|default:"Neuveden" }}</p>
-                    </div>
-                    <a href="#" class="btn btn-outline-brown w-100 mt-2">Upravit údaje</a>
+    <div class="row g-4 mt-1" style="position: relative; z-index: 2;">
+        <div class="col-lg-4">
+            <div class="p-card">
+                <h5 class="fw-bold mb-4" style="color: var(--brown-deep);">Osobní údaje</h5>
+                <div class="mb-3">
+                    <span class="p-label">Jméno a příjmení</span>
+                    <div class="p-value">{{ user.first_name }} {{ user.last_name|default:"Chovatel" }}</div>
                 </div>
+                <div class="mb-3">
+                    <span class="p-label">Telefon</span>
+                    <div class="p-value">{{ profil.telefon|default:"+420 --- --- ---" }}</div>
+                </div>
+                <div class="mb-4">
+                    <span class="p-label">Členem od</span>
+                    <div class="p-value">{{ user.date_joined|date:"j. F Y" }}</div>
+                </div>
+
+                <button type="button" class="btn-edit shadow-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                    <i class="fas fa-pen-nib me-2"></i>Upravit údaje
+                </button>
             </div>
         </div>
 
-        <div class="col-md-8">
-            <div class="card shadow-sm border-0 mb-4" style="border-radius: 20px;">
-                <div class="card-body">
-                    <h5 class="fw-bold" style="color: var(--primary-brown);">❤️ Moje srdíčka</h5>
-                    <div class="list-group list-group-flush">
+        <div class="col-lg-8">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="p-card">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-heart text-danger me-2"></i>Moje srdíčka</h5>
                         {% for post in libi_se_mi %}
-                        <a href="{% url 'zed_plemene' post.plemeno.slug %}" class="list-group-item list-group-item-action border-0 px-0 d-flex justify-content-between align-items-center">
-                            <span>Příspěvek u: <strong>{{ post.plemeno.nazev }}</strong></span>
-                            <small class="text-muted">{{ post.datum_pridani|date:"j.n.Y" }}</small>
+                        <div class="list-item-custom d-flex justify-content-between align-items-center">
+                            <span class="small fw-bold">{{ post.plemeno.nazev }}</span>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted small">Zatím žádná srdíčka.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-card">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-comment-alt text-primary me-2"></i>Komentáře</h5>
+                        {% for kom in komentare|slice:":3" %}
+                        <div class="list-item-custom small">"{{ kom.text|truncatechars:50 }}"</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-card mt-4">
+                <h5 class="fw-bold mb-4"><i class="fas fa-paw text-warning me-2"></i>Moje psí centrum</h5>
+                <div class="row g-3">
+                    <div class="col-4">
+                        <a href="{% url 'seznam_psu' %}" class="text-decoration-none text-center d-block p-3 rounded-4 hover-light text-dark">
+                            <div class="fs-2 mb-1">🐕</div>
+                            <div class="small fw-bold">Moji psi</div>
                         </a>
-                        {% empty %}
-                        <p class="text-muted small mt-2">Zatím jsi nedal žádné srdíčko.</p>
-                        {% endfor %}
                     </div>
-                </div>
-            </div>
-
-            <div class="card shadow-sm border-0 mb-4" style="border-radius: 20px;">
-                <div class="card-body">
-                    <h5 class="fw-bold" style="color: var(--primary-brown);">💬 Moje komentáře</h5>
-                    <div class="list-group list-group-flush">
-                        {% for kom in komentare %}
-                        <div class="list-group-item border-0 px-0">
-                            <small class="d-block text-muted">{{ kom.datum_pridani|date:"j.n.Y H:i" }} ({{ kom.prispevek.plemeno.nazev }})</small>
-                            <p class="mb-0 small">"{{ kom.text }}"</p>
-                        </div>
-                        {% empty %}
-                        <p class="text-muted small mt-2">Zatím jsi nic nekomentoval.</p>
-                        {% endfor %}
+                    <div class="col-4 border-start border-end">
+                        <a href="{% url 'pridat_psa' %}" class="text-decoration-none text-center d-block p-3 rounded-4 hover-light text-dark">
+                            <div class="fs-2 mb-1">✨</div>
+                            <div class="small fw-bold">Nový pes</div>
+                        </a>
+                    </div>
+                    <div class="col-4">
+                        <a href="{% url 'veterinar' %}" class="text-decoration-none text-center d-block p-3 rounded-4 hover-light text-dark">
+                            <div class="fs-2 mb-1">🏥</div>
+                            <div class="small fw-bold">Veterinář</div>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="row mt-2">
-        <div class="col-12">
-            <div class="card shadow-sm border-0 mb-4" style="border-radius: 20px; border-left: 6px solid var(--primary-brown);">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-3" style="color: var(--primary-brown);">🐶 Moje psí centrum</h5>
-                    <div class="row g-3 text-center">
-                        <div class="col-md-4">
-                            <a href="{% url 'seznam_psu' %}" class="btn btn-light w-100 py-3 border shadow-sm h-100 home-card" style="border-radius: 15px;">
-                                <span class="fs-2 d-block mb-1">🐕</span>
-                                <span class="fw-bold">Moji psi</span>
-                            </a>
-                        </div>
-                        <div class="col-md-4">
-                            <a href="{% url 'pridat_psa' %}" class="btn btn-light w-100 py-3 border shadow-sm h-100 home-card" style="border-radius: 15px;">
-                                <span class="fs-2 d-block mb-1">➕</span>
-                                <span class="fw-bold">Přidat psa</span>
-                            </a>
-                        </div>
-                        <div class="col-md-4">
-                            <a href="{% url 'terminy' %}" class="btn btn-light w-100 py-3 border shadow-sm h-100 home-card" style="border-radius: 15px;">
-                                <span class="fs-2 d-block mb-1">📅</span>
-                                <span class="fw-bold">Termíny</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: 30px; background: var(--soft-bg);">
+            <div class="modal-header border-0 pt-4 px-4">
+                <h4 class="fw-bold mb-0" style="color: var(--brown-deep); font-family: 'Playfair Display', serif;">Upravit profil</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm border-0 mb-5" style="border-radius: 20px;">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-3" style="color: var(--primary-brown);">🛍️ Moje inzeráty v bazaru</h5>
-                    <div class="list-group list-group-flush">
-                        {% for inzerat in moje_inzeraty %}
-                            <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 border-bottom">
-                                <div>
-                                    <strong class="text-dark">{{ inzerat.titulek }}</strong>
-                                    <br><small class="text-success fw-bold">{{ inzerat.cena }} Kč</small>
-                                </div>
-                                <a href="{% url 'detail_inzeratu' inzerat.id %}" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;">Zobrazit</a>
-                            </div>
-                        {% empty %}
-                            <p class="text-muted small">Zatím neprodáváš nic v bazaru.</p>
-                        {% endfor %}
+            <form method="POST" action="{% url 'upravit_profil' %}">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="p-label">Jméno</label>
+                        <input type="text" name="first_name" class="form-control rounded-4 p-3 border-0 shadow-sm" value="{{ user.first_name }}">
                     </div>
+                    <div class="mb-3">
+                        <label class="p-label">Příjmení</label>
+                        <input type="text" name="last_name" class="form-control rounded-4 p-3 border-0 shadow-sm" value="{{ user.last_name }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="p-label">Telefon</label>
+                        <input type="text" name="telefon" class="form-control rounded-4 p-3 border-0 shadow-sm" value="{{ profil.telefon }}">
+                    </div>
+                    <button type="submit" class="btn-edit mt-2 shadow">Uložit změny</button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>

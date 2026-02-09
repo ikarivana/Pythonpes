@@ -2,32 +2,55 @@
 
 {% block content %}
 <div class="container py-5">
-    <div class="card shadow-sm p-4 p-md-5" style="border-radius: 20px; border: none; background-color: white;">
-        <h1 style="color: var(--primary-brown); border-bottom: 2px solid var(--light-tan); padding-bottom: 10px;">🍪 Nastavení cookies</h1>
+    <div class="card shadow-lg p-4 p-md-5 mx-auto" style="border-radius: 35px; border: 1px solid rgba(197, 160, 89, 0.2); background-color: #fffdfa; max-width: 800px;">
 
-        <p class="mt-4 text-muted">Poslední aktualizace: 5. února 2026</p>
-
-        <section class="mt-4">
-            <h4 style="color: var(--primary-brown);">Vaše volba</h4>
-            <p>Respektujeme vaše soukromí. Pokud si nepřejete ukládání volitelných cookies, můžete je odmítnout. Portál bude i nadále fungovat v základním režimu (přihlášení a zabezpečení).</p>
-        </section>
-
-        <section class="mt-4">
-            <h4 style="color: var(--primary-brown);">Jaké cookies používáme?</h4>
-            <ul>
-                <li><strong>Nezbytné:</strong> Nutné pro přihlášení a zabezpečení webu. (Nelze vypnout)</li>
-                <li><strong>Funkční a analytické:</strong> Pamatují si vaše preference a pomáhají nám web zlepšovat.</li>
-            </ul>
-        </section>
-
-        <div class="mt-5 d-flex justify-content-center gap-3">
-            <a href="{% url 'home' %}" class="btn btn-success px-4 shadow-sm">Přijmout vše</a>
-
-            <a href="{% url 'home' %}" class="btn btn-outline-secondary px-4">Odmítnout volitelné</a>
+        <div class="text-center mb-4">
+            <span class="display-4">🍪</span>
+            <h1 class="mt-3" style="font-family: 'Playfair Display', serif; color: #3e2723; font-weight: 800;">Nastavení cookies</h1>
+            <div style="width: 60px; height: 4px; background: #c5a059; margin: 15px auto; border-radius: 2px;"></div>
         </div>
 
-        <p class="text-center mt-4 small text-muted">
-            Kliknutím na "Odmítnout" budou používány pouze technické cookies nezbytné pro provoz webu.
+        <p class="text-muted text-center small">Poslední aktualizace: 9. února 2026</p>
+
+        <div class="row mt-5">
+            <div class="col-md-12">
+                <section class="mb-4 p-3 rounded-4" style="background: rgba(197, 160, 89, 0.05); border-left: 5px solid #c5a059;">
+                    <h4 style="color: #3e2723; font-weight: 700;"><i class="fas fa-user-shield me-2"></i>Vaše volba</h4>
+                    <p class="mb-0 text-muted">Respektujeme vaše soukromí. Portál **Deník hrdinů** je navržen tak, aby chránil vaše data i data vašich psů. Pokud si nepřejete ukládání volitelných cookies, můžete je odmítnout. Portál bude i nadále fungovat v základním režimu (přihlášení a zabezpečení).</p>
+                </section>
+
+                <section class="mt-4 ps-2">
+                    <h4 style="color: #3e2723; font-weight: 700;">Jaké cookies používáme?</h4>
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item bg-transparent border-0 ps-0">
+                            <h6 class="fw-bold mb-1 text-dark"><i class="fas fa-check-circle text-success me-2"></i>Nezbytné cookies</h6>
+                            <p class="small text-muted mb-0">Nutné pro fungování přihlášení, zabezpečení proti CSRF útokům a správu vaší relace. Bez nich byste se nemohli bezpečně přihlásit ke svému profilu.</p>
+                        </div>
+                        <div class="list-group-item bg-transparent border-0 ps-0 mt-3">
+                            <h6 class="fw-bold mb-1 text-dark"><i class="fas fa-chart-line text-info me-2"></i>Funkční a analytické cookies</h6>
+                            <p class="small text-muted mb-0">Pomáhají nám pamatovat si vaše nastavení (např. tmavý režim nebo jazyk) a anonymně měřit, které části deníku jsou pro pejskaře nejužitečnější.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="mt-5 d-flex flex-column flex-md-row justify-content-center gap-3">
+            <a href="{% url 'home' %}" class="btn btn-lg px-5 py-3 rounded-pill shadow-sm fw-bold"
+               style="background: #c5a059; color: white; border: none; transition: 0.3s;"
+               onmouseover="this.style.background='#3e2723'" onmouseout="this.style.background='#c5a059'">
+                <i class="fas fa-check me-2"></i>Přijmout vše
+            </a>
+
+            <a href="{% url 'home' %}" class="btn btn-lg px-5 py-3 rounded-pill fw-bold"
+               style="background: transparent; color: #3e2723; border: 2px solid #3e2723; transition: 0.3s;"
+               onmouseover="this.style.background='rgba(62, 39, 35, 0.05)'" onmouseout="this.style.background='transparent'">
+                Odmítnout volitelné
+            </a>
+        </div>
+
+        <p class="text-center mt-4 extra-small text-muted" style="font-size: 0.75rem;">
+            Při odmítnutí budou aktivní pouze technické cookies nezbytné pro zabezpečený provoz webu podle standardů GDPR.
         </p>
     </div>
 </div>

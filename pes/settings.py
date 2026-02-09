@@ -29,7 +29,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-1pv+(%pqb466r@7*-l
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -131,9 +131,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-# fotky mobil
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
 
-# Jen pro vývoj! Na Rošti to pak změníme na skutečný SMTP.
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# fotky mobil
+DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100 MB
+
+# Cesta pro statické soubory (aby fungovalo CSS i v produkci)
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

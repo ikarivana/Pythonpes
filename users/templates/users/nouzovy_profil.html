@@ -1,69 +1,186 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<div class="container mt-4 mb-5" style="max-width: 500px;">
-    
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+    :root {
+        --emergency-red: #d63031;
+        --safe-green: #27ae60;
+        --vet-blue: #0984e3;
+        --bg-light: #f8f9fa;
+    }
+
+    body {
+        background-color: #f0f2f5;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .emergency-wrapper {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px 15px;
+    }
+
+    /* Pulzující hlavička pro případ ztráty */
+    .emergency-alert {
+        background: var(--emergency-red);
+        color: white;
+        border-radius: 20px;
+        padding: 15px;
+        text-align: center;
+        font-weight: 800;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 20px rgba(214, 48, 49, 0.3);
+        animation: pulse-red 2s infinite;
+    }
+
+    @keyframes pulse-red {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+        100% { transform: scale(1); }
+    }
+
+    /* Karta psa */
+    .profile-main-card {
+        background: white;
+        border-radius: 30px;
+        padding: 30px 20px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.03);
+        margin-bottom: 20px;
+    }
+
+    .dog-avatar {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 5px solid white;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        margin-bottom: 15px;
+    }
+
+    /* Akční tlačítka */
+    .action-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 18px;
+        border-radius: 20px;
+        font-weight: 800;
+        text-decoration: none;
+        transition: 0.3s;
+        margin-bottom: 12px;
+        font-size: 1.1rem;
+    }
+
+    .btn-call { background: var(--safe-green); color: white; }
+    .btn-whatsapp { background: #25d366; color: white; }
+    .btn-call:hover, .btn-whatsapp:hover { opacity: 0.9; color: white; transform: translateY(-2px); }
+
+    /* Sekce informací */
+    .info-section {
+        background: white;
+        border-radius: 25px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.02);
+    }
+
+    .info-label {
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #adb5bd;
+        letter-spacing: 1px;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .medical-warning {
+        border-left: 5px solid var(--emergency-red);
+        background: #fff5f5;
+        padding: 15px;
+        border-radius: 15px;
+        margin-top: 10px;
+    }
+</style>
+
+<div class="emergency-wrapper">
+
     {% if pes.je_ztraceny %}
-    <div class="alert alert-danger shadow-lg border-0 p-4 text-center mb-4" style="border-radius: 20px; animation: pulse 2s infinite;">
-        <h2 class="fw-bold mb-1">🚨 HLEDÁ SE!</h2>
-        <p class="mb-0">Tento pejsek je nahlášen jako ztracený.</p>
+    <div class="emergency-alert">
+        <i class="fas fa-exclamation-triangle me-2"></i> POZOR! PEJSEK JE ZTRACENÝ
+    </div>
+    {% else %}
+    <div class="text-center mb-4">
+        <span class="badge bg-primary rounded-pill px-3 py-2">Zdravotní karta hrdiny</span>
     </div>
     {% endif %}
 
-    <div class="card shadow-sm border-0" style="border-radius: 25px; overflow: hidden;">
+    <div class="profile-main-card">
         {% if pes.fotka %}
-            <img src="{{ pes.fotka.url }}" class="img-fluid" alt="{{ pes.jmeno }}" style="width: 100%; max-height: 400px; object-fit: cover;">
+        <img src="{{ pes.fotka.url }}" class="dog-avatar" alt="{{ pes.jmeno }}">
+        {% else %}
+        <div class="dog-avatar bg-light d-flex align-items-center justify-content-center mx-auto">
+            <span style="font-size: 4rem;">🐕</span>
+        </div>
         {% endif %}
-        
-        <div class="card-body p-4 text-center">
-            <h1 class="fw-bold mb-0" style="color: var(--primary-brown);">{{ pes.jmeno }}</h1>
-            <p class="text-muted fs-5">{{ pes.rasa }}</p>
 
-            <div class="row g-2 mt-2">
-                <div class="col-6">
-                    <div class="p-2 bg-light rounded-3 border">
-                        <small class="text-muted d-block">Věk</small>
-                        <strong>{{ pes.vek }} let</strong>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="p-2 bg-light rounded-3 border">
-                        <small class="text-muted d-block">Číslo čipu</small>
-                        <strong>{{ pes.cip }}</strong>
-                    </div>
-                </div>
-            </div>
+        <h1 class="fw-bold mb-0">{{ pes.jmeno }}</h1>
+        <p class="text-muted">{{ pes.rasa }} • {{ pes.vek }} let</p>
 
-            <hr class="my-4">
-
-            <h4 class="fw-bold mb-3">📞 Kontakt na majitele</h4>
-            <div class="d-grid gap-2">
-                <a href="tel:{{ majitel.telefon }}" class="btn btn-success btn-lg py-3 shadow-sm" style="border-radius: 15px;">
-                    <i class="fas fa-phone"></i> Zavolat majiteli
-                </a>
-                {% if majitel.telefon %}
-                <a href="https://wa.me/{{ majitel.telefon }}" class="btn btn-outline-success btn-lg py-3" style="border-radius: 15px; border-width: 2px;">
-                    WhatsApp zpráva
-                </a>
-                {% endif %}
-            </div>
-
-            {% if pes.popis %}
-            <div class="mt-4 text-start p-3 bg-beige rounded-4">
-                <h6 class="fw-bold mb-2">ℹ️ Důležité info:</h6>
-                <p class="mb-0 small text-muted">{{ pes.popis }}</p>
-            </div>
-            {% endif %}
+        <div class="d-flex justify-content-center gap-2 mt-2">
+            <span class="badge bg-light text-dark border p-2">Čip: {{ pes.cip|default:"Neuveden" }}</span>
         </div>
     </div>
-</div>
 
-<style>
-    .bg-beige { background-color: #fdfaf5; }
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.03); }
-        100% { transform: scale(1); }
-    }
-</style>
+    <div class="info-section">
+        <h5 class="fw-bold mb-3"><i class="fas fa-phone-alt me-2 text-success"></i>Kontaktovat majitele</h5>
+
+        {% if majitel.telefon %}
+        <a href="tel:{{ majitel.telefon|cut:' ' }}" class="action-btn btn-call shadow-sm">
+            <i class="fas fa-phone-alt"></i> Zavolat majiteli
+        </a>
+        <a href="https://wa.me/{{ majitel.telefon|cut:' ' }}?text=Dobrý den, našel jsem vašeho pejska jménem {{ pes.jmeno }}."
+           class="action-btn btn-whatsapp shadow-sm">
+            <i class="fab fa-whatsapp"></i> Napsat přes WhatsApp
+        </a>
+        {% else %}
+        <div class="alert alert-light border text-center">
+            Telefonní číslo není dostupné.
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="info-section">
+        <h5 class="fw-bold mb-3"><i class="fas fa-heartbeat me-2 text-danger"></i>Důležité lékařské info</h5>
+
+        <div class="medical-item mb-3">
+            <span class="info-label">Alergie a testy</span>
+            <div class="medical-warning">
+                <strong>{{ pes.zdravotni_testy|default:"Žádné hlášené alergie." }}</strong>
+            </div>
+        </div>
+
+        {% if pes.popis %}
+        <div class="medical-item">
+            <span class="info-label">Poznámky k chování / Zdraví</span>
+            <p class="mb-0 small text-muted">{{ pes.popis }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="text-center mt-5 mb-4">
+        <a href="{% url 'home' %}" class="btn btn-outline-secondary border-0 rounded-pill px-4 shadow-sm"
+           style="background: white; transition: 0.3s;">
+            <i class="fas fa-home me-2"></i> Zpět na hlavní stránku
+        </a>
+    </div>
+
+</div>
 {% endblock %}

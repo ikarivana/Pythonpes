@@ -1,144 +1,129 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-4 mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold" style="color: var(--primary-brown);">🐾 Moji psi</h2>
-        <a href="{% url 'pridat_psa' %}" class="btn text-white px-4 shadow-sm"
-           style="background-color: var(--primary-brown); border-radius: 15px;">
-            + Přidat pejska
+        <h2 class="fw-bold" style="color: var(--primary-brown); font-family: 'Playfair Display', serif;">🐾 Moji psi</h2>
+        <a href="{% url 'pridat_psa' %}" class="btn text-white px-4 shadow-sm fw-bold"
+           style="background-color: var(--primary-brown); border-radius: 15px; transition: 0.3s;">
+            <i class="fas fa-plus-circle me-1"></i> Přidat pejska
         </a>
     </div>
 
-    <div class="row">
+    <div class="row g-4">
         {% for pes in psi %}
-        <div class="col-md-4 mb-4">
+        <div class="col-md-6 col-lg-4">
             <div class="card shadow-sm border-0 h-100 {% if pes.je_ztraceny %}border border-danger border-3 animate-pulse{% endif %}"
-                 style="border-radius: 20px; overflow: hidden; position: relative;">
+                 style="border-radius: 25px; overflow: hidden; background: white;">
 
                 {% if pes.je_ztraceny %}
-                <div class="bg-danger text-white text-center py-1 fw-bold small"
-                     style="position: absolute; width: 100%; z-index: 10;">
-                    🚨 HLEDÁ SE
+                <div class="bg-danger text-white text-center py-1 fw-bold small shadow-sm"
+                     style="position: absolute; width: 100%; z-index: 10; letter-spacing: 1px;">
+                    🚨 HLEDÁ SE / ZTRACENÝ
                 </div>
                 {% endif %}
 
-                <div style="height: 200px; background-color: #f1ede4; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer;"
-                     data-bs-toggle="modal"
-                     data-bs-target="#modalFoto{{ pes.pk }}">
-
+                <div style="height: 220px; background-color: #f8f5f0; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer;"
+                     data-bs-toggle="modal" data-bs-target="#modalFoto{{ pes.pk }}">
                     {% if pes.fotka %}
-                    <img src="{{ pes.fotka.url }}"
-                         style="max-width: 100%; max-height: 100%; object-fit: contain;"
-                         alt="{{ pes.jmeno }}"
-                         title="Klikněte pro zvětšení">
+                    <img src="{{ pes.fotka.url }}" style="width: 100%; height: 100%; object-fit: cover;" alt="{{ pes.jmeno }}">
                     {% else %}
-                    <div style="font-size: 3rem;">🐕</div>
+                    <div class="text-muted" style="font-size: 4rem;">🐕</div>
                     {% endif %}
                 </div>
 
-                <div class="modal fade" id="modalFoto{{ pes.pk }}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered modal-lg">
-                        <div class="modal-content"
-                             style="border-radius: 20px; border: none; background-color: transparent;">
-                            <div class="modal-body p-0 text-center position-relative">
-                                {# Tlačítko pro zavření okna #}
-                                <button type="button" class="btn-close btn-close-white position-absolute"
-                                        style="top: 15px; right: 15px; z-index: 100; background-color: rgba(0,0,0,0.5); padding: 10px; border-radius: 50%; opacity: 1;"
-                                        data-bs-dismiss="modal" aria-label="Close"></button>
-
-                                {% if pes.fotka %}
-                                <img src="{{ pes.fotka.url }}" class="img-fluid shadow-lg"
-                                     style="border-radius: 15px; max-height: 90vh;">
-                                <div class="mt-2 text-white fw-bold" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
-                                    {{ pes.jmeno }}
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
+                <div class="card-body d-flex flex-column p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h3 class="fw-bold mb-0">
+                            <a href="{% url 'detail_psa' pes.pk %}" class="text-decoration-none text-dark hover-brown">
+                                {{ pes.jmeno }}
+                            </a>
+                        </h3>
+                        <span class="badge rounded-pill bg-light text-dark border px-3 py-2 shadow-sm">{{ pes.vek }} let</span>
                     </div>
-                </div>
-                {# --- KONEC UPRAVENÉ ČÁSTI --- #}
+                    <p class="text-muted mb-3"><i class="fas fa-paw me-1"></i> {{ pes.rasa }}</p>
 
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <h4 class="fw-bold mb-1">{{ pes.jmeno }}</h4>
-                        <span class="badge rounded-pill bg-light text-dark border small">{{ pes.vek }} let</span>
-                    </div>
-                    <p class="text-muted small mb-2">{{ pes.rasa }}</p>
-
-                    <div class="d-flex align-items-center p-2 mb-3 border rounded-3 bg-white shadow-sm">
+                    <div class="d-flex align-items-center p-3 mb-3 border rounded-4 bg-light shadow-inner">
                         {% if pes.qr_kod %}
-                        <img src="{{ pes.qr_kod.url }}" style="width: 50px; height: 50px;" class="me-2">
-                        <div style="font-size: 0.7rem; line-height: 1.2;">
-                            <span class="fw-bold d-block text-uppercase">Digitální známka</span>
-                            <a href="{{ pes.qr_kod.url }}" download class="text-primary text-decoration-none">Stáhnout
-                                QR pro tisk</a>
+                        <img src="{{ pes.qr_kod.url }}" style="width: 55px; height: 55px;" class="me-3 rounded shadow-sm border bg-white">
+                        <div style="font-size: 0.8rem; line-height: 1.3;">
+                            <span class="fw-bold d-block text-uppercase text-secondary" style="font-size: 0.65rem;">Digitální známka</span>
+                            <a href="{{ pes.qr_kod.url }}" download class="fw-bold text-primary text-decoration-none">
+                                <i class="fas fa-download me-1"></i> Stáhnout QR
+                            </a>
                         </div>
                         {% else %}
-                        <small class="text-muted px-2">QR kód se generuje...</small>
+                        <small class="text-muted"><i class="fas fa-sync fa-spin me-1"></i> Generuji QR...</small>
                         {% endif %}
                     </div>
 
-                    <div class="p-3 mb-3" style="background-color: var(--bg-beige); border-radius: 15px;">
-                        <div class="d-flex justify-content-between small mb-1">
-                            <span class="text-secondary">💉 Příští očkování:</span>
+                    <div class="p-3 mb-4" style="background-color: #fdfaf5; border-radius: 20px; border: 1px solid rgba(0,0,0,0.05);">
+                        <div class="d-flex justify-content-between small mb-2">
+                            <span class="text-secondary">💉 Další vakcína:</span>
                             <span class="fw-bold text-primary">{{ pes.pristi_ockovani|date:"d.m.Y"|default:"--" }}</span>
                         </div>
-                        <div class="d-flex justify-content-between small mb-2">
-                            <span class="text-secondary">💊 Příští odčervení:</span>
+                        <div class="d-flex justify-content-between small">
+                            <span class="text-secondary">💊 Odčervení:</span>
                             <span class="fw-bold text-success">{{ pes.pristi_odcerveni|date:"d.m.Y"|default:"--" }}</span>
-                        </div>
-
-                        <div class="mt-2 pt-2 border-top" style="border-color: rgba(0,0,0,0.05) !important;">
-                            <small class="fw-bold d-block mb-1" style="font-size: 0.7rem; color: var(--primary-brown);">POSLEDNÍ
-                                VAKCÍNY:</small>
-                            {% for ockovani in pes.vsechna_ockovani.all|slice:":2" %}
-                            <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem;">
-                                <span>• {{ ockovani.nazev_vakciny }}</span>
-                                <span>{{ ockovani.datum|date:"j.n.y" }}</span>
-                            </div>
-                            {% empty %}
-                            <small class="text-muted italic" style="font-size: 0.7rem;">Žádné záznamy</small>
-                            {% endfor %}
                         </div>
                     </div>
 
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'pridat_ockovani' pes.pk %}" class="btn btn-sm text-white"
-                           style="background-color: var(--primary-brown); border-radius: 10px; opacity: 0.9;">
-                            💉 Přidat očkování
+                    <div class="d-grid gap-2 mb-3 mt-auto">
+                        <a href="{% url 'detail_psa' pes.pk %}" class="btn fw-bold shadow-sm py-2"
+                           style="background-color: #ffc107; color: #5d4037; border-radius: 15px; border: none;">
+                            🔍 PROHLÉDNOUT PROFIL & RODOKMEN
                         </a>
+                    </div>
+
+                    <div class="d-grid gap-2">
                         <div class="d-flex gap-2">
                             <a href="{% url 'upravit_psa' pes.pk %}"
-                               class="btn btn-sm btn-outline-secondary flex-grow-1" style="border-radius: 10px;">
-                                Upravit
+                               class="btn btn-sm btn-outline-secondary flex-grow-1" style="border-radius: 12px; padding: 8px;">
+                                <i class="fas fa-edit me-1"></i> Upravit
                             </a>
                             <a href="{% url 'smazat_psa' pes.pk %}" class="btn btn-sm btn-outline-danger"
-                               style="border-radius: 10px;">
-                                🗑️
+                               style="border-radius: 12px; padding: 8px 15px;">
+                                <i class="fas fa-trash"></i>
                             </a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="modal fade" id="modalFoto{{ pes.pk }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content bg-transparent border-0">
+                    <div class="modal-body p-0 text-center position-relative">
+                        <button type="button" class="btn-close btn-close-white position-absolute"
+                                style="top: 20px; right: 20px; z-index: 100; background-color: rgba(0,0,0,0.5); padding: 10px; border-radius: 50%; opacity: 1;"
+                                data-bs-dismiss="modal"></button>
+                        {% if pes.fotka %}
+                        <img src="{{ pes.fotka.url }}" class="img-fluid shadow-lg rounded-4" style="max-height: 85vh;">
+                        <h4 class="text-white mt-3 fw-bold" style="text-shadow: 2px 2px 10px rgba(0,0,0,0.8);">{{ pes.jmeno }}</h4>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
         {% empty %}
-        <div class="col-12 text-center py-5">
-            <p class="text-muted">Zatím nemáte žádné pejsky.</p>
+        <div class="col-12 text-center py-5 shadow-sm rounded-4 bg-white border border-dashed">
+            <div style="font-size: 4rem;">🦮</div>
+            <h4 class="text-muted mt-3">Zatím jste nepřidali žádného pejska.</h4>
+            <a href="{% url 'pridat_psa' %}" class="btn btn-primary mt-3 px-4 rounded-pill">Vytvořit první profil</a>
         </div>
         {% endfor %}
     </div>
 </div>
 
 <style>
+    .hover-brown:hover { color: var(--primary-brown) !important; }
+    .shadow-inner { box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
     @keyframes pulse-border {
         0% { border-color: #dc3545; box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
-        70% { border-color: #ffc107; box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+        50% { border-color: #ffc107; box-shadow: 0 0 0 15px rgba(220, 53, 69, 0); }
         100% { border-color: #dc3545; box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
     }
-    .animate-pulse {
-        animation: pulse-border 2s infinite;
-    }
+    .animate-pulse { animation: pulse-border 2s infinite; }
 </style>
 {% endblock %}

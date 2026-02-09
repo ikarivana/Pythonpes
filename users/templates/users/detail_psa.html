@@ -1,0 +1,219 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+    :root {
+        --primary-brown: #5d4037;
+        --secondary-beige: #f8f5f2;
+        --accent-gold: #c5a059;
+        --male-blue: #4a90e2;
+        --female-pink: #e24a68;
+        --card-shadow: 10px 10px 20px #ebe8e5, -5px -5px 15px #ffffff;
+    }
+
+    body { font-family: 'Inter', sans-serif; background-color: #fdfcfb; color: #333; }
+    h1, h2, h3, h4 { font-family: 'Playfair Display', serif; color: var(--primary-brown); }
+
+    /* Karty s efektem hloubky */
+    .profi-card {
+        background: white;
+        border: none;
+        border-radius: 25px;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 2.5rem;
+        overflow: hidden;
+        position: relative;
+        border: 1px solid rgba(226, 209, 195, 0.3);
+    }
+
+    /* Galerie a Videa */
+    .gallery-container { position: relative; }
+    .gallery-img, .video-card {
+        width: 100%; border-radius: 18px; transition: 0.3s ease;
+        border: 4px solid white; box-shadow: 0 8px 15px rgba(0,0,0,0.06);
+    }
+    .gallery-img {
+    width: 100%;
+    height: 250px; /* Nebo výška, kterou tam máš */
+    /* Změna z cover na contain zajistí, že uvidíš celého psa */
+    object-fit: contain;
+    background-color: #f8f6f2; /* Jemné pozadí pro prázdná místa u fotky */
+    border-radius: 15px;
+    transition: 0.3s;
+}
+    .gallery-img:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(93, 64, 55, 0.15); }
+
+    .video-card { background: #f9f6f3; padding: 12px; }
+
+    /* Tlačítka */
+    .btn-profi {
+        background: var(--primary-brown); color: white;
+        border-radius: 12px; padding: 12px 22px; border: none; font-weight: 600;
+        transition: 0.3s; box-shadow: 0 4px 12px rgba(93, 64, 55, 0.2);
+    }
+    .btn-profi:hover { background: #452c24; color: white; transform: translateY(-2px); }
+
+    .delete-btn {
+        position: absolute; top: 10px; right: 10px;
+        background: rgba(226, 74, 104, 0.9); color: white;
+        border: none; width: 30px; height: 30px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 12px; transition: 0.3s; z-index: 5;
+    }
+    .delete-btn:hover { background: #e24a68; transform: scale(1.1); }
+
+    /* Rodokmen a Premium Blur */
+    .premium-blur { filter: blur(5px); pointer-events: none; opacity: 0.5; }
+    .lock-overlay {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        display: flex; flex-direction: column; justify-content: center;
+        align-items: center; background: rgba(255, 255, 255, 0.4);
+        z-index: 10; text-align: center; border-radius: 25px;
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="profi-card p-4 text-center border-top border-5" style="border-top-color: var(--primary-brown) !important;">
+                {% if pes.fotka %}
+                    <img src="{{ pes.fotka.url }}" class="img-fluid shadow-sm mb-3" style="border-radius: 20px; max-height: 300px; width: 100%; object-fit: cover;">
+                {% else %}
+                    <div class="bg-light rounded-4 py-5 mb-3" style="font-size: 5rem;">🐕</div>
+                {% endif %}
+
+                <h1 class="mb-1">{{ pes.jmeno }}</h1>
+                <p class="text-muted mb-3">{{ pes.rasa }}</p>
+
+                {% if request.user.profil == pes.majitel %}
+                <div class="d-grid gap-2">
+                    <button class="btn btn-profi" data-bs-toggle="modal" data-bs-target="#modalMedia">
+                        <i class="fas fa-plus-circle me-2"></i>Přidat Foto / Video
+                    </button>
+                    <a href="{% url 'upravit_psa' pes.pk %}" class="btn btn-light rounded-3 mt-1">⚙️ Upravit profil</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="profi-card p-4">
+                <h5 class="fw-bold mb-3"><i class="fas fa-heartbeat me-2 text-danger"></i>Zdraví</h5>
+                <ul class="list-unstyled small mb-0">
+                    <li class="d-flex justify-content-between mb-2"><strong>RTG HD:</strong> <span>{{ pes.rtg_hd|default:"-" }}</span></li>
+                    <li class="d-flex justify-content-between"><strong>RTG ED:</strong> <span>{{ pes.rtg_ed|default:"-" }}</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+
+            <div class="profi-card p-4">
+                <h4 class="mb-4">📸 Fotogalerie</h4>
+                <div class="row g-3">
+                    {% for f in fotky %}
+                    <div class="col-md-4 col-6 gallery-container">
+                        <a href="{{ f.obrazek.url }}" data-lightbox="pes-gallery" data-title="{{ f.popisek }}">
+                            <img src="{{ f.obrazek.url }}" class="gallery-img">
+                        </a>
+                        {% if request.user.profil == pes.majitel %}
+                        <form action="{% url 'smazat_foto' f.id %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-btn" onclick="return confirm('Smazat tuto fotku?')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <p class="text-muted px-3 small">Galerie je zatím prázdná.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="profi-card p-4">
+                <h4 class="mb-4">🎥 Videa</h4>
+                <div class="row g-3">
+                    {% for v in videa %}
+                    <div class="col-md-6 gallery-container">
+                        <div class="video-card">
+                            {% if v.video_soubor %}
+                                <video controls class="w-100 rounded-3">
+                                    <source src="{{ v.video_soubor.url }}" type="video/mp4">
+                                </video>
+                            {% elif v.video_url %}
+                                <div class="ratio ratio-16x9">
+                                    <iframe src="{{ v.video_url }}" allowfullscreen class="rounded-3"></iframe>
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% if request.user.profil == pes.majitel %}
+                        <form action="{% url 'smazat_video' v.id %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-btn" onclick="return confirm('Smazat toto video?')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <p class="text-muted px-3 small">Žádná videa k zobrazení.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="profi-card p-4">
+                <h4 class="mb-4">🧬 Rodokmen</h4>
+                <div class="pedigree-tree">
+                    <div class="ancestor-card male">
+                        <small>Otec:</small> {{ pes.otec_manualni|default:"Neznámý" }}
+                    </div>
+                    <div class="ancestor-card female">
+                        <small>Matka:</small> {{ pes.matka_manualni|default:"Neznámá" }}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalMedia" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-3 shadow-lg">
+            <div class="modal-body">
+                <ul class="nav nav-pills nav-fill mb-4">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tabFoto"><i class="fas fa-camera me-2"></i>Foto</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tabVideo"><i class="fas fa-video me-2"></i>Video</button>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="tabFoto">
+                        <form action="{% url 'pridat_foto' pes.id %}" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <input type="file" name="obrazek" class="form-control mb-3" accept="image/*" required>
+                            <input type="text" name="popisek" class="form-control mb-3" placeholder="Popis fotky...">
+                            <button class="btn btn-profi w-100">Nahrát foto</button>
+                        </form>
+                    </div>
+                    <div class="tab-pane fade" id="tabVideo">
+                        <form action="{% url 'pridat_video' pes.id %}" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <input type="file" name="video_soubor" class="form-control mb-3" accept="video/*">
+                            <input type="url" name="video_url" class="form-control mb-3" placeholder="YouTube odkaz...">
+                            <button class="btn btn-profi w-100">Uložit video</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+{% endblock %}

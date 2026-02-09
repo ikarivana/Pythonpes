@@ -73,47 +73,56 @@
     {% endif %}
 </div>
 {% if ztraceni_psi %}
-<div class="container px-0 mb-5">
-    <div class="alert shadow-lg border-0 p-0 overflow-hidden"
-         style="border-radius: 25px; background: #fff5f5; border: 2px solid #ff4d4d !important;">
-        <div class="row g-0">
-            <div class="col-md-2 bg-danger d-flex align-items-center justify-content-center text-white py-3">
-                <div class="text-center">
-                    <div style="font-size: 2.5rem;">🚨</div>
-                    <div class="fw-bold text-uppercase small">Hledá se!</div>
-                </div>
-            </div>
-            <div class="col-md-10 p-4">
-                <div class="d-flex flex-wrap gap-4 align-items-center">
-                    {% for pes in ztraceni_psi %}
-                    <div class="d-flex align-items-center gap-3">
-                        {% if pes.fotka %}
-                        <img src="{{ pes.fotka.url }}" class="rounded-circle shadow-sm"
-                             style="width: 70px; height: 70px; object-fit: cover; border: 3px solid white;">
-                        {% else %}
-                        <div class="rounded-circle bg-white d-flex align-items-center justify-content-center shadow-sm"
-                             style="width: 70px; height: 70px; font-size: 1.5rem;">🐕
-                        </div>
-                        {% endif %}
-                        <div>
-                            <h4 class="mb-0 fw-bold text-danger">{{ pes.jmeno }}</h4>
-                            <p class="mb-0 text-muted small"><strong>Plemeno:</strong> {{ pes.rasa }}</p>
-                            <a href="{% url 'nouzovy_profil' pes.id %}"
-                               class="btn btn-sm btn-outline-danger mt-1 py-0 px-3"
-                               style="border-radius: 10px; font-size: 0.8rem;">
-                                Pomoci najít 🐾
-                            </a>
+<section class="emergency-search py-5">
+    <div class="container">
+        <div class="d-flex align-items-center mb-4">
+            <div class="spinner-grow text-danger me-3" role="status"></div>
+            <h2 class="fw-bold m-0" style="color: #d63031; font-family: 'Playfair Display', serif;">
+                AKTUÁLNĚ SE HLEDAJÍ!
+            </h2>
+        </div>
+
+        <div class="row g-4">
+            {% for pes in ztraceni_psi %}
+            <div class="col-lg-6 col-xl-4">
+                <div class="card border-0 shadow-lg" style="border-radius: 25px; overflow: hidden; border-left: 8px solid #d63031 !important;">
+                    <div class="card-body p-0">
+                        <div class="d-flex h-100">
+                            <div style="width: 45%; min-height: 200px;">
+                                {% if pes.fotka %}
+                                    <img src="{{ pes.fotka.url }}" class="h-100 w-100" style="object-fit: cover;" alt="{{ pes.jmeno }}">
+                                {% else %}
+                                    <div class="h-100 w-100 bg-light d-flex align-items-center justify-content-center">🐕</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="p-3 d-flex flex-column justify-content-between" style="width: 55%;">
+                                <div>
+                                    <h4 class="fw-bold mb-1 text-dark">{{ pes.jmeno }}</h4>
+                                    <p class="text-muted small mb-2"><i class="fas fa-map-marker-alt me-1"></i> Poslední výskyt: {{ pes.rasa }}</p>
+                                </div>
+
+                                <div class="text-center bg-white p-2 rounded-3 border">
+                                    {% if pes.qr_kod %}
+                                        <img src="{{ pes.qr_kod.url }}" class="img-fluid" style="max-width: 80px;" alt="QR">
+                                    {% else %}
+                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data={{ request.scheme }}://{{ request.get_host }}{% url 'nouzovy_profil_psa' pes.id %}" class="img-fluid" style="max-width: 80px;">
+                                    {% endif %}
+                                    <small class="d-block mt-1 text-uppercase fw-bold text-danger" style="font-size: 0.55rem;">Rychlý sken 📲</small>
+                                </div>
+
+                                <a href="{% url 'nouzovy_profil_psa' pes.id %}" class="btn btn-danger btn-sm rounded-pill mt-2 fw-bold">
+                                    Zobrazit detaily
+                                </a>
+                            </div>
                         </div>
                     </div>
-                    {% if not forloop.last %}
-                    <div class="vr d-none d-md-block" style="height: 50px; opacity: 0.1;"></div>
-                    {% endif %}
-                    {% endfor %}
                 </div>
             </div>
+            {% endfor %}
         </div>
     </div>
-</div>
+</section>
 {% endif %}
 
 

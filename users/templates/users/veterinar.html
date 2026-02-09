@@ -1,0 +1,276 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+    :root {
+        --t-brown: #3e2723;
+        --t-gold: #c5a059;
+        --t-bg: #fdfaf4;
+        --t-card: #fffdfa;
+        --t-danger: #d63031;
+        --t-success: #2d6a4f;
+    }
+
+    body { background-color: #f9f4ef; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* --- BANNER --- */
+    .term-header {
+        background: linear-gradient(135deg, #4e342e 0%, #795548 100%);
+        border-radius: 40px;
+        padding: 60px 40px;
+        color: white;
+        margin-bottom: -50px;
+        position: relative;
+        z-index: 1;
+        box-shadow: 0 15px 35px rgba(78, 52, 46, 0.2);
+        border-bottom: 6px solid var(--t-gold);
+    }
+
+    /* --- KARTY PSA --- */
+    .dog-term-card {
+        background: var(--t-card);
+        border-radius: 35px;
+        border: 1px solid rgba(197, 160, 89, 0.2);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.04);
+        margin-bottom: 30px;
+        overflow: hidden;
+        transition: 0.3s ease;
+    }
+    .dog-term-card:hover { transform: translateY(-5px); }
+
+    .dog-name-bar {
+        background: rgba(197, 160, 89, 0.08);
+        padding: 25px 35px;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+
+    .term-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 25px; }
+
+    .term-box {
+        padding: 20px 10px; border-radius: 25px; text-align: center;
+        border: 2px solid transparent; transition: 0.3s;
+    }
+    .status-ok { background: #f0f7f0; color: var(--t-success); border-color: #e0eee0; }
+    .status-expired { background: #fff5f5; color: var(--t-danger); border-color: #ffe3e3; }
+    .status-warning { background: #fffcf0; color: #b08d00; border-color: #fff4cc; }
+
+    .term-date { font-size: 1.1rem; font-weight: 800; display: block; margin-top: 5px; }
+    .term-label { font-size: 0.6rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; opacity: 0.8; }
+
+    /* --- ZDRAVOTNÍ DENÍK --- */
+    .vet-report-section {
+        background: white;
+        border-radius: 35px;
+        border: 2px solid var(--t-gold);
+        padding: 35px;
+        margin-top: 20px;
+        position: relative;
+        z-index: 10;
+        box-shadow: 0 15px 40px rgba(197, 160, 89, 0.1);
+    }
+
+    .incident-card {
+        background: #fdfcfb;
+        border-radius: 22px;
+        padding: 20px;
+        border-left: 6px solid var(--t-gold);
+        margin-bottom: 15px;
+        display: flex; gap: 20px; align-items: center;
+        transition: 0.3s;
+        position: relative;
+    }
+    .incident-card:hover { box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
+
+    .qr-container {
+        width: 100px;
+        flex-shrink: 0;
+        text-align: center;
+    }
+
+    .action-icons {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        display: flex;
+        gap: 10px;
+    }
+    .action-icons a, .action-icons button {
+        color: #adb5bd;
+        transition: 0.2s;
+        font-size: 0.9rem;
+        background: none;
+        border: none;
+        padding: 0;
+    }
+    .action-icons a:hover { color: var(--t-gold); }
+    .action-icons button:hover { color: var(--t-danger); }
+
+    .btn-lux-add {
+        background: var(--t-gold); color: white;
+        border-radius: 18px; border: none; font-weight: 800;
+        padding: 12px 25px; transition: 0.3s;
+        text-transform: uppercase; font-size: 0.8rem;
+    }
+    .btn-lux-add:hover { background: var(--t-brown); color: white; transform: scale(1.05); }
+
+</style>
+
+<div class="container py-2 pb-5">
+    <div class="term-header text-center text-md-start">
+        <div class="row align-items-center">
+            <div class="col-md-7">
+                <h1 style="font-family: 'Playfair Display', serif; font-size: 3rem;" class="mb-2">Deník hrdinů 🐾</h1>
+                <p class="fs-5 opacity-75 mb-0">Kompletní lékařská složka pro vašeho veterináře.</p>
+            </div>
+            <div class="col-md-5 text-md-end mt-4 mt-md-0">
+                <div class="d-inline-flex gap-3">
+                    <div class="p-3 bg-white bg-opacity-10 rounded-4 border border-white border-opacity-20 shadow-sm">
+                        <span class="d-block fw-bold fs-3">{{ psi.count }}</span>
+                        <small class="text-uppercase" style="font-size: 0.6rem;">Psi v péči</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-4" style="position: relative; z-index: 5;">
+        {% for pes in psi %}
+        <div class="col-lg-6">
+            <div class="dog-term-card">
+                <div class="dog-name-bar">
+                    <h3 class="fw-bold m-0" style="color: var(--t-brown); font-family: 'Playfair Display', serif;">{{ pes.jmeno }}</h3>
+                    <a href="{% url 'detail_psa' pes.id %}" class="btn btn-sm btn-outline-secondary rounded-pill">Detail</a>
+                </div>
+
+                <div class="term-grid">
+                    <div class="term-box {% if pes.pristi_ockovani < dnes %}status-expired{% else %}status-ok{% endif %}">
+                        <span class="term-label">💉 Očkování</span>
+                        <span class="term-date">{{ pes.pristi_ockovani|date:"d. m. Y"|default:"-" }}</span>
+                    </div>
+                    <div class="term-box status-ok">
+                        <span class="term-label">💊 Odčervení</span>
+                        <span class="term-date">{{ pes.pristi_odcerveni|date:"d. m. Y"|default:"-" }}</span>
+                    </div>
+                    <div class="term-box status-warning">
+                        <span class="term-label">🛡️ Klíšťata</span>
+                        <span class="term-date">{{ pes.pristi_klistata|date:"d. m. Y"|default:"-" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="vet-report-section">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <h3 class="fw-bold mb-1" style="color: var(--t-brown); font-family: 'Playfair Display', serif;">🚨 Pohotovostní deník potíží</h3>
+                <p class="text-muted mb-0">Zapište příznaky. Vygenerujeme QR kód pro rychlý sken lékařem.</p>
+            </div>
+            <button class="btn btn-lux-add" data-bs-toggle="modal" data-bs-target="#newIncidentModal">
+                <i class="fas fa-edit me-2"></i>Zapsat nový problém
+            </button>
+        </div>
+
+        <div class="row g-4">
+            {% for zaznam in posledni_zaznamy %}
+            <div class="col-md-6">
+                <div class="incident-card shadow-sm" style="border-left-color: {% if zaznam.typ == 'urgentni' %}#d63031{% else %}#c5a059{% endif %};">
+
+                    <div class="action-icons">
+                        <a href="{% url 'upravit_zaznam' zaznam.pk %}" title="Upravit"><i class="fas fa-pen"></i></a>
+                        <form action="{% url 'smazat_zaznam' zaznam.pk %}" method="POST" style="display:inline;" onsubmit="return confirm('Opravdu smazat tento záznam?')">
+                            {% csrf_token %}
+                            <button type="submit" title="Smazat"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </div>
+
+                    <div class="qr-container">
+                        {% if zaznam.pes.qr_kod %}
+                            <img src="{{ zaznam.pes.qr_kod.url }}" class="img-fluid rounded border shadow-sm" alt="QR">
+                        {% else %}
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data={{ request.scheme }}://{{ request.get_host }}{% url 'nouzovy_profil_psa' zaznam.pes.id %}"
+                                 class="img-fluid rounded border shadow-sm" alt="QR">
+                        {% endif %}
+                        <small class="d-block mt-1 fw-bold text-uppercase" style="font-size: 0.5rem;">Skenuj mě</small>
+                    </div>
+
+                    <div class="flex-grow-1 pe-4">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5 class="fw-bold mb-0 text-dark">{{ zaznam.titulek }}</h5>
+                        </div>
+                        <small class="text-muted d-block mb-1">{{ zaznam.datum_vytvoreni|date:"d.m. H:i" }}</small>
+                        <p class="small text-muted mb-2 mt-1">{{ zaznam.popis|truncatechars:100 }}</p>
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-light text-dark border rounded-pill">🐕 {{ zaznam.pes.jmeno }}</span>
+                            <span class="badge {% if zaznam.typ == 'urgentni' %}bg-danger{% else %}bg-info{% endif %} rounded-pill">
+                                {{ zaznam.get_typ_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center p-5 opacity-50">
+                <i class="fas fa-notes-medical display-4 mb-3"></i>
+                <p>Zatím zde nejsou žádné záznamy o zdravotních potížích.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="newIncidentModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0" style="border-radius: 30px;">
+      <form method="POST" action="{% url 'veterinar' %}">
+        {% csrf_token %}
+        <div class="modal-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="fw-bold m-0">Nový zdravotní záznam</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-uppercase">Který pejsek má potíže?</label>
+                <select name="pes_id" class="form-select rounded-4 p-3 border-light bg-light" required>
+                    {% for pes in psi %}
+                        <option value="{{ pes.id }}">{{ pes.jmeno }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-uppercase">Vážnost situace</label>
+                <select name="typ" class="form-select rounded-4 p-3 border-light bg-light">
+                    <option value="zaznam">📝 Běžný záznam / pozorování</option>
+                    <option value="urgentni">🚨 Urgentní / bolest / úraz</option>
+                    <option value="kontrolni">🏥 Kontrolní měření</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-uppercase">Stručný titulek</label>
+                <input type="text" name="titulek" class="form-control rounded-4 p-3 border-light bg-light"
+                       placeholder="Např. Kulhání na levou přední" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-uppercase">Podrobný popis příznaků</label>
+                <textarea name="popis" class="form-control rounded-4 p-3 border-light bg-light" rows="4"
+                          placeholder="Popište chování, teplotu, kdy to začalo..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-lux-add w-100 py-3 mt-2 shadow-sm">
+                Uložit záznam do deníku
+            </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
