@@ -56,6 +56,26 @@
         100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
     }
     .pulse-danger { animation: pulse-red 2s infinite; border: 2px solid white; }
+
+    .custom-brown-alert {
+    background-color: #f4ece4; /* Světle hnědý/krémový podklad */
+    border: 1px solid #d7c4b3; /* Jemný hnědý rámeček */
+    color: #5d4037; /* Tmavě hnědý text */
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.custom-brown-alert a {
+    color: #8d6e63; /* Barva odkazů */
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.custom-brown-alert a:hover {
+    color: #5d4037; /* Ztmavnutí při přejetí */
+}
 </style>
 
 <div class="p-4 bg-white">
@@ -64,20 +84,44 @@
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div class="d-flex flex-wrap gap-2">
             <button class="badge-filter" style="background-color: #8B4513;" onclick="filtrujMapu('vse')">Vše</button>
-            <button class="badge-filter pulse-danger" style="background-color: #d32f2f;" onclick="filtrujMapu('nebezpeci')">⚠️ NEBEZPEČÍ</button>
-            <button class="badge-filter" style="background-color: #212121;" onclick="filtrujMapu('veterina')">Veterina</button>
-            <button class="badge-filter" style="background-color: #1976d2;" onclick="filtrujMapu('obchod')">Obchody</button>
-            <button class="badge-filter" style="background-color: #f57c00;" onclick="filtrujMapu('hotel')">Hotely</button>
-            <button class="badge-filter" style="background-color: #388e3c;" onclick="filtrujMapu('wellness')">Wellness</button>
-            <button class="badge-filter" style="background-color: #7b1fa2;" onclick="filtrujMapu('cvicak')">Cvičáky</button>
-            <button class="badge-filter" style="background-color: #757575;" onclick="filtrujMapu('utulek')">Útulky</button>
-            <button class="badge-filter" style="background-color: #ffc107; color: black;" onclick="filtrujMapu('chovna_stanice')">Chovné stanice</button>
+            <button class="badge-filter pulse-danger" style="background-color: #d32f2f;"
+                    onclick="filtrujMapu('nebezpeci')">⚠️ NEBEZPEČÍ
+            </button>
+            <button class="badge-filter" style="background-color: #212121;" onclick="filtrujMapu('veterina')">Veterina
+            </button>
+
+            <button class="badge-filter" style="background-color: #00bcd4;" onclick="filtrujMapu('strihani')">✂️
+                Stříhání psů
+            </button>
+
+            <button class="badge-filter" style="background-color: #1976d2;" onclick="filtrujMapu('obchod')">Obchody
+            </button>
+            <button class="badge-filter" style="background-color: #f57c00;" onclick="filtrujMapu('hotel')">Hotely
+            </button>
+            <button class="badge-filter" style="background-color: #388e3c;" onclick="filtrujMapu('wellness')">Wellness
+            </button>
+            <button class="badge-filter" style="background-color: #7b1fa2;" onclick="filtrujMapu('cvicak')">Cvičáky
+            </button>
+            <button class="badge-filter" style="background-color: #757575;" onclick="filtrujMapu('utulek')">Útulky
+            </button>
+            <button class="badge-filter" style="background-color: #ffc107; color: black;"
+                    onclick="filtrujMapu('chovna_stanice')">Chovné stanice
+            </button>
         </div>
 
-        <a href="{% url 'pridat_sluzbu' %}" class="btn fw-bold text-white shadow-sm"
-           style="background-color: #28a745; border-radius: 12px; padding: 12px 25px;">
-            ➕ Přidat záznam
-        </a>
+        <div class="map-controls">
+            {% if user.is_authenticated %}
+            <a href="{% url 'pridat_sluzbu' %}" class="btn btn-primary">
+                + Přidat službu nebo nebezpečí
+            </a>
+            {% else %}
+            <div class="custom-brown-alert">
+                Pro přidání služby na mapu se prosím
+                <a href="{% url 'login' %}">přihlaste</a> nebo
+                <a href="{% url 'register' %}">registrujte</a>.
+            </div>
+            {% endif %}
+        </div>
     </div>
 
     <div class="card shadow-lg p-0" style="border-radius: 20px; overflow: hidden; border: none;">
@@ -141,6 +185,7 @@
             'nebezpeci': 'red',
             'veterina': 'black',
             'veterinar': 'black',
+            'strihani': 'cyan',
             'obchod': 'blue',
             'hotel': 'orange',
             'wellness': 'green',

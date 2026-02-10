@@ -235,10 +235,31 @@
             {% endif %}
         </div>
     </div>
-    {% empty %}
-    <div class="text-center p-5">
-        <p class="text-muted">Zatím tu nejsou žádné příspěvky. Buďte první!</p>
+   {% empty %}
+    <div class="text-center p-5 shadow-sm bg-white mt-4" style="border-radius: 16px; border: 1px solid var(--card-border, #eaddcf);">
+        <div class="mb-3" style="font-size: 3rem; opacity: 0.3;">🐾</div>
+        <h4 class="fw-bold" style="color: var(--primary-brown, #8b5e3c);">Zatím tu nejsou žádné příspěvky.</h4>
+
+        {% if not user.is_authenticated %}
+            <p class="mt-3 mb-4 text-muted">
+                Chcete se podělit o zážitky nebo přidat fotku svého parťáka?<br>
+                <strong>Pro možnost přidání příspěvku je nutné se nejdříve přihlásit.</strong>
+            </p>
+            <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+                <a href="{% url 'login' %}" class="btn px-4 py-2 shadow-sm fw-bold"
+                   style="background-color: #8b5e3c; color: white; border-radius: 12px; text-decoration: none;">
+                    Přihlásit se
+                </a>
+                <a href="/users/register/" class="btn btn-outline-dark px-4 py-2 shadow-sm fw-bold"
+                   style="border-radius: 12px; text-decoration: none;">
+                    Registrace
+                </a>
+            </div>
+        {% else %}
+            <p class="text-muted">Buďte první, kdo na tuto zeď napíše!</p>
+            <p class="small text-muted">Stačí použít formulář nahoře 👆</p>
+        {% endif %}
     </div>
     {% endfor %}
-</div>
+    </div>
 {% endblock %}

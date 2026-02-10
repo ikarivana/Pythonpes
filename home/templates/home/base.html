@@ -22,7 +22,7 @@
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); margin: 0; }
         #wrapper { display: flex; min-height: 100vh; }
 
-        /* --- SIDEBAR S ODSTÍNOVANÝM GRADIENTEM --- */
+        /* --- SIDEBAR --- */
         #sidebar-wrapper {
             width: 290px;
             background: linear-gradient(180deg, var(--brown-dark) 0%, var(--brown-mid) 50%, var(--brown-light) 100%);
@@ -43,11 +43,10 @@
             font-size: 1.8rem;
             text-align: center;
             border-bottom: 1px solid rgba(255,255,255,0.05);
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         .sidebar-heading span { color: var(--accent-gold); }
 
-        /* --- POLOŽKY MENU JAKO KARTY --- */
+        /* --- POLOŽKY MENU --- */
         .list-group-item {
             background: rgba(255,255,255,0.03) !important;
             color: rgba(255,255,255,0.7) !important;
@@ -58,7 +57,7 @@
             text-decoration: none;
             display: flex;
             align-items: center;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: all 0.3s ease;
         }
 
         .list-group-item i {
@@ -73,21 +72,12 @@
             background: rgba(255,255,255,0.1) !important;
             color: white !important;
             transform: translateX(8px);
-            box-shadow: var(--shadow-item);
-            border-color: rgba(197, 160, 89, 0.3) !important;
-        }
-
-        .active-link {
-            background: linear-gradient(90deg, rgba(197, 160, 89, 0.2) 0%, rgba(197, 160, 89, 0.05) 100%) !important;
-            border: 1px solid var(--accent-gold) !important;
-            color: var(--accent-gold) !important;
         }
 
         /* --- PREMIUM TLAČÍTKO --- */
         .premium-btn {
             background: linear-gradient(45deg, #c5a059, #e9d5a1);
             color: #3e2723 !important;
-            border: none;
             border-radius: 12px;
             padding: 12px;
             font-weight: 700;
@@ -107,12 +97,20 @@
             100% { box-shadow: 0 0 0 0 rgba(197, 160, 89, 0); }
         }
 
-        .premium-btn:hover {
-            transform: scale(1.03);
-            filter: brightness(1.1);
+        /* --- GLOBÁLNÍ ŠIPKA ZPĚT --- */
+        .back-nav-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--brown-mid);
+            text-decoration: none;
+            font-weight: 700;
+            margin-bottom: 20px;
+            opacity: 0.7;
+            transition: 0.3s;
         }
+        .back-nav-link:hover { opacity: 1; transform: translateX(-5px); color: var(--accent-gold); }
 
-        /* --- HLAVNÍ OBSAH --- */
+        /* --- OBSAH --- */
         #page-content-wrapper { flex-grow: 1; padding: 40px; overflow-y: auto; width: 100%; }
         .content-card {
             background: white;
@@ -128,14 +126,10 @@
             margin-top: auto;
         }
 
-        /* MOBIL */
+        /* MOBILNÍ NAVIGACE */
         .mobile-nav { display: none; background: var(--brown-dark); padding: 1rem; color: white; position: sticky; top: 0; z-index: 1100; }
         @media (max-width: 992px) {
-            #wrapper { flex-direction: column; }
-            #sidebar-wrapper {
-                width: 100%; height: auto; position: fixed; top: 60px; left: -100%;
-                visibility: hidden; transition: 0.4s ease-in-out;
-            }
+            #sidebar-wrapper { width: 100%; height: auto; position: fixed; top: 60px; left: -100%; visibility: hidden; transition: 0.4s; }
             #sidebar-wrapper.show { left: 0; visibility: visible; height: calc(100vh - 60px); }
             .mobile-nav { display: flex; justify-content: space-between; align-items: center; }
             #page-content-wrapper { padding: 15px; }
@@ -158,25 +152,34 @@
                 <a href="{% url 'home' %}" class="list-group-item"><i class="fas fa-home"></i> Hlavní strana</a>
 
                 {% if user.is_authenticated %}
-                <a href="{% url 'profil' %}" class="list-group-item active-link">
-                    <i class="fas fa-user-circle"></i> <strong>Můj profil</strong>
-                </a>
+                    <a href="{% url 'profil' %}" class="list-group-item"><i class="fas fa-user-circle"></i> Můj profil</a>
+                    <a href="{% url 'seznam_psu' %}" class="list-group-item"><i class="fas fa-dog"></i> Moji psi</a>
+
+                    {% if user.profil.je_premium %}
+                        <a href="{% url 'veterinar' %}" class="list-group-item"><i class="fas fa-stethoscope"></i> Veterinář</a>
+                    {% else %}
+                        <a href="{% url 'cenik' %}" class="list-group-item" style="opacity: 0.8;">
+                            <i class="fas fa-stethoscope"></i> Veterinář <i class="fas fa-lock ms-auto text-warning" style="font-size: 0.7rem;"></i>
+                        </a>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'cenik' %}" class="list-group-item" style="opacity: 0.8;">
+                        <i class="fas fa-stethoscope"></i> Veterinář <i class="fas fa-lock ms-auto text-warning" style="font-size: 0.7rem;"></i>
+                    </a>
                 {% endif %}
 
-                <a href="{% url 'seznam_psu' %}" class="list-group-item"><i class="fas fa-dog"></i> Moji psi</a>
                 <a href="{% url 'seznam_zdi' %}" class="list-group-item"><i class="fas fa-images"></i> Zdi plemen</a>
                 <a href="{% url 'seznam_inzeratu' %}" class="list-group-item"><i class="fas fa-shopping-bag"></i> Bazar</a>
                 <a href="{% url 'kontakt' %}" class="list-group-item"><i class="fas fa-envelope"></i> Kontakt</a>
 
                 <div class="mt-4 px-3">
-                    {% if not user.profil.je_premium %}
+                    {% if not user.is_authenticated or not user.profil.je_premium %}
                         <a href="{% url 'cenik' %}" class="premium-btn">
                             <i class="fas fa-crown"></i> CHCI PREMIUM
                         </a>
-                        <small class="text-white-50 d-block text-center mt-2" style="font-size: 0.65rem;">Odemkni rodokmeny a úspěchy</small>
                     {% else %}
                         <div class="p-2 rounded-3 text-center" style="background: rgba(197, 160, 89, 0.1); border: 1px dashed var(--accent-gold);">
-                            <small class="text-uppercase fw-bold" style="color: var(--accent-gold); font-size: 0.7rem;">
+                            <small class="fw-bold" style="color: var(--accent-gold); font-size: 0.7rem;">
                                 <i class="fas fa-check-circle me-1"></i> Premium aktivní
                             </small>
                         </div>
@@ -186,12 +189,10 @@
 
             <div class="sidebar-footer">
                 {% if user.is_authenticated %}
-                    <div class="d-flex align-items-center justify-content-between mb-3 px-2">
+                    <div class="d-flex align-items-center justify-content-between mb-3 px-2 text-white">
                         <div class="overflow-hidden">
-                            <small class="d-block text-white-50" style="font-size: 0.7rem;">CHovatel</small>
-                            <a href="{% url 'profil' %}" class="text-white text-decoration-none fw-bold" style="font-size: 0.9rem;">
-                                {{ user.username }}
-                            </a>
+                            <small class="d-block text-white-50" style="font-size: 0.7rem;">Uživatel</small>
+                            <span class="text-white fw-bold d-block text-truncate" style="font-size: 0.9rem;">{{ user.username }}</span>
                         </div>
                         <form action="{% url 'logout' %}" method="post" class="m-0">
                             {% csrf_token %}
@@ -202,17 +203,17 @@
                     <a href="{% url 'login' %}" class="list-group-item mb-3"><i class="fas fa-key"></i> Přihlásit se</a>
                 {% endif %}
 
-                <div class="d-flex justify-content-around mt-2">
-                    <a href="{% url 'podminky' %}" class="text-white-50 text-decoration-none" style="font-size: 0.7rem;">Podmínky</a>
-                    <a href="{% url 'cookies' %}" class="text-white-50 text-decoration-none" style="font-size: 0.7rem;">Cookies</a>
+                <div class="d-flex justify-content-around border-top border-white border-opacity-10 pt-3">
+                    <a href="{% url 'podminky' %}" class="text-white-50 text-decoration-none" style="font-size: 0.75rem;">Podmínky</a>
+                    <span class="text-white-50" style="font-size: 0.75rem;">•</span>
+                    <a href="{% url 'cookies' %}" class="text-white-50 text-decoration-none" style="font-size: 0.75rem;">Cookies</a>
                 </div>
             </div>
         </div>
 
         <div id="page-content-wrapper">
-            <div class="content-card shadow-sm">
-                {% block content %}
-                {% endblock %}
+            <div class="content-card">
+                {% block content %}{% endblock %}
             </div>
         </div>
     </div>
@@ -225,3 +226,4 @@
     </script>
 </body>
 </html>
+

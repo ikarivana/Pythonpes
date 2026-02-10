@@ -1,22 +1,148 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<div class="container mt-5">
+<style>
+    .edit-card {
+        background: white;
+        border-radius: 25px;
+        padding: 40px;
+        /* Jemný zlatavý okraj */
+        border: 1px solid rgba(197, 160, 89, 0.3);
+    }
+
+    /* Nadpis v hnědé barvě z vašeho base.html */
+    .edit-title {
+        color: var(--brown-dark);
+        font-family: 'Playfair Display', serif;
+        font-weight: bold;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--brown-dark);
+        margin-top: 10px;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    /* Hlavní tlačítko ve vaší hnědé barvě s hover efektem do zlaté */
+    .btn-save-custom {
+        background-color: var(--brown-dark);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 12px;
+        font-weight: 700;
+        transition: 0.3s;
+    }
+
+    .btn-save-custom:hover {
+        background-color: var(--accent-gold);
+        color: var(--brown-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(197, 160, 89, 0.4);
+    }
+
+    /* Tlačítko zrušit */
+    .btn-cancel-custom {
+        border: 2px solid var(--brown-light);
+        color: var(--brown-dark);
+        background: transparent;
+        border-radius: 12px;
+        padding: 10px 25px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: 0.3s;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-cancel-custom:hover {
+        background-color: #f8f5f2;
+        color: var(--brown-dark);
+    }
+
+    /* Zvýraznění ikon barevně */
+    .icon-img { color: var(--accent-gold); }
+    .icon-vid { color: #d9534f; } /* ponecháme červenou pro video pro přehlednost */
+</style>
+
+<div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm" style="border-radius: 20px; border: none;">
-                <div class="card-body p-5">
-                    <h2 class="mb-4" style="color: var(--primary-brown);">✏️ Upravit inzerát</h2>
-                    <hr>
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        {{ form.as_p }}
-                        <div class="d-flex gap-2 mt-4">
-                            <button type="submit" class="btn btn-success px-4">Uložit změny</button>
-                            <a href="{% url 'seznam_inzeratu' %}" class="btn btn-outline-secondary">Zrušit</a>
+        <div class="col-lg-9">
+            <div class="edit-card shadow-sm">
+                <h2 class="edit-title mb-4">
+                    ✏️ Upravit inzerát: <span style="color: var(--accent-gold);">{{ inzerat.titulek }}</span>
+                </h2>
+                <hr style="border-top: 2px solid var(--accent-gold); opacity: 0.2;" class="mb-4">
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Kategorie</label>
+                            {{ form.kategorie }}
                         </div>
-                    </form>
-                </div>
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label">Název inzerátu</label>
+                            {{ form.titulek }}
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label class="form-label">Podrobný popis</label>
+                            {{ form.text }}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Cena (Kč)</label>
+                            {{ form.cena }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Kraj</label>
+                            {{ form.kraj }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Město</label>
+                            {{ form.mesto }}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Telefonní číslo</label>
+                            {{ form.telefon }}
+                        </div>
+
+                        <div class="col-12 my-4">
+                            <hr style="border-top: 1px dashed var(--accent-gold); opacity: 0.3;">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-image icon-img"></i> Hlavní fotografie</label>
+                            {{ form.obrazek }}
+                            {% if inzerat.obrazek %}
+                                <div class="mt-2 small text-muted">Aktuálně: {{ inzerat.obrazek.name }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-video icon-vid"></i> Video</label>
+                            {{ form.video }}
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label class="form-label"><i class="fas fa-images icon-img"></i> Přidat další fotky do galerie</label>
+                            {{ form.galerie_fotky }}
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 mt-4 pt-3 border-top">
+                        <button type="submit" class="btn-save-custom">
+                            <i class="fas fa-save me-2"></i> Uložit změny
+                        </button>
+                        <a href="{% url 'seznam_inzeratu' %}" class="btn-cancel-custom">
+                            Zrušit
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

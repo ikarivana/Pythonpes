@@ -1,13 +1,11 @@
 from django import forms
 from .models import Pes, Prispevek, Plemeno, Ockovani
 
-
 # Vlastní widget pro počeštění nahrávání souborů
 class CzechClearableFileInput(forms.ClearableFileInput):
-    clear_checkbox_label = 'Smazat aktuální fotku'
-    initial_text = 'Aktuální fotka'
+    clear_checkbox_label = 'Smazat aktuální soubor'
+    initial_text = 'Aktuální'
     input_text = 'Změnit'
-
 
 class PesForm(forms.ModelForm):
     RTG_CHOICES = [
@@ -29,7 +27,8 @@ class PesForm(forms.ModelForm):
             'cislo_zapisu', 'barva', 'srst', 'popis',
             'rtg_hd', 'rtg_ed', 'rtg_pater', 'genetika_dna', 'bonitace',
             'otec', 'matka', 'otec_manualni', 'matka_manualni',
-            'posledni_ockovani', 'posledni_odcerveni', 'posledni_klistata'
+            'posledni_ockovani', 'posledni_odcerveni',
+            'posledni_klistata', 'typ_ochrany_klistata'
         ]
 
         widgets = {
@@ -43,32 +42,39 @@ class PesForm(forms.ModelForm):
             'posledni_ockovani': forms.DateInput(attrs={'type': 'date'}),
             'posledni_odcerveni': forms.DateInput(attrs={'type': 'date'}),
             'posledni_klistata': forms.DateInput(attrs={'type': 'date'}),
+            'typ_ochrany_klistata': forms.Select(attrs={'class': 'form-select'}),
             'popis': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Povaha, zvláštní znamení...'}),
             'genetika_dna': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Výsledky testů...'}),
             'bonitace': forms.TextInput(attrs={'placeholder': 'Např. 5/3a/E1/S'}),
         }
 
         labels = {
-            'je_ztraceny': 'REŽIM "HLEDÁ SE"',
+            'je_ztraceny': '🚨 REŽIM "HLEDÁ SE"',
             'jmeno': 'Jméno pejska',
             'vek': 'Věk (roky)',
             'rasa': 'Rasa',
-            'fotka': 'Fotka pejska',
+            'fotka': 'Hlavní fotka pejska',
             'cip': 'Číslo čipu',
             'narozeni': 'Datum narození',
             'popis': 'Popis / Poznámky',
+            'typ_ochrany_klistata': 'Způsob ochrany (klíšťata)',
+            'posledni_klistata': 'Datum poslední aplikace (klíšťata)',
+            'posledni_ockovani': 'Datum posledního očkování',
+            'posledni_odcerveni': 'Datum posledního odčervení',
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for name, field in self.fields.items():
+            # Stylování podle typu pole
             if name == 'je_ztraceny':
                 field.widget.attrs.update({'class': 'form-check-input'})
+            elif isinstance(field.widget, forms.Select):
+                field.widget.attrs.update({'class': 'form-select custom-brown-input'})
             else:
                 field.widget.attrs.update({'class': 'form-control custom-brown-input'})
 
-
-# --- CHYBĚJÍCÍ TŘÍDY JSOU TADY ---
+# --- FORMULÁŘ PRO OČKOVÁNÍ (HISTORIE) ---
 
 class OckovaniForm(forms.ModelForm):
     class Meta:
@@ -76,7 +82,7 @@ class OckovaniForm(forms.ModelForm):
         fields = ['datum', 'nazev_vakciny', 'poznamka']
         widgets = {
             'datum': forms.DateInput(attrs={'type': 'date'}),
-            'nazev_vakciny': forms.TextInput(attrs={'placeholder': 'Např. Vzteklina'}),
+            'nazev_vakciny': forms.TextInput(attrs={'placeholder': 'Např. Biocan Novel DHPPi'}),
             'poznamka': forms.Textarea(attrs={'rows': 2}),
         }
         labels = {
@@ -89,6 +95,7 @@ class OckovaniForm(forms.ModelForm):
         for field in self.fields.values():
             field.widget.attrs.update({'class': 'form-control custom-brown-input'})
 
+# --- FORMULÁŘ PRO SOCIÁLNÍ ZEĎ ---
 
 class PrispevekForm(forms.ModelForm):
     class Meta:
@@ -99,9 +106,9 @@ class PrispevekForm(forms.ModelForm):
             'obrazek': CzechClearableFileInput(attrs={'class': 'form-control'}),
         }
         labels = {
-            'obrazek': 'Obrázek',
-            'video': 'Video',
-            'text': 'Text příspěvku',
+            'obrazek': 'Obrázek k příspěvku',
+            'video': 'Video k příspěvku',
+            'text': 'Váš text',
         }
 
     def __init__(self, *args, **kwargs):
@@ -109,29 +116,28 @@ class PrispevekForm(forms.ModelForm):
         for field in self.fields.values():
             field.widget.attrs.update({'class': 'form-control custom-brown-input'})
 
+# --- FORMULÁŘ PRO PLEMENA / AKCE ---
 
 class PlemenoForm(forms.ModelForm):
     class Meta:
         model = Plemeno
-        # PŘIDAL JSEM 'foto' A 'video' DO SEZNAMU POLÍ
         fields = ['nazev', 'popis', 'ikona', 'foto', 'video', 'datum_konani', 'misto', 'poradatel']
-
         widgets = {
             'popis': forms.Textarea(attrs={'rows': 3}),
             'datum_konani': forms.DateInput(attrs={'type': 'date'}),
+            'foto': CzechClearableFileInput(attrs={'class': 'form-control'}),
         }
         labels = {
-            'nazev': 'Název plemene/akce',
+            'nazev': 'Název plemene nebo akce',
             'datum_konani': 'Datum konání',
-            'foto': 'Nahrajte fotku 📸',
-            'video': 'Nahrajte video 🎥',
+            'foto': 'Prezentační foto',
+            'video': 'Video',
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
-            # Pro soubory nepoužíváme 'form-control', pokud chceme standardní vzhled nahrávání
-            if field_name not in ['foto', 'video']:
+            if field_name not in ['foto', 'video', 'ikona']:
                 field.widget.attrs.update({'class': 'form-control custom-brown-input'})
             else:
-                field.widget.attrs.update({'class': 'form-control-file'})
+                field.widget.attrs.update({'class': 'form-control'})

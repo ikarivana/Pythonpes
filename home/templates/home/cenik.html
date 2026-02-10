@@ -5,17 +5,45 @@
     :root {
         --primary-brown: #5d4037;
         --accent-gold: #c5a059;
+        --light-gold: #fdfaf5;
     }
-    .pricing-container { max-width: 900px; margin-top: 50px; margin-bottom: 80px; }
+
+    /* Styl pro šipku zpět */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: var(--primary-brown);
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 20px;
+        transition: transform 0.2s ease, color 0.2s ease;
+    }
+    .back-link:hover {
+        color: var(--accent-gold);
+        transform: translateX(-5px);
+        text-decoration: none;
+    }
+    .back-link i {
+        margin-right: 8px;
+    }
+
+    .pricing-container { max-width: 1100px; margin-top: 20px; margin-bottom: 80px; }
+    /* ... zbytek tvého CSS ... */
     .card-plan {
         border: none;
         border-radius: 30px;
-        transition: transform 0.3s ease;
+        transition: all 0.3s ease;
         background: white;
+        position: relative;
     }
-    .card-plan:hover { transform: translateY(-5px); }
-
-    /* Styl pro tlačítko jako odkaz */
+    .card-plan:hover { transform: translateY(-10px); }
+    .card-featured {
+        border: 2px solid var(--accent-gold) !important;
+        box-shadow: 0 15px 35px rgba(197, 160, 89, 0.2) !important;
+        transform: scale(1.05);
+        z-index: 2;
+    }
+    .card-featured:hover { transform: scale(1.07) translateY(-5px); }
     .btn-premium {
         background-color: var(--primary-brown);
         color: white !important;
@@ -31,30 +59,47 @@
         background-color: #452c24;
         box-shadow: 0 5px 15px rgba(93, 46, 10, 0.3);
     }
-    .feature-item { margin-bottom: 12px; font-size: 0.95rem; display: flex; align-items: center; }
-    .feature-item i { margin-right: 10px; width: 20px; text-align: center; }
+    .discount-tag {
+        position: absolute;
+        top: -15px;
+        right: 20px;
+        background: #28a745;
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.85rem;
+    }
+    .feature-item { margin-bottom: 12px; font-size: 0.9rem; display: flex; align-items: center; }
+    .feature-item i { margin-right: 10px; width: 18px; text-align: center; }
     .text-gold { color: var(--accent-gold); }
+    .price-sub { font-size: 0.8rem; color: #6c757d; display: block; }
 </style>
 
 <div class="container pricing-container">
+    <a href="javascript:history.back()" class="back-link">
+        <i class="fas fa-arrow-left"></i> Zpět
+    </a>
+
     <div class="text-center mb-5">
         <h2 class="fw-bold" style="color: var(--primary-brown); font-family: 'Playfair Display', serif; font-size: 2.5rem;">Vyberte si svůj plán</h2>
-        <p class="text-muted">Vše pro vašeho parťáka na jednom místě.</p>
+        <p class="text-muted">Podpořte rozvoj komunity a získejte profesionální nástroje.</p>
     </div>
 
-    <div class="row g-4 justify-content-center">
-        <div class="col-md-5">
+    <div class="row g-4 align-items-stretch">
+        <div class="col-lg-4">
             <div class="card card-plan shadow-sm p-4 h-100 border-top border-5 border-secondary">
                 <div class="card-body d-flex flex-column">
                     <h3 class="fw-bold mb-3">🐾 Mazlíčkář</h3>
-                    <div class="display-5 fw-bold mb-3">0 Kč <span class="fs-6 text-muted fw-normal">/ navždy</span></div>
+                    <div class="mb-3">
+                        <span class="display-6 fw-bold">Zdarma</span>
+                    </div>
                     <hr>
                     <div class="feature-item"><i class="fas fa-check text-success"></i> 1 Pejsek v systému</div>
                     <div class="feature-item"><i class="fas fa-check text-success"></i> Základní údaje a fotka</div>
                     <div class="feature-item"><i class="fas fa-check text-success"></i> QR známka k tisku</div>
-                    <div class="feature-item text-muted"><i class="fas fa-times"></i> <del>Profesionální rodokmen</del></div>
+                    <div class="feature-item text-muted"><i class="fas fa-times"></i> <del>Profi rodokmen</del></div>
                     <div class="feature-item text-muted"><i class="fas fa-times"></i> <del>Export PDF letáků</del></div>
-                    <div class="feature-item text-muted"><i class="fas fa-times"></i> <del>Zdravotní dědičnost</del></div>
 
                     <div class="mt-auto">
                         <a href="{% url 'seznam_psu' %}" class="btn btn-outline-secondary w-100 mt-4" style="border-radius: 15px;">Užívat zdarma</a>
@@ -63,28 +108,53 @@
             </div>
         </div>
 
-        <div class="col-md-5">
-            <div class="card card-plan shadow p-4 h-100 border-top border-5 border-warning" style="background: #fdfaf5; border-color: #c5a059 !important;">
+        <div class="col-lg-4">
+            <div class="card card-plan shadow-sm p-4 h-100 border-top border-5 border-warning" style="border-color: #dee2e6 !important;">
                 <div class="card-body d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h3 class="fw-bold mb-0">🏆 Chovatel</h3>
-                        <span class="badge bg-warning text-dark rounded-pill px-3">DOPORUČENO</span>
+                    <h3 class="fw-bold mb-3">🏆 Chovatel</h3>
+                    <div class="mb-3">
+                        <span class="display-6 fw-bold">99 Kč</span>
+                        <span class="text-muted">/ měsíc</span>
                     </div>
-                    <div class="display-5 fw-bold mb-3" style="color: var(--primary-brown);">99 Kč <span class="fs-6 text-muted fw-normal">/ měsíc</span></div>
                     <hr>
-                    <div class="feature-item"><i class="fas fa-star text-gold"></i> <strong>Neomezený počet psů</strong></div>
-                    <div class="feature-item"><i class="fas fa-star text-gold"></i> <strong>Profi rodokmen s dědičností</strong></div>
-                    <div class="feature-item"><i class="fas fa-star text-gold"></i> <strong>Export PDF letáků pro výstavy</strong></div>
-                    <div class="feature-item"><i class="fas fa-star text-gold"></i> Zdravotní a genetický deník</div>
-                    <div class="feature-item"><i class="fas fa-star text-gold"></i> Neomezená galerie a videa</div>
-                    <div class="feature-item"><i class="fas fa-star text-gold"></i> Přednostní podpora</div>
+                    <div class="feature-item"><i class="fas fa-star text-gold"></i> <strong>Všechny profi funkce</strong></div>
+                    <div class="feature-item"><i class="fas fa-star text-gold"></i> Neomezený počet psů</div>
+                    <div class="feature-item"><i class="fas fa-star text-gold"></i> Rodokmen a dědičnost</div>
+                    <div class="feature-item"><i class="fas fa-star text-gold"></i> Export PDF letáků</div>
 
                     <div class="mt-auto">
-                        <a href="https://vaseshop.simpleshop.cz/objednavka/tvoje-id-produktu/?email={{ request.user.email }}"
-                           class="btn btn-premium w-100 mt-4 fw-bold">
-                           AKTIVOVAT PREMIUM
+                        <a href="https://vaseshop.simpleshop.cz/objednavka/mesicni-id/" class="btn btn-outline-dark w-100 mt-4 fw-bold" style="border-radius: 15px;">
+                           AKTIVOVAT MĚSÍČNĚ
                         </a>
-                        <p class="text-center small text-muted mt-3 mb-0">Platbu lze kdykoliv zrušit.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card card-plan card-featured p-4 h-100" style="background: var(--light-gold);">
+                <span class="discount-tag">UŠETŘÍTE 200 Kč</span>
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h3 class="fw-bold mb-0">👑 Roční Profi</h3>
+                        <span class="badge bg-warning text-dark rounded-pill">VIP</span>
+                    </div>
+                    <div class="mb-3">
+                        <span class="display-6 fw-bold" style="color: var(--primary-brown);">990 Kč</span>
+                        <span class="text-muted">/ rok</span>
+                        <span class="price-sub">Vychází na <strong>82 Kč</strong> / měsíc</span>
+                    </div>
+                    <hr>
+                    <div class="feature-item"><i class="fas fa-crown text-gold"></i> <strong>Vše z plánu Chovatel</strong></div>
+                    <div class="feature-item"><i class="fas fa-heart text-gold"></i> Podpora rozvoje portálu</div>
+                    <div class="feature-item"><i class="fas fa-bolt text-gold"></i> Přednostní schvalování</div>
+                    <div class="feature-item"><i class="fas fa-gift text-gold"></i> Bonusy od partnerů</div>
+
+                    <div class="mt-auto">
+                        <a href="https://vaseshop.simpleshop.cz/objednavka/rocni-id/" class="btn btn-premium w-100 mt-4 fw-bold shadow">
+                           AKTIVOVAT ROČNÍ SE SLEVOU
+                        </a>
+                        <p class="text-center small text-muted mt-3 mb-0">Nejoblíbenější volba uživatelů.</p>
                     </div>
                 </div>
             </div>

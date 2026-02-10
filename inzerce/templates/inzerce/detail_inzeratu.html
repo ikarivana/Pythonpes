@@ -1,0 +1,260 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<style>
+    /* Kontejner pro detail */
+    .detail-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* HLAVNÍ FOTO - Zobrazení celé fotky bez ořezu */
+    .main-image-container {
+        background: #fff;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .img-detail-main {
+        width: 100%;
+        height: auto;
+        max-height: 800px;
+        object-fit: contain;
+    }
+    /* Styl pro tlačítko Zpět */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: #8d6e63; /* Tvoje hnědá */
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 20px;
+        transition: transform 0.2s, color 0.2s;
+    }
+
+    .back-link:hover {
+        color: #5d4037;
+        transform: translateX(-5px); /* Jemný pohyb šipky doleva při najetí */
+        text-decoration: none;
+    }
+
+    .back-link i {
+        margin-right: 8px;
+        font-size: 1.2rem;
+    }
+
+    /* INFO PANEL */
+    .info-card {
+        background: white;
+        border-radius: 25px;
+        padding: 35px;
+        height: 100%;
+        border-top: 5px solid #d4af37; /* Zlatý akcent */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .price-large {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.8rem;
+        color: #4a3728;
+        font-weight: 700;
+        margin: 20px 0;
+    }
+
+    /* VIDEO SEKCE */
+    .video-section {
+        background: #000;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-top: 30px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    }
+
+    /* GALERIE */
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .gallery-thumb {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .gallery-thumb:hover {
+        transform: scale(1.05);
+    }
+
+    /* TLAČÍTKO KONTAKT */
+    .btn-contact {
+        background: linear-gradient(45deg, #4a3728, #8b5e3c);
+        color: white !important;
+        padding: 15px;
+        border-radius: 15px;
+        text-align: center;
+        font-weight: 700;
+        display: block;
+        text-decoration: none;
+        font-size: 1.1rem;
+        transition: 0.3s;
+        border: none;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .btn-contact:hover {
+        background: #d4af37;
+        color: #4a3728 !important;
+        transform: translateY(-3px);
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        color: #8b5e3c;
+    }
+</style>
+
+<div class="container mt-4">
+    <a href="{% url 'seznam_inzeratu' %}" class="back-link">
+        <i class="fas fa-arrow-left"></i> Zpět na seznam inzerátů
+    </a>
+</div>
+
+<div class="detail-wrapper">
+    <div class="row g-4">
+
+        <div class="col-lg-7">
+            <div class="main-image-container">
+                {% if inzerat.obrazek %}
+                    <img src="{{ inzerat.obrazek.url }}" class="img-detail-main" alt="{{ inzerat.titulek }}">
+                {% else %}
+                    <div class="p-5 bg-light text-muted">
+                        <i class="fas fa-camera fa-5x"></i>
+                        <p class="mt-2">Bez hlavní fotografie</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if inzerat.video %}
+            <div class="video-section">
+                <video controls width="100%" poster="{% if inzerat.obrazek %}{{ inzerat.obrazek.url }}{% endif %}">
+                    <source src="{{ inzerat.video.url }}" type="video/mp4">
+                    Váš prohlížeč nepodporuje přehrávání videa.
+                </video>
+            </div>
+            {% endif %}
+
+            {% if galerie %}
+            <div class="mt-4 p-3 bg-white rounded-4 shadow-sm">
+                <h5 class="font-playfair mb-3"><i class="fas fa-images me-2 text-gold"></i>Další fotografie</h5>
+                <div class="gallery-grid">
+                    {% for foto in galerie %}
+                        <a href="{{ foto.foto.url }}" target="_blank">
+                            <img src="{{ foto.foto.url }}" class="gallery-thumb" alt="Detailní foto">
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-5">
+            <div class="info-card shadow-sm">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'seznam_inzeratu' %}" style="color: #d4af37; text-decoration: none;">Bazar</a></li>
+                        <li class="breadcrumb-item active">{{ inzerat.get_kategorie_display }}</li>
+                    </ol>
+                </nav>
+
+                <h1 class="font-playfair mb-2" style="color: #4a3728;">{{ inzerat.titulek }}</h1>
+
+                <div class="price-large">
+                    {% if inzerat.cena %}
+                        {{ inzerat.cena }} Kč
+                    {% else %}
+                        Cena dohodou
+                    {% endif %}
+                </div>
+
+                <div class="mb-4">
+                    <div class="meta-item">
+                        <i class="fas fa-map-marker-alt" style="color: #d4af37;"></i>
+                        <span><strong>Lokalita:</strong> {{ inzerat.get_kraj_display }}, {{ inzerat.mesto }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-calendar-alt" style="color: #d4af37;"></i>
+                        <span><strong>Vloženo:</strong> {{ inzerat.vytvoreno|date:"d. m. Y" }}</span>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="my-4">
+                    <h5 class="fw-bold mb-3">Popis inzerátu:</h5>
+                    <div style="white-space: pre-line; color: #444; line-height: 1.6;">
+                        {{ inzerat.text }}
+                    </div>
+                </div>
+
+                <div class="mt-auto pt-4 border-top">
+                    <h5 class="fw-bold mb-3" style="color: #4a3728;">🐾 Kontaktovat inzerenta:</h5>
+
+                    <div class="d-flex flex-column gap-2">
+                        {# Telefon se zobrazí jen pokud je povolen a vyplněn #}
+                        {% if inzerat.zobrazit_telefon and inzerat.telefon %}
+                            <a href="tel:{{ inzerat.telefon }}" class="btn-contact shadow">
+                                <i class="fas fa-phone-alt me-2"></i> {{ inzerat.telefon }}
+                            </a>
+                        {% endif %}
+
+                        {# Email se zobrazí jen pokud je povolen #}
+                        {% if inzerat.zobrazit_email %}
+                            <a href="mailto:{{ inzerat.autor.email }}" class="btn-contact shadow" style="background: linear-gradient(45deg, #8b5e3c, #a67c52);">
+                                <i class="fas fa-envelope me-2"></i> Napsat e-mail
+                            </a>
+                        {% endif %}
+
+                        {# Pokud jsou oba kontakty skryté #}
+                        {% if not inzerat.zobrazit_telefon and not inzerat.zobrazit_email %}
+                            <div class="alert alert-light border shadow-sm small py-2">
+                                <i class="fas fa-info-circle me-1" style="color: #d4af37;"></i>
+                                Inzerent si nepřeje být kontaktován přímo.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <p class="text-center mt-3 small text-muted">Při kontaktu uveďte, že voláte na inzerát z E.PES.CZ</p>
+                </div>
+
+                {% if user.is_authenticated %}
+                    {% if user == inzerat.autor or user.is_superuser %}
+                    <div class="d-flex gap-2 mt-4">
+                        <a href="{% url 'upravit_inzerat' inzerat.pk %}" class="btn btn-outline-warning flex-grow-1 border-2 fw-bold">
+                            <i class="fas fa-edit"></i> Upravit
+                        </a>
+                        <a href="{% url 'smazat_inzerat' inzerat.pk %}" class="btn btn-outline-danger border-2" onclick="return confirm('Opravdu smazat?')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
