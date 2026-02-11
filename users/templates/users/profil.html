@@ -1,88 +1,258 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 <style>
     :root {
-        --p-brown-dark: #3e2723;
-        --p-gold: #c5a059;
+        --primary-brown: #5d4037;
+        --accent-gold: #c5a059;
+        --soft-bg: #fdfaf5;
+        --card-bg: #ffffff;
+        --border-color: #e2d1c3;
     }
-    .profile-card {
-        background: white; border-radius: 25px; border: 1px solid rgba(197, 160, 89, 0.1);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05); padding: 30px; height: 100%;
-    }
-    .card-title { font-family: 'Playfair Display', serif; color: var(--p-brown-dark); font-weight: 700; margin-bottom: 25px; }
-    .p-label { font-size: 0.65rem; text-transform: uppercase; font-weight: 800; color: #adb5bd; }
-    .p-value { font-size: 1.1rem; font-weight: 700; color: var(--p-brown-dark); margin-bottom: 15px; }
 
-    .hub-item { text-align: center; text-decoration: none; color: var(--p-brown-dark); padding: 15px; border-radius: 20px; transition: 0.3s; }
-    .hub-item:hover { background: #fdfaf4; }
-    .hub-icon-wrapper { font-size: 2.5rem; margin-bottom: 10px; display: block; position: relative; }
-    .lock-overlay {
-        position: absolute; top: 0; right: 15%; font-size: 1rem; color: var(--p-gold);
-        background: white; border-radius: 50%; width: 24px; height: 24px;
-        display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    body {
+        background-color: var(--soft-bg) !important;
+        font-family: 'Inter', sans-serif;
+        color: #333;
     }
-    .locked-item { opacity: 0.6; filter: grayscale(0.5); }
+
+    h2, h4, .font-serif { font-family: 'Playfair Display', serif; color: var(--primary-brown); }
+
+    /* Horní karta majitele s opravou zobrazení */
+    .owner-glass-card {
+        background: white;
+        border-radius: 30px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 15px 35px rgba(93, 64, 55, 0.05);
+        padding: 40px;
+        margin-bottom: 40px;
+        position: relative;
+    }
+
+    .status-badge {
+        padding: 6px 16px;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .status-premium { background: var(--accent-gold); color: white; box-shadow: 0 4px 10px rgba(197, 160, 89, 0.3); }
+    .status-standard { background: #f0f0f0; color: #888; }
+
+    /* Karty psů */
+    .dog-profile-card {
+        background: white;
+        border-radius: 25px;
+        border: 1px solid var(--border-color);
+        transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        overflow: hidden;
+        height: 100%;
+        position: relative;
+    }
+    .dog-profile-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(93, 64, 55, 0.1);
+    }
+
+    .qr-box {
+        background: var(--soft-bg);
+        border: 1px dashed var(--accent-gold);
+        border-radius: 15px;
+        padding: 12px;
+        display: inline-block;
+        margin: 15px 0;
+    }
+
+    /* Statistiky */
+    .stat-pill {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+    }
+
+    .btn-brown { background: var(--primary-brown); color: white; border-radius: 15px; transition: 0.3s; border: none; }
+    .btn-brown:hover { background: #452f29; transform: scale(1.02); color: white; }
+
+    /* Mobilní přizpůsobení */
+    @media (max-width: 768px) {
+        .owner-glass-card { padding: 25px; text-align: center; }
+        .owner-glass-card .d-flex { flex-direction: column; }
+        .edit-btn-container { margin-top: 20px; width: 100%; }
+    }
 </style>
 
-<div class="container py-4">
-    <a href="javascript:history.back()" class="back-nav-link mb-4"><i class="fas fa-chevron-left me-2"></i> Zpět</a>
+<div class="container py-5">
 
-    <div class="row g-4">
-        <div class="col-lg-4">
-            <div class="profile-card text-md-start text-center">
-                <h4 class="card-title">Osobní údaje</h4>
-                <span class="p-label">Jméno a příjmení</span>
-                <div class="p-value">{{ user.get_full_name|default:user.username }}</div>
-                <span class="p-label">Telefon</span>
-                <div class="p-value">{{ user.profil.telefon|default:"Neuvedeno" }}</div>
-                <span class="p-label">Členem od</span>
-                <div class="p-value">{{ user.date_joined|date:"j. E Y" }}</div>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'upravit_profil' %}" class="btn btn-outline-dark rounded-pill w-100 fw-bold mt-2">Upravit údaje</a>
-                {% endif %}
+    <div class="owner-glass-card">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                <div class="position-relative">
+                    <div class="bg-light rounded-circle border d-flex align-items-center justify-content-center shadow-sm" style="width: 100px; height: 100px;">
+                        <i class="fas fa-user-circle fa-5x text-secondary opacity-50"></i>
+                    </div>
+                </div>
+                <div class="ms-4">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <h2 class="mb-0 fw-bold">{{ request.user.first_name|default:request.user.username }} {{ request.user.last_name }}</h2>
+                        {% if profil.je_premium %}
+                            <span class="status-badge status-premium"><i class="fas fa-crown me-1"></i> Premium</span>
+                        {% else %}
+                            <span class="status-badge status-standard">Standard</span>
+                        {% endif %}
+                    </div>
+                    <p class="text-muted mb-1 mt-2"><i class="fas fa-envelope me-2 text-brown"></i>{{ request.user.email }}</p>
+                    <p class="text-muted mb-0"><i class="fas fa-phone me-2 text-brown"></i>{{ profil.telefon|default:"Telefon nezadán" }}</p>
+                    {% if profil.lokalita %}
+                        <p class="text-muted mb-0 mt-1"><i class="fas fa-map-marker-alt me-2 text-brown"></i>{{ profil.lokalita }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="edit-btn-container">
+                <button class="btn btn-brown px-4 py-2 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#editProfilModal">
+                    <i class="fas fa-pen-nib me-2"></i> UPRAVIT ÚDAJE
+                </button>
             </div>
         </div>
+    </div>
 
+    <div class="row g-4">
         <div class="col-lg-8">
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <div class="profile-card">
-                        <h5 class="card-title"><i class="fas fa-heart text-danger"></i> Moje srdíčka</h5>
-                        <p class="m-0 p-2 fw-bold text-muted small bg-light rounded">Německý boxer</p>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="profile-card">
-                        <h5 class="card-title"><i class="fas fa-comment text-primary"></i> Komentáře</h5>
-                        <p class="m-0 p-2 fw-bold text-muted small bg-light rounded">"všichni"</p>
-                    </div>
-                </div>
-                <div class="col-12">
-                    <div class="profile-card">
-                        <h5 class="card-title"><i class="fas fa-paw text-warning"></i> Moje psí centrum</h5>
-                        <div class="d-flex justify-content-around align-items-center mt-4">
-                            <a href="{% url 'seznam_psu' %}" class="hub-item">
-                                <span class="hub-icon-wrapper">🐕</span><span class="fw-bold">Moji psi</span>
-                            </a>
-                            <a href="{% url 'pridat_psa' %}" class="hub-item">
-                                <span class="hub-icon-wrapper">✨</span><span class="fw-bold">Nový pes</span>
-                            </a>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="mb-0 fw-bold">Moji parťáci</h4>
+                <a href="{% url 'pridat_psa' %}" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold">
+                    <i class="fas fa-plus me-1"></i> PŘIDAT PSA
+                </a>
+            </div>
 
-                            {% if user.is_authenticated and user.profil.je_premium %}
-                                <a href="{% url 'veterinar' %}" class="hub-item">
-                                    <span class="hub-icon-wrapper">🏥</span><span class="fw-bold">Veterinář</span>
-                                </a>
+            <div class="row g-4">
+                {% for pes in profil.psi.all %}
+                <div class="col-md-6">
+                    <div class="dog-profile-card">
+                        <div class="d-flex justify-content-end p-2 border-bottom bg-light bg-opacity-50">
+                            <a href="{% url 'upravit_psa' pes.id %}" class="btn btn-sm text-muted" title="Upravit"><i class="fas fa-cog"></i></a>
+                            <form action="{% url 'smazat_psa' pes.id %}" method="POST" class="d-inline" onsubmit="return confirm('Opravdu smazat?')">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm text-danger" title="Smazat"><i class="fas fa-trash-alt"></i></button>
+                            </form>
+                        </div>
+
+                        <div class="p-4 text-center">
+                            {% if pes.fotka %}
+                                <img src="{{ pes.fotka.url }}" class="rounded-circle border shadow-sm mb-3" style="width: 90px; height: 90px; object-fit: cover;">
                             {% else %}
-                                <a href="{% url 'cenik' %}" class="hub-item locked-item">
-                                    <span class="hub-icon-wrapper">🏥<div class="lock-overlay"><i class="fas fa-lock"></i></div></span>
-                                    <span class="fw-bold">Veterinář</span>
-                                    <small class="d-block text-gold fw-bold" style="font-size: 0.6rem;">PREMIUM</small>
-                                </a>
+                                <div class="rounded-circle bg-light border mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 90px; height: 90px;">
+                                    <i class="fas fa-paw text-muted fa-2x"></i>
+                                </div>
                             {% endif %}
+
+                            <h5 class="fw-bold mb-1">{{ pes.jmeno }}</h5>
+                            <p class="text-muted small">{{ pes.rasa }}</p>
+
+                            <div class="qr-box">
+                                {% if pes.qr_kod %}
+                                    <img src="{{ pes.qr_kod.url }}" style="width: 75px; height: 75px;" alt="QR kód">
+                                {% else %}
+                                    <i class="fas fa-qrcode fa-4x text-muted opacity-25"></i>
+                                {% endif %}
+                                <div class="small mt-1 text-uppercase fw-bold text-muted" style="font-size: 0.6rem;">Nouzový QR kód</div>
+                            </div>
+
+                            <div class="mt-3">
+                                <a href="{% url 'detail_psa' pes.id %}" class="btn btn-brown w-100 fw-bold" style="background: var(--accent-gold);">
+                                    OTEVŘÍT DENÍK
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
+                {% empty %}
+                <div class="col-12 text-center py-5 bg-white rounded-5 border border-dashed">
+                    <p class="text-muted">Zatím tu nemáte žádného psa.</p>
+                    <a href="{% url 'pridat_psa' %}" class="btn btn-brown px-4">Přidat prvního parťáka</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <h4 class="mb-4 fw-bold">Aktivita na zdi</h4>
+            <div class="row g-3 mb-4">
+                <div class="col-6">
+                    <div class="stat-pill">
+                        <div class="h3 fw-bold mb-0" style="color: var(--primary-brown);">{{ libi_se_mi.count|default:"0" }}</div>
+                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem;">Lajků</small>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="stat-pill">
+                        <div class="h3 fw-bold mb-0" style="color: var(--primary-brown);">{{ komentare.count|default:"0" }}</div>
+                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem;">Komentářů</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 rounded-4 bg-white border shadow-sm text-center">
+                <h6 class="fw-bold mb-3">Stav účtu</h6>
+                {% if profil.je_premium %}
+                    <div class="p-3 rounded-3 mb-3" style="background: #f8fcf9; border-left: 4px solid #2d6a4f;">
+                        <small class="d-block text-muted text-start text-uppercase" style="font-size: 0.6rem;">Premium je aktivní do:</small>
+                        <span class="fw-bold text-success">{{ profil.premium_do|date:"d. m. Y" }}</span>
+                    </div>
+                    <a href="{% url 'cenik' %}" class="btn btn-sm btn-outline-secondary w-100 rounded-pill">Změnit plán</a>
+                {% else %}
+                    <p class="small text-muted mb-4 text-start">Získejte neomezený počet psů, zdravotní data a video galerii.</p>
+                    <a href="{% url 'cenik' %}" class="btn btn-brown w-100 py-2 fw-bold" style="background: var(--accent-gold);">AKTIVOVAT PREMIUM</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editProfilModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-2">
+            <div class="modal-header border-0 pb-0">
+                <h3 class="fw-bold font-serif mb-0 mt-3 ms-2">👤 Úprava profilu</h3>
+                <button type="button" class="btn-close me-2" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="{% url 'upravit_profil' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="row g-2">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold text-muted">JMÉNO</label>
+                            <input type="text" name="first_name" class="form-control rounded-3 border-light bg-light" value="{{ request.user.first_name }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold text-muted">PŘÍJMENÍ</label>
+                            <input type="text" name="last_name" class="form-control rounded-3 border-light bg-light" value="{{ request.user.last_name }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">E-MAIL</label>
+                        <input type="email" name="email" class="form-control rounded-3 border-light bg-light" value="{{ request.user.email }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">TELEFON</label>
+                        <input type="text" name="telefon" class="form-control rounded-3 border-light bg-light" value="{{ profil.telefon }}">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted">LOKALITA</label>
+                        <input type="text" name="lokalita" class="form-control rounded-3 border-light bg-light" value="{{ profil.lokalita }}" placeholder="např. Praha">
+                    </div>
+
+                    <button type="submit" class="btn btn-brown w-100 py-3 fw-bold shadow">ULOŽIT ZMĚNY</button>
+                </form>
             </div>
         </div>
     </div>

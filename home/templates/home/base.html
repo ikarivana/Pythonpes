@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}E.PES.CZ 🐾{% endblock %}</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+          rel="stylesheet">
 
     <style>
         :root {
@@ -14,12 +16,10 @@
             --brown-mid: #3e2723;
             --brown-light: #5d4037;
             --accent-gold: #c5a059;
-            --bg-light: #f8f6f2;
-            --shadow-sidebar: 4px 0 25px rgba(0,0,0,0.3);
-            --shadow-item: 0 4px 8px rgba(0,0,0,0.2);
+            --bg-light: #f9f4ef;
         }
 
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); margin: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-light); margin: 0; }
         #wrapper { display: flex; min-height: 100vh; }
 
         /* --- SIDEBAR --- */
@@ -33,197 +33,108 @@
             top: 0;
             height: 100vh;
             z-index: 1000;
-            box-shadow: var(--shadow-sidebar);
             border-right: 2px solid var(--accent-gold);
         }
 
-        .sidebar-heading {
-            padding: 2.5rem 1.25rem;
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
+        .sidebar-heading { padding: 2rem 1.25rem; font-family: 'Playfair Display', serif; font-size: 1.8rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar-heading span { color: var(--accent-gold); }
 
-        /* --- POLOŽKY MENU --- */
+        /* --- MENU --- */
         .list-group-item {
             background: rgba(255,255,255,0.03) !important;
-            color: rgba(255,255,255,0.7) !important;
+            color: rgba(255,255,255,0.8) !important;
             border: 1px solid rgba(255,255,255,0.05) !important;
-            padding: 0.85rem 1.2rem;
-            margin: 6px 15px;
-            border-radius: 14px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            transition: all 0.3s ease;
+            padding: 0.85rem 1.2rem; margin: 4px 15px; border-radius: 12px;
+            text-decoration: none; display: flex; align-items: center; transition: 0.2s;
+        }
+        .list-group-item i { width: 25px; color: var(--accent-gold); margin-right: 10px; text-align: center; }
+        .list-group-item:hover { background: rgba(255,255,255,0.1) !important; color: white !important; transform: translateX(5px); }
+
+        .premium-cta-card {
+            display: block; background: linear-gradient(135deg, #c5a059 0%, #8a6d3b 100%);
+            color: white !important; text-decoration: none; padding: 12px; border-radius: 16px;
+            margin: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); transition: 0.3s;
         }
 
-        .list-group-item i {
-            width: 30px;
-            font-size: 1.1rem;
-            margin-right: 10px;
-            text-align: center;
-            color: var(--accent-gold);
-        }
+        /* --- FOOTER (FIXED AT BOTTOM) --- */
+        .sidebar-footer { background: rgba(0,0,0,0.2); padding: 1.2rem 1rem; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto; }
 
-        .list-group-item:hover {
-            background: rgba(255,255,255,0.1) !important;
-            color: white !important;
-            transform: translateX(8px);
-        }
+        #page-content-wrapper { flex-grow: 1; width: 100%; background: var(--bg-light); }
+        .content-card { padding: 30px; }
 
-        /* --- PREMIUM TLAČÍTKO --- */
-        .premium-btn {
-            background: linear-gradient(45deg, #c5a059, #e9d5a1);
-            color: #3e2723 !important;
-            border-radius: 12px;
-            padding: 12px;
-            font-weight: 700;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            text-decoration: none;
-            transition: 0.3s;
-            animation: pulse-gold 2s infinite;
-        }
-
-        @keyframes pulse-gold {
-            0% { box-shadow: 0 0 0 0 rgba(197, 160, 89, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(197, 160, 89, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(197, 160, 89, 0); }
-        }
-
-        /* --- GLOBÁLNÍ ŠIPKA ZPĚT --- */
-        .back-nav-link {
-            display: inline-flex;
-            align-items: center;
-            color: var(--brown-mid);
-            text-decoration: none;
-            font-weight: 700;
-            margin-bottom: 20px;
-            opacity: 0.7;
-            transition: 0.3s;
-        }
-        .back-nav-link:hover { opacity: 1; transform: translateX(-5px); color: var(--accent-gold); }
-
-        /* --- OBSAH --- */
-        #page-content-wrapper { flex-grow: 1; padding: 40px; overflow-y: auto; width: 100%; }
-        .content-card {
-            background: white;
-            border-radius: 30px;
-            padding: 40px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
-            min-height: 85vh;
-        }
-
-        .sidebar-footer {
-            background: rgba(0,0,0,0.25);
-            padding: 1.5rem 1rem;
-            margin-top: auto;
-        }
-
-        /* MOBILNÍ NAVIGACE */
-        .mobile-nav { display: none; background: var(--brown-dark); padding: 1rem; color: white; position: sticky; top: 0; z-index: 1100; }
         @media (max-width: 992px) {
-            #sidebar-wrapper { width: 100%; height: auto; position: fixed; top: 60px; left: -100%; visibility: hidden; transition: 0.4s; }
-            #sidebar-wrapper.show { left: 0; visibility: visible; height: calc(100vh - 60px); }
-            .mobile-nav { display: flex; justify-content: space-between; align-items: center; }
-            #page-content-wrapper { padding: 15px; }
-            .content-card { padding: 25px 15px; border-radius: 20px; }
+            #sidebar-wrapper { display: none; } /* Pro zjednodušení teď skryto, po opravě doladíme mobil */
         }
     </style>
 </head>
 <body>
 
-    <nav class="mobile-nav shadow">
-        <span style="font-family: 'Playfair Display', serif; font-size: 1.3rem;">E<span>.</span>PES.CZ</span>
-        <button class="btn text-white border-0" id="menu-toggle"><i class="fas fa-bars fa-lg"></i></button>
-    </nav>
+<div id="wrapper">
+    <div id="sidebar-wrapper">
+        <div class="sidebar-heading">E<span>.</span>PES.CZ</div>
 
-    <div id="wrapper">
-        <div id="sidebar-wrapper">
-            <div class="sidebar-heading">E<span>.</span>PES.CZ 🐾</div>
+        <div class="list-group list-group-flush pt-2">
+            <a href="{% url 'home' %}" class="list-group-item">
+                <i class="fas fa-home"></i> Domů
+            </a>
 
-            <div class="list-group flex-grow-1 mt-3">
-                <a href="{% url 'home' %}" class="list-group-item"><i class="fas fa-home"></i> Hlavní strana</a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'profil' %}" class="list-group-item">
+                <i class="fas fa-user-circle"></i> Můj profil
+            </a>
+            {% endif %}
 
-                {% if user.is_authenticated %}
-                    <a href="{% url 'profil' %}" class="list-group-item"><i class="fas fa-user-circle"></i> Můj profil</a>
-                    <a href="{% url 'seznam_psu' %}" class="list-group-item"><i class="fas fa-dog"></i> Moji psi</a>
+            <a href="{% url 'mapa_sluzeb' %}" class="list-group-item">
+                <i class="fas fa-map-marked-alt"></i> Mapa služeb
+            </a>
 
-                    {% if user.profil.je_premium %}
-                        <a href="{% url 'veterinar' %}" class="list-group-item"><i class="fas fa-stethoscope"></i> Veterinář</a>
-                    {% else %}
-                        <a href="{% url 'cenik' %}" class="list-group-item" style="opacity: 0.8;">
-                            <i class="fas fa-stethoscope"></i> Veterinář <i class="fas fa-lock ms-auto text-warning" style="font-size: 0.7rem;"></i>
-                        </a>
-                    {% endif %}
-                {% else %}
-                    <a href="{% url 'cenik' %}" class="list-group-item" style="opacity: 0.8;">
-                        <i class="fas fa-stethoscope"></i> Veterinář <i class="fas fa-lock ms-auto text-warning" style="font-size: 0.7rem;"></i>
-                    </a>
-                {% endif %}
+            <a href="{% url 'seznam_inzeratu' %}" class="list-group-item">
+                <i class="fas fa-shopping-basket"></i> Psí Bazar
+            </a>
 
-                <a href="{% url 'seznam_zdi' %}" class="list-group-item"><i class="fas fa-images"></i> Zdi plemen</a>
-                <a href="{% url 'seznam_inzeratu' %}" class="list-group-item"><i class="fas fa-shopping-bag"></i> Bazar</a>
-                <a href="{% url 'kontakt' %}" class="list-group-item"><i class="fas fa-envelope"></i> Kontakt</a>
-
-                <div class="mt-4 px-3">
-                    {% if not user.is_authenticated or not user.profil.je_premium %}
-                        <a href="{% url 'cenik' %}" class="premium-btn">
-                            <i class="fas fa-crown"></i> CHCI PREMIUM
-                        </a>
-                    {% else %}
-                        <div class="p-2 rounded-3 text-center" style="background: rgba(197, 160, 89, 0.1); border: 1px dashed var(--accent-gold);">
-                            <small class="fw-bold" style="color: var(--accent-gold); font-size: 0.7rem;">
-                                <i class="fas fa-check-circle me-1"></i> Premium aktivní
-                            </small>
-                        </div>
-                    {% endif %}
+            <a href="{% url 'cenik' %}" class="premium-cta-card mt-4">
+                <div class="d-flex align-items-center justify-content-center">
+                    <i class="fas fa-crown me-2 text-warning"></i>
+                    <span class="fw-bold" style="font-size: 0.85rem; letter-spacing: 1px;">AKTIVOVAT PREMIUM</span>
                 </div>
-            </div>
-
-            <div class="sidebar-footer">
-                {% if user.is_authenticated %}
-                    <div class="d-flex align-items-center justify-content-between mb-3 px-2 text-white">
-                        <div class="overflow-hidden">
-                            <small class="d-block text-white-50" style="font-size: 0.7rem;">Uživatel</small>
-                            <span class="text-white fw-bold d-block text-truncate" style="font-size: 0.9rem;">{{ user.username }}</span>
-                        </div>
-                        <form action="{% url 'logout' %}" method="post" class="m-0">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-link p-0 text-warning"><i class="fas fa-power-off fa-lg"></i></button>
-                        </form>
-                    </div>
-                {% else %}
-                    <a href="{% url 'login' %}" class="list-group-item mb-3"><i class="fas fa-key"></i> Přihlásit se</a>
-                {% endif %}
-
-                <div class="d-flex justify-content-around border-top border-white border-opacity-10 pt-3">
-                    <a href="{% url 'podminky' %}" class="text-white-50 text-decoration-none" style="font-size: 0.75rem;">Podmínky</a>
-                    <span class="text-white-50" style="font-size: 0.75rem;">•</span>
-                    <a href="{% url 'cookies' %}" class="text-white-50 text-decoration-none" style="font-size: 0.75rem;">Cookies</a>
-                </div>
-            </div>
+            </a>
         </div>
 
-        <div id="page-content-wrapper">
-            <div class="content-card">
-                {% block content %}{% endblock %}
+        <div class="sidebar-footer">
+            {% if user.is_authenticated %}
+            <div class="d-flex align-items-center justify-content-between mb-3 px-2 text-white">
+                <div class="overflow-hidden">
+                    <small class="d-block text-white-50" style="font-size: 0.65rem;">Páníček</small>
+                    <span class="text-white fw-bold d-block text-truncate" style="font-size: 0.85rem;">{{ user.username }}</span>
+                </div>
+                <form action="{% url 'logout' %}" method="post" class="m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-link p-0 text-warning"><i class="fas fa-power-off"></i>
+                    </button>
+                </form>
+            </div>
+            {% else %}
+            <div class="px-2 mb-3">
+                <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm w-100 mb-2">Přihlásit se</a>
+                <a href="{% url 'register' %}" class="btn btn-warning btn-sm w-100 fw-bold"
+                   style="color: var(--brown-dark);">Registrace</a>
+            </div>
+            {% endif %}
+
+            <div class="d-flex justify-content-around border-top border-white border-opacity-10 pt-3">
+                <a href="{% url 'podminky' %}" class="text-white-50 text-decoration-none" style="font-size: 0.7rem;">Podmínky</a>
+                <span class="text-white-50">•</span>
+                <a href="{% url 'cookies' %}" class="text-white-50 text-decoration-none" style="font-size: 0.7rem;">Cookies</a>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.getElementById('menu-toggle').addEventListener('click', function() {
-            document.getElementById('sidebar-wrapper').classList.toggle('show');
-        });
-    </script>
+    <div id="page-content-wrapper">
+        <div class="content-card">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
-

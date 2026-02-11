@@ -1,120 +1,191 @@
 {% extends 'home/base.html' %}
-{% load crispy_forms_tags %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="alert mb-4 text-center" style="background-color: #fff9db; border: 1px solid #ffe066; border-radius: 15px; padding: 12px;">
-                <span class="me-2">💡</span>
-                <strong>Tip:</strong> S Premium verzí můžete přidat neomezeně psů a získat kompletní zdravotní profil.
-            </div>
-
-            <div class="card shadow-sm border-0 rounded-4 p-4">
-                <div class="text-center mb-4">
-                    <h2 class="fw-bold" style="color: #5d4037;">
-                        <i class="fas fa-cog me-2" style="color: #bcaaa4;"></i> Úprava profilu
-                    </h2>
-                    <p class="text-muted small">Vyplňte údaje o vašem pejskovi</p>
-                </div>
-
-                <form method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-
-                    <div class="p-3 mb-4 rounded-4" style="background-color: #fff5f5; border: 1px solid #ffe3e3;">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <h6 class="text-danger fw-bold mb-0">🚨 REŽIM "HLEDÁ SE"</h6>
-                                <p class="text-muted mb-0" style="font-size: 0.8rem;">Aktivujte jen v případě ztráty!</p>
-                            </div>
-                            <div class="form-check form-switch">
-                                {{ form.je_ztraceny }}
-                            </div>
-                        </div>
-                    </div>
-
-                    <h5 class="fw-bold mb-3" style="color: #8d6e63;"><i class="fas fa-map-marker-alt me-2 text-danger"></i> Základní údaje</h5>
-                    <div class="row">
-                        <div class="col-md-8">{{ form.jmeno|as_crispy_field }}</div>
-                        <div class="col-md-4">{{ form.vek|as_crispy_field }}</div>
-                        <div class="col-md-12">{{ form.rasa|as_crispy_field }}</div>
-                        <div class="col-md-12">{{ form.fotka|as_crispy_field }}</div>
-                        <div class="col-md-12">{{ form.cip|as_crispy_field }}</div>
-                    </div>
-
-                    <div class="mt-4 mb-4 p-4 rounded-4 shadow-sm" style="background-color: #f8fff9; border: 1px solid #d4edda;">
-                        <h5 class="fw-bold mb-3 text-success" style="font-size: 1.1rem;">
-                            <i class="fas fa-shield-dog me-2"></i> Termíny prevence (Zdarma)
-                        </h5>
-                        <div class="row">
-                            <div class="col-md-4">
-                                {{ form.posledni_ockovani|as_crispy_field }}
-                            </div>
-                            <div class="col-md-4">
-                                {{ form.posledni_odcerveni|as_crispy_field }}
-                            </div>
-                            <div class="col-md-4">
-                                {{ form.posledni_klistata|as_crispy_field }}
-                            </div>
-                        </div>
-                        <p class="text-muted mb-0 mt-2" style="font-size: 0.75rem;">
-                            <i class="fas fa-info-circle me-1"></i> Tato data uvidíte na hlavní kartě psa.
-                        </p>
-                    </div>
-
-                    <h5 class="fw-bold mb-3 mt-4" style="color: #8d6e63;"><i class="fas fa-dna me-2"></i> Zdraví a Rodokmen 🔒</h5>
-                    <div class="p-4 rounded-4 border text-center" style="background-color: #fcfcfc; border-style: dashed !important; position: relative; overflow: hidden;">
-
-                        <div style="opacity: 0.3; filter: blur(1px); pointer-events: none;">
-                            <div class="row">
-                                <div class="col-md-6">{{ form.rtg_hd|as_crispy_field }}</div>
-                                <div class="col-md-6">{{ form.rtg_ed|as_crispy_field }}</div>
-                                <div class="col-md-6">{{ form.otec_manualni|as_crispy_field }}</div>
-                                <div class="col-md-6">{{ form.matka_manualni|as_crispy_field }}</div>
-                            </div>
-                        </div>
-
-                        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255,255,255,0.2);">
-                            <i class="fas fa-lock fa-2x mb-3" style="color: #c5a059;"></i>
-                            <h6 class="fw-bold mb-1">Prémiové funkce jsou uzamčeny</h6>
-                            <p class="text-muted small px-5 mb-3">Pole pro RTG výsledky, DNA testy a rodokmen jsou dostupné pouze v Premium verzi.</p>
-                            <a href="{% url 'cenik' %}" class="btn btn-sm px-4 fw-bold shadow-sm" style="background-color: white; border: 1px solid #c5a059; color: #b08d4a; border-radius: 20px;">
-                                Aktivovat Premium
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="mt-5">
-                        <button type="submit" class="btn w-100 py-3 rounded-4 shadow-sm" style="background-color: #5d4037; color: white; border: none; font-weight: 600; font-size: 1.1rem;">
-                            Uložit změny
-                        </button>
-                        <div class="text-center mt-3">
-                            <a href="{% url 'seznam_psu' %}" class="text-muted text-decoration-none small">
-                                Zrušit a zpět na seznam
-                            </a>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
-    /* Stylování formulářových polí pro lepší vzhled */
-    input[type="text"], input[type="number"], input[type="date"], select, textarea {
-        border-radius: 12px !important;
-        border: 1px solid #dee2e6 !important;
+    :root {
+        --t-brown: #3e2723;
+        --t-gold: #c5a059;
+        --t-bg: #fdfaf4;
+        --t-input: #ffffff;
+        --t-border: rgba(197, 160, 89, 0.3);
+    }
+
+    body { background-color: #f9f4ef; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    .edit-container { max-width: 900px; margin: 30px auto; padding: 0 15px; }
+
+    .edit-card {
+        background: var(--t-bg);
+        border-radius: 30px;
+        border: 1px solid var(--t-border);
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(62, 39, 35, 0.05);
+        margin-bottom: 25px;
+    }
+
+    .section-title {
+        font-family: 'Playfair Display', serif;
+        color: var(--t-brown);
+        font-size: 1.8rem;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .form-label {
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: var(--t-gold);
+        margin-bottom: 5px;
+    }
+
+    .custom-brown-input {
+        border-radius: 15px !important;
+        border: 1px solid var(--t-border) !important;
         padding: 10px 15px !important;
-        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        color: var(--t-brown) !important;
     }
-    input:focus {
-        border-color: #c5a059 !important;
-        box-shadow: 0 0 0 0.2rem rgba(197, 160, 89, 0.1) !important;
+
+    .btn-save-lg {
+        background: var(--t-brown);
+        color: white;
+        border: none;
+        border-radius: 15px;
+        padding: 12px 40px;
+        font-weight: 800;
+        transition: 0.3s;
     }
-    .form-check-input:checked {
-        background-color: #dc3545;
-        border-color: #dc3545;
+    .btn-save-lg:hover { background: #2b1b19; transform: translateY(-2px); color: white; }
+
+    .premium-lock {
+        border-left: 4px solid var(--t-gold);
+        background: rgba(197, 160, 89, 0.03);
     }
 </style>
+
+<div class="edit-container">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="section-title m-0">
+                <i class="fas fa-edit text-gold"></i> Upravit profil: {{ pes.jmeno }}
+            </h1>
+            <a href="{% url 'export_pes_pdf' pes.id %}" class="btn btn-danger btn-sm rounded-pill px-3 fw-bold">
+                <i class="fas fa-file-pdf me-1"></i> STÁHNOUT PDF
+            </a>
+        </div>
+
+        <div class="edit-card border-danger mb-4">
+            <div class="form-check form-switch d-flex align-items-center gap-3">
+                {{ form.je_ztraceny }}
+                <label class="form-check-label fw-bold text-danger">{{ form.je_ztraceny.label }}</label>
+            </div>
+        </div>
+
+        <div class="edit-card">
+            <h5 class="fw-bold mb-4" style="color: var(--t-brown); border-bottom: 1px solid var(--t-border); padding-bottom: 10px;">
+                Základní informace
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.jmeno.label }}</label>
+                    {{ form.jmeno }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.rasa.label }}</label>
+                    {{ form.rasa }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">{{ form.narozeni.label }}</label>
+                    {{ form.narozeni }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">{{ form.vek.label }}</label>
+                    {{ form.vek }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">{{ form.cip.label }}</label>
+                    {{ form.cip }}
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Hlavní fotka</label>
+                    {{ form.fotka }}
+                </div>
+            </div>
+        </div>
+
+        <div class="edit-card premium-lock">
+            <h5 class="fw-bold mb-4" style="color: var(--t-brown);">
+                <i class="fas fa-certificate text-gold me-2"></i> Chovatelské záznamy & RTG
+                {% if not request.user.profil.je_premium %}
+                    <small class="badge bg-warning text-dark ms-2" style="font-size: 0.6rem;">PREMIUM</small>
+                {% endif %}
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.cislo_zapisu.label }}</label>
+                    {{ form.cislo_zapisu }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ form.rtg_hd.label }}</label>
+                    {{ form.rtg_hd }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{{ form.rtg_ed.label }}</label>
+                    {{ form.rtg_ed }}
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">{{ form.bonitace.label }}</label>
+                    {{ form.bonitace }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Otec</label>
+                    {{ form.otec }}
+                    <div class="mt-2">{{ form.otec_manualni }}</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Matka</label>
+                    {{ form.matka }}
+                    <div class="mt-2">{{ form.matka_manualni }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="edit-card">
+            <h5 class="fw-bold mb-4" style="color: var(--t-brown);">Prevence & Zdraví</h5>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">{{ form.posledni_ockovani.label }}</label>
+                    {{ form.posledni_ockovani }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">{{ form.posledni_odcerveni.label }}</label>
+                    {{ form.posledni_odcerveni }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">{{ form.posledni_klistata.label }}</label>
+                    {{ form.posledni_klistata }}
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-4 mb-5">
+            <a href="{% url 'detail_psa' pes.id %}" class="text-decoration-none fw-bold" style="color: var(--t-gold);">
+                <i class="fas fa-chevron-left me-1"></i> Zpět na profil
+            </a>
+            <button type="submit" class="btn btn-save-lg shadow">
+                <i class="fas fa-check-circle me-1"></i> ULOŽIT ZMĚNY
+            </button>
+        </div>
+
+    </form>
+</div>
+
 {% endblock %}

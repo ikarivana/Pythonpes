@@ -25,7 +25,7 @@
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius: 15px;">
                             <li>
                                 <a class="dropdown-item py-2" href="{% url 'upravit_psa' pes.pk %}">
-                                    <i class="fas fa-edit me-2 text-primary"></i> Upravit
+                                    <i class="fas fa-edit me-2 text-warning"></i> Upravit
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
@@ -39,52 +39,52 @@
                 </div>
                 {% endif %}
 
-                <div style="height: 220px; background-color: #f8f5f0; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                <div style="height: 250px; background-color: #f8f5f0; overflow: hidden;">
                     {% if pes.fotka %}
                         <img src="{{ pes.fotka.url }}" style="width: 100%; height: 100%; object-fit: cover;" alt="{{ pes.jmeno }}">
                     {% else %}
-                        <div class="text-muted" style="font-size: 4rem;">🐕</div>
+                        <div class="h-100 d-flex align-items-center justify-content-center text-muted" style="font-size: 4rem;">🐕</div>
                     {% endif %}
                 </div>
 
                 <div class="card-body d-flex flex-column p-4">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <h3 class="fw-bold mb-0">
-                            <a href="{% url 'detail_psa' pes.pk %}" class="text-decoration-none text-dark hover-brown">
+                            <a href="{% url 'detail_psa' pes.pk %}" class="text-decoration-none text-dark hover-brown font-serif">
                                 {{ pes.jmeno }}
                             </a>
                         </h3>
-                        <span class="badge rounded-pill bg-light text-dark border px-3 py-2 shadow-sm">{{ pes.vek }} let</span>
+                        <span class="badge rounded-pill bg-white text-muted border px-3 py-2 shadow-sm small">{{ pes.vek }} let</span>
                     </div>
-                    <p class="text-muted mb-3"><i class="fas fa-paw me-1"></i> {{ pes.rasa }}</p>
+                    <p class="text-muted mb-3"><i class="fas fa-paw me-1 opacity-50"></i> {{ pes.rasa }}</p>
 
-                    <div class="p-3 mb-4" style="background-color: #fdfaf5; border-radius: 20px; border: 1px solid rgba(0,0,0,0.05);">
+                    <div class="p-3 mb-4" style="background-color: var(--light-gold); border-radius: 20px; border: 1px solid var(--border-color);">
                         <div class="d-flex justify-content-between small mb-2">
-                            <span class="text-secondary">💉 Očkování do:</span>
-                            <span class="fw-bold {% if pes.ockovani_propadle %}text-danger animate-pulse-red{% else %}text-primary{% endif %}">
+                            <span class="text-muted"><i class="fas fa-syringe me-2" style="width: 15px;"></i> Očkování do:</span>
+                            <span class="fw-bold {% if pes.ockovani_propadle %}text-danger animate-pulse-red{% else %}text-brown{% endif %}">
                                 {{ pes.pristi_ockovani|date:"d.m.Y"|default:"--" }}
                             </span>
                         </div>
 
                         <div class="d-flex justify-content-between small mb-2">
-                            <span class="text-secondary">🕷️ Klíšťata do:</span>
-                            <span class="fw-bold {% if pes.klistata_propadle %}text-danger animate-pulse-red{% else %}text-success{% endif %}">
+                            <span class="text-muted"><i class="fas fa-bug me-2" style="width: 15px;"></i> Klíšťata do:</span>
+                            <span class="fw-bold {% if pes.klistata_propadle %}text-danger animate-pulse-red{% else %}text-brown{% endif %}">
                                 {{ pes.pristi_klistata|date:"d.m.Y"|default:"--" }}
                             </span>
                         </div>
 
                         <div class="d-flex justify-content-between small">
-                            <span class="text-secondary">💊 Odčervení:</span>
-                            <span class="fw-bold {% if pes.odcerveni_propadle %}text-danger{% else %}text-dark{% endif %}">
+                            <span class="text-muted"><i class="fas fa-capsules me-2" style="width: 15px;"></i> Odčervení:</span>
+                            <span class="fw-bold {% if pes.odcerveni_propadle %}text-danger{% else %}text-brown{% endif %}">
                                 {{ pes.pristi_odcerveni|date:"d.m.Y"|default:"--" }}
                             </span>
                         </div>
                     </div>
 
                     <div class="d-grid gap-2 mt-auto">
-                        <a href="{% url 'detail_psa' pes.pk %}" class="btn fw-bold shadow-sm py-2"
-                           style="background-color: #ffc107; color: #5d4037; border-radius: 15px; border: none;">
-                            PROFIL PSA
+                        <a href="{% url 'detail_psa' pes.pk %}" class="btn fw-bold shadow-sm py-2 text-uppercase"
+                           style="background-color: var(--accent-gold); color: white; border-radius: 15px; border: none; letter-spacing: 0.5px;">
+                            Profil psa
                         </a>
                     </div>
                 </div>
@@ -99,11 +99,21 @@
 </div>
 
 <style>
-    .hover-brown:hover { color: var(--primary-brown) !important; }
+    /* CSS proměnné pro sjednocení barev */
+    :root {
+        --primary-brown: #5d4037;
+        --accent-gold: #c5a059;
+        --light-gold: #fdfaf5;
+        --border-color: #e2d1c3;
+    }
+
+    .text-brown { color: var(--primary-brown); }
+    .font-serif { font-family: 'Playfair Display', serif; }
+    .hover-brown:hover { color: var(--accent-gold) !important; }
+
     .animate-pulse-red { animation: pulse-red 2s infinite; }
     @keyframes pulse-red { 0%, 100% { color: #dc3545; } 50% { color: #ff8e8e; } }
 
-    /* Změna barvy dropdown položek při najetí */
-    .dropdown-item:hover { background-color: #fdfaf5; }
+    .dropdown-item:hover { background-color: var(--light-gold); }
 </style>
 {% endblock %}

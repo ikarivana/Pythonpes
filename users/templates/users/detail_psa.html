@@ -1,180 +1,228 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
     :root {
-        --primary-brown: #5d4037;
-        --accent-beige: #f8f5f2;
-        --border-color: #e2d1c3;
+        --t-brown: #3e2723;
+        --t-gold: #c5a059;
+        --t-bg: #fdfaf4;
+        --t-card: #ffffff;
+        --t-border: rgba(197, 160, 89, 0.2);
+        --t-red: #e35d6a; /* Barva PDF tlačítka z tvé fotky */
     }
 
-    body { font-family: 'Inter', sans-serif; background-color: #fdfcfb; }
-    h2, h4 { font-family: 'Playfair Display', serif; color: var(--primary-brown); }
+    body { background-color: #f9f4ef; font-family: 'Plus Jakarta Sans', sans-serif; }
 
-    /* Hlavní kontejner */
-    .profi-card {
-        background: white;
+    /* HLAVIČKA - kompaktní se zaoblením */
+    .profile-header-slim {
+        background: linear-gradient(135deg, var(--t-brown) 0%, #5d4037 100%);
+        padding: 25px 0; color: white;
+        border-bottom: 4px solid var(--t-gold);
+        border-radius: 0 0 30px 30px;
+        margin-bottom: 25px;
+    }
+
+    /* KARTY */
+    .stat-card-compact {
+        background: var(--t-card);
         border-radius: 20px;
-        border: 1px solid var(--border-color);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-        margin-bottom: 1.5rem;
+        padding: 20px;
+        border: 1px solid var(--t-border);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+        margin-bottom: 20px;
     }
 
-    /* Prevence boxy */
-    .prevence-item {
-        background: var(--accent-beige);
-        border-radius: 12px;
-        padding: 0.8rem 1rem;
-        text-decoration: none !important;
-        display: block;
-        margin-bottom: 0.8rem;
-        transition: 0.3s;
-        border: 1px solid transparent;
+    .section-label {
+        font-size: 0.7rem; font-weight: 800; text-transform: uppercase;
+        color: var(--t-gold); letter-spacing: 1px; display: block; margin-bottom: 15px;
     }
-    .prevence-item:hover { border-color: var(--primary-brown); transform: translateY(-2px); }
 
-    /* Galerie - Flexibilní Grid */
+    /* VIDEO FIX - tohle udrží video v boxu */
+    .video-frame {
+        border-radius: 15px;
+        overflow: hidden;
+        border: 1px solid var(--t-border);
+        background: #000;
+        line-height: 0;
+        position: relative;
+    }
+
     .gallery-grid {
         display: grid;
-        /* Na počítači 3 sloupce, na tabletu 2, na mobilu 2 (aby nebyly obří) */
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
     }
 
-    .gallery-item {
-        height: 180px; /* Sjednocená výška */
-        background: #fafafa;
-        border-radius: 12px;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid #eee;
+    .gallery-img-sm {
+        width: 100%; height: 100px; object-fit: cover; border-radius: 12px;
     }
 
-    .gallery-item img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain; /* Žádný ořez, vidíš celou fotku */
+    /* TLAČÍTKA */
+    .btn-pdf {
+        background-color: var(--t-red); color: white;
+        border-radius: 12px; font-weight: 700; font-size: 0.8rem;
+        padding: 8px 16px; border: none; transition: 0.3s;
+    }
+    .btn-pdf:hover { background-color: #c94b57; color: white; transform: scale(1.05); }
+
+    .btn-brown-sm {
+        background: var(--t-brown); color: white; border-radius: 12px;
+        padding: 8px 20px; font-size: 0.85rem; border: none; font-weight: 700;
     }
 
-    /* Mobilní úpravy */
-    @media (max-width: 768px) {
-        .gallery-grid { grid-template-columns: repeat(2, 1fr); }
-        .gallery-item { height: 150px; }
-        .display-mobile-column { flex-direction: column; }
+    .btn-plus {
+        width: 30px; height: 30px; border-radius: 10px;
+        border: 1px solid var(--t-gold); color: var(--t-gold);
+        background: transparent; display: flex; align-items: center; justify-content: center;
     }
 </style>
 
-<div class="container mt-4 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <a href="{% url 'seznam_psu' %}" class="text-decoration-none text-muted fw-bold small">
-            <i class="fas fa-chevron-left me-1"></i> ZPĚT
-        </a>
-        <a href="{% url 'upravit_psa' pes.pk %}" class="btn btn-sm text-white px-3" style="background: var(--primary-brown); border-radius: 8px;">
-            <i class="fas fa-cog"></i>
-        </a>
-    </div>
-
-    <div class="row g-4">
-        <div class="col-lg-4">
-            <div class="profi-card p-4 text-center">
+<div class="profile-header-slim shadow">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-3">
                 {% if pes.fotka %}
-                    <img src="{{ pes.fotka.url }}" class="rounded-circle mb-3 border shadow-sm" style="width: 120px; height: 120px; object-fit: cover;">
+                    <img src="{{ pes.fotka.url }}" style="width: 80px; height: 80px; border-radius: 20px; object-fit: cover; border: 2px solid white;">
                 {% endif %}
-                <h2 class="fw-bold mb-0">{{ pes.jmeno }}</h2>
-                <p class="text-muted small mb-4">{{ pes.rasa }}</p>
-
-                <div class="text-start mt-4">
-                    <h6 class="fw-bold small text-uppercase mb-3" style="letter-spacing: 1px; color: #a1887f;">Prevence</h6>
-
-                    <a href="{% url 'upravit_psa' pes.pk %}" class="prevence-item">
-                        <div class="d-flex justify-content-between">
-                            <span class="small fw-bold text-dark">Vakcinace</span>
-                            {% if pes.ockovani_propadle %}<i class="fas fa-exclamation-circle text-danger"></i>{% endif %}
-                        </div>
-                        <div class="small text-muted">{{ pes.pristi_ockovani|date:"d. m. Y" }}</div>
-                    </a>
-
-                    <a href="{% url 'upravit_psa' pes.pk %}" class="prevence-item">
-                        <div class="d-flex justify-content-between">
-                            <span class="small fw-bold text-dark">{{ pes.get_typ_ochrany_klistata_display|truncatechars:15 }}</span>
-                            {% if pes.klistata_propadle %}<i class="fas fa-clock text-danger"></i>{% endif %}
-                        </div>
-                        <div class="small text-muted">Do: {{ pes.pristi_klistata|date:"d. m. Y" }}</div>
-                    </a>
-
-                    <a href="{% url 'upravit_psa' pes.pk %}" class="prevence-item">
-                        <div class="d-flex justify-content-between">
-                            <span class="small fw-bold text-dark">Odčervení</span>
-                            {% if pes.odcerveni_propadle %}<i class="fas fa-pills text-danger"></i>{% endif %}
-                        </div>
-                        <div class="small text-muted">{{ pes.pristi_odcerveni|date:"d. m. Y" }}</div>
-                    </a>
+                <div>
+                    <h2 class="m-0 fw-bold" style="font-family: 'Playfair Display', serif;">{{ pes.jmeno }}</h2>
+                    <p class="m-0 opacity-75 small">{{ pes.plemeno }}</p>
                 </div>
             </div>
-        </div>
-
-        <div class="col-lg-8">
-            <div class="profi-card p-4">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4 class="fw-bold mb-0">Galerie</h4>
-                    <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalMedia">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                </div>
-
-                <div class="gallery-grid">
-                    {% for f in fotky %}
-                    <div class="gallery-item position-relative shadow-sm">
-                        <a href="{{ f.obrazek.url }}" data-lightbox="pes-gallery">
-                            <img src="{{ f.obrazek.url }}">
-                        </a>
-                        {% if request.user.profil == pes.majitel %}
-                        <form action="{% url 'smazat_foto' f.id %}" method="POST" class="position-absolute" style="top:5px; right:5px;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger btn-sm rounded-circle p-0" style="width:22px; height:22px; font-size:10px;" onclick="return confirm('Smazat?')">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </form>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-
-                {% if videa %}
-                <h4 class="fw-bold mt-5 mb-3">Videa</h4>
-                <div class="row g-3">
-                    {% for v in videa %}
-                    <div class="col-md-6">
-                        <div class="rounded-4 overflow-hidden border">
-                            <video controls class="w-100 d-block"><source src="{{ v.video_soubor.url }}" type="video/mp4"></video>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
+            <div class="d-flex gap-2">
+                <a href="{% url 'export_pes_pdf' pes.id %}" class="btn-pdf shadow-sm">
+                    <i class="fas fa-file-pdf me-1"></i> STÁHNOUT PDF RODOKMEN
+                </a>
+                <a href="{% url 'upravit_psa' pes.id %}" class="btn btn-light btn-sm rounded-pill px-3 fw-bold">Upravit</a>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="modalMedia" tabindex="-1">
+<div class="container">
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="stat-card-compact">
+                <span class="section-label">Aktuální prevence</span>
+                <div class="d-flex justify-content-between mb-2 small"><span>💉 Očkování:</span> <b>{{ pes.pristi_ockovani|date:"d.m.Y" }}</b></div>
+                <div class="d-flex justify-content-between mb-2 small"><span>💊 Odčervení:</span> <b>{{ pes.pristi_odcerveni|date:"d.m.Y" }}</b></div>
+                <div class="d-flex justify-content-between mb-3 small"><span>🛡️ Klíšťata:</span> <b>{{ pes.pristi_klistata|date:"d.m.Y" }}</b></div>
+                <a href="{% url 'veterinar' %}" class="btn-brown-sm w-100 d-block text-center text-decoration-none">Deník hrdiny</a>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="stat-card-compact">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="section-label m-0">Galerie</span>
+                    <button class="btn-plus" data-bs-toggle="modal" data-bs-target="#addPhotoModal"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="gallery-grid">
+                    {% for foto in fotky %}
+                        <img src="{{ foto.obrazek.url }}" class="gallery-img-sm shadow-sm">
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="stat-card-compact">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="section-label m-0">Videa</span>
+                    <button class="btn-plus" data-bs-toggle="modal" data-bs-target="#addVideoModal"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="row g-3">
+                    {% for video in videa %}
+                    <div class="col-md-6">
+                        <div class="video-frame shadow-sm">
+                            {% if video.video_soubor %}
+                                <video controls style="width: 100%; aspect-ratio: 16/9; object-fit: cover;">
+                                    <source src="{{ video.video_soubor.url }}" type="video/mp4">
+                                </video>
+                            {% elif video.video_url %}
+                                <div class="ratio ratio-16x9">
+                                    <iframe src="{{ video.video_url|safe }}" allowfullscreen></iframe>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="stat-card-compact">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="section-label m-0">Úspěchy</span>
+                    <button class="btn-plus" data-bs-toggle="modal" data-bs-target="#addUspechModal"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for uspech in uspechy %}
+                        <span class="badge bg-light text-brown border rounded-pill p-2 px-3 fw-normal" style="color: var(--t-brown);">
+                           🏆 {{ uspech.nazev }} ({{ uspech.datum|date:"Y" }})
+                        </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addVideoModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content p-4 border-0" style="border-radius: 20px;">
-            <h5 class="fw-bold mb-3">Přidat fotku</h5>
-            <form action="{% url 'pridat_foto' pes.id %}" method="POST" enctype="multipart/form-data">
+        <div class="modal-content rounded-4 border-0">
+            <form method="POST" action="{% url 'pridat_video' pes.id %}" enctype="multipart/form-data">
                 {% csrf_token %}
-                <input type="file" name="obrazek" class="form-control mb-3" accept="image/*" required>
-                <button class="btn w-100 py-2 text-white fw-bold" style="background: var(--primary-brown); border-radius: 10px;">NAHRÁT</button>
+                <div class="modal-body p-4">
+                    <h5 class="fw-bold mb-4">Nahrát video hrdiny</h5>
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted">Z galerie mobilu</label>
+                        <input type="file" name="video_soubor" class="form-control" accept="video/*">
+                    </div>
+                    <div class="text-center my-2 opacity-50 small">— NEBO —</div>
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted">YouTube odkaz</label>
+                        <input type="url" name="video_url" class="form-control" placeholder="https://youtube.com/embed/...">
+                    </div>
+                    <button type="submit" class="btn-brown-sm w-100 py-2 mt-2">ULOŽIT VIDEO</button>
+                </div>
             </form>
         </div>
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+{% if request.user.profil.je_premium and pes.cislo_zapisu %}
+<div class="stat-card-compact mt-3" style="border-left: 4px solid var(--t-gold);">
+    <span class="section-label">Chovné údaje</span>
+    <div class="row small g-2">
+        <div class="col-6"><b>Zápis:</b> {{ pes.cislo_zapisu }}</div>
+        <div class="col-6"><b>Bonitace:</b> {{ pes.bonitace|default:"-" }}</div>
+        <div class="col-12"><b>Zdravotní testy:</b> {{ pes.zdravotni_vysledky|default:"-" }}</div>
+    </div>
+</div>
+{% endif %}
+
+{% if request.user.profil.je_premium %}
+<div class="prevence-panel" style="background: rgba(197, 160, 89, 0.05); border-color: var(--t-gold);">
+    <div class="d-flex align-items-center mb-3">
+        <i class="fas fa-certificate text-gold me-2"></i>
+        <h5 class="m-0 fw-bold" style="color: var(--t-brown);">Chovné a uchovňovací údaje (Premium)</h5>
+    </div>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label">Číslo zápisu (plemenná kniha)</label>
+            <input type="text" name="cislo_zapisu" class="form-control" value="{{ pes.cislo_zapisu }}" placeholder="ČLP/PK/...">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Bonitace / Chovnost</label>
+            <input type="text" name="bonitace" class="form-control" value="{{ pes.bonitace }}" placeholder="Např. Chovný / 5JX1/P">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Zdravotní testy (RTG, DNA)</label>
+            <input type="text" name="zdravotni_vysledky" class="form-control" value="{{ pes.zdravotni_vysledky }}" placeholder="Např. HD A, ED 0/0">
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}

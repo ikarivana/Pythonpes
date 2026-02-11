@@ -1,0 +1,114 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<style>
+    /* Moderní minimalistický styl */
+    .reg-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+        background-color: #fdfaf7; /* Velmi jemná krémová */
+    }
+
+    .reg-card {
+        background: white;
+        width: 100%;
+        max-width: 450px;
+        padding: 40px;
+        border-radius: 24px;
+        box-shadow: 0 10px 30px rgba(141, 110, 99, 0.1);
+        border: 1px solid #efebe9;
+    }
+
+    .reg-card h2 {
+        color: #5d4037;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 30px;
+        letter-spacing: -1px;
+    }
+
+    /* Schováme ty ošklivé Django help-texty (těch 150 znaků atd.) */
+    .helptext, .form-text {
+        display: none !important;
+    }
+
+    /* Moderní inputy */
+    .reg-card input {
+        width: 100%;
+        padding: 14px 20px;
+        margin: 8px 0 20px 0;
+        border: 2px solid #f3e5f5;
+        border-radius: 12px;
+        background: #fafafa;
+        transition: all 0.3s ease;
+    }
+
+    .reg-card input:focus {
+        border-color: #8d6e63;
+        background: white;
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(141, 110, 99, 0.1);
+    }
+
+    .reg-card label {
+        font-weight: 600;
+        color: #8d6e63;
+        margin-left: 5px;
+    }
+
+    .btn-modern {
+        background: #8d6e63;
+        color: white;
+        border: none;
+        width: 100%;
+        padding: 16px;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s, background 0.3s;
+        margin-top: 10px;
+    }
+
+    .btn-modern:hover {
+        background: #6d4c41;
+        transform: translateY(-2px);
+    }
+
+    .errorlist {
+        color: #d32f2f;
+        list-style: none;
+        padding: 0;
+        font-size: 0.85rem;
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="reg-wrapper">
+    <div class="reg-card">
+        <h2>Nová tlapka 🐾</h2>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="errorlist">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn-modern">Vytvořit účet</button>
+        </form>
+
+        <p style="text-align: center; margin-top: 25px; color: #a1887f;">
+            Už jsi členem? <a href="{% url 'login' %}" style="color: #6d4c41; font-weight: bold; text-decoration: none;">Přihlas se</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

@@ -11,17 +11,28 @@
         .dog-name { font-size: 32px; font-weight: bold; color: #5d4037; margin: 0; text-transform: uppercase; }
         .breed { font-style: italic; color: #c5a059; font-size: 18px; }
 
-        /* Hlavní foto a info */
+        /* Mřížka pro Foto a QR kód */
         .main-grid { margin-top: 30px; width: 100%; }
-        .photo-box { width: 45%; }
-        .info-box { width: 55%; padding-left: 20px; vertical-align: top; }
+        .photo-box { width: 40%; vertical-align: top; }
+        .qr-section { width: 20%; text-align: center; vertical-align: top; padding: 0 10px; }
+        .info-box { width: 40%; padding-left: 10px; vertical-align: top; }
 
         .section-title {
             background: #5d4037; color: white; padding: 5px 15px;
             font-size: 14px; text-transform: uppercase; margin-top: 20px;
         }
 
-        /* Rodokmen s dědičností */
+        /* Styl pro QR kód v PDF */
+        .qr-container {
+            border: 1px solid #e2d1c3;
+            padding: 10px;
+            background: #fdfaf5;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .qr-label { font-size: 8px; font-weight: bold; margin-top: 5px; color: #5d4037; }
+
+        /* Rodokmen */
         .pedigree-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px; }
         .pedigree-table td { border: 1px solid #d1c4b9; padding: 8px; vertical-align: top; width: 33%; }
         .parent { background: #fdf9f3; font-weight: bold; font-size: 11px; }
@@ -42,28 +53,45 @@
                 <td class="photo-box">
                     {% if pes.fotka %}
                         <img src="{{ pes.fotka.path }}" style="width: 100%; border-radius: 15px;">
+                    {% else %}
+                        <div style="width: 100%; height: 200px; background: #eee; border-radius: 15px;"></div>
                     {% endif %}
                 </td>
-                <td class="info-box">
-                    <div class="section-title">Základní údaje</div>
-                    <p><strong>Číslo zápisu:</strong> {{ pes.cislo_zapisu }}<br>
-                    <strong>Čip:</strong> {{ pes.cip }}<br>
-                    <strong>Datum narození:</strong> {{ pes.narozeni|date:"d.m.Y" }}<br>
-                    <strong>Barva/Srst:</strong> {{ pes.barva }}, {{ pes.srst }}</p>
 
-                    <div class="section-title">Zdravotní výsledky</div>
-                    <p><strong>DKK (HD):</strong> {{ pes.rtg_hd|default:"-" }} | <strong>DLK (ED):</strong> {{ pes.rtg_ed|default:"-" }}<br>
-                    <strong>Páteř:</strong> {{ pes.rtg_pater|default:"-" }}<br>
-                    <strong>Genetika:</strong> {{ pes.genetika_dna|default:"Neuvedeno" }}</p>
+                <td class="qr-section">
+                    <div class="qr-container">
+                        {% if pes.qr_kod %}
+                            <img src="{{ pes.qr_kod.path }}" style="width: 100px; height: 100px;">
+                            <div class="qr-label">NOUZOVÝ PROFIL</div>
+                        {% else %}
+                            <div style="font-size: 9px; color: #ccc;">QR kód není k dispozici</div>
+                        {% endif %}
+                    </div>
+                </td>
+
+                <td class="info-box">
+                    <div class="section-title" style="margin-top: 0;">Základní údaje</div>
+                    <p style="font-size: 11px;">
+                        <strong>Číslo zápisu:</strong> {{ pes.cislo_zapisu|default:"-" }}<br>
+                        <strong>Čip:</strong> {{ pes.cip|default:"-" }}<br>
+                        <strong>Datum narození:</strong> {{ pes.narozeni|date:"d.m.Y" }}<br>
+                        <strong>Barva/Srst:</strong> {{ pes.barva|default:"-" }}, {{ pes.srst|default:"-" }}
+                    </p>
+
+                    <div class="section-title">Zdraví</div>
+                    <p style="font-size: 11px;">
+                        <strong>DKK:</strong> {{ pes.rtg_hd|default:"-" }} | <strong>DLK:</strong> {{ pes.rtg_ed|default:"-" }}<br>
+                        <strong>Páteř:</strong> {{ pes.rtg_pater|default:"-" }}
+                    </p>
                 </td>
             </tr>
         </table>
 
-        <div class="section-title">3-Generační Rodokmen s dědičností</div>
+        <div class="section-title">3-Generační Rodokmen</div>
         <table class="pedigree-table">
             <tr>
                 <td rowspan="2" class="parent">
-                    OTEC: {{ pes.otec.jmeno|default:pes.otec_manualni }}<br>
+                    OTEC: {{ pes.otec.jmeno|default:pes.otec_manualni|default:"-" }}<br>
                     <span class="health-tag">HD: {{ pes.otec.rtg_hd }} ED: {{ pes.otec.rtg_ed }}</span>
                 </td>
                 <td class="parent">Děda: {{ pes.otec.otec.jmeno|default:"-" }}</td>
@@ -73,7 +101,7 @@
             </tr>
             <tr>
                 <td rowspan="2" class="parent">
-                    MATKA: {{ pes.matka.jmeno|default:pes.matka_manualni }}<br>
+                    MATKA: {{ pes.matka.jmeno|default:pes.matka_manualni|default:"-" }}<br>
                     <span class="health-tag">HD: {{ pes.matka.rtg_hd }} ED: {{ pes.matka.rtg_ed }}</span>
                 </td>
                 <td class="parent">Děda: {{ pes.matka.otec.jmeno|default:"-" }}</td>
@@ -84,10 +112,10 @@
         </table>
 
         <div class="section-title">Výstavní a pracovní úspěchy</div>
-        <p style="font-size: 12px;">{{ uspechy|join:", " }}</p>
+        <p style="font-size: 12px;">{{ uspechy|join:", "|default:"Zatím žádné záznamy." }}</p>
 
         <div class="footer">
-            Generováno portálem MojePsíData.cz – Profesionální správa chovu
+            Generováno portálem MojePsíData.cz – Dokument pro identifikaci a chov
         </div>
     </div>
 </body>

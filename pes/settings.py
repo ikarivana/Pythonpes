@@ -65,7 +65,7 @@ ROOT_URLCONF = 'pes.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -153,7 +153,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100 MB
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = 'profil'
 LOGOUT_REDIRECT_URL = 'home'
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
