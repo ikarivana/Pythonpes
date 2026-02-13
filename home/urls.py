@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import simpleshop_webhook
 
 urlpatterns = [
     # Hlavní stránka
@@ -20,4 +21,6 @@ urlpatterns = [
     path('podminky/', views.podminky, name='podminky'),
     path('cookies/', views.cookies, name='cookies'),
     path('cenik/', views.cenik, name='cenik'),
+
+    path('simpleshop/webhook/', simpleshop_webhook, name='simpleshop_webhook'),
 ]

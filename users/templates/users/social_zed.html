@@ -139,23 +139,39 @@
 
     <h4 class="section-header">Aktuální zdi plemen</h4>
     <div class="row g-3 mb-4">
-        {% for p in plemena_bežna %}
-            {% if p.slug != 'psi-hriste' %} <div class="col-md-3 col-6"><a href="{% url 'zed_plemene' p.slug %}" class="breed-item shadow-sm">{{ p.nazev }}</a></div>
+        {% for p in vsechna_plemena %}
+            {# Zobrazíme plemeno, pokud to není jedna ze speciálních kategorií nebo hřiště #}
+            {% if p.kategorie != 'vystavy' and p.kategorie != 'lovecka' and p.slug != 'psi-hriste' and p.slug != 'venceni' and p.slug != 'hlidani' %}
+                <div class="col-md-3 col-6">
+                    <a href="{% url 'zed_plemene' p.slug %}" class="breed-item shadow-sm">
+                        🐾 {{ p.nazev }}
+                    </a>
+                </div>
             {% endif %}
+        {% empty %}
+            <p class="text-muted ps-3">Zatím tu nejsou žádná plemena.</p>
         {% endfor %}
     </div>
 
     <h4 class="section-header">Probíhající Výstavy</h4>
     <div class="row g-3 mb-4">
         {% for p in plemena_vystavy %}
-            <div class="col-md-3 col-6"><a href="{% url 'zed_plemene' p.slug %}" class="breed-item shadow-sm">🏆 {{ p.nazev }}</a></div>
+            <div class="col-md-3 col-6">
+                <a href="{% url 'zed_plemene' p.slug %}" class="breed-item shadow-sm">🏆 {{ p.nazev }}</a>
+            </div>
+        {% empty %}
+            <p class="text-muted ps-3">Žádné aktuální výstavy.</p>
         {% endfor %}
     </div>
 
     <h4 class="section-header">Lovecké akce</h4>
     <div class="row g-3 mb-5">
         {% for p in plemena_lovecka %}
-            <div class="col-md-3 col-6"><a href="{% url 'zed_plemene' p.slug %}" class="breed-item shadow-sm">🌿 {{ p.nazev }}</a></div>
+            <div class="col-md-3 col-6">
+                <a href="{% url 'zed_plemene' p.slug %}" class="breed-item shadow-sm">🌿 {{ p.nazev }}</a>
+            </div>
+        {% empty %}
+            <p class="text-muted ps-3">Žádné plánované akce.</p>
         {% endfor %}
     </div>
 </div>

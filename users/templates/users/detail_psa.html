@@ -8,24 +8,24 @@
     :root {
         --t-brown: #3e2723;
         --t-gold: #c5a059;
-        --t-bg: #fdfaf4;
+        --t-bg: #f9f4ef;
         --t-card: #ffffff;
         --t-border: rgba(197, 160, 89, 0.2);
-        --t-red: #e35d6a; /* Barva PDF tlačítka z tvé fotky */
+        --t-red: #e35d6a;
     }
 
-    body { background-color: #f9f4ef; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background-color: var(--t-bg); font-family: 'Plus Jakarta Sans', sans-serif; }
 
-    /* HLAVIČKA - kompaktní se zaoblením */
+    /* --- HLAVIČKA --- */
     .profile-header-slim {
         background: linear-gradient(135deg, var(--t-brown) 0%, #5d4037 100%);
-        padding: 25px 0; color: white;
+        padding: 30px 0; color: white;
         border-bottom: 4px solid var(--t-gold);
         border-radius: 0 0 30px 30px;
-        margin-bottom: 25px;
+        margin-bottom: 30px;
     }
 
-    /* KARTY */
+    /* --- KARTY --- */
     .stat-card-compact {
         background: var(--t-card);
         border-radius: 20px;
@@ -40,63 +40,71 @@
         color: var(--t-gold); letter-spacing: 1px; display: block; margin-bottom: 15px;
     }
 
-    /* VIDEO FIX - tohle udrží video v boxu */
-    .video-frame {
-        border-radius: 15px;
-        overflow: hidden;
-        border: 1px solid var(--t-border);
-        background: #000;
-        line-height: 0;
-        position: relative;
-    }
-
+    /* --- GALERIE --- */
     .gallery-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: 10px;
+        gap: 12px;
     }
-
     .gallery-img-sm {
         width: 100%; height: 100px; object-fit: cover; border-radius: 12px;
+        cursor: pointer; transition: 0.3s;
+    }
+    .gallery-empty-state {
+        grid-column: 1 / -1; background: #fdfcfb; border: 2px dashed #eeebe7;
+        border-radius: 15px; padding: 30px; text-align: center; opacity: 0.6;
     }
 
-    /* TLAČÍTKA */
+    /* --- VIDEO RESPONSIVE --- */
+    .video-frame {
+        border-radius: 15px; overflow: hidden; background: #000;
+        width: 100%; aspect-ratio: 16 / 9;
+        position: relative;
+    }
+    .video-frame video, .video-frame iframe {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
+    }
+
+    /* --- BUTTONS --- */
     .btn-pdf {
-        background-color: var(--t-red); color: white;
+        background-color: var(--t-red); color: white !important;
         border-radius: 12px; font-weight: 700; font-size: 0.8rem;
-        padding: 8px 16px; border: none; transition: 0.3s;
+        padding: 10px 20px; border: none; display: inline-flex; align-items: center;
+        text-decoration: none;
     }
-    .btn-pdf:hover { background-color: #c94b57; color: white; transform: scale(1.05); }
-
     .btn-brown-sm {
-        background: var(--t-brown); color: white; border-radius: 12px;
-        padding: 8px 20px; font-size: 0.85rem; border: none; font-weight: 700;
+        background: var(--t-brown); color: white !important; border-radius: 12px;
+        padding: 12px; font-weight: 700; width: 100%; border: none; display: block;
+        text-decoration: none;
     }
-
     .btn-plus {
-        width: 30px; height: 30px; border-radius: 10px;
-        border: 1px solid var(--t-gold); color: var(--t-gold);
-        background: transparent; display: flex; align-items: center; justify-content: center;
+        width: 32px; height: 32px; border-radius: 10px; border: 1px solid var(--t-gold);
+        color: var(--t-gold); background: transparent; display: flex; align-items: center; justify-content: center;
+    }
+    .btn-plus:hover { background: var(--t-gold); color: white; }
+
+    /* --- PREMIUM LOCK --- */
+    .premium-lock-box {
+        background: rgba(197, 160, 89, 0.05); border: 1px dashed var(--t-gold);
+        border-radius: 20px; padding: 25px; text-align: center;
     }
 </style>
 
 <div class="profile-header-slim shadow">
     <div class="container">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-            <div class="d-flex align-items-center gap-3">
-                {% if pes.fotka %}
-                    <img src="{{ pes.fotka.url }}" style="width: 80px; height: 80px; border-radius: 20px; object-fit: cover; border: 2px solid white;">
-                {% endif %}
+            <div class="d-flex align-items-center gap-4">
+                {% if pes.fotka %}<img src="{{ pes.fotka.url }}" style="width: 100px; height: 100px; border-radius: 25px; object-fit: cover; border: 3px solid rgba(255,255,255,0.2);">
+                {% else %}<div style="width: 100px; height: 100px; border-radius: 25px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center;"><i class="fas fa-paw fa-2x opacity-25"></i></div>{% endif %}
                 <div>
-                    <h2 class="m-0 fw-bold" style="font-family: 'Playfair Display', serif;">{{ pes.jmeno }}</h2>
-                    <p class="m-0 opacity-75 small">{{ pes.plemeno }}</p>
+                    <h1 class="m-0 fw-bold" style="font-family: 'Playfair Display', serif;">{{ pes.jmeno }}</h1>
+                    <p class="m-0 opacity-75"><i class="fas fa-dna me-1"></i> {{ pes.rasa }}</p>
+                    <div class="mt-2">{% if user.profil.je_premium %}<span class="badge bg-warning text-dark rounded-pill px-3"><i class="fas fa-crown me-1"></i> ALFA PES</span>{% endif %}</div>
                 </div>
             </div>
             <div class="d-flex gap-2">
-                <a href="{% url 'export_pes_pdf' pes.id %}" class="btn-pdf shadow-sm">
-                    <i class="fas fa-file-pdf me-1"></i> STÁHNOUT PDF RODOKMEN
-                </a>
-                <a href="{% url 'upravit_psa' pes.id %}" class="btn btn-light btn-sm rounded-pill px-3 fw-bold">Upravit</a>
+                <a href="{% url 'export_pes_pdf' pes.id %}" class="btn-pdf shadow-sm"><i class="fas fa-file-pdf me-2"></i> PDF RODOKMEN</a>
+                <a href="{% url 'upravit_psa' pk=pes.id %}" class="btn btn-outline-light btn-sm rounded-pill px-4 fw-bold">Upravit</a>
             </div>
         </div>
     </div>
@@ -107,63 +115,114 @@
         <div class="col-lg-4">
             <div class="stat-card-compact">
                 <span class="section-label">Aktuální prevence</span>
-                <div class="d-flex justify-content-between mb-2 small"><span>💉 Očkování:</span> <b>{{ pes.pristi_ockovani|date:"d.m.Y" }}</b></div>
-                <div class="d-flex justify-content-between mb-2 small"><span>💊 Odčervení:</span> <b>{{ pes.pristi_odcerveni|date:"d.m.Y" }}</b></div>
-                <div class="d-flex justify-content-between mb-3 small"><span>🛡️ Klíšťata:</span> <b>{{ pes.pristi_klistata|date:"d.m.Y" }}</b></div>
-                <a href="{% url 'veterinar' %}" class="btn-brown-sm w-100 d-block text-center text-decoration-none">Deník hrdiny</a>
+                <div class="d-flex justify-content-between mb-2 small">
+                    <span><i class="fas fa-syringe me-2 text-muted"></i>Očkování:</span>
+                    <b class="{% if pes.ockovani_propadle %}text-danger{% endif %}">{{ pes.pristi_ockovani|date:"d.m.Y"|default:"Neuvedeno" }}</b>
+                </div>
+                <div class="d-flex justify-content-between mb-2 small">
+                    <span><i class="fas fa-pills me-2 text-muted"></i>Odčervení:</span>
+                    <b class="{% if pes.odcerveni_propadle %}text-danger{% endif %}">{{ pes.pristi_odcerveni|date:"d.m.Y"|default:"Neuvedeno" }}</b>
+                </div>
+                <div class="d-flex justify-content-between mb-3 small">
+                    <span><i class="fas fa-shield-virus me-2 text-muted"></i>Klíšťata:</span>
+                    <b class="{% if pes.klistata_propadle %}text-danger{% endif %}">{{ pes.pristi_klistata|date:"d.m.Y"|default:"Neuvedeno" }}</b>
+                </div>
+                <hr class="opacity-10">
+                <a href="{% url 'veterinar' %}" class="btn-brown-sm text-center">Otevřít zdravotní deník</a>
+            </div>
+
+            {% if user.profil.je_premium or pes.majitel == user %}
+            <div class="stat-card-compact" style="border-left: 4px solid var(--t-gold); background: #fffcf5;">
+                <span class="section-label"><i class="fas fa-crown me-1"></i> Digitální zdravotní karta</span>
+                <div class="row g-3 small">
+                    <div class="col-6"><label class="text-muted d-block small">ZÁPIS</label><b>{{ pes.cislo_zapisu|default:"-" }}</b></div>
+                    <div class="col-6"><label class="text-muted d-block small">BONITACE</label><b>{{ pes.bonitace|default:"-" }}</b></div>
+                    <div class="col-6"><label class="text-muted d-block small">RTG HD/ED</label><b>{{ pes.rtg_hd|default:"-" }}/{{ pes.rtg_ed|default:"-" }}</b></div>
+                    <div class="col-6"><label class="text-muted d-block small">PÁTEŘ</label><b>{{ pes.rtg_pater|default:"-" }}</b></div>
+                    <div class="col-12"><label class="text-muted d-block small">GENETIKA / DNA</label><b>{{ pes.genetika_dna|default:"Bez záznamu" }}</b></div>
+                </div>
+            </div>
+            {% else %}
+            <div class="premium-lock-box shadow-sm mb-4">
+                <i class="fas fa-lock fa-2x mb-3 text-gold opacity-50"></i>
+                <h6 class="fw-bold">Chovná karta hrdiny</h6>
+                <p class="small text-muted">Kompletní výsledky jsou dostupné pouze pro ALFA páníčky.</p>
+                <a href="{% url 'register' %}" class="btn btn-sm btn-warning w-100 rounded-pill fw-bold" style="background:var(--t-gold); border:none; color:white;">AKTIVOVAT ALFA</a>
+            </div>
+            {% endif %}
+
+            <div class="stat-card-compact text-center">
+                <span class="section-label">Nouzový QR kód</span>
+                {% if pes.qr_kod %}
+                <img src="{{ pes.qr_kod.url }}" style="width: 120px; border: 1px solid #eee; padding: 5px; border-radius: 10px;">
+                {% endif %}
             </div>
         </div>
 
         <div class="col-lg-8">
             <div class="stat-card-compact">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="section-label m-0">Galerie</span>
+                    <span class="section-label m-0">Galerie fotek</span>
                     <button class="btn-plus" data-bs-toggle="modal" data-bs-target="#addPhotoModal"><i class="fas fa-plus"></i></button>
                 </div>
                 <div class="gallery-grid">
                     {% for foto in fotky %}
-                        <img src="{{ foto.obrazek.url }}" class="gallery-img-sm shadow-sm">
+                    <img src="{{ foto.obrazek.url }}" class="gallery-img-sm shadow-sm">
+                    {% empty %}
+                    <div class="gallery-empty-state"><i class="fas fa-camera fa-2x mb-2"></i><p class="m-0 small">Zatím žádné fotky. Buďte první!</p></div>
                     {% endfor %}
                 </div>
             </div>
 
             <div class="stat-card-compact">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="section-label m-0">Videa</span>
+                    <span class="section-label m-0">Videa z akcí</span>
                     <button class="btn-plus" data-bs-toggle="modal" data-bs-target="#addVideoModal"><i class="fas fa-plus"></i></button>
                 </div>
                 <div class="row g-3">
                     {% for video in videa %}
                     <div class="col-md-6">
                         <div class="video-frame shadow-sm">
-                            {% if video.video_soubor %}
-                                <video controls style="width: 100%; aspect-ratio: 16/9; object-fit: cover;">
-                                    <source src="{{ video.video_soubor.url }}" type="video/mp4">
-                                </video>
-                            {% elif video.video_url %}
-                                <div class="ratio ratio-16x9">
-                                    <iframe src="{{ video.video_url|safe }}" allowfullscreen></iframe>
-                                </div>
-                            {% endif %}
+                            {% if video.video_soubor %}<video controls><source src="{{ video.video_soubor.url }}" type="video/mp4"></video>
+                            {% elif video.video_url %}<iframe src="{{ video.video_url|safe }}" allowfullscreen></iframe>{% endif %}
                         </div>
                     </div>
+                    {% empty %}
+                    <p class="small text-muted text-center py-2">Žádná videa k zobrazení.</p>
                     {% endfor %}
                 </div>
             </div>
 
             <div class="stat-card-compact">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="section-label m-0">Úspěchy</span>
+                    <span class="section-label m-0">Výstavy a zkoušky</span>
                     <button class="btn-plus" data-bs-toggle="modal" data-bs-target="#addUspechModal"><i class="fas fa-plus"></i></button>
                 </div>
                 <div class="d-flex flex-wrap gap-2">
                     {% for uspech in uspechy %}
-                        <span class="badge bg-light text-brown border rounded-pill p-2 px-3 fw-normal" style="color: var(--t-brown);">
-                           🏆 {{ uspech.nazev }} ({{ uspech.datum|date:"Y" }})
-                        </span>
+                    <div class="badge bg-light text-dark border rounded-pill p-2 px-3 fw-normal">
+                        <i class="fas fa-trophy text-gold me-2"></i> {{ uspech.nazev }} ({{ uspech.datum|date:"Y" }})
+                    </div>
+                    {% empty %}
+                    <p class="small text-muted">Zatím žádné trofeje.</p>
                     {% endfor %}
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addPhotoModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0">
+            <form method="POST" action="{% url 'pridat_foto' pes.id %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <h5 class="fw-bold mb-3">Přidat fotku hrdiny</h5>
+                    <input type="file" name="obrazek" class="form-control mb-3" accept="image/*" required>
+                    <button type="submit" class="btn-brown-sm">ULOŽIT FOTKU</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -174,55 +233,37 @@
             <form method="POST" action="{% url 'pridat_video' pes.id %}" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="modal-body p-4">
-                    <h5 class="fw-bold mb-4">Nahrát video hrdiny</h5>
+                    <h5 class="fw-bold mb-4">Nahrát video</h5>
                     <div class="mb-3">
-                        <label class="small fw-bold text-muted">Z galerie mobilu</label>
+                        <label class="small fw-bold">Z galerie mobilu</label>
                         <input type="file" name="video_soubor" class="form-control" accept="video/*">
                     </div>
                     <div class="text-center my-2 opacity-50 small">— NEBO —</div>
                     <div class="mb-3">
-                        <label class="small fw-bold text-muted">YouTube odkaz</label>
+                        <label class="small fw-bold">YouTube odkaz</label>
                         <input type="url" name="video_url" class="form-control" placeholder="https://youtube.com/embed/...">
                     </div>
-                    <button type="submit" class="btn-brown-sm w-100 py-2 mt-2">ULOŽIT VIDEO</button>
+                    <button type="submit" class="btn-brown-sm">ULOŽIT VIDEO</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-{% if request.user.profil.je_premium and pes.cislo_zapisu %}
-<div class="stat-card-compact mt-3" style="border-left: 4px solid var(--t-gold);">
-    <span class="section-label">Chovné údaje</span>
-    <div class="row small g-2">
-        <div class="col-6"><b>Zápis:</b> {{ pes.cislo_zapisu }}</div>
-        <div class="col-6"><b>Bonitace:</b> {{ pes.bonitace|default:"-" }}</div>
-        <div class="col-12"><b>Zdravotní testy:</b> {{ pes.zdravotni_vysledky|default:"-" }}</div>
-    </div>
-</div>
-{% endif %}
-
-{% if request.user.profil.je_premium %}
-<div class="prevence-panel" style="background: rgba(197, 160, 89, 0.05); border-color: var(--t-gold);">
-    <div class="d-flex align-items-center mb-3">
-        <i class="fas fa-certificate text-gold me-2"></i>
-        <h5 class="m-0 fw-bold" style="color: var(--t-brown);">Chovné a uchovňovací údaje (Premium)</h5>
-    </div>
-    <div class="row g-3">
-        <div class="col-md-4">
-            <label class="form-label">Číslo zápisu (plemenná kniha)</label>
-            <input type="text" name="cislo_zapisu" class="form-control" value="{{ pes.cislo_zapisu }}" placeholder="ČLP/PK/...">
-        </div>
-        <div class="col-md-4">
-            <label class="form-label">Bonitace / Chovnost</label>
-            <input type="text" name="bonitace" class="form-control" value="{{ pes.bonitace }}" placeholder="Např. Chovný / 5JX1/P">
-        </div>
-        <div class="col-md-4">
-            <label class="form-label">Zdravotní testy (RTG, DNA)</label>
-            <input type="text" name="zdravotni_vysledky" class="form-control" value="{{ pes.zdravotni_vysledky }}" placeholder="Např. HD A, ED 0/0">
+<div class="modal fade" id="addUspechModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0">
+            <form method="POST" action="{% url 'pridat_uspech' pes.id %}">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <h5 class="fw-bold mb-3">Přidat ocenění / zkoušku</h5>
+                    <input type="text" name="nazev" class="form-control mb-2" placeholder="Název (např. V1, CAJC...)" required>
+                    <input type="date" name="datum" class="form-control mb-3" required>
+                    <button type="submit" class="btn-brown-sm">ULOŽIT DO SBÍRKY</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-{% endif %}
 
 {% endblock %}

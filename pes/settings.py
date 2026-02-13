@@ -27,9 +27,9 @@ load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-1pv+(%pqb466r@7*-l7wr0skdytrs**6d1sqlkx0mh_jp0%sjp')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['www.epes.online', 'epes.online','127.0.0.1']
 
 
 # Application definition
@@ -72,6 +72,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'users.context_processors.counts',
             ],
         },
     },

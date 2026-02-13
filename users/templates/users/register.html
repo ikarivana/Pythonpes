@@ -2,88 +2,61 @@
 
 {% block content %}
 <style>
-    /* Moderní minimalistický styl */
     .reg-wrapper {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 80vh;
-        background-color: #fdfaf7; /* Velmi jemná krémová */
+        display: flex; justify-content: center; align-items: center;
+        min-height: 80vh; background-color: #fdfaf7; padding: 20px;
     }
-
     .reg-card {
-        background: white;
-        width: 100%;
-        max-width: 450px;
-        padding: 40px;
-        border-radius: 24px;
-        box-shadow: 0 10px 30px rgba(141, 110, 99, 0.1);
-        border: 1px solid #efebe9;
+        background: white; width: 100%; max-width: 480px;
+        padding: 40px; border-radius: 24px;
+        box-shadow: 0 10px 30px rgba(141, 110, 99, 0.1); border: 1px solid #efebe9;
     }
-
     .reg-card h2 {
-        color: #5d4037;
-        font-weight: 800;
-        text-align: center;
-        margin-bottom: 30px;
-        letter-spacing: -1px;
+        color: #5d4037; font-weight: 800; text-align: center;
+        margin-bottom: 30px; letter-spacing: -1px; font-family: 'Playfair Display', serif;
     }
 
-    /* Schováme ty ošklivé Django help-texty (těch 150 znaků atd.) */
-    .helptext, .form-text {
-        display: none !important;
-    }
+    /* Skrytí nápovědy Djanga */
+    .helptext, .form-text { display: none !important; }
 
-    /* Moderní inputy */
-    .reg-card input {
-        width: 100%;
-        padding: 14px 20px;
-        margin: 8px 0 20px 0;
-        border: 2px solid #f3e5f5;
-        border-radius: 12px;
-        background: #fafafa;
-        transition: all 0.3s ease;
+    /* Stylování polí */
+    .form-group { margin-bottom: 15px; }
+    .reg-card label {
+        font-weight: 600; color: #8d6e63; margin-left: 5px; display: block; margin-bottom: 5px;
     }
-
+    /* Cílíme na textové inputy, ale ne na checkbox */
+    .reg-card input:not([type="checkbox"]) {
+        width: 100%; padding: 12px 18px; border: 2px solid #f3e5f5;
+        border-radius: 12px; background: #fafafa; transition: all 0.3s ease;
+    }
     .reg-card input:focus {
-        border-color: #8d6e63;
-        background: white;
-        outline: none;
+        border-color: #8d6e63; background: white; outline: none;
         box-shadow: 0 0 0 4px rgba(141, 110, 99, 0.1);
     }
 
-    .reg-card label {
-        font-weight: 600;
-        color: #8d6e63;
-        margin-left: 5px;
+    /* Checkbox souhlasu */
+    .terms-box { display: flex; justify-content: center; margin: 20px 0; }
+    .terms-inner {
+        display: inline-flex; align-items: center; padding: 10px 15px;
+        background: rgba(141, 110, 99, 0.05); border: 1px solid rgba(141, 110, 99, 0.15);
+        border-radius: 12px;
+    }
+    .terms-inner input[type="checkbox"] {
+        width: 18px !important; height: 18px !important; cursor: pointer;
+    }
+    .terms-inner label {
+        font-size: 0.85rem; color: #5d4037; margin-left: 10px; cursor: pointer; font-weight: 500;
+        margin-bottom: 0; /* Zrušení marginu u labelu v checkboxu */
     }
 
     .btn-modern {
-        background: #8d6e63;
-        color: white;
-        border: none;
-        width: 100%;
-        padding: 16px;
-        border-radius: 12px;
-        font-size: 1.1rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: transform 0.2s, background 0.3s;
-        margin-top: 10px;
+        background: #8d6e63; color: white; border: none; width: 100%;
+        padding: 16px; border-radius: 12px; font-size: 1.1rem; font-weight: 700;
+        cursor: pointer; transition: 0.3s;
     }
+    .btn-modern:hover { background: #6d4c41; transform: translateY(-2px); }
 
-    .btn-modern:hover {
-        background: #6d4c41;
-        transform: translateY(-2px);
-    }
-
-    .errorlist {
-        color: #d32f2f;
-        list-style: none;
-        padding: 0;
-        font-size: 0.85rem;
-        margin-bottom: 10px;
-    }
+    .errorlist { color: #d32f2f; list-style: none; padding: 0; font-size: 0.75rem; margin-top: 5px; }
 </style>
 
 <div class="reg-wrapper">
@@ -98,15 +71,26 @@
                     <label>{{ field.label }}</label>
                     {{ field }}
                     {% if field.errors %}
-                        <div class="errorlist">{{ field.errors }}</div>
+                        <ul class="errorlist">
+                            {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
                     {% endif %}
                 </div>
             {% endfor %}
 
-            <button type="submit" class="btn-modern">Vytvořit účet</button>
+            <div class="terms-box">
+                <div class="terms-inner">
+                    <input type="checkbox" id="souhlas_podminky" name="souhlas_podminky" required>
+                    <label for="souhlas_podminky">
+                        Souhlasím s <a href="{% url 'podminky' %}" target="_blank" style="color: #c5a059; font-weight: 700; text-decoration: none;">podmínkami</a>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-modern shadow-sm">Vytvořit účet</button>
         </form>
 
-        <p style="text-align: center; margin-top: 25px; color: #a1887f;">
+        <p style="text-align: center; margin-top: 25px; color: #a1887f; font-size: 0.9rem;">
             Už jsi členem? <a href="{% url 'login' %}" style="color: #6d4c41; font-weight: bold; text-decoration: none;">Přihlas se</a>
         </p>
     </div>

@@ -2,11 +2,7 @@
 
 {% block content %}
 <style>
-    /* Sjednocení s tvým "Warm" stylem */
-    .login-container {
-        max-width: 450px;
-        margin: 60px auto;
-    }
+    .login-container { max-width: 450px; margin: 60px auto; }
     .login-card {
         background: white;
         border: 1px solid #eaddcf;
@@ -14,24 +10,12 @@
         box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
     .btn-login {
-        background-color: #8b5e3c; /* Tvoje primární hnědá */
-        color: white;
-        border-radius: 12px;
-        font-weight: 600;
-        padding: 12px;
-        border: none;
-        transition: 0.3s;
+        background-color: #8b5e3c; color: white; border-radius: 12px;
+        font-weight: 600; padding: 12px; border: none; transition: 0.3s;
     }
-    .btn-login:hover {
-        background-color: #6d4a30;
-        transform: translateY(-2px);
-        color: white;
-    }
-    .form-control {
-        border-radius: 10px;
-        border: 1px solid #eaddcf;
-        padding: 10px 15px;
-    }
+    .btn-login:hover { background-color: #6d4a30; transform: translateY(-2px); color: white; }
+
+    .form-control { border-radius: 10px; border: 1px solid #eaddcf; padding: 10px 15px; }
     .form-control:focus {
         border-color: #8b5e3c;
         box-shadow: 0 0 0 0.2rem rgba(139, 94, 60, 0.15);
@@ -42,34 +26,31 @@
     <div class="login-card p-4 p-md-5">
         <div class="text-center mb-4">
             <h2 class="fw-bold" style="color: #4a3728;">Přihlášení 🐾</h2>
-            {% if next %}
-                <div class="alert mt-3 small" style="background-color: #fdfaf5; color: #8b5e3c; border: 1px solid #eaddcf;">
-                    Pro pokračování na zeď se prosím nejdříve přihlaste.
-                </div>
-            {% endif %}
         </div>
 
         <form method="post">
             {% csrf_token %}
-
             <div class="mb-3">
-                <label class="form-label small fw-bold">Uživatelské jméno</label>
+                <label class="form-label small fw-bold text-muted">Uživatelské jméno</label>
                 <input type="text" name="username" class="form-control" placeholder="Tvé jméno" required>
             </div>
 
-            <div class="mb-4">
-                <label class="form-label small fw-bold">Heslo</label>
+            <div class="mb-3">
+                <div class="d-flex justify-content-between">
+                    <label class="form-label small fw-bold text-muted">Heslo</label>
+                    <a href="{% url 'password_reset' %}" class="small" style="color: #c5a059; text-decoration: none;">Zapomenuté heslo?</a>
+                </div>
                 <input type="password" name="password" class="form-control" placeholder="••••••••" required>
             </div>
 
-            <button type="submit" class="btn btn-login w-100 shadow-sm">
+            <button type="submit" class="btn btn-login w-100 shadow-sm mt-2">
                 Vstoupit do deníku
             </button>
         </form>
 
         <div class="text-center mt-4">
             <p class="small text-muted mb-0">Ještě nemáte účet?</p>
-            <a href="/users/register/" class="small fw-bold" style="color: #8b5e3c; text-decoration: none;">Zaregistrujte se zde</a>
+            <a href="{% url 'register' %}" class="small fw-bold" style="color: #8b5e3c; text-decoration: none;">Zaregistrujte se zde</a>
         </div>
     </div>
 </div>

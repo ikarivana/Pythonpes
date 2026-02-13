@@ -2,186 +2,268 @@
 
 {% block content %}
 <style>
-    /* --- DEFINICE BAREV A STYLŮ --- */
-    :root {
-        --p-brown-dark: #3e2723;
-        --p-brown-mid: #5d4037;
-        --p-gold: #c5a059;
-        --p-bg-beige: #fdfaf5;
+    /* Hlavní kontejner - čistý a přehledný */
+    .home-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 15px;
     }
 
-    /* Hero blok */
-    .hero-warm {
-        padding: 60px 20px;
-        background: var(--p-brown-mid);
-        border-radius: 30px;
-        margin-bottom: 40px;
-        text-align: center;
-        color: white;
-        box-shadow: 0 15px 35px rgba(62, 39, 35, 0.2);
-        position: relative;
-        overflow: hidden;
+    /* Hero sekce s pozdravem */
+    .hero-alfa {
+        padding: 20px 0;
+        margin-bottom: 20px;
     }
-    .hero-warm h1 { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 2.8rem; }
-
-    .stat-badge-warm {
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(5px);
-        padding: 8px 25px;
-        border-radius: 50px;
-        font-size: 0.9rem;
-        display: inline-block;
-        margin-top: 20px;
+    .hero-alfa h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.2rem;
+        color: #2d1b19;
+        margin-bottom: 5px;
     }
 
-    /* Hlavní karty (Bazar, Mapa, Profil) */
-    .home-card {
-        border: none;
-        border-radius: 25px;
-        transition: 0.3s;
+    /* STATUS BADGE - Korunka nebo tlapka u jména */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
         background: white;
-        text-decoration: none !important;
-        color: inherit !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        padding: 6px 14px;
+        border-radius: 50px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        color: #c5a059;
+        font-weight: 700;
+        font-size: 0.8rem;
     }
-    .home-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
-    .icon-circle { width: 60px; height: 60px; background: var(--p-bg-beige); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 15px; }
 
-    /* Sekce Komunita a Plemena */
-    .section-header { display: flex; align-items: center; gap: 15px; margin-top: 50px; margin-bottom: 25px; }
-    .header-line { width: 40px; height: 4px; background: var(--p-gold); border-radius: 2px; }
-
-    .breed-wall-card {
+    /* ELEGANTNÍ ZÚŽENÝ BANNER PRO KORUNKU */
+    .premium-banner {
         background: white;
         border-radius: 20px;
-        border: 1px solid rgba(0,0,0,0.04);
-        padding: 20px;
+        padding: 15px 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 35px;
+        border: 1px solid rgba(197, 160, 89, 0.25);
+        box-shadow: 0 10px 25px rgba(62, 39, 35, 0.05);
+        transition: transform 0.3s ease;
+    }
+    .premium-banner:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(197, 160, 89, 0.12);
+    }
+    .premium-content {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .premium-icon {
+        font-size: 1.5rem;
+        background: #fffdf5;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+    }
+    .premium-text h5 {
+        margin: 0;
+        font-weight: 800;
+        color: #3e2723;
+        font-size: 1rem;
+    }
+    .premium-text p {
+        margin: 0;
+        font-size: 0.8rem;
+        color: #8d7d77;
+    }
+    .btn-alfa-slim {
+        background: #c5a059;
+        color: white !important;
+        font-weight: 700;
+        font-size: 0.8rem;
+        padding: 8px 18px;
+        border-radius: 10px;
+        text-decoration: none !important;
+        transition: 0.3s;
+    }
+    .btn-alfa-slim:hover {
+        background: #3e2723;
+        transform: scale(1.05);
+    }
+
+    /* HLAVNÍ POHYBLIVÉ KARTY - Výrazné stínování */
+    .main-card {
+        background: #ffffff;
+        border-radius: 25px;
+        padding: 35px 20px;
         text-align: center;
         text-decoration: none !important;
+        color: #3e2723;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 15px 35px rgba(62, 39, 35, 0.1), 0 5px 15px rgba(0,0,0,0.05);
+        border: 1px solid rgba(197, 160, 89, 0.1);
+    }
+    .main-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 25px 50px rgba(62, 39, 35, 0.18);
+        border-color: #c5a059;
+    }
+    .icon-circle {
+        width: 60px;
+        height: 60px;
+        background: #fdfaf6;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        font-size: 1.8rem;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    /* Dlaždice komunity */
+    .sub-card {
+        background: white;
+        border-radius: 15px;
+        padding: 15px;
+        text-align: center;
+        text-decoration: none !important;
+        color: #5d4037;
+        font-weight: 600;
         display: block;
         transition: 0.3s;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-        height: 100%;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.04);
     }
-    .breed-wall-card:hover { transform: translateY(-5px); border-color: var(--p-gold); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+    .sub-card:hover {
+        transform: translateY(-3px);
+        background: #3e2723;
+        color: white !important;
+    }
 
-    .breed-img-wrapper { width: 60px; height: 60px; margin: 0 auto 12px; border-radius: 50%; overflow: hidden; border: 2px solid #f8f6f2; background: #eee; }
-    .breed-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+    /* Příspěvky na zdi */
+    .post-card {
+        background: white;
+        border-radius: 18px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        border: 1px solid rgba(0,0,0,0.02);
+        transition: 0.3s;
+    }
+    .post-card:hover {
+        box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    }
 
-    .breed-name-small { color: var(--p-brown-dark); font-weight: 700; font-size: 0.85rem; display: block; text-transform: uppercase; }
-    .breed-count { color: #adb5bd; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; }
+    /* Nadpisy sekcí */
+    .section-label {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin: 45px 0 20px 0;
+    }
+    .section-label h4 {
+        font-weight: 800;
+        color: #3e2723;
+        margin: 0;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .section-label .line {
+        flex-grow: 1;
+        height: 1.5px;
+        background: rgba(197, 160, 89, 0.2);
+    }
 
-    .all-breeds-btn { border: 2px dashed var(--p-gold) !important; background: #fffdf9; }
+    /* Mobilní zobrazení */
+    @media (max-width: 768px) {
+        .premium-banner { flex-direction: column; text-align: center; gap: 15px; }
+        .premium-content { flex-direction: column; gap: 10px; }
+        .main-card { padding: 30px 15px; }
+    }
 </style>
 
-<div class="hero-warm">
-    <h1>Vítejte v Psím Deníku 🐾</h1>
-    <p class="opacity-75">Vše důležité o vašich čtyřnohých kamarádech na jednom místě.</p>
-    {% if not user.is_authenticated %}
-        <div class="mt-3">
-            <a href="{% url 'login' %}" class="btn btn-light px-4 fw-bold me-2" style="border-radius: 12px;">Přihlásit se</a>
-            <a href="{% url 'register' %}" class="btn btn-outline-light px-4 fw-bold" style="border-radius: 12px;">Registrace</a>
+<div class="home-container">
+    <div class="hero-alfa">
+        <h2>Ahoj, {{ user.username }}! 🐾</h2>
+        <div class="status-badge">
+            {% if je_premium %}
+                <i class="fas fa-crown"></i> TVŮJ ALFA PROFIL JE AKTIVNÍ
+            {% else %}
+                <i class="fas fa-paw"></i> BĚŽNÝ PÁNÍČEK
+            {% endif %}
         </div>
+    </div>
+
+    {% if not je_premium %}
+    <div class="premium-banner">
+        <div class="premium-content">
+            <div class="premium-icon">👑</div>
+            <div class="premium-text">
+                <h5>Chcete korunku u jména?</h5>
+                <p>Získejte status ALFA a podpořte náš psí svět.</p>
+            </div>
+        </div>
+        <a href="{% url 'cenik' %}" class="btn-alfa-slim">ZÍSKAT STATUS</a>
+    </div>
     {% endif %}
-    <div class="stat-badge-warm">
-        Dnes je {{ "now"|date:"j. F Y" }} – čas na procházku! 🌳
-    </div>
-</div>
 
-<div class="row g-4">
-    <div class="col-md-4">
-        <a href="{% url 'seznam_inzeratu' %}" class="card h-100 home-card p-4 text-center">
-            <div class="icon-circle">📦</div>
-            <h5 class="fw-bold">Inzerce / Bazar</h5>
-            <p class="text-muted small">Místo pro nákup a prodej psích potřeb.</p>
-            <span class="mt-auto fw-bold text-success small">Vstoupit do bazaru →</span>
-        </a>
-    </div>
-    <div class="col-md-4">
-        <a href="{% url 'mapa_sluzeb' %}" class="card h-100 home-card p-4 text-center">
-            <div class="icon-circle">📍</div>
-            <h5 class="fw-bold">Mapa služeb</h5>
-            <p class="text-muted small">Veteriny a parky přehledně na mapě.</p>
-            <span class="mt-auto fw-bold text-primary small">Prohlédnout mapu →</span>
-        </a>
-    </div>
-    <div class="col-md-4">
-        <a href="{% url 'profil' %}" class="card h-100 home-card p-4 text-center">
-            <div class="icon-circle">👤</div>
-            <h5 class="fw-bold">Můj profil</h5>
-            <p class="text-muted small">Správa vašich psů a nastavení účtu.</p>
-            <span class="mt-auto fw-bold small" style="color: var(--p-brown-mid);">Můj deník →</span>
-        </a>
-    </div>
-</div>
-
-<div class="section-header">
-    <div class="header-line"></div>
-    <div>
-        <h4 class="fw-bold mb-0" style="color: var(--p-brown-dark); font-family: 'Playfair Display', serif;">Komunita a služby</h4>
-        <p class="text-muted m-0 small">Najděte parťáky pro své aktivity.</p>
-    </div>
-</div>
-
-<div class="row g-4">
-    <div class="col-md-4 col-12">
-        <a href="{% url 'zed_plemene' 'venceni' %}" class="breed-wall-card">
-            <div class="breed-img-wrapper d-flex align-items-center justify-content-center bg-light">
-                <span style="font-size: 1.5rem;">🦮</span>
-            </div>
-            <span class="breed-name-small">Venčení</span>
-            <span class="breed-count">Domluvit procházku</span>
-        </a>
-    </div>
-    <div class="col-md-4 col-6">
-        <a href="{% url 'zed_plemene' 'hlidani' %}" class="breed-wall-card">
-            <div class="breed-img-wrapper d-flex align-items-center justify-content-center bg-light">
-                <span style="font-size: 1.5rem;">🏠</span>
-            </div>
-            <span class="breed-name-small">Hlídání</span>
-            <span class="breed-count">Vzájemná pomoc</span>
-        </a>
-    </div>
-    <div class="col-md-4 col-6">
-        <a href="{% url 'zed_plemene' 'psi-hriste' %}" class="breed-wall-card">
-            <div class="breed-img-wrapper d-flex align-items-center justify-content-center bg-light">
-                <span style="font-size: 1.5rem;">🌳</span>
-            </div>
-            <span class="breed-name-small">Psí hřiště</span>
-            <span class="breed-count">Kde to žije</span>
-        </a>
-    </div>
-</div>
-
-<div class="section-header">
-    <div class="header-line"></div>
-    <div>
-        <h4 class="fw-bold mb-0" style="color: var(--p-brown-dark); font-family: 'Playfair Display', serif;">Zdi plemen</h4>
-        <p class="text-muted m-0 small">Diskuse a rady pro konkrétní rasy.</p>
-    </div>
-</div>
-
-<div class="row g-4 mb-5">
-    <div class="col-md-6">
-        <a href="{% url 'seznam_zdi' %}" class="breed-wall-card all-breeds-btn d-flex align-items-center p-3">
-            <div class="breed-img-wrapper m-0 me-3 bg-white d-flex align-items-center justify-content-center">🔍</div>
-            <div class="text-start">
-                <span class="breed-name-small">Vybrat jiné plemeno</span>
-                <span class="breed-count">Procházet seznam všech plemen</span>
-            </div>
-        </a>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <a href="{% url 'seznam_inzeratu' %}" class="main-card">
+                <div class="icon-circle">📦</div>
+                <h5 class="fw-bold mb-1">Psí Bazar</h5>
+                <p class="text-muted small mb-0">Nakupujte a prodávejte věci pro své parťáky</p>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'mapa_sluzeb' %}" class="main-card">
+                <div class="icon-circle">📍</div>
+                <h5 class="fw-bold mb-1">Mapa služeb</h5>
+                <p class="text-muted small mb-0">Veteriny, parky a hřiště ve vašem okolí</p>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'profil' %}" class="main-card">
+                <div class="icon-circle">👤</div>
+                <h5 class="fw-bold mb-1">Můj deník</h5>
+                <p class="text-muted small mb-0">Kompletní profil a správa vašich pejsků</p>
+            </a>
+        </div>
     </div>
 
-    <div class="col-md-6">
-        <a href="{% url 'zed_plemene' 'nemecky-boxer' %}" class="breed-wall-card d-flex align-items-center p-3">
-            <div class="breed-img-wrapper m-0 me-3">
-                <div class="h-100 w-100 d-flex align-items-center justify-content-center bg-light">🐕</div>
-            </div>
-            <div class="text-start">
-                <span class="breed-name-small">Německý boxer</span>
-                <span class="breed-count">Vstoupit na zeď</span>
-            </div>
-        </a>
+    <div class="section-label">
+        <h4>Komunita a zdi</h4>
+        <div class="line"></div>
     </div>
+    <div class="row g-3">
+        <div class="col-6 col-md-3"><a href="{% url 'zed_plemene' 'venceni' %}" class="sub-card">🦮 Venčení</a></div>
+        <div class="col-6 col-md-3"><a href="{% url 'zed_plemene' 'hlidani' %}" class="sub-card">🏠 Hlídání</a></div>
+        <div class="col-6 col-md-3"><a href="{% url 'zed_plemene' 'psi-hriste' %}" class="sub-card">🌳 Hřiště</a></div>
+        <div class="col-6 col-md-3"><a href="{% url 'seznam_zdi' %}" class="sub-card">🐾 Všechny rasy</a></div>
+    </div>
+
+    <div class="section-label">
+        <h4>Aktuálně na zdi</h4>
+        <div class="line"></div>
+    </div>
+    {% for prispevek in posledni_prispevky %}
+    <div class="post-card">
+        <div class="d-flex align-items-center mb-2">
+            <div class="bg-light rounded-circle p-2 me-2" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-user text-muted small"></i></div>
+            <span class="fw-bold small">{{ prispevek.autor.username }}</span>
+            <span class="text-muted mx-2">•</span>
+            <small class="text-muted">{{ prispevek.datum_pridani|timesince }} zpět</small>
+        </div>
+        <p class="mb-0 text-secondary small">{{ prispevek.text }}</p>
+    </div>
+    {% empty %}
+    <div class="text-center py-4 text-muted small">Na zdi je zatím ticho... 🐾</div>
+    {% endfor %}
 </div>
 {% endblock %}

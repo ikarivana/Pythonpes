@@ -22,7 +22,6 @@
         font-weight: bold;
     }
 
-    /* Červené tlačítko pro nebezpečí v popupu */
     .btn-danger-map {
         background-color: #d32f2f;
         color: white !important;
@@ -58,70 +57,64 @@
     .pulse-danger { animation: pulse-red 2s infinite; border: 2px solid white; }
 
     .custom-brown-alert {
-    background-color: #f4ece4; /* Světle hnědý/krémový podklad */
-    border: 1px solid #d7c4b3; /* Jemný hnědý rámeček */
-    color: #5d4037; /* Tmavě hnědý text */
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    text-align: center;
-}
+        background-color: #f4ece4;
+        border: 1px solid #d7c4b3;
+        color: #5d4037;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
 
-.custom-brown-alert a {
-    color: #8d6e63; /* Barva odkazů */
-    font-weight: bold;
-    text-decoration: underline;
-}
-
-.custom-brown-alert a:hover {
-    color: #5d4037; /* Ztmavnutí při přejetí */
-}
+    .custom-brown-alert a {
+        color: #8d6e63;
+        font-weight: bold;
+        text-decoration: underline;
+    }
 </style>
 
 <div class="p-4 bg-white">
     <h2 style="color: #8B4513; font-weight: bold;" class="mb-4">📍 Interaktivní mapa služeb</h2>
 
+    <div style="margin-bottom: 12px; padding-left: 5px;">
+        <span style="font-size: 0.8rem; color: #666; font-style: italic;">
+            🐾 Informace v mapě jsou čerpány z veřejných zdrojů. Pro úpravu či smazání záznamu nás kontaktujte.
+        </span>
+    </div>
+
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div class="d-flex flex-wrap gap-2">
             <button class="badge-filter" style="background-color: #8B4513;" onclick="filtrujMapu('vse')">Vše</button>
-            <button class="badge-filter pulse-danger" style="background-color: #d32f2f;"
-                    onclick="filtrujMapu('nebezpeci')">⚠️ NEBEZPEČÍ
-            </button>
-            <button class="badge-filter" style="background-color: #212121;" onclick="filtrujMapu('veterina')">Veterina
-            </button>
-
-            <button class="badge-filter" style="background-color: #00bcd4;" onclick="filtrujMapu('strihani')">✂️
-                Stříhání psů
-            </button>
-
-            <button class="badge-filter" style="background-color: #1976d2;" onclick="filtrujMapu('obchod')">Obchody
-            </button>
-            <button class="badge-filter" style="background-color: #f57c00;" onclick="filtrujMapu('hotel')">Hotely
-            </button>
-            <button class="badge-filter" style="background-color: #388e3c;" onclick="filtrujMapu('wellness')">Wellness
-            </button>
-            <button class="badge-filter" style="background-color: #7b1fa2;" onclick="filtrujMapu('cvicak')">Cvičáky
-            </button>
-            <button class="badge-filter" style="background-color: #757575;" onclick="filtrujMapu('utulek')">Útulky
-            </button>
-            <button class="badge-filter" style="background-color: #ffc107; color: black;"
-                    onclick="filtrujMapu('chovna_stanice')">Chovné stanice
-            </button>
+            <button class="badge-filter pulse-danger" style="background-color: #d32f2f;" onclick="filtrujMapu('nebezpeci')">⚠️ NEBEZPEČÍ</button>
+            <button class="badge-filter" style="background-color: #212121;" onclick="filtrujMapu('veterina')">Veterina</button>
+            <button class="badge-filter" style="background-color: #00bcd4;" onclick="filtrujMapu('strihani')">✂️ Stříhání psů</button>
+            <button class="badge-filter" style="background-color: #1976d2;" onclick="filtrujMapu('obchod')">Obchody</button>
+            <button class="badge-filter" style="background-color: #f57c00;" onclick="filtrujMapu('hotel')">Hotely</button>
+            <button class="badge-filter" style="background-color: #388e3c;" onclick="filtrujMapu('wellness')">Wellness</button>
+            <button class="badge-filter" style="background-color: #7b1fa2;" onclick="filtrujMapu('cvicak')">Cvičáky</button>
+            <button class="badge-filter" style="background-color: #757575;" onclick="filtrujMapu('utulek')">Útulky</button>
+            <button class="badge-filter" style="background-color: #ffc107; color: black;" onclick="filtrujMapu('chovna_stanice')">Chovné stanice</button>
         </div>
 
-        <div class="map-controls">
-            {% if user.is_authenticated %}
-            <a href="{% url 'pridat_sluzbu' %}" class="btn btn-primary">
-                + Přidat službu nebo nebezpečí
-            </a>
-            {% else %}
-            <div class="custom-brown-alert">
-                Pro přidání služby na mapu se prosím
-                <a href="{% url 'login' %}">přihlaste</a> nebo
-                <a href="{% url 'register' %}">registrujte</a>.
-            </div>
-            {% endif %}
+        <a href="mailto:vas-elivdruhy@gmail.com?subject=Zadost o upravu/smazani z PSI mapy&body=Dobrý den, žádám o úpravu/smazání tohoto záznamu v psí mapě: (doplňte název a důvod). Děkuji."
+           class="badge-filter"
+           style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; text-decoration: none; font-size: 0.8rem; font-weight: bold;">
+           🚩 Nahlásit / Smazat
+        </a>
+    </div>
+
+    <div class="map-controls mb-4">
+        {% if user.is_authenticated %}
+        <a href="{% url 'pridat_sluzbu' %}" class="btn btn-primary">
+            + Přidat službu nebo nebezpečí
+        </a>
+        {% else %}
+        <div class="custom-brown-alert">
+            Pro přidání služby na mapu se prosím
+            <a href="{% url 'login' %}">přihlaste</a> nebo
+            <a href="{% url 'register' %}">registrujte</a>.
         </div>
+        {% endif %}
     </div>
 
     <div class="card shadow-lg p-0" style="border-radius: 20px; overflow: hidden; border: none;">
@@ -137,7 +130,6 @@
     var map;
     var sluzby = {{ sluzby_json|safe }};
 
-    // Funkce pro nahlášení neaktuálnosti (musí být globální pro onclick v popupu)
     function nahlasitNeaktualni(id) {
         if (confirm("Opravdu je toto varování již neaktuální? Pomůžete tím ostatním pejskařům.")) {
             fetch(`/mapa/nahlasit-neaktualni/${id}/`)
@@ -150,7 +142,6 @@
         }
     }
 
-    // Funkce pro filtrování
     function filtrujMapu(kategorie) {
         allMarkers.forEach(function(item) {
             if (kategorie === 'vse' || item.typ === kategorie) {
@@ -162,14 +153,12 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        // 1. Inicializace mapy
         map = L.map('map').setView([49.8, 15.5], 7);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // 2. Funkce pro vytváření barevných ikon
         function createIcon(color) {
             return new L.Icon({
                 iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
@@ -194,7 +183,6 @@
             'chovna_stanice': 'gold'
         };
 
-        // 3. Vykreslení špendlíků
         sluzby.forEach(function(s) {
             var lat = parseFloat(s.lat);
             var lon = parseFloat(s.lon);
@@ -206,7 +194,6 @@
                 allMarkers.push({ marker: marker, typ: s.typ_slug });
 
                 var isDanger = s.typ_slug === 'nebezpeci';
-
                 var popupContent = `
                     <div style="min-width: 160px;">
                         <strong style="color: ${isDanger ? 'red' : '#8B4513'}; font-size: 1.1rem;">

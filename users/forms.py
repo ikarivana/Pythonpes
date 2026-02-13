@@ -1,5 +1,8 @@
 from datetime import date
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+
 from .models import Pes, Prispevek, Plemeno, Ockovani
 
 
@@ -156,6 +159,33 @@ class PlemenoForm(forms.ModelForm):
         widgets = {
             'datum_konani': forms.DateInput(attrs={'type': 'date'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.update({'class': 'form-control custom-brown-input'})
+
+
+class UserUpdateForm(forms.ModelForm):
+    email = forms.EmailField(label="Váš e-mail (pro notifikace)")
+
+    class Meta:
+        model = User
+        fields = ['username', 'email']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.update({'class': 'form-control custom-brown-input'})
+
+class ExtendedRegistrationForm(UserCreationForm):
+    first_name = forms.CharField(label="Jméno", max_length=30, required=True)
+    last_name = forms.CharField(label="Příjmení", max_length=30, required=True)
+    email = forms.EmailField(label="E-mail (pro obnovu hesla)", required=True)
+
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
