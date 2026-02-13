@@ -29,7 +29,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-1pv+(%pqb466r@7*-l
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['www.epes.online', 'epes.online','127.0.0.1']
+ALLOWED_HOSTS = ['epes-8717.rostiapp.cz', 'www.epes.online', 'epes.online', '127.0.0.1', 'localhost']
 
 
 # Application definition
