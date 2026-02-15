@@ -6,14 +6,14 @@
     <title>{% block title %}E.PES.CZ 🐾{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
-          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --dark-cocoa: #2d1b19;
             --mid-brown: #3e2723;
             --gold: #c5a059;
             --bg-page: #f9f4ef;
+            --sos-red: #e35d6a;
         }
 
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-page); margin: 0; overflow-x: hidden; }
@@ -32,8 +32,7 @@
         .sidebar-logo { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: white; text-decoration: none; font-weight: 800; }
         .sidebar-logo span { color: var(--gold); }
 
-        /* --- POHYBLIVÉ ODKAZY --- */
-        .nav-list { padding: 10px 15px; flex-grow: 1; }
+        .nav-list { padding: 10px 15px; flex-grow: 1; overflow-y: auto; }
         .sidebar-label { padding: 15px 15px 5px; font-size: 0.65rem; text-transform: uppercase; color: rgba(255,255,255,0.3); letter-spacing: 2px; font-weight: 800; }
 
         .nav-link-custom {
@@ -43,67 +42,31 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .nav-link-custom i {
-            width: 25px; margin-right: 15px; color: var(--gold);
-            transition: transform 0.3s ease;
-        }
+        .nav-link-custom i { width: 25px; margin-right: 15px; color: var(--gold); transition: transform 0.3s ease; }
+        .nav-link-custom:hover { background: rgba(255,255,255,0.08); color: white !important; transform: translateX(8px); }
 
-        .nav-link-custom:hover {
-            background: rgba(255,255,255,0.08);
-            color: white !important;
-            transform: translateX(8px);
-        }
+        .nav-link-sos { color: var(--sos-red) !important; font-weight: 800; }
+        .nav-link-sos i { color: var(--sos-red) !important; }
 
-        .nav-link-custom:hover i {
-            transform: scale(1.2) rotate(-5deg);
-        }
-
-        /* --- USER SECTION DOLE --- */
-        .user-section {
-            padding: 20px; background: rgba(0,0,0,0.2);
-            border-top: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .user-pill {
-            display: flex; align-items: center; justify-content: space-between;
-            background: rgba(255,255,255,0.05); padding: 12px 15px; border-radius: 15px;
-        }
-
+        .user-section { padding: 20px; background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.05); }
+        .user-pill { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 12px 15px; border-radius: 15px; }
         .user-info { display: flex; align-items: center; gap: 10px; }
         .user-name { font-weight: 700; font-size: 0.9rem; display: block; line-height: 1.2; }
         .user-role { font-size: 0.65rem; color: var(--gold); text-transform: uppercase; font-weight: 800; }
 
-        .logout-btn {
-            background: none; border: none; padding: 5px;
-            color: rgba(255,255,255,0.2); font-size: 1.1rem; transition: 0.3s;
-        }
+        .logout-btn { background: none; border: none; padding: 5px; color: rgba(255,255,255,0.2); font-size: 1.1rem; transition: 0.3s; }
         .logout-btn:hover { color: #ff6b6b; transform: rotate(90deg); }
 
-        /* MOBILNÍ NAV */
-        #mobile-header {
-            display: none; background: var(--dark-cocoa); padding: 15px;
-            color: white; border-bottom: 2px solid var(--gold);
-        }
+        #mobile-header { display: none; background: var(--dark-cocoa); padding: 15px; color: white; border-bottom: 2px solid var(--gold); }
 
         @media (max-width: 991px) {
             #sidebar-wrapper { position: fixed; left: -280px; transition: 0.4s; }
             #sidebar-wrapper.active { left: 0; }
             #mobile-header { display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 2000; }
-            #page-content-wrapper { padding: 20px !important; }
         }
 
         #page-content-wrapper { flex-grow: 1; padding: 40px; transition: 0.3s; }
     </style>
-
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-6ZLZDG54WS"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-6ZLZDG54WS');
-</script>
 </head>
 <body>
 
@@ -123,15 +86,20 @@
             <a href="{% url 'home' %}" class="nav-link-custom"><i class="fas fa-home"></i> Domů</a>
 
             {% if user.is_authenticated %}
+            <a href="{% url 'seznam_psu' %}" class="nav-link-custom"><i class="fas fa-dog"></i> Moji psi</a>
             <a href="{% url 'profil' %}" class="nav-link-custom"><i class="fas fa-user-circle"></i> Můj profil</a>
-
             <a href="{% url 'seznam_notifikaci' %}" class="nav-link-custom">
                 <i class="fas fa-bell"></i> Notifikace
                 {% if pocet_notifikaci > 0 %}
-                    <span class="badge rounded-pill bg-danger ms-2">{{ pocet_notifikaci }}</span>
+                <span class="badge rounded-pill bg-danger ms-2">{{ pocet_notifikaci }}</span>
                 {% endif %}
             </a>
             {% endif %}
+
+            <div class="sidebar-label">SOS Záchrana</div>
+            <a href="{% url 'home' %}" class="nav-link-custom nav-link-sos">
+                <i class="fas fa-broadcast-tower"></i> Hledaní psi
+            </a>
 
             <div class="sidebar-label">Inzerce a Služby</div>
             <a href="{% url 'seznam_inzeratu' %}" class="nav-link-custom"><i class="fas fa-shopping-basket"></i> Psí Bazar</a>
@@ -144,27 +112,32 @@
 
         <div class="user-section">
             {% if user.is_authenticated %}
-                <div class="user-pill">
+                <div class="user-pill mb-3">
                     <div class="user-info">
                         <div style="color: var(--gold); font-size: 1.2rem;"><i class="fas fa-paw"></i></div>
                         <div>
                             <span class="user-name">{{ user.username }}</span>
                             <span class="user-role">
-                                {% if je_premium %}👑 ALFA ČLEN{% else %}Páníček{% endif %}
+                                {% if user.profil.is_premium %}👑 ALFA ČLEN{% else %}Páníček{% endif %}
                             </span>
                         </div>
                     </div>
-
                     <form action="{% url 'logout' %}" method="post" id="logout-form-bottom" class="m-0">
                         {% csrf_token %}
-                        <button type="submit" class="logout-btn" title="Odhlásit se">
-                            <i class="fas fa-power-off"></i>
-                        </button>
+                        <button type="submit" class="logout-btn" title="Odhlásit se"><i class="fas fa-power-off"></i></button>
                     </form>
                 </div>
+
+                {% if not user.profil.is_premium %}
+                <div class="d-grid mb-3">
+                    <a href="{% url 'pricing' %}" class="btn btn-sm fw-bold" style="background: var(--gold); color: var(--dark-cocoa); border-radius: 10px; font-size: 0.75rem;">
+                        <i class="fas fa-arrow-up me-1"></i> AKTIVOVAT PREMIUM
+                    </a>
+                </div>
+                {% endif %}
             {% else %}
-                <div class="d-grid gap-2">
-                    <a href="{% url 'login' %}" class="nav-link-custom" style="margin-bottom: 5px; justify-content: center; background: rgba(255,255,255,0.05);">
+                <div class="d-grid gap-2 mb-3">
+                    <a href="{% url 'login' %}" class="nav-link-custom" style="justify-content: center; background: rgba(255,255,255,0.05); margin-bottom: 0;">
                         <i class="fas fa-sign-in-alt"></i> Přihlásit se
                     </a>
                     <a href="{% url 'register' %}" class="nav-link-custom" style="justify-content: center; background: var(--gold); color: var(--dark-cocoa) !important; font-weight: 800;">
@@ -173,7 +146,7 @@
                 </div>
             {% endif %}
 
-            <div class="mt-3 d-flex justify-content-center gap-3">
+            <div class="d-flex justify-content-center gap-3">
                 <a href="{% url 'podminky' %}" style="font-size: 0.65rem; color: rgba(255,255,255,0.2); text-decoration: none;">Podmínky</a>
                 <span style="color: rgba(255,255,255,0.1); font-size: 0.65rem;">|</span>
                 <a href="{% url 'cookies' %}" style="font-size: 0.65rem; color: rgba(255,255,255,0.2); text-decoration: none;">Cookies</a>

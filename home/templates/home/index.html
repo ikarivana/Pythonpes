@@ -21,6 +21,48 @@
         margin-bottom: 5px;
     }
 
+    /* PŘIDÁNO: SOS SEKCE STYLY */
+    .sos-section {
+        background: #fff5f5;
+        border: 2px solid #e35d6a;
+        border-radius: 25px;
+        padding: 20px;
+        margin-bottom: 35px;
+        box-shadow: 0 10px 20px rgba(227, 93, 106, 0.1);
+    }
+    .sos-card {
+        background: white;
+        border-radius: 18px;
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        text-decoration: none !important;
+        color: inherit;
+        transition: 0.3s;
+        border: 1px solid rgba(227, 93, 106, 0.1);
+    }
+    .sos-card:hover {
+        transform: scale(1.02);
+        box-shadow: 0 5px 15px rgba(227, 93, 106, 0.15);
+    }
+    .sos-img {
+        width: 65px;
+        height: 65px;
+        border-radius: 12px;
+        object-fit: cover;
+    }
+    .sos-badge {
+        background: #e35d6a;
+        color: white;
+        font-size: 0.6rem;
+        font-weight: 900;
+        padding: 2px 8px;
+        border-radius: 50px;
+        text-transform: uppercase;
+        display: inline-block;
+        margin-bottom: 4px;
+    }
+
     /* STATUS BADGE - Korunka nebo tlapka u jména */
     .status-badge {
         display: inline-flex;
@@ -199,6 +241,33 @@
             {% endif %}
         </div>
     </div>
+{% if ztraceni_psi %}
+<div class="sos-section">
+    <h4 class="fw-bold mb-3" style="color: #b33939; font-size: 1rem;">
+        <i class="fas fa-bullhorn me-2"></i> AKTUÁLNĚ HLEDÁME
+    </h4>
+    <div class="row g-3">
+        {% for hledany_pes in ztraceni_psi %}
+        <div class="col-md-6 col-lg-4">
+            <a href="{% url 'nouzovy_profil_psa' pes_id=hledany_pes.id %}" class="sos-card">
+                {% if hledany_pes.fotka %}
+                    <img src="{{ hledany_pes.fotka.url }}" class="sos-img">
+                {% else %}
+                    <div class="sos-img bg-light d-flex align-items-center justify-content-center">
+                        <i class="fas fa-paw text-muted"></i>
+                    </div>
+                {% endif %}
+                <div class="ms-3">
+                    <span class="sos-badge">Ztracen</span>
+                    <h6 class="fw-bold m-0" style="color: #2d1b19;">{{ hledany_pes.jmeno }}</h6>
+                    <small class="text-muted d-block" style="font-size: 0.7rem;">{{ hledany_pes.rasa }}</small>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
 
     {% if not je_premium %}
     <div class="premium-banner">
@@ -209,7 +278,7 @@
                 <p>Získejte status ALFA a podpořte náš psí svět.</p>
             </div>
         </div>
-        <a href="{% url 'cenik' %}" class="btn-alfa-slim">ZÍSKAT STATUS</a>
+        <a href="{% url 'pricing' %}" class="btn-alfa-slim">ZÍSKAT STATUS</a>
     </div>
     {% endif %}
 
