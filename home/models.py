@@ -33,6 +33,10 @@ class Sluzba(models.Model):
     lon = models.FloatField(verbose_name="Zeměpisná délka")
     vytvoreno = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = "Služba"
+        verbose_name_plural = "Služby"
+
     def __str__(self):
         return f"{self.nazev} ({self.get_typ_display()})"
 
@@ -44,7 +48,7 @@ class Sluzba(models.Model):
             return self.vytvoreno > limit and self.potvrzeni_minus < 3
         return True  # Ostatní služby jsou aktivní stále (pokud je nesmažeš)
 
-# home/models.py
+
 
 class KontaktniZprava(models.Model):
     jmeno = models.CharField(max_length=100, verbose_name="Jméno")
@@ -52,6 +56,10 @@ class KontaktniZprava(models.Model):
     predmet = models.CharField(max_length=200, verbose_name="Předmět")
     zprava = models.TextField(verbose_name="Zpráva")
     vytvoreno = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Kontaktní zpráva"
+        verbose_name_plural = "Kontaktní zprávy"
 
     def __str__(self):
         return f"Zpráva od {self.jmeno} - {self.predmet}"

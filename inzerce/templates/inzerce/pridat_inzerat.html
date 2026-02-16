@@ -115,7 +115,8 @@
         <div class="row justify-content-center">
             <div class="col-lg-11 col-xl-10">
                 <div class="inzerat-card">
-                    <h2 class="section-title">Nový inzerát <i class="fas fa-plus-circle ms-2" style="font-size: 1.5rem; color: var(--gold);"></i></h2>
+                    <h2 class="section-title">Nový inzerát <i class="fas fa-plus-circle ms-2"
+                                                              style="font-size: 1.5rem; color: var(--gold);"></i></h2>
 
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
@@ -156,15 +157,22 @@
                                             {{ form.telefon }}
                                         </div>
                                         <div class="col-md-6">
+                                            <label class="form-label"><i class="fas fa-envelope"></i> Kontaktní
+                                                email</label>
+                                            {{ form.email_kontakni }}
+                                        </div>
+                                        <div class="col-md-6">
                                             <label class="form-label"><i class="fas fa-camera"></i> Hlavní fotka</label>
                                             {{ form.obrazek }}
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label"><i class="fas fa-video"></i> Video (volitelné)</label>
+                                            <label class="form-label"><i class="fas fa-video"></i> Video
+                                                (volitelné)</label>
                                             {{ form.video }}
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label"><i class="fas fa-images"></i> Další fotky do galerie</label>
+                                            <label class="form-label"><i class="fas fa-images"></i> Další fotky do
+                                                galerie</label>
                                             {{ form.galerie_fotky }}
                                         </div>
                                     </div>

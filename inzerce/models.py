@@ -46,6 +46,7 @@ class Inzerat(models.Model):
     telefon = models.CharField(max_length=20, blank=True, null=True, verbose_name="Telefon")
     zobrazit_telefon = models.BooleanField(default=True, verbose_name="Zobrazit telefon v inzerátu")
     zobrazit_email = models.BooleanField(default=True, verbose_name="Zobrazit email v inzerátu")
+    email_kontakni = models.EmailField(max_length=254, verbose_name="Kontaktní email", blank=True)
 
     # Hlavní náhledový obrázek
     obrazek = models.ImageField(upload_to='inzeraty/obrazky/', null=True, blank=True, verbose_name="Hlavní fotografie")
