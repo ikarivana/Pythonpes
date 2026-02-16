@@ -45,6 +45,8 @@ class Pes(models.Model):
     rtg_pater = models.CharField(max_length=100, blank=True, null=True)
     typ_ochrany_klistata = models.CharField(max_length=100, blank=True, null=True)
     qr_kod = models.ImageField(upload_to='qr_kody/', blank=True, null=True)
+    je_ztraceny = models.BooleanField(default=False)
+    oblast_ztraty = models.CharField(max_length=200, blank=True, null=True, verbose_name="Kde se pes ztratil")
 
     # Chovatelské údaje
     cislo_zapisu = models.CharField(max_length=100, blank=True, null=True)

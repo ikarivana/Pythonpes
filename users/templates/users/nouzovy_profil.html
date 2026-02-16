@@ -112,8 +112,8 @@
                     {{ pes.cip|default:"Nezadáno" }}
                 </div>
 
-                {% if majitel.telefon %}
-                <a href="tel:{{ majitel.telefon }}" class="btn-call-major shadow-sm">
+                {% if pes.majitel.telefon %}
+                href="tel:{{ pes.majitel.telefon }}" class="btn-call-major shadow-sm">
                     <i class="fas fa-phone-alt"></i> ZAVOLAT
                 </a>
                 {% endif %}

@@ -35,7 +35,6 @@ class PesForm(forms.ModelForm):
 
     class Meta:
         model = Pes
-        # DŮLEŽITÉ: Pole 'vek' jsme vymazali, nahradilo ho 'narozeni'
         fields = [
             'jmeno', 'rasa', 'datum_narozeni', 'cip', 'fotka',
             'posledni_ockovani', 'posledni_odcerveni', 'posledni_klistata', 'typ_ochrany_klistata',
@@ -45,7 +44,7 @@ class PesForm(forms.ModelForm):
 
         # Widgety pro mobilní telefony (vyvolají kalendář a číselník)
         widgets = {
-            'narozeni': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'datum_narozeni': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'posledni_ockovani': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'posledni_odcerveni': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'posledni_klistata': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
