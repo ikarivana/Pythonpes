@@ -427,9 +427,16 @@ def zed_plemene(request, slug):
     prispevky = plemeno.prispevky_na_zed.all().order_by('-datum_pridani')
     return render(request, 'users/zed.html', {'plemeno': plemeno, 'prispevky': prispevky, 'form': PrispevekForm()})
 
+
 @login_required
 def profil_uzivatele(request):
-    return render(request, 'users/profil.html', {'profil': request.user.profil})
+    profil, created = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
+    context = {
+        'profil': profil,
+        'libi_se_mi': [],
+        'komentare': [],
+    }
+    return render(request, 'users/profil.html', context)
 
 def register(request):
     if request.method == 'POST':

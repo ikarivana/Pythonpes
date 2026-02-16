@@ -200,7 +200,7 @@
 
             <div class="p-4 rounded-4 bg-white border shadow-sm text-center">
                 <h6 class="fw-bold mb-3">Stav účtu</h6>
-                {% if profil.je_premium %}
+                {% if profil.is_premium %}
                     <div class="p-3 rounded-3 mb-3" style="background: #f8fcf9; border-left: 4px solid #2d6a4f;">
                         <small class="d-block text-muted text-start text-uppercase" style="font-size: 0.6rem;">Premium je aktivní do:</small>
                         <span class="fw-bold text-success">{{ profil.premium_do|date:"d. m. Y" }}</span>
