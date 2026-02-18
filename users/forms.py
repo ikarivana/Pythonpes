@@ -60,11 +60,12 @@ class PesForm(forms.ModelForm):
         for name, field in self.fields.items():
             field.widget.attrs.update({'class': 'form-control custom-brown-input'})
 
-        # Omezení pro FREE uživatele (Logika zůstává stejná)
-        if self.request and not (self.request.user.is_staff or getattr(self.request.user.profil, 'je_premium', False)):
+        # Omezení pro FREE uživatele
+        if self.request and not (self.request.user.is_staff or self.request.user.profil.ma_aktivni_premium):
             self.fields['rtg_hd'].help_text = "🔒 Pouze pro ALFA pány"
             self.fields['rtg_ed'].help_text = "🔒 Pouze pro ALFA pány"
             self.fields['genetika_dna'].help_text = "🔒 Pouze pro ALFA pány"
+
 
 # --- 2. FORMULÁŘE PRO UŽIVATELE ---
 

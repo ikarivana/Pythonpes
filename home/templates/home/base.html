@@ -3,10 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}E.PES.CZ 🐾{% endblock %}</title>
+    <title>{% block title %}EPES.ONLINE 🐾{% endblock %}</title>
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+    <link rel="manifest" href="/static/manifest.json">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+          rel="stylesheet">
     <style>
         :root {
             --dark-cocoa: #2d1b19;
@@ -72,14 +78,14 @@
 
 <div id="mobile-header">
     <button class="btn text-white" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
-    <div style="font-family: 'Playfair Display'; font-size: 1.2rem; font-weight: 800;">E<span>.</span>PES.CZ</div>
+    <div style="font-family: 'Playfair Display'; font-size: 1.2rem; font-weight: 800;">E<span>.</span>EPES.ONLINE</div>
     <div style="width: 40px;"></div>
 </div>
 
 <div id="wrapper">
     <nav id="sidebar-wrapper">
         <div class="sidebar-header">
-            <a href="{% url 'home' %}" class="sidebar-logo">E<span>.</span>PES.CZ</a>
+            <a href="{% url 'home' %}" class="sidebar-logo">E<span>.</span>EPES.ONLINE</a>
         </div>
 
         <div class="nav-list">
@@ -102,7 +108,8 @@
             </a>
 
             <div class="sidebar-label">Inzerce a Služby</div>
-            <a href="{% url 'seznam_inzeratu' %}" class="nav-link-custom"><i class="fas fa-shopping-basket"></i> Psí Bazar</a>
+            <a href="{% url 'seznam_inzeratu' %}" class="nav-link-custom"><i class="fas fa-shopping-basket"></i> Psí
+                Bazar</a>
             <a href="{% url 'mapa_sluzeb' %}" class="nav-link-custom"><i class="fas fa-map-marked-alt"></i> Mapa služeb</a>
 
             <div class="sidebar-label">Komunita</div>
@@ -112,56 +119,70 @@
 
         <div class="user-section">
             {% if user.is_authenticated %}
-                <div class="user-pill mb-3">
-                    <div class="user-info">
-                        <div style="color: var(--gold); font-size: 1.2rem;"><i class="fas fa-paw"></i></div>
-                        <div>
-                            <span class="user-name">{{ user.username }}</span>
-                            <span class="user-role">
+            <div class="user-pill mb-3">
+                <div class="user-info">
+                    <div style="color: var(--gold); font-size: 1.2rem;"><i class="fas fa-paw"></i></div>
+                    <div>
+                        <span class="user-name">{{ user.username }}</span>
+                        <span class="user-role">
                                 {% if user.profil.is_premium %}👑 ALFA ČLEN{% else %}Páníček{% endif %}
                             </span>
-                        </div>
                     </div>
-                    <form action="{% url 'logout' %}" method="post" id="logout-form-bottom" class="m-0">
-                        {% csrf_token %}
-                        <button type="submit" class="logout-btn" title="Odhlásit se"><i class="fas fa-power-off"></i></button>
-                    </form>
                 </div>
+                <form action="{% url 'logout' %}" method="post" id="logout-form-bottom" class="m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn" title="Odhlásit se"><i class="fas fa-power-off"></i>
+                    </button>
+                </form>
+            </div>
 
-                {% if not user.profil.is_premium %}
-                <div class="d-grid mb-3">
-                    <a href="{% url 'cenik' %}" class="btn btn-sm fw-bold" style="background: var(--gold); color: var(--dark-cocoa); border-radius: 10px; font-size: 0.75rem;">
-                        <i class="fas fa-arrow-up me-1"></i> AKTIVOVAT PREMIUM
-                    </a>
-                </div>
-                {% endif %}
+            {% if not user.profil.is_premium %}
+            <div class="d-grid mb-3">
+                <a href="{% url 'cenik' %}" class="btn btn-sm fw-bold"
+                   style="background: var(--gold); color: var(--dark-cocoa); border-radius: 10px; font-size: 0.75rem;">
+                    <i class="fas fa-arrow-up me-1"></i> AKTIVOVAT PREMIUM
+                </a>
+            </div>
+            {% endif %}
             {% else %}
-                <div class="d-grid gap-2 mb-3">
-                    <a href="{% url 'login' %}" class="nav-link-custom" style="justify-content: center; background: rgba(255,255,255,0.05); margin-bottom: 0;">
-                        <i class="fas fa-sign-in-alt"></i> Přihlásit se
-                    </a>
-                    <a href="{% url 'register' %}" class="nav-link-custom" style="justify-content: center; background: var(--gold); color: var(--dark-cocoa) !important; font-weight: 800;">
-                        <i class="fas fa-user-plus" style="color: var(--dark-cocoa);"></i> Registrace
-                    </a>
-                </div>
+            <div class="d-grid gap-2 mb-3">
+                <a href="{% url 'login' %}" class="nav-link-custom"
+                   style="justify-content: center; background: rgba(255,255,255,0.05); margin-bottom: 0;">
+                    <i class="fas fa-sign-in-alt"></i> Přihlásit se
+                </a>
+                <a href="{% url 'register' %}" class="nav-link-custom"
+                   style="justify-content: center; background: var(--gold); color: var(--dark-cocoa) !important; font-weight: 800;">
+                    <i class="fas fa-user-plus" style="color: var(--dark-cocoa);"></i> Registrace
+                </a>
+            </div>
             {% endif %}
 
             <div class="d-flex justify-content-center gap-3">
-                <a href="{% url 'podminky' %}" style="font-size: 0.65rem; color: rgba(255,255,255,0.2); text-decoration: none;">Podmínky</a>
+                <a href="{% url 'podminky' %}"
+                   style="font-size: 0.65rem; color: rgba(255,255,255,0.2); text-decoration: none;">Podmínky</a>
                 <span style="color: rgba(255,255,255,0.1); font-size: 0.65rem;">|</span>
-                <a href="{% url 'cookies' %}" style="font-size: 0.65rem; color: rgba(255,255,255,0.2); text-decoration: none;">Cookies</a>
+                <a href="{% url 'cookies' %}"
+                   style="font-size: 0.65rem; color: rgba(255,255,255,0.2); text-decoration: none;">Cookies</a>
             </div>
         </div>
     </nav>
 
     <div id="page-content-wrapper">
+        {% if premium_warning %}
+        <div class="alert alert-warning text-center" style="font-weight: 700;">
+            👑 {{ premium_warning }}
+        </div>
+        {% endif %}
+
+
         {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show"
+             role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
         {% endif %}
 
         {% block content %}{% endblock %}

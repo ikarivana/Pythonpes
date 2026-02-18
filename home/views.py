@@ -21,19 +21,20 @@ from users.models import Plemeno, Prispevek, Pes, ProfilMajitele
 # --- 1. HLAVNÍ STRÁNKA (OPRAVENÁ) ---
 def index(request):
     je_premium = False
+
     if request.user.is_authenticated:
-        # Vynutíme si čerstvé data z databáze
         profil = ProfilMajitele.objects.filter(uzivatel=request.user).first()
         if profil:
-            je_premium = profil.is_premium
+            je_premium = profil.is_premium and profil.premium_do >= date.today()
 
-    # --- PŘIDÁNO: Načtení ztracených psů ---
     ztraceni_psi = Pes.objects.filter(je_ztraceny=True)
 
     return render(request, 'home/index.html', {
         'je_premium': je_premium,
-        'ztraceni_psi': ztraceni_psi,  # Posíláme seznam ztracených psů do šablony
+        'ztraceni_psi': ztraceni_psi,
     })
+
+
 
 
 @csrf_exempt
@@ -60,7 +61,7 @@ def simpleshop_webhook(request):
                     profil = user.profil
 
                     # AKTIVACE PREMIUM
-                    profil.je_premium = True
+                    profil.is_premium = True
                     # Nastavíme platnost na 1 rok
                     profil.premium_do = date.today() + timedelta(days=365)
                     profil.save()
