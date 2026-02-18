@@ -230,9 +230,9 @@
                 </h5>
                 <p class="text-muted" style="line-height: 1.6; font-size: 1rem; white-space: pre-wrap;">
                     {% if pes.popis %}
-                        {{ pes.popis }}
+                    {{ pes.popis }}
                     {% else %}
-                        <em>O tomto pejskovi zatím není nic napsáno. Popis můžete přidat v úpravách psa.</em>
+                    <em>O tomto pejskovi zatím není nic napsáno. Popis můžete přidat v úpravách psa.</em>
                     {% endif %}
                 </p>
             </div>
@@ -284,37 +284,59 @@
 
         <div class="col-12 mt-4">
             <div class="info-card">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="section-header m-0"><i class="fas fa-images" style="color: var(--alfa-gold);"></i>
-                        Fotogalerie</h5>
-                    <span class="label-sm">{{ pes.galerie_fotky.count }} / 5</span>
+                <div class="d-flex justify-content-between align-items-center mb-3"><h5 class="section-header m-0"><i
+                        class="fas fa-images" style="color: var(--alfa-gold);"></i> Fotogalerie </h5>
+                    <div class="d-flex align-items-center gap-2"><span class="label-sm">{{ pes.galerie_fotky.count }} / 5</span>
+                        <button class="btn-alfa-gold" onclick="document.getElementById('gallery-photo-input').click()"
+                                style="padding: 5px 15px; font-size: 0.7rem;"><i class="fas fa-plus"></i> Přidat fotku
+                        </button>
+                    </div>
                 </div>
-                <div class="media-grid">
-                    {% for foto in pes.galerie_fotky.all %}
-                    <img src="{{ foto.obrazek.url }}" class="media-item" onclick="window.open(this.src)">
+                <div class="media-grid"> {% for foto in pes.galerie_fotky.all %} <img src="{{ foto.obrazek.url }}"
+                                                                                      class="media-item"
+                                                                                      onclick="window.open(this.src)">
                     {% empty %}
-                    <div class="col-12 text-center py-4 text-muted small">Zatím žádné fotky v galerii.</div>
+                    <div class="col-12 text-center py-4 text-muted small"> Zatím žádné fotky v galerii.</div>
                     {% endfor %}
                 </div>
+                <form id="photo-upload-form" method="POST" action="{% url 'pridat_foto' pes.id %}"
+                      enctype="multipart/form-data" class="d-none"> {% csrf_token %} <input type="file" name="obrazek"
+                                                                                            id="gallery-photo-input"
+                                                                                            accept="image/*"></form>
             </div>
         </div>
 
         <div class="col-12 mt-4">
             <div class="info-card">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="section-header m-0"><i class="fas fa-video" style="color: var(--alfa-gold);"></i> Videa
-                    </h5>
-                    <span class="label-sm">{{ pes.galerie_videa.count }} / 1</span>
+                <div class="d-flex justify-content-between align-items-center mb-3"><h5 class="section-header m-0"><i
+                        class="fas fa-video" style="color: var(--alfa-gold);"></i> Videa </h5>
+                    <div class="d-flex align-items-center gap-2"><span class="label-sm">{{ pes.galerie_videa.count }} / 1</span>
+                        {% if pes.galerie_videa.count < 1 %}
+                        <button class="btn-alfa-gold" onclick="document.getElementById('gallery-video-input').click()"
+                                style="padding: 5px 15px; font-size: 0.7rem;"><i class="fas fa-plus"></i> Přidat video
+                        </button>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="media-grid">
-                    {% for vid in pes.galerie_videa.all %}
+                <div class="media-grid"> {% for vid in pes.galerie_videa.all %}
                     <video src="{{ vid.video_soubor.url }}" controls class="media-item"></video>
                     {% empty %}
-                    <div class="col-12 text-center py-4 text-muted small">Zatím žádná videa.</div>
+                    <div class="col-12 text-center py-4 text-muted small"> Zatím žádná videa.</div>
                     {% endfor %}
                 </div>
+                <form id="video-upload-form" method="POST" action="{% url 'pridat_video' pes.id %}"
+                      enctype="multipart/form-data" class="d-none"> {% csrf_token %} <input type="file"
+                                                                                            name="video_soubor"
+                                                                                            id="gallery-video-input"
+                                                                                            accept="video/*"></form>
             </div>
         </div>
+        <script>
+            document.getElementById('gallery-photo-input').addEventListener('change', function() {
+                document.getElementById('photo-upload-form').submit();
+            });
+            document.getElementById('gallery-video-input').addEventListener('change', function() { document.getElementById('video-upload-form').submit();
+        </script>
 
     </div>
-</div> {% endblock %}
+    {% endblock %}

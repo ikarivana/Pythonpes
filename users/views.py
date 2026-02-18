@@ -7,7 +7,6 @@ from reportlab.pdfbase.ttfonts import TTFont
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.contrib.auth.models import User
 from django.contrib.auth import login
 from django.core.mail import send_mail
 from django.http import HttpResponse, JsonResponse
@@ -15,7 +14,6 @@ from django.template.loader import get_template
 from django.utils.text import slugify
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.base import ContentFile
-from .models import Pes, ProfilMajitele
 
 from xhtml2pdf import pisa
 from PIL import Image, ImageOps

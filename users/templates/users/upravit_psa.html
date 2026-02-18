@@ -125,7 +125,7 @@
                 <i class="fas fa-lock mb-2" style="color: var(--t-gold); font-size: 1.5rem;"></i>
                 <h6 class="fw-bold m-0">Původ a chovné údaje</h6>
                 <p style="font-size: 0.7rem; color: var(--t-brown);">Dostupné pouze pro ALFA členy</p>
-                <a href="{% url 'pricing' %}" class="btn-alfa-slim">AKTIVOVAT</a>
+                <a href="{% url 'cena' %}" class="btn-alfa-slim">AKTIVOVAT</a>
             </div>
             {% endif %}
 
@@ -173,13 +173,13 @@
             <div class="row g-2">
                 <div class="col-7 col-md-8">
                     <label class="label-gold">Název titulu / výstavy</label>
-                    <input type="text" name="nazev" class="input-clean" placeholder="Např. CAJC, BOJ..." required {% if not user.profil.je_premium %}disabled{% endif %}>
+                    <input type="text" name="nazev" class="input-clean" placeholder="Např. CAJC, BOJ..." required {% if not user.profil.is_premium %}disabled{% endif %}>
                 </div>
                 <div class="col-5 col-md-4">
                     <label class="label-gold">Datum</label>
                     <div class="d-flex gap-2">
-                        <input type="date" name="datum" class="input-clean" required {% if not user.profil.je_premium %}disabled{% endif %}>
-                        <button type="submit" class="btn btn-gold text-white px-3 rounded-3" style="background: var(--t-gold); height: 48px;" {% if not user.profil.je_premium %}disabled{% endif %}><i class="fas fa-plus"></i></button>
+                        <input type="date" name="datum" class="input-clean" required {% if not user.profil.is_premium %}disabled{% endif %}>
+                        <button type="submit" class="btn btn-gold text-white px-3 rounded-3" style="background: var(--t-gold); height: 48px;" {% if not user.profil.is_premium %}disabled{% endif %}><i class="fas fa-plus"></i></button>
                     </div>
                 </div>
             </div>
@@ -252,12 +252,12 @@
 
 <form id="auto-photo-form" method="POST" action="{% url 'pridat_foto' pes.id %}" enctype="multipart/form-data" class="d-none">
     {% csrf_token %}
-    <input type="file" name="obrazek" id="gallery-photo-input" accept="image/*" onchange="this.form.submit()">
+    <input type="file" name="obrazek" id="gallery-photo-input" accept="image/*">
 </form>
 
 <form id="auto-video-form" method="POST" action="{% url 'pridat_video' pes.id %}" enctype="multipart/form-data" class="d-none">
     {% csrf_token %}
-    <input type="file" name="video_soubor" id="gallery-video-input" accept="video/*" onchange="this.form.submit()">
+    <input type="file" name="video_soubor" id="gallery-video-input" accept="video/*">
 </form>
 
 <script>
