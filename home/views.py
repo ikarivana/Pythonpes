@@ -25,7 +25,7 @@ def index(request):
     if request.user.is_authenticated:
         profil = ProfilMajitele.objects.filter(uzivatel=request.user).first()
         if profil:
-            je_premium = profil.is_premium and profil.premium_do >= date.today()
+            je_premium = profil.is_premium and profil.premium_do and profil.premium_do >= date.today()
 
     ztraceni_psi = Pes.objects.filter(je_ztraceny=True)
 

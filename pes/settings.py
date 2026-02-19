@@ -27,7 +27,7 @@ load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-1pv+(%pqb466r@7*-l7wr0skdytrs**6d1sqlkx0mh_jp0%sjp')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['epes-8717.rostiapp.cz', 'www.epes.online', 'epes.online', '127.0.0.1', 'localhost']
 CSRF_TRUSTED_ORIGINS = ['https://epes-8717.rostiapp.cz', 'https://www.epes.online', 'https://epes.online']
@@ -165,4 +165,4 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+

@@ -161,19 +161,24 @@
                                                 email</label>
                                             {{ form.email_kontakni }}
                                         </div>
+
                                         <div class="col-md-6">
                                             <label class="form-label"><i class="fas fa-camera"></i> Hlavní fotka</label>
-                                            {{ form.obrazek }}
+                                            <input type="file" name="obrazek" accept="image/*" class="form-control">
                                         </div>
+
                                         <div class="col-md-6">
                                             <label class="form-label"><i class="fas fa-video"></i> Video
                                                 (volitelné)</label>
-                                            {{ form.video }}
+                                            <input type="file" name="video" accept="video/*" class="form-control">
                                         </div>
-                                        <div class="col-md-6">
+
+                                        <div class="col-md-12">
                                             <label class="form-label"><i class="fas fa-images"></i> Další fotky do
                                                 galerie</label>
-                                            {{ form.galerie_fotky }}
+                                            <input type="file" name="galerie_fotky" accept="image/*" multiple
+                                                   class="form-control">
+                                            <small class="text-muted ms-2">Můžete vybrat více obrázků najednou.</small>
                                         </div>
                                     </div>
                                 </div>

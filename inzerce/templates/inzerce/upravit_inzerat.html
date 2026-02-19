@@ -123,20 +123,28 @@
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label"><i class="fas fa-image icon-img"></i> Hlavní fotografie</label>
-                            {{ form.obrazek }}
+                            <input type="file" name="obrazek" accept=".jpg,.jpeg,.png,.webp" class="form-control">
+
                             {% if inzerat.obrazek %}
-                            <div class="mt-2 small text-muted">Aktuálně: {{ inzerat.obrazek.name }}</div>
+                            <div class="mt-2 small text-muted">
+                                <i class="fas fa-check-circle text-success"></i> Aktuálně uloženo:
+                                <a href="{{ inzerat.obrazek.url }}" target="_blank" class="text-decoration-none">{{
+                                    inzerat.obrazek.name }}</a>
+                            </div>
                             {% endif %}
                         </div>
+
                         <div class="col-md-6 mb-3">
                             <label class="form-label"><i class="fas fa-video icon-vid"></i> Video</label>
-                            {{ form.video }}
+                            <input type="file" name="video" accept=".mp4,.mov,.avi" class="form-control">
                         </div>
 
                         <div class="col-12 mb-3">
                             <label class="form-label"><i class="fas fa-images icon-img"></i> Přidat další fotky do
                                 galerie</label>
-                            {{ form.galerie_fotky }}
+                            <input type="file" name="galerie_fotky" accept=".jpg,.jpeg,.png,.webp" multiple
+                                   class="form-control">
+                            <small class="text-muted">Tip: V galerii můžete vybrat více snímků najednou.</small>
                         </div>
                     </div>
 

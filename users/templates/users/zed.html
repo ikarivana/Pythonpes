@@ -1,175 +1,222 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
 <style>
     :root {
         --bg-page: #fdfaf5;
         --card-border: #eaddcf;
         --text-dark: #4a3728;
         --primary-brown: #8b5e3c;
+        /* LUXUSNÍ ZLATÁ A HNĚDÁ PALETA */
+        --gold-light: #f9f1e7;
+        --gold-accent: #c5a059; /* Elegantní zlatá */
+        --bronze-dark: #6d4a30;
     }
 
-    body { background-color: var(--bg-page); color: var(--text-dark); }
-    .feed-container { max-width: 900px; margin: 0 auto; padding: 20px; }
+    body {
+        background-color: var(--bg-page);
+        color: var(--text-dark);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
 
-    .post-card, .add-post-card {
+    .feed-container { max-width: 1000px; margin: 0 auto; padding: 30px 20px; }
+
+    /* KARTA PŘIDÁNÍ PŘÍSPĚVKU */
+    .add-post-card {
+        background: white;
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 15px 40px rgba(139, 94, 60, 0.1);
+        margin-bottom: 40px;
+        border: 1px solid var(--card-border);
+    }
+
+    .avatar-gold {
+        width: 55px;
+        height: 55px;
+        border-radius: 18px;
+        border: 2px solid var(--gold-accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--gold-light);
+        color: var(--gold-accent);
+        font-size: 1.5rem;
+    }
+
+    .add-post-card textarea {
+        border: 1.5px solid #eee !important;
+        background: #fafafa !important;
+        border-radius: 18px !important;
+        padding: 15px 20px !important;
+        transition: 0.3s;
+    }
+
+    .add-post-card textarea:focus {
+        border-color: var(--gold-accent) !important;
+        background: white !important;
+        box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.1) !important;
+    }
+
+    /* ZLATÁ TLAČÍTKA NAHRÁVÁNÍ */
+    .mini-upload-btn {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 18px 8px 10px;
         background: white;
         border: 1px solid var(--card-border);
-        border-radius: 16px;
-        margin-bottom: 25px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-        overflow: hidden;
+        border-radius: 14px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
     }
 
+    .mini-upload-btn:hover {
+        transform: translateY(-2px);
+        border-color: var(--gold-accent);
+        box-shadow: 0 8px 20px rgba(197, 160, 89, 0.15);
+    }
+
+    .icon-box-gold {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--gold-light);
+        color: var(--gold-accent);
+        font-size: 1.1rem;
+    }
+
+    /* TLAČÍTKO PUBLIKOVAT - GRADIENT */
+    .btn-gold-action {
+        background: linear-gradient(135deg, var(--gold-accent), var(--primary-brown));
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 30px;
+        font-weight: 700;
+        box-shadow: 0 5px 15px rgba(139, 94, 60, 0.3);
+        transition: 0.3s;
+    }
+
+    .btn-gold-action:hover {
+        transform: scale(1.02);
+        box-shadow: 0 8px 25px rgba(139, 94, 60, 0.4);
+    }
+
+    /* PŘÍSPĚVEK */
+    .post-card {
+        background: white;
+        border-radius: 24px;
+        margin-bottom: 35px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+        overflow: hidden;
+        border: 1px solid rgba(234, 221, 207, 0.4);
+    }
+
+    .post-header { padding: 20px; border-bottom: 1px solid #f8f1e9; }
+
     .post-media-container {
-        background-color: #f8f8f8;
+        background-color: #fdfdfd;
         display: flex;
         justify-content: center;
-        align-items: center;
-        max-height: 400px;
-        overflow: hidden;
+        border-top: 1px solid #f3f0ec;
+        border-bottom: 1px solid #f3f0ec;
     }
 
     .post-media-container img, .post-media-container video {
         max-width: 100%;
-        max-height: 400px;
-        width: auto;
-        height: auto;
+        max-height: 550px;
         object-fit: contain;
-        display: block;
     }
 
-    .btn-custom {
-        background-color: var(--primary-brown);
-        color: white;
-        border-radius: 10px;
-        border: none;
-        padding: 8px 25px;
-        font-weight: 600;
-        transition: 0.3s;
-    }
-
-    .btn-custom:hover {
-        background-color: #6d4a30;
-        transform: translateY(-1px);
-    }
-
+    /* KOMENTÁŘE */
+    .comment-section { background: #fdfbf9; padding: 20px; }
     .comment-bubble {
-        background: #f3f0ec;
-        border-radius: 12px;
-        padding: 8px 12px;
-        margin-bottom: 8px;
-        position: relative;
+        background: white;
+        border-radius: 15px;
+        padding: 12px 18px;
+        margin-bottom: 10px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.02);
+        border: 1px solid #f3f0ec;
     }
 
-    .btn-back {
-        display: inline-flex;
-        align-items: center;
+    .btn-edit-tool {
+        color: var(--gold-accent);
         text-decoration: none;
-        color: var(--primary-brown);
-        font-size: 0.9rem;
-        font-weight: 600;
-        transition: 0.3s;
-        padding: 10px 0;
+        font-size: 0.8rem;
+        transition: 0.2s;
     }
-
-    .btn-back:hover {
-        color: var(--text-dark);
-        transform: translateX(-5px);
-    }
-
-    .no-caret::after { display: none !important; }
-
-    input[type="file"]::file-selector-button {
-        background-color: white;
-        color: var(--primary-brown);
-        border: 1px solid var(--card-border);
-        border-radius: 10px;
-        padding: 6px 15px;
-        font-weight: 600;
-        transition: 0.3s;
-        cursor: pointer;
-    }
-
-    input[type="file"]::file-selector-button:hover {
-        background-color: var(--primary-brown);
-        color: white;
-    }
-
-    /* Fokus na inputy - pryč s modrou! */
-    .form-control:focus {
-        border-color: var(--primary-brown) !important;
-        box-shadow: 0 0 0 0.25rem rgba(139, 94, 60, 0.2) !important;
-    }
-
-    @media (max-width: 768px) {
-        .add-post-card .d-flex.gap-3 {
-            flex-direction: column;
-            gap: 10px !important;
-        }
-
-        .add-post-card .d-flex.justify-content-between {
-            flex-direction: column;
-            align-items: stretch !important;
-        }
-
-        .btn-custom {
-            width: 100%;
-            margin-top: 10px;
-        }
-    }
+    .btn-edit-tool:hover { color: var(--bronze-dark); }
 </style>
 
 <div class="feed-container">
-    <a href="{% url 'seznam_zdi' %}" class="btn-back">
-        ⬅ Zpět na výběr zdi
-    </a>
-
-    <div class="text-center mb-4">
-        <h2 class="fw-bold" style="color: var(--primary-brown);">🐾 Zeď: {{ plemeno.nazev }}</h2>
+    <div class="text-center mb-5">
+        <h1 class="fw-bold" style="color: var(--bronze-dark);">🐾 Zeď: {{ plemeno.nazev }}</h1>
+        <div style="width: 60px; height: 3px; background: var(--gold-accent); margin: 10px auto;"></div>
     </div>
 
     {% if user.is_authenticated %}
-    <div class="add-post-card p-4 shadow-sm">
-        <h6 class="fw-bold mb-3">Sdílejte momentku se svým pejskem</h6>
+    <div class="add-post-card">
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <div class="mb-3">
-                {{ form.text }}
+            <div class="d-flex gap-3 mb-4">
+                <div class="avatar-gold">🐶</div>
+                <textarea name="text" class="form-control" placeholder="Sdílejte příběh svého pejska..." rows="2" required></textarea>
             </div>
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+
+            <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex gap-3">
-                    <span>🖼️ {{ form.obrazek }}</span>
-                    <span>🎥 {{ form.video }}</span>
+                    <label class="mini-upload-btn" id="label-photo">
+                        <div class="icon-box-gold"><i class="fas fa-camera"></i></div>
+                        <span>Přidat Foto</span>
+                        <input type="file" name="obrazek" accept="image/*" style="display: none;" onchange="updateUI(this, 'label-photo')">
+                    </label>
+
+                    <label class="mini-upload-btn" id="label-video">
+                        <div class="icon-box-gold"><i class="fas fa-video"></i></div>
+                        <span>Přidat Video</span>
+                        <input type="file" name="video" accept="video/*" style="display: none;" onchange="updateUI(this, 'label-video')">
+                    </label>
                 </div>
-                <button type="submit" name="btn_prispevek" class="btn btn-custom">Sdílet</button>
+
+                <button type="submit" name="btn_prispevek" class="btn-gold-action">
+                    Publikovat
+                </button>
             </div>
         </form>
     </div>
     {% endif %}
 
     {% for post in prispevky %}
-    <div class="post-card shadow-sm" id="post-{{ post.id }}">
-        <div class="p-3 d-flex justify-content-between align-items-center">
+    <div class="post-card">
+        <div class="post-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-                <div class="bg-light rounded-circle me-2 d-flex align-items-center justify-content-center border" style="width: 40px; height: 40px;">🐶</div>
+                <div class="avatar-gold me-3" style="width: 45px; height: 45px; border-radius: 12px; font-size: 1.2rem;">🐶</div>
                 <div>
-                    <strong class="d-block">@{{ post.autor.username }}</strong>
-                    <small class="text-muted">{{ post.datum_pridani|date:"j. n. Y H:i" }}</small>
+                    <strong class="d-block" style="color: var(--bronze-dark);">@{{ post.autor.username }}</strong>
+                    <small class="text-muted" style="font-size: 0.75rem;">{{ post.datum_pridani|date:"j. n. Y · H:i" }}</small>
                 </div>
             </div>
 
             {% if post.autor == user %}
             <div class="dropdown">
-                <button class="btn btn-link text-muted no-caret dropdown-toggle p-0" type="button" data-bs-toggle="dropdown">
-                    ⋮
+                <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown" style="text-decoration: none;">
+                    <i class="fas fa-ellipsis-h"></i>
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                    <li><a class="dropdown-item" href="{% url 'upravit_prispevek' post.id %}">✏️ Upravit</a></li>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius: 15px;">
+                    <li><a class="dropdown-item py-2" href="javascript:void(0)" onclick="toggleEdit('post', '{{ post.id }}')">✏️ Upravit text</a></li>
+                    <li><hr class="dropdown-divider"></li>
                     <li>
-                        <form action="{% url 'smazat_prispevek' post.id %}" method="post" onsubmit="return confirm('Smazat příspěvek?');">
-                            {% csrf_token %}
-                            <button type="submit" class="dropdown-item text-danger">🗑️ Smazat</button>
+                        <form action="{% url 'smazat_prispevek' post.id %}" method="post" onsubmit="return confirm('Smazat tento příspěvek?')">
+                            {% csrf_token %}<button class="dropdown-item text-danger py-2">🗑️ Smazat</button>
                         </form>
                     </li>
                 </ul>
@@ -177,89 +224,99 @@
             {% endif %}
         </div>
 
-        {% if post.video or post.obrazek %}
+        {% if post.obrazek or post.video %}
         <div class="post-media-container">
-            {% if post.video %}
-                <video controls style="width: 100%;"><source src="{{ post.video.url }}" type="video/mp4"></video>
-            {% elif post.obrazek %}
-                <img src="{{ post.obrazek.url }}" alt="Příspěvek">
-            {% endif %}
+            {% if post.video %}<video controls><source src="{{ post.video.url }}" type="video/mp4"></video>
+            {% else %}<img src="{{ post.obrazek.url }}" alt="Příspěvek">{% endif %}
         </div>
         {% endif %}
 
-        <div class="p-3">
-            <div class="mb-2 d-flex align-items-center gap-2">
-                <a href="{% url 'like_post' post.id %}" class="text-decoration-none">
+        <div class="p-4">
+            <div id="display-post-{{ post.id }}">
+                <p style="font-size: 1.1rem; line-height: 1.6;">{{ post.text }}</p>
+            </div>
+
+            <div id="edit-post-{{ post.id }}" style="display: none;" class="mb-3">
+                <form method="post" action="{% url 'upravit_prispevek' post.id %}">
+                    {% csrf_token %}
+                    <textarea name="text" class="form-control mb-2 shadow-sm">{{ post.text }}</textarea>
+                    <button type="submit" class="btn btn-sm btn-gold-action">Uložit</button>
+                    <button type="button" class="btn btn-sm btn-light" onclick="toggleEdit('post', '{{ post.id }}')">Zrušit</button>
+                </form>
+            </div>
+
+            <div class="d-flex align-items-center gap-3 mt-3">
+                <a href="{% url 'like_post' post.id %}" class="text-decoration-none fs-4">
                     {% if user in post.likes.all %}❤️{% else %}🤍{% endif %}
                 </a>
-                <span class="fw-bold small">{{ post.likes.count }} lajků</span>
+                <span class="small fw-bold">{{ post.likes.count }} lajků</span>
             </div>
-            <p class="mb-0"><strong>{{ post.autor.username }}</strong> {{ post.text }}</p>
         </div>
 
-        <div class="comment-section p-3 border-top bg-light bg-opacity-10">
+        <div class="comment-section">
             {% for komentar in post.komentare.all %}
-                <div class="comment-bubble shadow-sm">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <strong class="small" style="color: var(--primary-brown);">{{ komentar.autor.username }}</strong>
-                            <div class="small">{{ komentar.text }}</div>
-                        </div>
+            <div class="comment-bubble">
+                <div id="display-comm-{{ komentar.id }}">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong class="small" style="color: var(--gold-accent);">@{{ komentar.autor.username }}</strong>
                         {% if komentar.autor == user %}
-                        <div class="dropdown">
-                            <button class="btn btn-sm text-muted no-caret p-0" data-bs-toggle="dropdown">⋮</button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 small">
-                                <li><a class="dropdown-item" href="{% url 'upravit_komentar' komentar.id %}">✏️ Upravit</a></li>
-                                <li>
-                                    <form action="{% url 'smazat_komentar' komentar.id %}" method="post">
-                                        {% csrf_token %}
-                                        <button type="submit" class="dropdown-item text-danger">🗑️ Smazat</button>
-                                    </form>
-                                </li>
-                            </ul>
+                        <div class="d-flex gap-2">
+                            <a href="javascript:void(0)" onclick="toggleEdit('comm', '{{ komentar.id }}')" class="btn-edit-tool">✏️</a>
+                            <form action="{% url 'smazat_komentar' komentar.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}<button class="btn btn-link text-danger p-0 border-0" style="font-size: 0.7rem; text-decoration: none;">✕</button>
+                            </form>
                         </div>
                         {% endif %}
                     </div>
+                    <div class="small text-dark">{{ komentar.text }}</div>
                 </div>
+
+                <div id="edit-comm-{{ komentar.id }}" style="display: none;">
+                    <form method="post" action="{% url 'upravit_komentar' komentar.id %}">
+                        {% csrf_token %}
+                        <input type="text" name="text" class="form-control form-control-sm mb-2" value="{{ komentar.text }}">
+                        <button type="submit" class="btn btn-xs btn-gold-action px-2 py-1" style="font-size: 0.7rem;">Uložit</button>
+                    </form>
+                </div>
+            </div>
             {% endfor %}
 
             {% if user.is_authenticated %}
-            <form method="post" class="mt-2">
+            <form method="post" class="mt-3">
                 {% csrf_token %}
                 <input type="hidden" name="prispevek_id" value="{{ post.id }}">
-                <div class="input-group input-group-sm">
-                    <input type="text" name="text_komentare" class="form-control border-0 bg-light" placeholder="Napište komentář..." required>
-                    <button class="btn btn-custom px-3" type="submit" name="btn_komentar">Poslat</button>
+                <div class="input-group shadow-sm" style="border-radius: 12px; overflow: hidden; border: 1px solid var(--card-border);">
+                    <input type="text" name="text_komentare" class="form-control border-0 px-3" placeholder="Přidat komentář..." required>
+                    <button class="btn btn-gold-action border-0 px-4" name="btn_komentar" type="submit">Poslat</button>
                 </div>
             </form>
             {% endif %}
         </div>
     </div>
-   {% empty %}
-    <div class="text-center p-5 shadow-sm bg-white mt-4" style="border-radius: 16px; border: 1px solid var(--card-border, #eaddcf);">
-        <div class="mb-3" style="font-size: 3rem; opacity: 0.3;">🐾</div>
-        <h4 class="fw-bold" style="color: var(--primary-brown, #8b5e3c);">Zatím tu nejsou žádné příspěvky.</h4>
-
-        {% if not user.is_authenticated %}
-            <p class="mt-3 mb-4 text-muted">
-                Chcete se podělit o zážitky nebo přidat fotku svého parťáka?<br>
-                <strong>Pro možnost přidání příspěvku je nutné se nejdříve přihlásit.</strong>
-            </p>
-            <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
-                <a href="{% url 'login' %}" class="btn px-4 py-2 shadow-sm fw-bold"
-                   style="background-color: #8b5e3c; color: white; border-radius: 12px; text-decoration: none;">
-                    Přihlásit se
-                </a>
-                <a href="/users/register/" class="btn btn-outline-dark px-4 py-2 shadow-sm fw-bold"
-                   style="border-radius: 12px; text-decoration: none;">
-                    Registrace
-                </a>
-            </div>
-        {% else %}
-            <p class="text-muted">Buďte první, kdo na tuto zeď napíše!</p>
-            <p class="small text-muted">Stačí použít formulář nahoře 👆</p>
-        {% endif %}
-    </div>
     {% endfor %}
-    </div>
+</div>
+
+<script>
+    function updateUI(input, labelId) {
+        const label = document.getElementById(labelId);
+        if (input.files.length > 0) {
+            label.style.background = '#f0fdf4';
+            label.style.borderColor = '#22c55e';
+            label.querySelector('.icon-box-gold').style.color = '#22c55e';
+            label.querySelector('span').innerText = 'Připraveno ✅';
+        }
+    }
+
+    function toggleEdit(type, id) {
+        const d = document.getElementById('display-' + type + '-' + id);
+        const e = document.getElementById('edit-' + type + '-' + id);
+        if (d.style.display === 'none') {
+            d.style.display = 'block';
+            e.style.display = 'none';
+        } else {
+            d.style.display = 'none';
+            e.style.display = 'block';
+        }
+    }
+</script>
 {% endblock %}
