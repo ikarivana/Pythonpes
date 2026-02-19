@@ -421,11 +421,21 @@ def export_pes_pdf(request, pes_id):
 def seznam_zdi(request):
     return render(request, 'users/social_zed.html', {'vsechna_plemena': Plemeno.objects.all().order_by('nazev')})
 
-def zed_plemene(request, slug):
-    plemeno = get_object_or_404(Plemeno, slug=slug)
-    prispevky = plemeno.prispevky_na_zed.all().order_by('-datum_pridani')
-    return render(request, 'users/zed.html', {'plemeno': plemeno, 'prispevky': prispevky, 'form': PrispevekForm()})
 
+def zed_plemene(request, slug):
+    try:
+        plemeno = Plemeno.objects.get(slug=slug)
+    except Plemeno.DoesNotExist:
+        # Pokud plemeno neexistuje, pošleme uživatele na seznam a vypíšeme varování
+        messages.error(request, f"Kategorie '{slug}' nebyla nalezena.")
+        return redirect('seznam_zdi')  # Název tvého URL pro seznam plemen
+
+    prispevky = plemeno.prispevky_na_zed.all().order_by('-datum_pridani')
+    return render(request, 'users/zed.html', {
+        'plemeno': plemeno,
+        'prispevky': prispevky,
+        'form': PrispevekForm()
+    })
 
 @login_required
 def profil_uzivatele(request):
