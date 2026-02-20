@@ -85,21 +85,33 @@
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div class="d-flex flex-wrap gap-2">
             <button class="badge-filter" style="background-color: #8B4513;" onclick="filtrujMapu('vse')">Vše</button>
-            <button class="badge-filter pulse-danger" style="background-color: #d32f2f;" onclick="filtrujMapu('nebezpeci')">⚠️ NEBEZPEČÍ</button>
-            <button class="badge-filter" style="background-color: #212121;" onclick="filtrujMapu('veterina')">Veterina</button>
-            <button class="badge-filter" style="background-color: #00bcd4;" onclick="filtrujMapu('strihani')">✂️ Stříhání psů</button>
-            <button class="badge-filter" style="background-color: #1976d2;" onclick="filtrujMapu('obchod')">Obchody</button>
-            <button class="badge-filter" style="background-color: #f57c00;" onclick="filtrujMapu('hotel')">Hotely</button>
-            <button class="badge-filter" style="background-color: #388e3c;" onclick="filtrujMapu('wellness')">Wellness</button>
-            <button class="badge-filter" style="background-color: #7b1fa2;" onclick="filtrujMapu('cvicak')">Cvičáky</button>
-            <button class="badge-filter" style="background-color: #757575;" onclick="filtrujMapu('utulek')">Útulky</button>
-            <button class="badge-filter" style="background-color: #ffc107; color: black;" onclick="filtrujMapu('chovna_stanice')">Chovné stanice</button>
+            <button class="badge-filter pulse-danger" style="background-color: #d32f2f;"
+                    onclick="filtrujMapu('nebezpeci')">⚠️ NEBEZPEČÍ
+            </button>
+            <button class="badge-filter" style="background-color: #212121;" onclick="filtrujMapu('veterina')">Veterina
+            </button>
+            <button class="badge-filter" style="background-color: #00bcd4;" onclick="filtrujMapu('strihani')">✂️
+                Stříhání psů
+            </button>
+            <button class="badge-filter" style="background-color: #1976d2;" onclick="filtrujMapu('obchod')">Obchody
+            </button>
+            <button class="badge-filter" style="background-color: #f57c00;" onclick="filtrujMapu('hotel')">Hotely
+            </button>
+            <button class="badge-filter" style="background-color: #388e3c;" onclick="filtrujMapu('wellness')">Wellness
+            </button>
+            <button class="badge-filter" style="background-color: #7b1fa2;" onclick="filtrujMapu('cvicak')">Cvičáky
+            </button>
+            <button class="badge-filter" style="background-color: #757575;" onclick="filtrujMapu('utulek')">Útulky
+            </button>
+            <button class="badge-filter" style="background-color: #ffc107; color: black;"
+                    onclick="filtrujMapu('chovna_stanice')">Chovné stanice
+            </button>
         </div>
 
         <a href="mailto:vas-elivdruhy@gmail.com?subject=Zadost o upravu/smazani z PSI mapy&body=Dobrý den, žádám o úpravu/smazání tohoto záznamu v psí mapě: (doplňte název a důvod). Děkuji."
            class="badge-filter"
            style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; text-decoration: none; font-size: 0.8rem; font-weight: bold;">
-           🚩 Nahlásit / Smazat
+            🚩 Nahlásit / Smazat
         </a>
     </div>
 
@@ -126,42 +138,21 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
+    var sluzby = {{ sluzby_json|safe }};
     var allMarkers = [];
     var map;
-    var sluzby = {{ sluzby_json|safe }};
-
-    function nahlasitNeaktualni(id) {
-        if (confirm("Opravdu je toto varování již neaktuální? Pomůžete tím ostatním pejskařům.")) {
-            fetch(`/mapa/nahlasit-neaktualni/${id}/`)
-                .then(response => {
-                    if (response.ok) {
-                        alert("Děkujeme za nahlášení!");
-                        location.reload();
-                    }
-                });
-        }
-    }
-
-    function filtrujMapu(kategorie) {
-        allMarkers.forEach(function(item) {
-            if (kategorie === 'vse' || item.typ === kategorie) {
-                map.addLayer(item.marker);
-            } else {
-                map.removeLayer(item.marker);
-            }
-        });
-    }
 
     document.addEventListener('DOMContentLoaded', function() {
+        // 1. Inicializace mapy
         map = L.map('map').setView([49.8, 15.5], 7);
-
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
+        // 2. Funkce pro barevné ikonky (veterina bude černá)
         function createIcon(color) {
             return new L.Icon({
-                iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-' + color + '.png',
                 shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
                 iconSize: [25, 41],
                 iconAnchor: [12, 41],
@@ -170,7 +161,7 @@
             });
         }
 
-        const barvyMap = {
+        var barvyMap = {
             'nebezpeci': 'red',
             'veterina': 'black',
             'veterinar': 'black',
@@ -183,6 +174,7 @@
             'chovna_stanice': 'gold'
         };
 
+        // 3. Vykreslení bodů na mapu
         sluzby.forEach(function(s) {
             var lat = parseFloat(s.lat);
             var lon = parseFloat(s.lon);
@@ -191,28 +183,35 @@
                 var colorName = barvyMap[s.typ_slug] || 'blue';
                 var marker = L.marker([lat, lon], { icon: createIcon(colorName) }).addTo(map);
 
-                allMarkers.push({ marker: marker, typ: s.typ_slug });
+                // Skládáme obsah bubliny: Adresa zůstává, web přidáváme jako tlačítko
+                var content = '<div style="min-width:180px; font-family:sans-serif; line-height:1.4;">';
+                content += '<b style="color:#8B4513; font-size:1.1rem; display:block; margin-bottom:2px;">' + s.nazev + '</b>';
+                content += '<span style="background:#eee; padding:2px 6px; border-radius:4px; font-size:0.8rem;">' + s.typ + '</span>';
+                content += '<hr style="margin:8px 0; border:0; border-top:1px solid #ddd;">';
+                content += '<p style="margin:0 0 10px 0; font-size:0.9rem; color:#444;">📍 ' + s.adresa + '</p>';
 
-                var isDanger = s.typ_slug === 'nebezpeci';
-                var popupContent = `
-                    <div style="min-width: 160px;">
-                        <strong style="color: ${isDanger ? 'red' : '#8B4513'}; font-size: 1.1rem;">
-                            ${isDanger ? '⚠️ ' + s.nazev : s.nazev}
-                        </strong><br>
-                        <small style="background: #f0f0f0; padding: 2px 5px; border-radius: 4px;">${s.typ}</small>
-                        <hr style="margin: 8px 0;">
-                        <p style="margin: 0; font-size: 0.9rem;">${s.adresa}</p>
-                        ${isDanger ?
-                            `<button onclick="nahlasitNeaktualni(${s.id})" class="btn-danger-map">❌ Již neaktuální</button>` :
-                            (s.telefon ? `<a href="tel:${s.telefon}" class="btn-call">📞 Zavolat</a>` : '')
-                        }
-                    </div>
-                `;
-                marker.bindPopup(popupContent);
+                // Pokud má služba web, přidáme hnědé tlačítko
+                if (s.web) {
+                    content += '<a href="' + s.web + '" target="_blank" style="display:block; background:#8B4513; color:white; text-align:center; padding:10px; border-radius:8px; text-decoration:none; font-weight:bold; font-size:0.9rem;">🌐 OTEVŘÍT WEB</a>';
+                }
+
+                content += '</div>';
+                marker.bindPopup(content);
+                allMarkers.push({ marker: marker, typ: s.typ_slug });
             }
         });
 
         setTimeout(function() { map.invalidateSize(); }, 500);
     });
+
+    function filtrujMapu(kategorie) {
+        allMarkers.forEach(function(item) {
+            if (kategorie === 'vse' || item.typ === kategorie) {
+                map.addLayer(item.marker);
+            } else {
+                map.removeLayer(item.marker);
+            }
+        });
+    }
 </script>
 {% endblock %}

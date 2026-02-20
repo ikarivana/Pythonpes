@@ -83,17 +83,47 @@
         }
     }
 
+    function geokodujAdresu() {
+        var adresaField = document.getElementById('id_adresa');
+        if (!adresaField) return;
+
+        var adresa = adresaField.value;
+        if (adresa.length > 5) {
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(adresa)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        var lat = parseFloat(data[0].lat);
+                        var lon = parseFloat(data[0].lon);
+                        mapPicker.setView([lat, lon], 16);
+                        setCoords(lat, lon);
+                    }
+                })
+                .catch(err => console.error("Chyba při geokódování:", err));
+        }
+    }
+
+    // Všechnu inicializaci dáme do jednoho bloku
     document.addEventListener('DOMContentLoaded', function() {
+        // 1. Inicializace mapy
         mapPicker = L.map('map-picker').setView([49.8, 15.5], 7);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
         }).addTo(mapPicker);
 
+        // 2. Kliknutí do mapy
         mapPicker.on('click', function(e) {
             setCoords(e.latlng.lat, e.latlng.lng);
         });
 
+        // 3. Hlídání adresy pro automatické GPS
+        var adresaInput = document.getElementById('id_adresa');
+        if (adresaInput) {
+            adresaInput.addEventListener('blur', geokodujAdresu);
+        }
+
+        // 4. Oprava velikosti mapy
         setTimeout(function() {
             mapPicker.invalidateSize();
         }, 300);

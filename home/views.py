@@ -18,23 +18,31 @@ from inzerce.models import Inzerat, InzeratFoto
 from inzerce.forms import InzeratForm
 from users.models import Plemeno, Prispevek, Pes, ProfilMajitele
 
+
 # --- 1. HLAVNÍ STRÁNKA (OPRAVENÁ) ---
 def index(request):
-    je_premium = False
+    is_premium = False
 
     if request.user.is_authenticated:
         profil = ProfilMajitele.objects.filter(uzivatel=request.user).first()
         if profil:
-            je_premium = profil.is_premium and profil.premium_do and profil.premium_do >= date.today()
+            if profil.is_premium:
+                if profil.premium_do:
+                    is_premium = profil.premium_do >= date.today()
+                else:
+                    is_premium = True
+            else:
+                is_premium = False
 
+    # Načtení dat pro šablonu (ztracení psi a zeď)
     ztraceni_psi = Pes.objects.filter(je_ztraceny=True)
+    posledni_prispevky = Prispevek.objects.all().order_by('-datum_pridani')[:5] # Načte posledních 5 příspěvků
 
     return render(request, 'home/index.html', {
-        'je_premium': je_premium,
+        'je_premium': is_premium,
         'ztraceni_psi': ztraceni_psi,
+        'posledni_prispevky': posledni_prispevky,
     })
-
-
 
 
 @csrf_exempt
@@ -193,13 +201,16 @@ def mapa_sluzeb(request):
             'adresa': s.adresa,
             'telefon': s.telefon,
             'popis': s.popis,
+            'web': s.web,
         })
 
     context = {
         'sluzby_json': json.dumps(sluzby_data),
-        'je_prihlasen': request.user.is_authenticated  # Pro snadnou kontrolu v šabloně
+        'je_prihlasen': request.user.is_authenticated
     }
-    return render(request, 'home/mapa_sluzeb.html', {'sluzby_json': json.dumps(sluzby_data)})
+    # Opravený return, aby používal context
+    return render(request, 'home/mapa_sluzeb.html', context)
+
 
 @login_required
 def pridat_sluzbu(request):
@@ -277,4 +288,3 @@ def cookies(request): return render(request, 'home/cookies.html')
 
 
 def cenik(request): return render(request, 'home/cenik.html')
-

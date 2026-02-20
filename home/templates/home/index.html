@@ -234,12 +234,12 @@
     <div class="hero-alfa">
         <h2>Ahoj, {{ user.username }}! 🐾</h2>
         <div class="status-badge">
-            {% if je_premium %}
-                <i class="fas fa-crown"></i> TVŮJ ALFA PROFIL JE AKTIVNÍ
-            {% else %}
-                <i class="fas fa-paw"></i> BĚŽNÝ PÁNÍČEK
-            {% endif %}
-        </div>
+    {% if user.profil.is_premium %}
+        <i class="fas fa-crown" style="color: gold !important;"></i> TVŮJ ALFA PROFIL JE AKTIVNÍ
+    {% else %}
+        <i class="fas fa-paw"></i> BĚŽNÝ PÁNÍČEK
+    {% endif %}
+</div>
     </div>
 {% if ztraceni_psi %}
 <div class="sos-section">
@@ -269,7 +269,7 @@
 </div>
 {% endif %}
 
-    {% if not je_premium %}
+    {% if not user.profil.is_premium %}
     <div class="premium-banner">
         <div class="premium-content">
             <div class="premium-icon">👑</div>

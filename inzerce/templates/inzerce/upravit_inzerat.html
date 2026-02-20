@@ -2,161 +2,178 @@
 
 {% block content %}
 <style>
-    .edit-card {
-        background: white;
-        border-radius: 25px;
-        padding: 40px;
-        /* Jemný zlatavý okraj */
-        border: 1px solid rgba(197, 160, 89, 0.3);
+    .inzerat-wrapper {
+        min-height: 100vh;
+        padding-top: 20px;
+        padding-bottom: 50px;
     }
 
-    /* Nadpis v hnědé barvě z vašeho base.html */
-    .edit-title {
-        color: var(--brown-dark);
+    .inzerat-card {
+        background: linear-gradient(145deg, #ffffff, #fdfaf7);
+        border-radius: 30px;
+        border: 1px solid rgba(197, 160, 89, 0.2);
+        padding: 50px;
+        box-shadow: 20px 20px 60px #e0d5cb, -10px -10px 30px #ffffff;
+    }
+
+    .section-title {
         font-family: 'Playfair Display', serif;
-        font-weight: bold;
+        color: var(--dark-cocoa);
+        font-weight: 800;
+        margin-bottom: 40px;
+        position: relative;
+        display: inline-block;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 60%;
+        height: 4px;
+        background: var(--gold);
+        border-radius: 2px;
+    }
+
+    .form-control, .form-select {
+        border: 1.5px solid #eeebe7 !important;
+        border-radius: 15px !important;
+        padding: 12px 18px !important;
+        background-color: #fdfcfb !important;
+        transition: all 0.3s ease !important;
+        box-shadow: inset 2px 2px 5px rgba(0,0,0,0.03) !important;
     }
 
     .form-label {
-        font-weight: 600;
-        color: var(--brown-dark);
-        margin-top: 10px;
-        margin-bottom: 5px;
-        display: block;
+        font-weight: 700;
+        color: var(--mid-brown);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        margin-left: 5px;
     }
 
-    /* Hlavní tlačítko ve vaší hnědé barvě s hover efektem do zlaté */
-    .btn-save-custom {
-        background-color: var(--brown-dark);
+    .form-label i {
+        color: var(--gold);
+        width: 20px;
+        margin-right: 5px;
+    }
+
+    .btn-submit-premium {
+        background: linear-gradient(135deg, var(--mid-brown) 0%, var(--dark-cocoa) 100%);
         color: white;
         border: none;
-        padding: 12px 30px;
-        border-radius: 12px;
-        font-weight: 700;
-        transition: 0.3s;
+        padding: 18px;
+        border-radius: 18px;
+        font-weight: 800;
+        font-size: 1.1rem;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 10px 20px rgba(45, 27, 25, 0.2);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        width: 100%;
+        margin-top: 30px;
     }
 
-    .btn-save-custom:hover {
-        background-color: var(--accent-gold);
-        color: var(--brown-dark);
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(197, 160, 89, 0.4);
+    .btn-submit-premium:hover {
+        background: var(--gold);
+        color: var(--dark-cocoa);
+        transform: scale(1.02) translateY(-3px);
+        box-shadow: 0 15px 30px rgba(197, 160, 89, 0.3);
     }
 
-    /* Tlačítko zrušit */
-    .btn-cancel-custom {
-        border: 2px solid var(--brown-light);
-        color: var(--brown-dark);
-        background: transparent;
-        border-radius: 12px;
-        padding: 10px 25px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: 0.3s;
-        display: inline-flex;
-        align-items: center;
+    .media-section {
+        background: rgba(197, 160, 89, 0.05);
+        padding: 25px;
+        border-radius: 20px;
+        border: 1px dashed var(--gold);
+        margin-top: 20px;
     }
-
-    .btn-cancel-custom:hover {
-        background-color: #f8f5f2;
-        color: var(--brown-dark);
-    }
-
-    /* Zvýraznění ikon barevně */
-    .icon-img { color: var(--accent-gold); }
-    .icon-vid { color: #d9534f; } /* ponecháme červenou pro video pro přehlednost */
 </style>
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-9">
-            <div class="edit-card shadow-sm">
-                <h2 class="edit-title mb-4">
-                    ✏️ Upravit inzerát: <span style="color: var(--accent-gold);">{{ inzerat.titulek }}</span>
-                </h2>
-                <hr style="border-top: 2px solid var(--accent-gold); opacity: 0.2;" class="mb-4">
+<div class="inzerat-wrapper">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-11 col-xl-10">
+                <div class="inzerat-card">
+                    <h2 class="section-title">Upravit inzerát<i class="fas fa-paw ms-2" style="color: var(--gold);"></i></h2>
 
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
 
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Kategorie</label>
-                            {{ form.kategorie }}
-                        </div>
-                        <div class="col-md-8 mb-3">
-                            <label class="form-label">Název inzerátu</label>
-                            {{ form.titulek }}
-                        </div>
-
-                        <div class="col-12 mb-3">
-                            <label class="form-label">Podrobný popis</label>
-                            {{ form.text }}
-                        </div>
-
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Cena (Kč)</label>
-                            {{ form.cena }}
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Kraj</label>
-                            {{ form.kraj }}
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Město</label>
-                            {{ form.mesto }}
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Telefonní číslo</label>
-                            {{ form.telefon }}
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Kontaktní email</label>
-                            {{ form.email_kontakni }}
-                        </div>
-
-                        <div class="col-12 my-4">
-                            <hr style="border-top: 1px dashed var(--accent-gold); opacity: 0.3;">
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label"><i class="fas fa-image icon-img"></i> Hlavní fotografie</label>
-                            <input type="file" name="obrazek" accept=".jpg,.jpeg,.png,.webp" class="form-control">
-
-                            {% if inzerat.obrazek %}
-                            <div class="mt-2 small text-muted">
-                                <i class="fas fa-check-circle text-success"></i> Aktuálně uloženo:
-                                <a href="{{ inzerat.obrazek.url }}" target="_blank" class="text-decoration-none">{{
-                                    inzerat.obrazek.name }}</a>
+                        <div class="row g-4">
+                            <div class="col-md-8">
+                                <label class="form-label"><i class="fas fa-pen-nib"></i> Titulek inzerátu</label>
+                                {{ form.titulek }}
                             </div>
-                            {% endif %}
+                            <div class="col-md-4">
+                                <label class="form-label"><i class="fas fa-th-large"></i> Kategorie</label>
+                                {{ form.kategorie }}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label"><i class="fas fa-quote-left"></i> Podrobný popis</label>
+                                {{ form.text }}
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label"><i class="fas fa-coins"></i> Cena (Kč)</label>
+                                {{ form.cena }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label"><i class="fas fa-map"></i> Kraj</label>
+                                {{ form.kraj }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label"><i class="fas fa-city"></i> Město / Lokalita</label>
+                                {{ form.mesto }}
+                            </div>
+
+                            <div class="col-md-12 mt-4">
+                                <div class="media-section">
+                                    <div class="row g-4">
+                                        <div class="col-md-6">
+                                            <label class="form-label"><i class="fas fa-phone-alt"></i> Telefon</label>
+                                            {{ form.telefon }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label"><i class="fas fa-envelope"></i> Kontaktní email</label>
+                                            {{ form.email_kontakni }}
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label"><i class="fas fa-image"></i> Hlavní fotka</label>
+                                            {{ form.obrazek }}
+                                            {% if inzerat.obrazek %}
+                                            <div class="mt-2 small text-muted">
+                                                <i class="fas fa-check-circle text-success"></i> Aktuálně:
+                                                <a href="{{ inzerat.obrazek.url }}" target="_blank">{{ inzerat.obrazek.name }}</a>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label"><i class="fas fa-film"></i> Video (volitelné)</label>
+                                            {{ form.video }}
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <label class="form-label"><i class="fas fa-images"></i> Další fotky do galerie</label>
+                                            {{ form.galerie_fotky }}
+                                            <small class="text-muted ms-2">Vyberte snímky z galerie najednou.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label"><i class="fas fa-video icon-vid"></i> Video</label>
-                            <input type="file" name="video" accept=".mp4,.mov,.avi" class="form-control">
-                        </div>
-
-                        <div class="col-12 mb-3">
-                            <label class="form-label"><i class="fas fa-images icon-img"></i> Přidat další fotky do
-                                galerie</label>
-                            <input type="file" name="galerie_fotky" accept=".jpg,.jpeg,.png,.webp" multiple
-                                   class="form-control">
-                            <small class="text-muted">Tip: V galerii můžete vybrat více snímků najednou.</small>
-                        </div>
-                    </div>
-
-                    <div class="d-flex gap-3 mt-4 pt-3 border-top">
-                        <button type="submit" class="btn-save-custom">
-                            <i class="fas fa-save me-2"></i> Uložit změny
+                        <button type="submit" class="btn-submit-premium">
+                            <i class="fas fa-save me-2"></i> Uložit inzerát
                         </button>
-                        <a href="{% url 'seznam_inzeratu' %}" class="btn-cancel-custom">
-                            Zrušit
-                        </a>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
