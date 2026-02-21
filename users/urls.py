@@ -16,7 +16,7 @@ urlpatterns = [
     path('pes-detail/<int:pes_id>/', views.detail_psa, name='detail_psa'),
     path('pes/<int:pes_id>/', views.nouzovy_profil_psa, name='nouzovy_profil_psa'),
     path('pes/<int:pes_id>/odeslat-polohu/', views.odeslat_polohu_nalezu, name='odeslat_polohu'),
-    path('pes/<int:pes_id>/odeslat-email/', views.odeslat_sos_email, name='odeslat_sos_email'),  # PŘIDÁNO
+    path('pes/<int:pes_id>/odeslat-email/', views.odeslat_sos_email, name='odeslat_sos_email'),
     path('pes/<int:pk>/prepnout-ztratu/', views.prepnout_ztratu, name='prepnout_ztratu'),
 
     # --- ZDRAVOTNÍ ZÁZNAMY ---

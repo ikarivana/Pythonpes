@@ -146,7 +146,7 @@ class Ockovani(models.Model):
 
 
 # --- GALERIE FOTEK ---
-class Galerie(models.Model):
+class GalerieFotka(models.Model):
     # on_delete=models.CASCADE zajistí, že při smazání psa zmizí i jeho galerie
     pes = models.ForeignKey(Pes, on_delete=models.CASCADE, related_name='galerie_fotky')
     obrazek = models.ImageField(upload_to='galerie_psu/')
@@ -157,7 +157,7 @@ class Galerie(models.Model):
         verbose_name_plural = "Galerie fotek"
 
 # --- GALERIE VIDEÍ ---
-class Video(models.Model):
+class GalerieVideo(models.Model):
     pes = models.ForeignKey(Pes, on_delete=models.CASCADE, related_name='galerie_videa')
     video_soubor = models.FileField(upload_to='videa_psu/')
     vytvoreno = models.DateTimeField(auto_now_add=True)
@@ -196,9 +196,13 @@ class Plemeno(models.Model):
 
 class Prispevek(models.Model):
     autor = models.ForeignKey(User, on_delete=models.CASCADE)
-    plemeno = models.ForeignKey(Plemeno, on_delete=models.CASCADE, related_name='prispevky_na_zed')
+    # Necháme null=True, aby zeď fungovala i pro služby bez plemene
+    plemeno = models.ForeignKey(Plemeno, on_delete=models.CASCADE, related_name='prispevky_na_zed', null=True, blank=True)
+    # TOTO JE KLÍČOVÉ POLE:
+    sekce_slug = models.CharField(max_length=100, db_index=True, blank=True)
     text = models.TextField()
     obrazek = models.ImageField(upload_to='prispevky/', blank=True, null=True)
+    video = models.FileField(upload_to='videa/', blank=True, null=True)
     datum_pridani = models.DateTimeField(auto_now_add=True)
     likes = models.ManyToManyField(User, related_name='libi_se_mi', blank=True)
 

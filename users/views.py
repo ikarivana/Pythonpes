@@ -1,25 +1,29 @@
 import os
 import json
 import io
+from PIL import Image, ImageOps
+from pillow_heif import register_heif_opener
+
 from django.conf import settings
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import login
 from django.core.mail import send_mail
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from django.template.loader import get_template
 from django.utils.text import slugify
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.base import ContentFile
 
-from xhtml2pdf import pisa
-from PIL import Image, ImageOps
-from pillow_heif import register_heif_opener
+from .forms import UserUpdateForm, PlemenoForm, PrispevekForm, ExtendedRegistrationForm, OckovaniForm, PesForm
+from .models import Plemeno, Prispevek, Komentar, GalerieFotka, GalerieVideo, ProfilMajitele, Uspech, Pes, \
+    ZdravotniZaznam, Notifikace
 
-from pes import settings
+# Ostatní nástroje
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from xhtml2pdf import pisa
 
 # Aktivace podpory HEIC (iPhone fotky)
 register_heif_opener()
@@ -43,17 +47,6 @@ def zpracuj_foto(input_file):
     output.seek(0)
 
     return ContentFile(output.read(), name=input_file.name.rsplit('.', 1)[0] + '.jpg')
-
-# Importy tvých modelů a formulářů
-from .models import (
-    Pes, ProfilMajitele, Plemeno, Prispevek, Komentar,
-    ZdravotniZaznam, Uspech, Notifikace, Ockovani,
-    Galerie, Video
-)
-from .forms import (
-    PesForm, PrispevekForm, PlemenoForm, OckovaniForm,
-    UserUpdateForm, ExtendedRegistrationForm
-)
 
 # --- 1. SPRÁVA PSŮ (Základní operace) ---
 
@@ -166,7 +159,7 @@ def pridat_foto(request, pes_id):
         profil = request.user.profil
 
         # KONTROLA LIMITU FOTEK (5 fotek pro Free)
-        if not profil.je_premium and not request.user.is_staff:
+        if not profil.is_premium and not request.user.is_staff:
             if pes.galerie_fotky.count() >= 5:
                 messages.warning(request, "V bezplatné verzi můžete mít u pejska maximálně 5 fotek.")
                 return redirect('upravit_psa', pk=pes_id)
@@ -175,7 +168,8 @@ def pridat_foto(request, pes_id):
         if img:
             try:
                 zpracovany_obrazek = zpracuj_foto(img)
-                Galerie.objects.create(pes=pes, obrazek=zpracovany_obrazek)
+                # ZMĚNA: Galerie -> GalerieFotka
+                GalerieFotka.objects.create(pes=pes, obrazek=zpracovany_obrazek)
                 messages.success(request, "Fotka nahrána.")
             except Exception as e:
                 messages.error(request, f"Chyba: {e}")
@@ -184,11 +178,12 @@ def pridat_foto(request, pes_id):
 
 @login_required
 def smazat_foto(request, pk):
-    # Najdeme fotku a zároveň ověříme, že patří psovi aktuálního uživatele
-    foto = get_object_or_404(Galerie, id=pk, pes__majitel=request.user.profil)
-    pes_id = foto.pes.id  # Uložíme si ID psa, abychom se měli kam vrátit
-    foto.delete()         # Smažeme záznam z databáze (i soubor z disku, pokud máš správně nastaveno)
+    # ZMĚNA: Galerie -> GalerieFotka
+    foto = get_object_or_404(GalerieFotka, id=pk, pes__majitel=request.user.profil)
+    pes_id = foto.pes.id
+    foto.delete()
     messages.success(request, "Fotka byla úspěšně smazána.")
+    # Tady se vracíme na detail_psa
     return redirect('detail_psa', pes_id=pes_id)
 
 
@@ -199,20 +194,23 @@ def pridat_video(request, pes_id):
         profil = request.user.profil
 
         # KONTROLA LIMITU VIDEÍ (1 video pro Free)
-        if not profil.je_premium and not request.user.is_staff:
+        if not profil.is_premium and not request.user.is_staff:
             if pes.galerie_videa.count() >= 1:
                 messages.warning(request, "V bezplatné verzi můžete mít u pejska pouze 1 video.")
                 return redirect('upravit_psa', pk=pes_id)
 
         vid = request.FILES.get('video_soubor')
         if vid:
-            Video.objects.create(pes=pes, video_soubor=vid)
+            # ZMĚNA: Video -> GalerieVideo
+            GalerieVideo.objects.create(pes=pes, video_soubor=vid)
             messages.success(request, "Video nahráno.")
 
     return redirect('upravit_psa', pk=pes_id)
+
 @login_required
 def smazat_video(request, pk):
-    video = get_object_or_404(Video, id=pk, pes__majitel=request.user.profil)
+    # ZMĚNA: Video -> GalerieVideo
+    video = get_object_or_404(GalerieVideo, id=pk, pes__majitel=request.user.profil)
     p_id = video.pes.id
     video.delete()
     messages.success(request, "Video smazáno.")
@@ -237,7 +235,7 @@ def detail_psa(request, pes_id):
         'uspechy': pes.uspechy.all(),
         'fotky': pes.galerie_fotky.all(),
         'videa': pes.galerie_videa.all(),
-        'ockovani': pes.ockovani.all() if hasattr(pes, 'ockovani') else [],
+        'ockovani': pes.vsechna_ockovani.all(),
     })
 
 def nouzovy_profil_psa(request, pes_id):
@@ -423,19 +421,41 @@ def seznam_zdi(request):
 
 
 def zed_plemene(request, slug):
-    try:
-        plemeno = Plemeno.objects.get(slug=slug)
-    except Plemeno.DoesNotExist:
-        # Pokud plemeno neexistuje, pošleme uživatele na seznam a vypíšeme varování
-        messages.error(request, f"Kategorie '{slug}' nebyla nalezena.")
-        return redirect('seznam_zdi')  # Název tvého URL pro seznam plemen
+    plemeno = Plemeno.objects.filter(slug=slug).first()
+    # Tady byla ta chyba - změň plemeno_slug na sekce_slug
+    prispevky = Prispevek.objects.filter(sekce_slug=slug).order_by('-datum_pridani')
 
-    prispevky = plemeno.prispevky_na_zed.all().order_by('-datum_pridani')
+    form = PrispevekForm()
+
+    if request.method == 'POST' and 'btn_prispevek' in request.POST:
+        form = PrispevekForm(request.POST, request.FILES)
+        if form.is_valid():
+            prispevek = form.save(commit=False)
+            prispevek.autor = request.user
+            prispevek.plemeno = plemeno
+            prispevek.sekce_slug = slug  # Tady se to uloží správně
+            prispevek.save()
+            return redirect('zed_plemene', slug=slug)
+
     return render(request, 'users/zed.html', {
+        'form': form,  # Toto zajistí zobrazení pole
         'plemeno': plemeno,
         'prispevky': prispevky,
-        'form': PrispevekForm()
+        'nazev_sekce': plemeno.nazev if plemeno else slug.capitalize(),
+        'slug': slug
     })
+
+
+@login_required
+def smazat_prispevek(request, post_id):
+    prispevek = get_object_or_404(Prispevek, id=post_id)
+    # Kontrola, že maže jen autor
+    if prispevek.autor == request.user:
+        slug = prispevek.sekce_slug
+        prispevek.delete()
+        messages.success(request, "Příspěvek smazán.")
+        return redirect('zed_plemene', slug=slug)
+    return HttpResponseForbidden()
 
 @login_required
 def profil_uzivatele(request):
@@ -473,6 +493,7 @@ def pridat_uspech(request, pes_id):
     return redirect('detail_psa', pes_id=pes.id)
 
 # --- DOPLNĚK: SOCIÁLNÍ SÍŤ (Příspěvky a interakce) ---
+
 @login_required
 def upravit_prispevek(request, pk):
     p = get_object_or_404(Prispevek, pk=pk, autor=request.user)
@@ -483,7 +504,7 @@ def upravit_prispevek(request, pk):
             return redirect('zed_plemene', slug=p.plemeno.slug)
     else:
         form = PrispevekForm(instance=p)
-    return render(request, 'users/pridat_prispevek.html', {'form': form, 'editace': True})
+    return redirect('zed_plemene', slug=p.plemeno.slug if p.plemeno else p.sekce_slug)
 
 @login_required
 def smazat_prispevek(request, pk):
@@ -493,7 +514,7 @@ def smazat_prispevek(request, pk):
         prispevek.delete()
         messages.success(request, "Příspěvek byl smazán.")
         return redirect('zed_plemene', slug=slug)
-    return render(request, 'users/smazat_potvrzeni.html', {'objekt': prispevek})
+    slug = prispevek.plemeno.slug if prispevek.plemeno else prispevek.sekce_slug
 
 @login_required
 def pridej_like(request, post_id):
@@ -515,16 +536,26 @@ def pridej_like(request, post_id):
 def pridat_odpoved(request, parent_id):
     parent = get_object_or_404(Komentar, id=parent_id)
     if request.method == "POST":
-        Komentar.objects.create(
+        novy_komentar = Komentar.objects.create(
             prispevek=parent.prispevek,
             autor=request.user,
             text=request.POST.get('text_odpovedi'),
         )
+        # TADY pošli notifikaci autorovi původního komentáře
+        if parent.autor != request.user:
+            Notifikace.objects.create(
+                prijemce=parent.autor,
+                odesilatel=request.user,
+                typ='odpoved',
+                prispevek=parent.prispevek
+            )
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 @login_required
 def seznam_notifikaci(request):
+    # Načte notifikace, které uživateli přišly
     nots = request.user.prijate_notifikace.all().order_by('-datum_vytvoreni')
+    # Označí je za přečtené
     nots.filter(precteno=False).update(precteno=True)
     return render(request, 'users/notifikace.html', {'nots': nots})
 
