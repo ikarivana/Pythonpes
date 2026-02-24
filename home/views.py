@@ -222,7 +222,7 @@ def pridat_sluzbu(request):
             if nova_sluzba.typ == 'nebezpeci':
                 nova_sluzba.schvaleno = True
             nova_sluzba.save()
-            messages.success(request, "Záznam byl uložen.")
+            messages.success(request, "Záznam byl odeslán ke schválení. Po prověření administrátorem se objeví na mapě.")
             return redirect('mapa_sluzeb')
     else:
         form = SluzbaForm()

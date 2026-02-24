@@ -133,19 +133,19 @@
             <div class="row g-3">
                 <div class="col-md-4">
                     <label class="label-gold">DKK (HD)</label>
-                    <input type="text" name="rtg_hd" class="input-clean" value="{{ pes.rtg_hd }}" {% if not user.profil.je_premium %}disabled{% endif %}>
+                    <input type="text" name="rtg_hd" class="input-clean" value="{{ pes.rtg_hd }}" {% if not user.profil.is_premium %}disabled{% endif %}>
                 </div>
                 <div class="col-md-4">
                     <label class="label-gold">DLK (ED)</label>
-                    <input type="text" name="rtg_ed" class="input-clean" value="{{ pes.rtg_ed }}" {% if not user.profil.je_premium %}disabled{% endif %}>
+                    <input type="text" name="rtg_ed" class="input-clean" value="{{ pes.rtg_ed }}" {% if not user.profil.is_premium %}disabled{% endif %}>
                 </div>
                 <div class="col-md-4">
                     <label class="label-gold">Páteř / Jiné RTG</label>
-                    <input type="text" name="rtg_pater" class="input-clean" value="{{ pes.rtg_pater }}" {% if not user.profil.je_premium %}disabled{% endif %}>
+                    <input type="text" name="rtg_pater" class="input-clean" value="{{ pes.rtg_pater }}" {% if not user.profil.is_premium %}disabled{% endif %}>
                 </div>
                 <div class="col-md-6">
                     <label class="label-gold">Chovná stanice</label>
-                    <input type="text" name="chovna_stanice" class="input-clean" value="{{ pes.chovna_stanice }}" {% if not user.profil.je_premium %}disabled{% endif %}>
+                    <input type="text" name="chovna_stanice" class="input-clean" value="{{ pes.chovna_stanice }}" {% if not user.profil.is_premium %}disabled{% endif %}>
                 </div>
                 <div class="col-md-6">
                     <label class="label-gold">Otec / Matka (manuálně)</label>
@@ -261,6 +261,9 @@
 </form>
 
 <script>
+    /**
+     * Funkce pro potvrzení smazání pomocí SweetAlert2
+     */
     function confirmSmartDelete(deleteUrl, itemType) {
         Swal.fire({
             title: 'Smazat ' + itemType + '?',
@@ -269,12 +272,59 @@
             showCancelButton: true,
             confirmButtonText: 'Ano, smazat',
             cancelButtonText: 'Zrušit',
-            reverseButtons: true
+            reverseButtons: true,
+            confirmButtonColor: '#d63031',
+            cancelButtonColor: '#f1f1f1',
         }).then((result) => {
             if (result.isConfirmed) {
                 window.location.href = deleteUrl;
             }
         })
+    }
+
+    /**
+     * Automatické odesílání formulářů při výběru média
+     */
+    const photoInput = document.getElementById('gallery-photo-input');
+    if (photoInput) {
+        photoInput.onchange = function() {
+            document.getElementById('auto-photo-form').submit();
+        };
+    }
+
+    const videoInput = document.getElementById('gallery-video-input');
+    if (videoInput) {
+        videoInput.onchange = function() {
+            document.getElementById('auto-video-form').submit();
+        };
+    }
+
+    /**
+     * Automatický pomocník pro výpočet termínu klíšťat
+     * Počítá: Datum aplikace + Počet dní ochrany = Příští aplikace
+     */
+    const klistataInput = document.getElementsByName('posledni_klistata')[0];
+    if (klistataInput) {
+        klistataInput.addEventListener('change', function() {
+            let posledniDate = new Date(this.value);
+
+            // Zkusíme vzít dny z pole 'typ_ochrany_klistata', pokud tam není číslo, dáme 30
+            let dnyInput = document.getElementsByName('typ_ochrany_klistata')[0].value;
+            let dnyNavic = parseInt(dnyInput) || 30;
+
+            if (!isNaN(posledniDate.getTime())) {
+                // Přičteme dny
+                posledniDate.setDate(posledniDate.getDate() + dnyNavic);
+
+                // Zformátujeme pro HTML input (YYYY-MM-DD)
+                let y = posledniDate.getFullYear();
+                let m = ('0' + (posledniDate.getMonth() + 1)).slice(-2);
+                let d = ('0' + posledniDate.getDate()).slice(-2);
+
+                let pristiDateString = `${y}-${m}-${d}`;
+                document.getElementsByName('pristi_klistata')[0].value = pristiDateString;
+            }
+        });
     }
 </script>
 {% endblock %}

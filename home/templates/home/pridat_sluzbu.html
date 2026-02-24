@@ -1,9 +1,28 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
+<style>
+    #map-picker {
+        height: 600px !important;
+        min-height: 400px;
+        width: 100%;
+        display: block;
+        border-radius: 20px;
+    }
+    .gps-rescue-mode { display: none; }
+    .gps-visible {
+        display: block !important;
+        background-color: #fff3cd !important;
+        border: 2px solid #ffc107 !important;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+</style>
+
 <div class="container-fluid mt-4">
     <div class="d-flex align-items-center mb-4">
-        <a href="{% url 'mapa_sluzeb' %}" class="text-decoration-none me-3" style="color: #8B4513; transition: 0.3s;" title="Zpět na mapu">
+        <a href="{% url 'mapa_sluzeb' %}" class="text-decoration-none me-3" style="color: #8B4513;">
             <span style="font-size: 2rem;">←</span>
         </a>
         <h2 class="mb-0" style="color: #8B4513; font-weight: bold;">📍 Přidat novou službu</h2>
@@ -16,9 +35,11 @@
                     📍 Zaměřit moji polohu (GPS)
                 </button>
 
-                <form method="post">
+                <form method="post" id="map-form">
                     {% csrf_token %}
-                    {{ form.as_p }}
+                    <div id="form-fields-container">
+                        {{ form.as_p }}
+                    </div>
 
                     <div class="d-flex gap-2 mt-3">
                         <button type="submit" class="btn fw-bold flex-grow-1" style="background-color: #8B4513; color: white; border-radius: 10px; padding: 10px;">
@@ -34,28 +55,35 @@
 
         <div class="col-md-7">
             <div class="card shadow-sm p-0" style="border-radius: 20px; overflow: hidden; border: none;">
-                <div id="map-picker" style="height: 600px; width: 100%; background-color: #f8f9fa;"></div>
+                <div id="map-picker"></div>
             </div>
-            <p class="text-muted mt-2 small text-center">💡 Klikněte do mapy pro automatické vyplnění souřadnic nebo použijte tlačítko GPS.</p>
+            <p class="text-muted mt-2 small text-center">💡 Klikněte do mapy pro ruční zaměření nebo použijte GPS.</p>
         </div>
     </div>
 </div>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
     var mapPicker;
     var marker;
 
-    function setCoords(lat, lon) {
-        var latField = document.getElementById('id_lat');
-        var lonField = document.getElementById('id_lon');
-
-        if (latField && lonField) {
-            latField.value = lat.toFixed(6);
-            lonField.value = lon.toFixed(6);
+    // 1. Zobrazení skrytých polí
+    function ukazPoleSouradnic() {
+        const latInput = document.getElementById('id_lat');
+        const lonInput = document.getElementById('id_lon');
+        if (latInput && lonInput) {
+            latInput.closest('p').className = 'gps-visible';
+            lonInput.closest('p').className = 'gps-visible';
         }
+    }
+
+    // 2. Zápis souřadnic
+    function setCoords(lat, lon) {
+        document.getElementById('id_lat').value = lat.toFixed(6);
+        document.getElementById('id_lon').value = lon.toFixed(6);
+        ukazPoleSouradnic();
 
         if (marker) {
             marker.setLatLng([lat, lon]);
@@ -68,65 +96,66 @@
         }
     }
 
+    // 3. GPS tlačítko
     function najdiMne() {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                var lat = position.coords.latitude;
-                var lon = position.coords.longitude;
+            navigator.geolocation.getCurrentPosition(function(pos) {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
                 mapPicker.setView([lat, lon], 16);
                 setCoords(lat, lon);
-            }, function() {
-                alert("Nepodařilo se získat polohu. Povolte prosím GPS.");
-            });
-        } else {
-            alert("Váš prohlížeč nepodporuje geolokaci.");
+            }, function() { alert("Povolte prosím GPS."); });
         }
     }
 
+    // 4. Geokódování adresy
     function geokodujAdresu() {
-        var adresaField = document.getElementById('id_adresa');
-        if (!adresaField) return;
-
-        var adresa = adresaField.value;
+        const adresa = document.getElementById('id_adresa').value;
         if (adresa.length > 5) {
             fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(adresa)}`)
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
                     if (data.length > 0) {
-                        var lat = parseFloat(data[0].lat);
-                        var lon = parseFloat(data[0].lon);
+                        const lat = parseFloat(data[0].lat);
+                        const lon = parseFloat(data[0].lon);
                         mapPicker.setView([lat, lon], 16);
                         setCoords(lat, lon);
-                    }
-                })
-                .catch(err => console.error("Chyba při geokódování:", err));
+                    } else { ukazPoleSouradnic(); }
+                });
         }
     }
 
-    // Všechnu inicializaci dáme do jednoho bloku
+    // 5. Hlavní start
     document.addEventListener('DOMContentLoaded', function() {
-        // 1. Inicializace mapy
+        // Inicializace mapy
         mapPicker = L.map('map-picker').setView([49.8, 15.5], 7);
-
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
         }).addTo(mapPicker);
 
-        // 2. Kliknutí do mapy
+        // Skrytí polí
+        const latInput = document.getElementById('id_lat');
+        const lonInput = document.getElementById('id_lon');
+        if (latInput && lonInput) {
+            latInput.closest('p').style.display = 'none';
+            lonInput.closest('p').style.display = 'none';
+        }
+
+        // Zobrazení při chybě
+        {% if form.errors %}
+            ukazPoleSouradnic();
+        {% endif %}
+
+        // Klik do mapy
         mapPicker.on('click', function(e) {
             setCoords(e.latlng.lat, e.latlng.lng);
         });
 
-        // 3. Hlídání adresy pro automatické GPS
-        var adresaInput = document.getElementById('id_adresa');
-        if (adresaInput) {
-            adresaInput.addEventListener('blur', geokodujAdresu);
-        }
+        // Blur na adrese
+        document.getElementById('id_adresa').addEventListener('blur', geokodujAdresu);
 
-        // 4. Oprava velikosti mapy
-        setTimeout(function() {
-            mapPicker.invalidateSize();
-        }, 300);
+        // Fix šedé mapy
+        setTimeout(() => { mapPicker.invalidateSize(); }, 400);
     });
 </script>
 {% endblock %}

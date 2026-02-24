@@ -92,24 +92,30 @@
             <a href="{% url 'home' %}" class="nav-link-custom"><i class="fas fa-home"></i> Domů</a>
 
             {% if user.is_authenticated %}
-            <a href="{% url 'seznam_psu' %}" class="nav-link-custom"><i class="fas fa-dog"></i> Moji psi</a>
+            <a href="{% url 'seznam_psu' %}" class="nav-link-custom"><i class="fas fa-dog"></i> Moje smečka</a>
             <a href="{% url 'profil' %}" class="nav-link-custom"><i class="fas fa-user-circle"></i> Můj profil</a>
-            <a href="{% url 'seznam_notifikaci' %}" class="nav-link-custom">
-                <i class="fas fa-bell"></i> Notifikace
-                {% if pocet_notifikaci > 0 %}
-                <span class="badge rounded-pill bg-danger ms-2">{{ pocet_notifikaci }}</span>
-                {% endif %}
+            <a href="{% url 'seznam_notifikaci' %}" class="nav-link-custom d-flex align-items-center">
+                <div class="position-relative">
+                    <i class="fas fa-bell"></i>
+                    {% if pocet_notifikaci > 0 %}
+                    <span class="badge rounded-pill bg-danger notification-blink position-absolute top-0 start-100 translate-middle"
+                          style="font-size: 0.6rem;">
+                {{ pocet_notifikaci }}
+            </span>
+                    {% endif %}
+                </div>
+                <span class="ms-2">Notifikace</span>
             </a>
             {% endif %}
 
             <div class="sidebar-label">SOS Záchrana</div>
-            <a href="{% url 'home' %}" class="nav-link-custom nav-link-sos">
-                <i class="fas fa-broadcast-tower"></i> Hledaní psi
+            <a href="{% url 'seznam_hledanych' %}" class="nav-link-custom nav-link-sos">
+                <i class="fas fa-broadcast-tower"></i> Pátrání po psech
             </a>
 
             <div class="sidebar-label">Inzerce a Služby</div>
             <a href="{% url 'seznam_inzeratu' %}" class="nav-link-custom"><i class="fas fa-shopping-basket"></i> Psí
-                Bazar</a>
+                bazar</a>
             <a href="{% url 'mapa_sluzeb' %}" class="nav-link-custom"><i class="fas fa-map-marked-alt"></i> Mapa služeb</a>
 
             <div class="sidebar-label">Komunita</div>

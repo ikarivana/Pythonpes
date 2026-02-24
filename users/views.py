@@ -1,6 +1,9 @@
 import os
 import json
 import io
+from datetime import timedelta, timezone
+
+import qrcode
 from PIL import Image, ImageOps
 from pillow_heif import register_heif_opener
 
@@ -60,98 +63,116 @@ def seznam_psu(request):
     psi = Pes.objects.filter(majitel=profil)
     return render(request, 'users/seznam_psu.html', {'psi': psi, 'profil': profil})
 
+
+@login_required
+def dashboard(request):
+    profil = request.user.profil
+    psi = Pes.objects.filter(majitel=profil)
+    # Načteme nepřečtené notifikace (sociální i zdravotní)
+    nots = request.user.prijate_notifikace.filter(precteno=False).order_by('-datum_vytvoreni')
+    dnes_plus_3 = timezone.now().date() + timedelta(days=3)
+
+    return render(request, 'users/dashboard.html', {
+        'psi': psi,
+        'nots': nots,
+        'profil': profil,
+        'dnes_plus_3': dnes_plus_3,
+    })
+
+
 @login_required
 def pridat_psa(request):
-    profil, created = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
+    # 1. Získání profilu uživatele
+    profil = get_object_or_404(ProfilMajitele, uzivatel=request.user)
 
+    # 2. OMEZENÍ PREMIUM: Pokud není premium/staff a už má 1 psa, nepustíme ho dál
     if not profil.is_premium and not request.user.is_staff and profil.psi.count() >= 1:
-        messages.warning(request, "Ve verzi zdarma můžete mít pouze jednoho pejska.")
+        messages.warning(request, "Ve verzi zdarma můžete mít pouze jednoho pejska. Pro více psů si aktivujte Premium.")
         return redirect('seznam_psu')
 
     if request.method == 'POST':
-        request_files = request.FILES.copy()
-        if 'fotka' in request_files:
-            try:
-                img_file = request_files['fotka']
-                img = Image.open(img_file)
-                img = ImageOps.exif_transpose(img)
-                if img.mode in ("RGBA", "P", "CMYK"):
-                    img = img.convert("RGB")
-                img.thumbnail((1200, 1200), Image.Resampling.LANCZOS)
-                temp_handle = io.BytesIO()
-                img.save(temp_handle, format='JPEG', quality=85)
-                temp_handle.seek(0)
-                novy_nazev = img_file.name.rsplit('.', 1)[0] + ".jpg"
-                request_files['fotka'] = ContentFile(temp_handle.read(), name=novy_nazev)
-            except Exception as e:
-                print(f"Chyba zpracování: {e}")
-
+        # FILES je nutné pro fotky a videa
         form = PesForm(request.POST, request.FILES, request=request)
         if form.is_valid():
-            pes = form.save(commit=False)
-            pes.majitel = profil
-            pes.save()
-            messages.success(request, f"Pejsek {pes.jmeno} přidán!")
-            return redirect('seznam_psu')
+            try:
+                pes = form.save(commit=False)
+                pes.majitel = profil
+
+                # Pojistka pro pole, která dříve házela chybu v DB
+                pole_k_oprave = ['otec_manualni', 'matka_manualni', 'zdravotni_testy', 'bonitace']
+                for pole in pole_k_oprave:
+                    if not getattr(pes, pole):
+                        setattr(pes, pole, "Nezadáno")
+
+                # 3. GENEROVÁNÍ QR KÓDU
+                # Odkaz na detail psa (uprav doménu podle potřeby)
+                url_psa = f"https://epes.online/users/pes/{pes.id}/"
+                qr = qrcode.QRCode(version=1, box_size=10, border=5)
+                qr.add_data(url_psa)
+                qr.make(fit=True)
+
+                img = qr.make_image(fill_color="black", back_color="white")
+                buffer = io.BytesIO()
+                img.save(buffer, format='PNG')
+
+                # Uložení QR kódu do modelu
+                pes.qr_kod.save(f'qr_{pes.jmeno}.png', File(buffer), save=False)
+
+                pes.save()
+                messages.success(request, f"Pejsek {pes.jmeno} byl úspěšně přidán i s QR kódem!")
+                return redirect('seznam_psu')
+            except Exception as e:
+                messages.error(request, f"Chyba při ukládání: {e}")
     else:
         form = PesForm(request=request)
+
     return render(request, 'users/pridat_psa.html', {'form': form})
+
 
 @login_required
 def upravit_psa(request, pk):
-    # 1. Najdeme psa
+    # Najdeme psa, který patří přihlášenému uživateli
+    # Pokud pes neexistuje nebo patří někomu jinému, vrátí 404
     pes = get_object_or_404(Pes, pk=pk, majitel=request.user.profil)
 
     if request.method == 'POST':
-        # 2. Aktualizujeme jen pole, která přišla (prevence IntegrityError)
-        if 'jmeno' in request.POST: pes.jmeno = request.POST.get('jmeno')
-        if 'rasa' in request.POST: pes.rasa = request.POST.get('rasa')
-        if 'cip' in request.POST: pes.cip = request.POST.get('cip')
-        if 'popis' in request.POST: pes.popis = request.POST.get('popis')
-        if 'cislo_zapisu' in request.POST: pes.cislo_zapisu = request.POST.get('cislo_zapisu')
-        if 'rtg_hd' in request.POST: pes.rtg_hd = request.POST.get('rtg_hd')
-        if 'rtg_ed' in request.POST: pes.rtg_ed = request.POST.get('rtg_ed')
+        # instance=pes zajistí, že Django údaje přepíše a nevytvoří nového psa
+        form = PesForm(request.POST, request.FILES, instance=pes, request=request)
+        if form.is_valid():
+            try:
+                pes_upraveny = form.save(commit=False)
 
-        # Data (Datumy)
-        narozeni = request.POST.get('datum_narozeni')
-        if narozeni: pes.datum_narozeni = narozeni
-        ocko = request.POST.get('posledni_ockovani')
-        if ocko: pes.posledni_ockovani = ocko
+                # Pojistka pro prázdná pole, která dříve shazovala databázi
+                for pole in ['otec_manualni', 'matka_manualni', 'zdravotni_testy', 'bonitace']:
+                    if hasattr(pes_upraveny, pole) and not getattr(pes_upraveny, pole):
+                        setattr(pes_upraveny, pole, "Nezadáno")
 
-        # Fotka
-        if request.FILES.get('fotka'):
-            pes.fotka = request.FILES.get('fotka')
+                pes_upraveny.save()
+                messages.success(request, f"Údaje pejska {pes_upraveny.jmeno} byly upraveny.")
+                return redirect('seznam_psu')
+            except Exception as e:
+                messages.error(request, f"Chyba při ukládání: {e}")
+    else:
+        form = PesForm(instance=pes, request=request)
 
-        # 3. Režim ztráty (Důležité pro ten přepínač v detailu)
-        if 'je_ztraceny_sent' in request.POST or 'jmeno' in request.POST:
-            pes.je_ztraceny = 'je_ztraceny' in request.POST
+    return render(request, 'users/upravit_psa.html', {'form': form, 'pes': pes})
 
-        pes.save()
-        messages.success(request, f"Změny u psa {pes.jmeno} byly úspěšně uloženy.")
-
-        # TADY BYLA CHYBA: Musí tu být pes_id, ne pk!
-        return redirect('detail_psa', pes_id=pes.id)
-
-    # 4. TENTO KÓD MUSÍ BÝT ODSZENÝ TAKTO (pro zobrazení stránky - GET)
-    fotky = pes.galerie_fotky.all()
-    videa = pes.galerie_videa.all()
-
-    return render(request, 'users/upravit_psa.html', {
-        'pes': pes,
-        'fotky': fotky,
-        'videa': videa
-    })
 
 @login_required
 def smazat_psa(request, pk):
+    # Najdeme psa, který patří přihlášenému uživateli
     pes = get_object_or_404(Pes, pk=pk, majitel=request.user.profil)
+
     if request.method == 'POST':
+        jmeno_psa = pes.jmeno
         pes.delete()
+        messages.success(request, f"Pejsek {jmeno_psa} byl úspěšně smazán.")
         return redirect('seznam_psu')
+
     return render(request, 'users/smazat_psa_potvrzeni.html', {'pes': pes})
 
-# --- 2. MULTIMÉDIA (Galerie - Nahrávání a mazání) ---
 
+# --- 2. MULTIMÉDIA (Galerie - Nahrávání a mazání) ---
 @login_required
 def pridat_foto(request, pes_id):
     if request.method == 'POST':
@@ -282,12 +303,14 @@ def odeslat_sos_email(request, pes_id):
 
     return redirect('nouzovy_profil_psa', pes_id=pes_id)
 
+
 @login_required
-def prepnout_ztratu(request, pk):
-    pes = get_object_or_404(Pes, pk=pk, majitel=request.user.profil)
+def prepnout_ztratu(request, pes_id):
+    pes = get_object_or_404(Pes, pk=pes_id, majitel=request.user.profil)
     pes.je_ztraceny = not pes.je_ztraceny
     pes.save()
-    return redirect('detail_psa', pes_id=pk)
+
+    return redirect('detail_psa', pes_id=pes_id)
 
 @csrf_exempt
 def odeslat_polohu_nalezu(request, pes_id):
@@ -300,6 +323,11 @@ def odeslat_polohu_nalezu(request, pes_id):
         send_mail("📍 POLOHA NÁLEZU", zprava, 'noreply@pes.cz', [pes.majitel.uzivatel.email])
         return JsonResponse({'status': 'ok'})
     return JsonResponse({'status': 'error'}, status=400)
+
+def seznam_hledanych_psu(request):
+    # Vyfiltruje pouze psy, kteří jsou označeni jako ztracení
+    hledani_psi = Pes.objects.filter(je_ztraceny=True).order_by('-id')
+    return render(request, 'users/seznam_hledanych.html', {'psi': hledani_psi})
 
 # --- 4. ZDRAVÍ A PDF ---
 

@@ -112,9 +112,25 @@
                     {{ pes.cip|default:"Nezadáno" }}
                 </div>
 
+                <span class="info-label">Identifikační QR kód</span>
+                <div class="text-center p-3 bg-white rounded mb-3 border shadow-sm"
+                     style="border-style: dashed !important;">
+                    {% if pes.qr_kod %}
+                    <img src="{{ pes.qr_kod.url }}" class="img-fluid" style="max-width: 140px;"
+                         alt="QR kód pro nouzový kontakt">
+                    <p class="small text-muted mt-2 mb-0" style="font-size: 0.7rem;">Skenováním získáte kontakt na
+                        majitele</p>
+                    {% else %}
+                    <div class="py-3">
+                        <i class="fas fa-qrcode fa-3x text-light mb-2"></i>
+                        <p class="small text-muted">QR kód není vygenerován</p>
+                    </div>
+                    {% endif %}
+                </div>
+
                 {% if pes.majitel.telefon %}
-                href="tel:{{ pes.majitel.telefon }}" class="btn-call-major shadow-sm">
-                    <i class="fas fa-phone-alt"></i> ZAVOLAT
+                <a href="tel:{{ pes.majitel.telefon }}" class="btn-call-major shadow-sm">
+                    <i class="fas fa-phone-alt"></i> ZAVOLAT MAJITELI
                 </a>
                 {% endif %}
             </div>

@@ -2,7 +2,8 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+      rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
@@ -59,7 +60,8 @@
                 <i class="fas fa-paw fa-2x"></i>
             </div>
             <h2 class="fw-800" style="color: var(--t-brown);">Nový hrdina</h2>
-            <p class="text-muted small">Zadejte údaje vašeho parťáka. Systém mu po uložení automaticky vytvoří unikátní QR kód pro digitální pas.</p>
+            <p class="text-muted small">Zadejte údaje vašeho parťáka. Systém mu po uložení automaticky vytvoří unikátní
+                QR kód pro digitální pas.</p>
         </div>
 
         <form method="post" enctype="multipart/form-data">
@@ -94,7 +96,8 @@
                             <i class="fas fa-shield-virus text-warning mt-1"></i>
                             <div>
                                 <small class="fw-bold d-block mb-1 text-dark">Délka ochrany proti parazitům</small>
-                                <small class="text-muted">Zadejte počet dní, po kterých ochrana vyprší. Web vás pak včas upozorní na novou aplikaci.</small>
+                                <small class="text-muted">Zadejte počet dní, po kterých ochrana vyprší. Web vás pak včas
+                                    upozorní na novou aplikaci.</small>
                                 <div class="mt-2">{{ form.typ_ochrany_klistata|as_crispy_field }}</div>
                             </div>
                         </div>
@@ -107,17 +110,25 @@
             <div class="row g-3">
                 <div class="col-md-6">{{ form.rtg_hd|as_crispy_field }}</div>
                 <div class="col-md-6">{{ form.rtg_ed|as_crispy_field }}</div>
+                <div class="col-12">{{ form.zdravotni_testy|as_crispy_field }}</div>
+
                 <div class="col-md-6">{{ form.otec_manualni|as_crispy_field }}</div>
                 <div class="col-md-6">{{ form.matka_manualni|as_crispy_field }}</div>
                 <div class="col-12">{{ form.genetika_dna|as_crispy_field }}</div>
             </div>
-
             <div class="section-divider"></div>
             <div class="section-title">Profilová fotografie</div>
             <div class="p-4 rounded-4 text-center" style="background: #fafafa; border: 2px dashed #eee;">
                 <i class="fas fa-image fa-2x mb-2 text-muted opacity-50"></i>
                 {{ form.fotka|as_crispy_field }}
                 <p class="small text-muted mb-0">Nahrajte nejhezčí fotku vašeho hrdiny.</p>
+            </div>
+            <div class="section-divider"></div>
+            <div class="section-title">Video hrdiny</div>
+            <div class="p-4 rounded-4 text-center" style="background: #fafafa; border: 2px dashed #eee;">
+                <i class="fas fa-video fa-2x mb-2 text-muted opacity-50"></i>
+                {{ form.video|as_crispy_field }}
+                <p class="small text-muted mb-0">Nahrajte krátké video vašeho parťáka (volitelné).</p>
             </div>
 
             <button type="submit" class="btn-save-dog shadow">
@@ -128,7 +139,10 @@
 </div>
 
 <script>
-    // Malý trik: přidáme automaticky placeholder k datu narození
-    document.getElementById('id_narozeni').placeholder = 'dd.mm.rrrr';
+    // Opravené ID podle tvého modelu
+    const dateField = document.getElementById('id_datum_narozeni');
+    if (dateField) {
+        dateField.placeholder = 'dd.mm.rrrr';
+    }
 </script>
 {% endblock %}

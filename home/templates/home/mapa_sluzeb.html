@@ -149,8 +149,29 @@
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // 2. Funkce pro barevné ikonky (veterina bude černá)
-        function createIcon(color) {
+        // 2. Definice speciální tyrkysové ikonky pro stříhání (SVG)
+        // Toto vytvoří ikonku přímo v prohlížeči, nemusí se nic stahovat
+       var strihaniIcon = L.divIcon({
+    className: 'custom-div-icon',
+    // Tento kód vytvoří klasickou kapku (špendlík) s nožičkou
+    html: `<div style="
+        background-color: #00bcd4;
+        width: 20px;
+        height: 20px;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        border: 2px solid white;
+        box-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+        position: relative;
+        top: -10px;
+    "></div>`,
+    iconSize: [20, 20],
+    iconAnchor: [10, 10], // Ukotvení na špičku
+    popupAnchor: [0, -20]
+});
+
+        // Funkce pro ostatní ikonky
+        function getOtherIcon(color) {
             return new L.Icon({
                 iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-' + color + '.png',
                 shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -164,8 +185,6 @@
         var barvyMap = {
             'nebezpeci': 'red',
             'veterina': 'black',
-            'veterinar': 'black',
-            'strihani': 'cyan',
             'obchod': 'blue',
             'hotel': 'orange',
             'wellness': 'green',
@@ -174,29 +193,37 @@
             'chovna_stanice': 'gold'
         };
 
-        // 3. Vykreslení bodů na mapu
+        // 3. Vykreslení bodů
         sluzby.forEach(function(s) {
             var lat = parseFloat(s.lat);
             var lon = parseFloat(s.lon);
 
             if (!isNaN(lat) && !isNaN(lon)) {
-                var colorName = barvyMap[s.typ_slug] || 'blue';
-                var marker = L.marker([lat, lon], { icon: createIcon(colorName) }).addTo(map);
+                var marker;
+                var typText = (s.typ || "").toLowerCase();
 
-                // Skládáme obsah bubliny: Adresa zůstává, web přidáváme jako tlačítko
-                var content = '<div style="min-width:180px; font-family:sans-serif; line-height:1.4;">';
-                content += '<b style="color:#8B4513; font-size:1.1rem; display:block; margin-bottom:2px;">' + s.nazev + '</b>';
-                content += '<span style="background:#eee; padding:2px 6px; border-radius:4px; font-size:0.8rem;">' + s.typ + '</span>';
-                content += '<hr style="margin:8px 0; border:0; border-top:1px solid #ddd;">';
-                content += '<p style="margin:0 0 10px 0; font-size:0.9rem; color:#444;">📍 ' + s.adresa + '</p>';
-
-                // Pokud má služba web, přidáme hnědé tlačítko
-                if (s.web) {
-                    content += '<a href="' + s.web + '" target="_blank" style="display:block; background:#8B4513; color:white; text-align:center; padding:10px; border-radius:8px; text-decoration:none; font-weight:bold; font-size:0.9rem;">🌐 OTEVŘÍT WEB</a>';
+                // Pokud je to stříhání, použijeme naši neprůstřelnou tyrkysovou ikonu
+                if (typText.includes('stříhání') || s.typ_slug === 'strihani') {
+                    marker = L.marker([lat, lon], { icon: strihaniIcon }).addTo(map);
+                } else {
+                    // Ostatní barvy podle mapy
+                    var color = barvyMap[s.typ_slug] || 'blue';
+                    marker = L.marker([lat, lon], { icon: getOtherIcon(color) }).addTo(map);
                 }
 
+                // Popup obsah
+                var content = '<div style="min-width:180px; font-family:sans-serif;">';
+                content += '<b>' + s.nazev + '</b><br>';
+                content += '<span style="color:#666; font-size:0.8rem;">' + s.typ + '</span><br>';
+                content += '📍 ' + s.adresa + '<br>';
+                if (s.web) {
+                    content += '<br><a href="' + s.web + '" target="_blank" style="display:block; background:#8B4513; color:white; text-align:center; padding:5px; border-radius:4px; text-decoration:none;">OTEVŘÍT WEB</a>';
+                }
                 content += '</div>';
+
                 marker.bindPopup(content);
+
+                // Uložení pro filtry
                 allMarkers.push({ marker: marker, typ: s.typ_slug });
             }
         });

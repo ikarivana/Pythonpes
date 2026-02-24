@@ -11,17 +11,19 @@ urlpatterns = [
     path('veterinar/', views.veterinar, name='veterinar'),
     path('ockovani/pridat/<int:pes_id>/', views.pridat_ockovani, name='pridat_ockovani'),
     path('moji-psi/', views.seznam_psu, name='seznam_psu'),
+    path('dashboard/', views.dashboard, name='dashboard'),
 
     # --- DETAIL A NOUZOVÝ SYSTÉM ---
     path('pes-detail/<int:pes_id>/', views.detail_psa, name='detail_psa'),
     path('pes/<int:pes_id>/', views.nouzovy_profil_psa, name='nouzovy_profil_psa'),
     path('pes/<int:pes_id>/odeslat-polohu/', views.odeslat_polohu_nalezu, name='odeslat_polohu'),
     path('pes/<int:pes_id>/odeslat-email/', views.odeslat_sos_email, name='odeslat_sos_email'),
-    path('pes/<int:pk>/prepnout-ztratu/', views.prepnout_ztratu, name='prepnout_ztratu'),
+    path('pes/<int:pes_id>/prepnout-ztratu/', views.prepnout_ztratu, name='prepnout_ztratu'),
+    path('hledani-psi/', views.seznam_hledanych_psu, name='seznam_hledanych'),
 
     # --- ZDRAVOTNÍ ZÁZNAMY ---
     path('zaznam/upravit/<int:pk>/', views.upravit_zaznam, name='upravit_zaznam'),
-    path('zaznam/smazat/<int:pk>/', views.smazat_zaznam, name='smazat_zaznam'),
+    path('pes/<int:pes_id>/prepnout-ztratu/', views.prepnout_ztratu, name='prepnout_ztratu'),
 
     # --- SPRÁVA GALERIE A ÚSPĚCHŮ ---
     path('pes/<int:pes_id>/galerie/pridat-foto/', views.pridat_foto, name='pridat_foto'),

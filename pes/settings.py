@@ -27,7 +27,7 @@ load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-1pv+(%pqb466r@7*-l7wr0skdytrs**6d1sqlkx0mh_jp0%sjp')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['epes-8717.rostiapp.cz', 'www.epes.online', 'epes.online', '127.0.0.1', 'localhost']
 CSRF_TRUSTED_ORIGINS = ['https://epes-8717.rostiapp.cz', 'https://www.epes.online', 'https://epes.online']
@@ -55,14 +55,16 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+
 ]
+WHITENOISE_INDEX_FILE = True
 
 ROOT_URLCONF = 'pes.urls'
 
@@ -163,6 +165,12 @@ LOGOUT_REDIRECT_URL = 'home'
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.rosti.cz'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = '8717@rostiapp.cz'  # Tvůj uživatel z obrázku
+EMAIL_HOST_PASSWORD = 'c330b034c16043cf8888611540eb0c54'  # Tvé heslo z obrázku
+DEFAULT_FROM_EMAIL = 'Epes.online <8717@rostiapp.cz>'
 
 

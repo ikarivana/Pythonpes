@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    /* --- Celkový styl Dashboardu --- */
+ .dashboard-container {
+     background-color: #f8f9fa;
+     border-radius: 20px;
+     padding: 20px;
+ }
+
+ /* --- Karty psů (Zdravotní karty) --- */
+ .card-zdravi {
+     border: none;
+     border-radius: 15px;
+     transition: transform 0.2s ease, box-shadow 0.2s ease;
+     border-left: 6px solid #28a745; /* Zelený pruh pro zdravého psa */
+     background: white;
+ }
+
+ .card-zdravi:hover {
+     transform: translateY(-5px);
+     box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+ }
+
+ /* --- Stav "POZOR" (např. klíšťata se blíží) --- */
+ .card-urgent {
+     border-left-color: #dc3545 !important; /* Červený pruh pro pozornost */
+ }
+
+ /* --- Ikony a odznaky --- */
+ .health-icon {
+     font-size: 1.2rem;
+     margin-bottom: 5px;
+     display: block;
+ }
+
+ .stat-label {
+     font-size: 0.75rem;
+     text-transform: uppercase;
+     color: #6c757d;
+     letter-spacing: 1px;
+ }
+
+ .stat-value {
+     font-size: 1rem;
+     font-weight: 700;
+     color: #343a40;
+ }
+
+ .stat-value.urgent {
+     color: #dc3545;
+ }
+
+ /* --- Animace pro blikající Notifikace (Zvonilka) --- */
+ @keyframes pulse-red {
+     0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+     70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+     100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+ }
+
+ .urgent-blink {
+     animation: pulse-red 2s infinite;
+     background: linear-gradient(45deg, #dc3545, #ff4b5c);
+     color: white;
+     border: none;
+ }
+
+ /* --- Mobilní úpravy --- */
+ @media (max-width: 768px) {
+     .card-zdravi .row > div {
+         border-right: none !important;
+         border-bottom: 1px solid #eee;
+         padding: 10px 0;
+     }
+     .card-zdravi .row > div:last-child {
+         border-bottom: none;
+     }
+ }olid #ff4444; }
+</style>
+
+<div class="container mt-4">
+    {% if nots %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card urgent-blink p-3 shadow-sm d-flex flex-row justify-content-between align-items-center">
+                <span><i class="fas fa-bell mr-2"></i> Máte nové zdravotní nebo sociální upozornění!</span>
+                <a href="{% url 'seznam_notifikaci' %}" class="btn btn-light btn-sm">Zobrazit</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <h2 class="mb-4">Můj Dashboard</h2>
+
+    <div class="row">
+        <div class="col-md-8">
+            <h4 class="mb-3 text-muted"><i class="fas fa-heartbeat"></i> Zdravotní prevence smečky</h4>
+            {% for pes in psi %}
+            <div class="card mb-3 shadow-sm card-zdravi">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0"><strong>{{ pes.jmeno }}</strong></h5>
+                        <span class="badge badge-pill badge-success">Premium Aktivní</span>
+                    </div>
+                    <div class="row text-center align-items-center">
+                        <div class="col-4 border-right">
+                            <small class="text-muted d-block">💉 OČKOVÁNÍ</small>
+                            <span class="stat-value">
+            {% if pes.ockovani_set.first %}
+                {{ pes.ockovani_set.first.datum_pristi_navstevy|date:"d. m." }}
+            {% else %}
+                <span class="text-muted small">---</span>
+            {% endif %}
+        </span>
+                        </div>
+
+                        <div class="col-4 border-right">
+                            <small class="text-muted d-block">💊 ODČERVENÍ</small>
+                            <span class="stat-value">
+            {% if pes.pristi_odcerveni %}
+                {{ pes.pristi_odcerveni|date:"d. m." }}
+            {% else %}
+                <span class="text-muted small">---</span>
+            {% endif %}
+        </span>
+                        </div>
+
+                        <div class="col-4">
+                            <small class="text-muted d-block">🐜 KLÍŠŤATA</small>
+                            <span class="stat-value">
+            {% if pes.pristi_klistata %}
+                {% if pes.pristi_klistata <= dnes_plus_3 %}
+                    <strong class="text-danger">⚠️ {{ pes.pristi_klistata|timeuntil }}</strong>
+                {% else %}
+                    {{ pes.pristi_klistata|date:"d. m." }}
+                {% endif %}
+            {% else %}
+                <span class="text-muted small">---</span>
+            {% endif %}
+        </span>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'detail_psa' pes.id %}" class="btn btn-outline-primary btn-sm btn-block mt-3">Spravovat
+                        zdraví</a>
+                    zdraví</a>
+                </div>
+            </div>
+            {% empty %}
+            <p>Zatím zde nemáte žádné pejsky. <a href="{% url 'pridat_psa' %}">Přidejte prvního!</a></p>
+            {% endfor %}
+        </div>
+
+        <div class="col-md-4">
+            <h4 class="mb-3 text-muted"><i class="fas fa-users"></i> Komunita</h4>
+            <div class="list-group shadow-sm">
+                <a href="{% url 'seznam_zdi' %}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-stream mr-2"></i> Hlavní zeď plemen
+                </a>
+                <a href="{% url 'seznam_hledanych_psu' %}"
+                   class="list-group-item list-group-item-action text-danger">
+                    <i class="fas fa-search-location mr-2"></i> SOS: Ztracení psi
+                </a>
+                <a href="{% url 'profil_uzivatele' %}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-user-cog mr-2"></i> Můj profil
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<h4 class="mb-3 mt-4 text-muted"><i class="fas fa-chart-line"></i> Aktivita pejska</h4>
+<div class="row text-center">
+    <div class="col-6 mb-3">
+        <div class="card shadow-sm p-3" style="border-radius: 15px; border-bottom: 4px solid var(--t-gold);">
+            <i class="fas fa-camera fa-2x mb-2 text-muted"></i>
+            <div class="stat-value" style="font-size: 1.5rem; font-weight: 800;">{{ pocet_fotek }}</div>
+            <div class="stat-label" style="font-size: 0.7rem; color: #aaa;">FOTEK V GALERII</div>
+        </div>
+    </div>
+
+    <div class="col-6 mb-3">
+        <div class="card shadow-sm p-3" style="border-radius: 15px; border-bottom: 4px solid #3e2723;">
+            <i class="fas fa-video fa-2x mb-2 text-muted"></i>
+            <div class="stat-value" style="font-size: 1.5rem; font-weight: 800;">{{ pocet_videi }}</div>
+            <div class="stat-label" style="font-size: 0.7rem; color: #aaa;">VIDEA</div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

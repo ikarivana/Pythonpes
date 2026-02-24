@@ -37,16 +37,19 @@ class Pes(models.Model):
     rasa = models.CharField(max_length=100)
     cip = models.CharField(max_length=50, blank=True)
     fotka = models.ImageField(upload_to='profily_psu/', blank=True, null=True)
+    video = models.FileField(upload_to='videa_psu/', null=True, blank=True)
     popis = models.TextField(blank=True, null=True)
     otec_manualni = models.CharField(max_length=200, blank=True, null=True, verbose_name="Otec (jméno)")
     matka_manualni = models.CharField(max_length=200, blank=True, null=True, verbose_name="Matka (jméno)")
     datum_narozeni = models.DateField(null=True, blank=True, verbose_name="Datum narození")
     genetika_dna = models.TextField(blank=True, null=True)
+    zdravotni_testy = models.TextField(blank=True, null=True, verbose_name="Zdravotní testy")
+    bonitace = models.TextField(blank=True, null=True, verbose_name="Bonitace")
     rtg_pater = models.CharField(max_length=100, blank=True, null=True)
     typ_ochrany_klistata = models.CharField(max_length=100, blank=True, null=True)
     qr_kod = models.ImageField(upload_to='qr_kody/', blank=True, null=True)
     je_ztraceny = models.BooleanField(default=False)
-    oblast_ztraty = models.CharField(max_length=200, blank=True, null=True, verbose_name="Kde se pes ztratil")
+    oblast_ztraty = models.CharField(max_length=255, verbose_name="Kde se pejsek ztratil?")
 
     # Chovatelské údaje
     cislo_zapisu = models.CharField(max_length=100, blank=True, null=True)
@@ -114,23 +117,28 @@ class Pes(models.Model):
         is_new = self.pk is None
         super().save(*args, **kwargs)
 
-        # Generujeme QR kód pouze pokud ještě neexistuje
+        # 2. Generujeme QR kód pouze pokud ještě neexistuje
         if not self.qr_kod:
-            qr_data = f"https://epes.online/users/pes/{self.id}/"
-            qr = qrcode.QRCode(version=1, box_size=10, border=5)
-            qr.add_data(qr_data)
-            qr.make(fit=True)
+            try:
+                # Sjednoť URL s urls.py (buď /pes/ nebo /users/pes/)
+                qr_url = f"https://epes.online/pes/{self.id}/"
 
-            img = qr.make_image(fill_color="black", back_color="white")
-            canvas = BytesIO()
-            img.save(canvas, format='PNG')
+                qr = qrcode.QRCode(version=1, box_size=10, border=5)
+                qr.add_data(qr_url)
+                qr.make(fit=True)
 
-            fname = f'qr_pes_{self.id}.png'
-            # save=False zajistí, že se hned nezavolá znovu save() modelu
-            self.qr_kod.save(fname, File(canvas), save=False)
+                img = qr.make_image(fill_color="black", back_color="white")
+                canvas = BytesIO()
+                img.save(canvas, format='PNG')
+                canvas.seek(0)
 
-            # Uložíme finálně pouze pole qr_kod, aby se nespouštěla celá save metoda znovu
-            super().save(update_fields=['qr_kod'])
+                fname = f'qr_pes_{self.id}.png'
+                self.qr_kod.save(fname, File(canvas), save=False)
+
+                # Uložíme pouze pole qr_kod, abychom nezacyklili save()
+                super().save(update_fields=['qr_kod'])
+            except Exception as e:
+                print(f"Chyba při generování QR: {e}")
 
 
 class Ockovani(models.Model):
