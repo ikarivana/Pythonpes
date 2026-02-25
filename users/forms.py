@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Pes, Ockovani, Prispevek, Plemeno
+from .models import Pes, Ockovani, Prispevek, Plemeno, ProfilMajitele
 from django import forms
 from .models import Pes
 
@@ -63,12 +63,20 @@ class PesForm(forms.ModelForm):
             self.fields['rtg_ed'].help_text = "🔒 Pouze pro ALFA pány"
             self.fields['genetika_dna'].help_text = "🔒 Pouze pro ALFA pány"
 
-
 # --- 2. FORMULÁŘE PRO UŽIVATELE ---
 
 class ExtendedRegistrationForm(UserCreationForm):
-    """Formulář pro registraci s rozšířenými poli"""
-    email = forms.EmailField(required=True)
+    """Formulář pro registraci s rozšířenými poli o profil, adresu a promo kód"""
+    email = forms.EmailField(required=True, label="E-mail")
+    telefon = forms.CharField(required=False, label="Telefon")
+    ulice_cp = forms.CharField(required=False, label="Ulice a č.p.")
+    mesto = forms.CharField(required=False, label="Město")
+    psc = forms.CharField(required=False, label="PSČ")
+    promo_kod = forms.CharField(
+        required=False,
+        label="Promo kód (volitelné)",
+        widget=forms.TextInput(attrs={'placeholder': 'Máš kód? Např. UTULEK'})
+    )
 
     class Meta(UserCreationForm.Meta):
         model = User
@@ -79,9 +87,50 @@ class ExtendedRegistrationForm(UserCreationForm):
         for name, field in self.fields.items():
             field.widget.attrs.update({'class': 'form-control'})
 
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        if commit:
+            user.save()
+
+            # Logika pro výpočet Premia z kódu
+            kod_text = self.cleaned_data.get('promo_kod', '').strip()
+            is_premium = False
+            premium_do = None
+            final_kod = None
+
+            if kod_text:
+                try:
+                    # Hledáme kód (case-insensitive - nezáleží na velkých/malých písmenech)
+                    pkod = PromoKod.objects.get(kod__iexact=kod_text, je_aktivni=True)
+                    is_premium = True
+                    premium_do = date.today() + timedelta(days=pkod.pocet_dni)
+                    final_kod = pkod.kod.upper()
+                except PromoKod.DoesNotExist:
+                    final_kod = f"NEPLATNÝ: {kod_text}"
+
+            # Vytvoříme profil
+            ProfilMajitele.objects.update_or_create(
+                uzivatel=user,
+                defaults={
+                    'telefon': self.cleaned_data.get('telefon'),
+                    'ulice_cp': self.cleaned_data.get('ulice_cp'),
+                    'mesto': self.cleaned_data.get('mesto'),
+                    'psc': self.cleaned_data.get('psc'),
+                    'is_premium': is_premium,
+                    'premium_do': premium_do,
+                    'pouzity_kod': final_kod,
+                }
+            )
+        return user
+
+
 class UserUpdateForm(forms.ModelForm):
     """Formulář pro aktualizaci profilu v nastavení"""
     email = forms.EmailField(required=True)
+    telefon = forms.CharField(required=False)
+    ulice_cp = forms.CharField(required=False, label="Ulice a č.p.")
+    mesto = forms.CharField(required=False, label="Město")
+    psc = forms.CharField(required=False, label="PSČ")
 
     class Meta:
         model = User
@@ -89,8 +138,26 @@ class UserUpdateForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if self.instance and hasattr(self.instance, 'profil'):
+            self.fields['telefon'].initial = self.instance.profil.telefon
+            self.fields['ulice_cp'].initial = self.instance.profil.ulice_cp
+            self.fields['mesto'].initial = self.instance.profil.mesto
+            self.fields['psc'].initial = self.instance.profil.psc
+
         for name, field in self.fields.items():
             field.widget.attrs.update({'class': 'form-control'})
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        if commit:
+            user.save()
+            profil = user.profil
+            profil.telefon = self.cleaned_data.get('telefon')
+            profil.ulice_cp = self.cleaned_data.get('ulice_cp')
+            profil.mesto = self.cleaned_data.get('mesto')
+            profil.psc = self.cleaned_data.get('psc')
+            profil.save()
+        return user
 
 # --- 3. OSTATNÍ FORMULÁŘE (Sociální síť a zdraví) ---
 

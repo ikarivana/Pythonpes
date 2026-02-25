@@ -8,6 +8,16 @@ from django.core.files import File
 from django.db import models
 
 
+class PromoKod(models.Model):
+    kod = models.CharField(max_length=50, unique=True, verbose_name="Promo kód")
+    pocet_dni = models.IntegerField(default=30, verbose_name="Počet dní premia")
+    je_aktivni = models.BooleanField(default=True)
+    poznamka = models.CharField(max_length=200, blank=True, verbose_name="Poznámka (např. útulek)")
+
+    def __str__(self):
+        return f"{self.kod} ({self.pocet_dni} dní)"
+
+
 class ProfilMajitele(models.Model):
     uzivatel = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profil')
     telefon = models.CharField(max_length=20, blank=True)
@@ -15,22 +25,11 @@ class ProfilMajitele(models.Model):
     mesto = models.CharField(max_length=100, blank=True, verbose_name="Město")
     psc = models.CharField(max_length=10, blank=True, verbose_name="PSČ")
 
-    # Vyber si jeden název, třeba is_premium
     is_premium = models.BooleanField(default=False)
     premium_do = models.DateField(null=True, blank=True)
 
-    def __str__(self):
-        return self.uzivatel.username
-
-    # Bonus: Funkce, která sama zkontroluje, jestli premium ještě platí
-    @property
-    def ma_aktivni_premium(self):
-        from datetime import date
-        if self.is_premium:
-            if self.premium_do:
-                return self.premium_do >= date.today()
-            return True  # Má premium navždy
-        return False
+    # NOVÉ POLE PRO STATISTIKY
+    pouzity_kod = models.CharField(max_length=50, blank=True, null=True, verbose_name="Použitý promo kód")
 
 
 # --- MODEL PSA ---

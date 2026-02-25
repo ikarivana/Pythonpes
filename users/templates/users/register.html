@@ -13,26 +13,40 @@
     }
     .reg-card h2 {
         color: #5d4037; font-weight: 800; text-align: center;
-        margin-bottom: 30px; letter-spacing: -1px; font-family: 'Playfair Display', serif;
+        margin-bottom: 10px; letter-spacing: -1px; font-family: 'Playfair Display', serif;
+    }
+    .reg-subtitle {
+        text-align: center; color: #a1887f; font-size: 0.9rem; margin-bottom: 30px;
     }
 
     /* Skrytí nápovědy Djanga */
     .helptext, .form-text { display: none !important; }
 
     /* Stylování polí */
-    .form-group { margin-bottom: 15px; }
+    .form-group { margin-bottom: 15px; position: relative; }
     .reg-card label {
         font-weight: 600; color: #8d6e63; margin-left: 5px; display: block; margin-bottom: 5px;
+        font-size: 0.85rem; text-transform: uppercase;
     }
-    /* Cílíme na textové inputy, ale ne na checkbox */
+
+    /* Cílíme na textové inputy */
     .reg-card input:not([type="checkbox"]) {
         width: 100%; padding: 12px 18px; border: 2px solid #f3e5f5;
         border-radius: 12px; background: #fafafa; transition: all 0.3s ease;
     }
     .reg-card input:focus {
-        border-color: #8d6e63; background: white; outline: none;
-        box-shadow: 0 0 0 4px rgba(141, 110, 99, 0.1);
+        border-color: #c5a059; background: white; outline: none;
+        box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.1);
     }
+
+    /* Sekce Adresa s ikonkou */
+    .address-divider {
+        margin: 25px 0 15px; padding: 10px; border-radius: 12px;
+        background: #fdfaf5; border: 1px solid #efebe9;
+        display: flex; align-items: center; gap: 10px;
+    }
+    .address-divider i { color: #c5a059; font-size: 1.2rem; }
+    .address-divider span { color: #5d4037; font-weight: 700; font-size: 0.9rem; }
 
     /* Checkbox souhlasu */
     .terms-box { display: flex; justify-content: center; margin: 20px 0; }
@@ -46,7 +60,7 @@
     }
     .terms-inner label {
         font-size: 0.85rem; color: #5d4037; margin-left: 10px; cursor: pointer; font-weight: 500;
-        margin-bottom: 0; /* Zrušení marginu u labelu v checkboxu */
+        margin-bottom: 0;
     }
 
     .btn-modern {
@@ -62,36 +76,64 @@
 <div class="reg-wrapper">
     <div class="reg-card">
         <h2>Nová tlapka 🐾</h2>
+        <p class="reg-subtitle">Založte si profil a získejte chytrou známku pro pejska.</p>
 
         <form method="post">
             {% csrf_token %}
 
             {% for field in form %}
-                <div class="form-group">
-                    <label>{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <ul class="errorlist">
-                            {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
+            {# Pokud pole obsahuje 'ulice' nebo 'adresa', vložíme před něj předěl s ikonkou #}
+            {% if field.name == 'ulice_cp' %}
+            <div class="address-divider">
+                <i class="fas fa-home"></i>
+                <span>Kde pejsek bydlí? (pro zaslání dárků)</span>
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label>{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <ul class="errorlist">
+                    {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
             {% endfor %}
 
             <div class="terms-box">
                 <div class="terms-inner">
                     <input type="checkbox" id="souhlas_podminky" name="souhlas_podminky" required>
                     <label for="souhlas_podminky">
-                        Souhlasím s <a href="{% url 'podminky' %}" target="_blank" style="color: #c5a059; font-weight: 700; text-decoration: none;">podmínkami</a>
+                        Souhlasím s <a href="{% url 'podminky' %}" target="_blank"
+                                       style="color: #c5a059; font-weight: 700; text-decoration: none;">podmínkami</a>
                     </label>
                 </div>
+            </div>
+
+            <div class="address-divider" style="background: #fdfaf5; border-color: #c5a059;">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Máš promo kód?</span>
+            </div>
+
+            <div class="form-group">
+                {{ form.promo_kod }}
+                {% if form.promo_kod.errors %}
+                <ul class="errorlist">{% for error in form.promo_kod.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
             </div>
 
             <button type="submit" class="btn-modern shadow-sm">Vytvořit účet</button>
         </form>
 
         <p style="text-align: center; margin-top: 25px; color: #a1887f; font-size: 0.9rem;">
-            Už jsi členem? <a href="{% url 'login' %}" style="color: #6d4c41; font-weight: bold; text-decoration: none;">Přihlas se</a>
+            Už jsi členem? <a href="{% url 'login' %}"
+                              style="color: #6d4c41; font-weight: bold; text-decoration: none;">Přihlas se</a>
         </p>
     </div>
 </div>
