@@ -38,6 +38,7 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
     path('register/', views.register, name='register'),
 
+
     # Obnova hesla
     path('password-reset/', auth_views.PasswordResetView.as_view(template_name='users/password_reset.html'),
          name='password_reset'),
@@ -66,6 +67,7 @@ urlpatterns = [
     # --- PROFIL A NOTIFIKACE ---
     path('muj-profil/', views.profil_uzivatele, name='profil'),
     path('profil/upravit/', views.upravit_profil, name='upravit_profil'),
+    path('profil/smazat/', views.smazat_profil, name='smazat_profil'),
     path('like/<int:post_id>/', views.pridej_like, name='like_post'),
     path('notifikace/', views.seznam_notifikaci, name='seznam_notifikaci'),
 ]

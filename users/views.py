@@ -12,7 +12,7 @@ from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.core.mail import send_mail
 from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from django.template.loader import get_template
@@ -28,6 +28,12 @@ from .models import Plemeno, Prispevek, Komentar, GalerieFotka, GalerieVideo, Pr
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from xhtml2pdf import pisa
+
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+from django.contrib import messages
+
 
 # Aktivace podpory HEIC (iPhone fotky)
 register_heif_opener()
@@ -168,7 +174,7 @@ def smazat_psa(request, pk):
         jmeno_psa = pes.jmeno
         pes.delete()
         messages.success(request, f"Pejsek {jmeno_psa} byl úspěšně smazán.")
-        return redirect('seznam_psu')
+        return redirect('muj_profil')
 
     return render(request, 'users/smazat_psa_potvrzeni.html', {'pes': pes})
 
@@ -489,10 +495,12 @@ def smazat_prispevek(request, post_id):
 @login_required
 def profil_uzivatele(request):
     profil, created = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
+    # Získání psů přes related_name='psi', pokud ho máš v modelu
+    # Pokud ne, použij: request.user.pes_set.all()
     context = {
         'profil': profil,
-        'libi_se_mi': [],
-        'komentare': [],
+        'libi_se_mi': [], # Sem později dopojíme lajky
+        'komentare': [],  # Sem později dopojíme komentáře
     }
     return render(request, 'users/profil.html', context)
 
@@ -502,10 +510,34 @@ def register(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('seznam_psu')
+            # TADY: Použij přesně ten název, který máš v urls.py (pravděpodobně 'muj_profil')
+            return redirect('muj_profil')
     else:
         form = ExtendedRegistrationForm()
     return render(request, 'users/register.html', {'form': form})
+
+@login_required
+def upravit_profil(request):
+    if request.method == 'POST':
+        form = UserUpdateForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            # OPRAVA: Směrujeme na name='profil' z tvého urls.py
+            messages.success(request, "Profil byl úspěšně upraven.")
+            return redirect('profil')
+    else:
+        form = UserUpdateForm(instance=request.user)
+    return render(request, 'users/profil.html', {'form': form}) # Upravujeme přímo v profilu
+
+@login_required
+def smazat_profil(request):
+    # Tohle je ta klíčová funkce, která ti chyběla!
+    uzivatel = request.user
+    logout(request)
+    uzivatel.delete()
+    messages.warning(request, "Tvůj účet byl smazán.")
+    return redirect('home')
+
 
 # --- DOPLNĚK: ÚSPĚCHY ---
 @login_required
@@ -642,7 +674,8 @@ def upravit_profil(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Váš profil byl úspěšně aktualizován.")
-            return redirect('profil_uzivatele')
+            # OPRAVA: Změň 'profil_uzivatele' na 'profil'
+            return redirect('profil')
     else:
         form = UserUpdateForm(instance=request.user)
 

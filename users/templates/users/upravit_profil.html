@@ -1,0 +1,119 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+    .edit-wrapper {
+        display: flex; justify-content: center; align-items: center;
+        min-height: 80vh; background-color: #fdfaf7; padding: 40px 20px;
+    }
+    .edit-card {
+        background: white; width: 100%; max-width: 600px;
+        padding: 40px; border-radius: 24px;
+        box-shadow: 0 10px 30px rgba(141, 110, 99, 0.1); border: 1px solid #efebe9;
+    }
+    .edit-card h2 {
+        color: #5d4037; font-weight: 800; text-align: center;
+        margin-bottom: 30px; font-family: 'Playfair Display', serif;
+    }
+    
+    .form-section-title {
+        color: #c5a059; font-weight: 700; font-size: 0.9rem;
+        text-transform: uppercase; margin: 25px 0 15px;
+        display: flex; align-items: center; gap: 10px;
+    }
+    .form-section-title i { font-size: 1.1rem; }
+
+    .form-group { margin-bottom: 15px; }
+    .edit-card label {
+        font-weight: 600; color: #8d6e63; margin-left: 5px; 
+        display: block; margin-bottom: 5px; font-size: 0.85rem;
+    }
+    
+    .edit-card input {
+        width: 100%; padding: 12px 18px; border: 2px solid #f3e5f5;
+        border-radius: 12px; background: #fafafa; transition: all 0.3s ease;
+    }
+    .edit-card input:focus {
+        border-color: #c5a059; background: white; outline: none;
+        box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.1);
+    }
+
+    .btn-save {
+        background: #5d4037; color: white; border: none; width: 100%;
+        padding: 16px; border-radius: 12px; font-size: 1.1rem; font-weight: 700;
+        cursor: pointer; transition: 0.3s; margin-top: 20px;
+    }
+    .btn-save:hover { background: #452f29; transform: translateY(-2px); }
+    
+    .btn-back {
+        display: block; text-align: center; margin-top: 20px;
+        color: #a1887f; text-decoration: none; font-weight: 500; font-size: 0.9rem;
+    }
+    .btn-back:hover { color: #5d4037; }
+</style>
+
+<div class="edit-wrapper">
+    <div class="edit-card">
+        <h2>Upravit můj profil</h2>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-section-title">
+                <i class="fas fa-user"></i> Osobní údaje
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label>Jméno</label>
+                    {{ form.first_name }}
+                </div>
+                <div class="col-md-6 form-group">
+                    <label>Příjmení</label>
+                    {{ form.last_name }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Uživatelské jméno</label>
+                {{ form.username }}
+            </div>
+
+            <div class="form-group">
+                <label>E-mail</label>
+                {{ form.email }}
+            </div>
+
+            <div class="form-group">
+                <label>Telefon</label>
+                {{ form.telefon }}
+            </div>
+
+            <div class="form-section-title">
+                <i class="fas fa-home"></i> Adresa pro dárky a známky
+            </div>
+
+            <div class="form-group">
+                <label>Ulice a č.p.</label>
+                {{ form.ulice_cp }}
+            </div>
+
+            <div class="row">
+                <div class="col-md-8 form-group">
+                    <label>Město</label>
+                    {{ form.mesto }}
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>PSČ</label>
+                    {{ form.psc }}
+                </div>
+            </div>
+
+            <button type="submit" class="btn-save shadow-sm">Uložit změny</button>
+            <a href="{% url 'profil' %}" class="btn-back">Zpět na profil bez uložení</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
