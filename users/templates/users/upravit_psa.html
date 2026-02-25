@@ -6,7 +6,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
-    /* Stylování okna SweetAlert */
     .swal2-popup { border-radius: 30px !important; font-family: 'Plus Jakarta Sans', sans-serif !important; background-color: #fdfaf4 !important; }
     .swal2-title { color: #3e2723 !important; }
     .swal2-confirm { background-color: #d63031 !important; border-radius: 15px !important; padding: 12px 30px !important; font-weight: 700 !important; }
@@ -125,7 +124,7 @@
                 <i class="fas fa-lock mb-2" style="color: var(--t-gold); font-size: 1.5rem;"></i>
                 <h6 class="fw-bold m-0">Původ a chovné údaje</h6>
                 <p style="font-size: 0.7rem; color: var(--t-brown);">Dostupné pouze pro ALFA členy</p>
-                <a href="{% url 'cena' %}" class="btn-alfa-slim">AKTIVOVAT</a>
+                <a href="{% url 'cenik' %}" class="btn-alfa-slim">AKTIVOVAT</a>
             </div>
             {% endif %}
 
@@ -149,7 +148,7 @@
                 </div>
                 <div class="col-md-6">
                     <label class="label-gold">Otec / Matka (manuálně)</label>
-                    <input type="text" name="rodice_manualni" class="input-clean" value="{{ pes.otec_manualni }} / {{ pes.matka_manualni }}" placeholder="Otec / Matka" {% if not user.profil.je_premium %}disabled{% endif %}>
+                    <input type="text" name="rodice_manualni" class="input-clean" value="{{ pes.otec_manualni }} / {{ pes.matka_manualni }}" placeholder="Otec / Matka" {% if not user.profil.is_premium %}disabled{% endif %}>
                 </div>
             </div>
         </div>
@@ -163,7 +162,7 @@
             <i class="fas fa-trophy mb-2" style="color: var(--t-gold); font-size: 1.5rem;"></i>
             <h6 class="fw-bold m-0">Výstavy a úspěchy</h6>
             <p style="font-size: 0.7rem; color: var(--t-brown);">Zapisujte kariéru svého psa s ALFA profilem</p>
-            <a href="{% url 'pricing' %}" class="btn-alfa-slim">AKTIVOVAT</a>
+            <a href="{% url 'cenik' %}" class="btn-alfa-slim">AKTIVOVAT</a>
         </div>
         {% endif %}
 
@@ -201,48 +200,48 @@
     </div>
 
     <div class="edit-card">
-        <h5 class="section-title">Galerie a Média</h5>
-        <div class="upload-grid">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="section-title mb-0">Galerie a Média</h5>
+            {% if not user.profil.is_premium %}
+            <span class="text-muted small">Foto: {{ pes.galerie_fotky.count }}/5 | Video: {{ pes.galerie_videa.count }}/1</span>
+            {% endif %}
+        </div>
 
-            {# LOGIKA LIMITU FOTEK (5) #}
+        <div class="upload-grid">
             {% if user.profil.is_premium or pes.galerie_fotky.count < 5 %}
             <div class="upload-box" onclick="document.getElementById('gallery-photo-input').click()">
                 <i class="fas fa-camera fa-lg mb-1"></i>
                 <span class="small fw-bold">+ FOTO</span>
             </div>
             {% else %}
-            <div class="upload-box" style="opacity: 0.5; cursor: help;" title="Limit 5 fotek pro běžný profil">
+            <div class="upload-box disabled-box" title="Limit 5 fotek vyčerpán">
                 <i class="fas fa-lock mb-1"></i>
-                <span style="font-size: 0.6rem; font-weight: 800;">LIMIT 5 FOTEK</span>
+                <span class="small">LIMIT</span>
             </div>
             {% endif %}
 
-            {# LOGIKA LIMITU VIDEA (1) #}
             {% if user.profil.is_premium or pes.galerie_videa.count < 1 %}
             <div class="upload-box" onclick="document.getElementById('gallery-video-input').click()">
                 <i class="fas fa-video fa-lg mb-1"></i>
                 <span class="small fw-bold">+ VIDEO</span>
             </div>
             {% else %}
-            <div class="upload-box" style="opacity: 0.5; cursor: help;" title="Limit 1 video pro běžný profil">
+            <div class="upload-box disabled-box" title="Limit 1 video vyčerpán">
                 <i class="fas fa-lock mb-1"></i>
-                <span style="font-size: 0.6rem; font-weight: 800;">LIMIT 1 VIDEO</span>
+                <span class="small">LIMIT</span>
             </div>
             {% endif %}
 
             {% for foto in pes.galerie_fotky.all %}
-            <div class="media-item shadow-sm">
+            <div class="media-item">
                 <img src="{{ foto.obrazek.url }}">
                 <a href="#" class="btn-delete-media" onclick="confirmSmartDelete('{% url 'smazat_foto' foto.id %}', 'fotku')">×</a>
             </div>
             {% endfor %}
 
             {% for video in pes.galerie_videa.all %}
-            <div class="media-item shadow-sm">
+            <div class="media-item">
                 <video muted><source src="{{ video.video_soubor.url }}"></video>
-                <div class="position-absolute top-50 start-50 translate-middle text-white opacity-75">
-                    <i class="fas fa-play-circle fa-lg"></i>
-                </div>
                 <a href="#" class="btn-delete-media" onclick="confirmSmartDelete('{% url 'smazat_video' video.id %}', 'video')">×</a>
             </div>
             {% endfor %}
@@ -261,9 +260,6 @@
 </form>
 
 <script>
-    /**
-     * Funkce pro potvrzení smazání pomocí SweetAlert2
-     */
     function confirmSmartDelete(deleteUrl, itemType) {
         Swal.fire({
             title: 'Smazat ' + itemType + '?',
@@ -282,49 +278,10 @@
         })
     }
 
-    /**
-     * Automatické odesílání formulářů při výběru média
-     */
     const photoInput = document.getElementById('gallery-photo-input');
-    if (photoInput) {
-        photoInput.onchange = function() {
-            document.getElementById('auto-photo-form').submit();
-        };
-    }
+    if (photoInput) { photoInput.onchange = function() { document.getElementById('auto-photo-form').submit(); }; }
 
     const videoInput = document.getElementById('gallery-video-input');
-    if (videoInput) {
-        videoInput.onchange = function() {
-            document.getElementById('auto-video-form').submit();
-        };
-    }
-
-    /**
-     * Automatický pomocník pro výpočet termínu klíšťat
-     * Počítá: Datum aplikace + Počet dní ochrany = Příští aplikace
-     */
-    const klistataInput = document.getElementsByName('posledni_klistata')[0];
-    if (klistataInput) {
-        klistataInput.addEventListener('change', function() {
-            let posledniDate = new Date(this.value);
-
-            // Zkusíme vzít dny z pole 'typ_ochrany_klistata', pokud tam není číslo, dáme 30
-            let dnyInput = document.getElementsByName('typ_ochrany_klistata')[0].value;
-            let dnyNavic = parseInt(dnyInput) || 30;
-
-            if (!isNaN(posledniDate.getTime())) {
-                // Přičteme dny
-                posledniDate.setDate(posledniDate.getDate() + dnyNavic);
-
-                // Zformátujeme pro HTML input (YYYY-MM-DD)
-                let y = posledniDate.getFullYear();
-                let m = ('0' + (posledniDate.getMonth() + 1)).slice(-2);
-                let d = ('0' + posledniDate.getDate()).slice(-2);
-
-                let pristiDateString = `${y}-${m}-${d}`;
-                document.getElementsByName('pristi_klistata')[0].value = pristiDateString;
-            }
-        });
-    }
+    if (videoInput) { videoInput.onchange = function() { document.getElementById('auto-video-form').submit(); }; }
 </script>
 {% endblock %}

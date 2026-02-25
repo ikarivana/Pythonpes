@@ -2,6 +2,7 @@ import os
 import json
 import io
 from datetime import timedelta, timezone
+from django.core.files import File
 
 import qrcode
 from PIL import Image, ImageOps

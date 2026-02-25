@@ -11,6 +11,9 @@ from django.db import models
 class ProfilMajitele(models.Model):
     uzivatel = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profil')
     telefon = models.CharField(max_length=20, blank=True)
+    ulice_cp = models.CharField(max_length=255, blank=True, verbose_name="Ulice a č.p.")
+    mesto = models.CharField(max_length=100, blank=True, verbose_name="Město")
+    psc = models.CharField(max_length=10, blank=True, verbose_name="PSČ")
 
     # Vyber si jeden název, třeba is_premium
     is_premium = models.BooleanField(default=False)

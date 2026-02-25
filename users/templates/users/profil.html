@@ -125,14 +125,20 @@
                     <i class="fas fa-phone me-2" style="width: 20px;"></i>
                     <span>{{ profil.telefon|default:"Telefon nezadán" }}</span>
                 </div>
+                {% if profil.ulice_cp or profil.mesto %}
+                <div class="text-muted d-flex align-items-center">
+                    <i class="fas fa-map-marker-alt me-2" style="width: 20px;"></i>
+                    <span>{{ profil.ulice_cp }}, {{ profil.mesto }} {{ profil.psc }}</span>
+                </div>
+                {% endif %}
             </div>
         </div>
 
         <div class="col-md-auto mt-3 mt-md-0">
-            <a href="{% url 'upravit_profil' %}" class="btn btn-brown rounded-pill px-4"
+            <button class="btn btn-brown rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#editProfilModal"
                style="background: #6d4c41; color: white; border: none;">
                 <i class="fas fa-edit me-2"></i> UPRAVIT ÚDAJE
-            </a>
+            </button>
         </div>
     </div>
 </div>
@@ -249,53 +255,71 @@
             {% endif %}
         </div>
     </div>
-    <div class="modal fade" id="editProfilModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content p-2">
-                <div class="modal-header border-0 pb-0">
-                    <h3 class="fw-bold font-serif mb-0 mt-3 ms-2">👤 Úprava profilu</h3>
-                    <button type="button" class="btn-close me-2" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <form action="{% url 'upravit_profil' %}" method="POST">
-                        {% csrf_token %}
-                        <div class="row g-2">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label small fw-bold text-muted">JMÉNO</label>
-                                <input type="text" name="first_name"
-                                       class="form-control rounded-3 border-light bg-light"
-                                       value="{{ request.user.first_name }}">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label small fw-bold text-muted">PŘÍJMENÍ</label>
-                                <input type="text" name="last_name"
-                                       class="form-control rounded-3 border-light bg-light"
-                                       value="{{ request.user.last_name }}">
-                            </div>
-                        </div>
+</div>
 
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">E-MAIL</label>
-                            <input type="email" name="email" class="form-control rounded-3 border-light bg-light"
-                                   value="{{ request.user.email }}">
+<div class="modal fade" id="editProfilModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-2">
+            <div class="modal-header border-0 pb-0">
+                <h3 class="fw-bold font-serif mb-0 mt-3 ms-2">👤 Úprava profilu</h3>
+                <button type="button" class="btn-close me-2" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="{% url 'upravit_profil' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="row g-2">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold text-muted">JMÉNO</label>
+                            <input type="text" name="first_name"
+                                   class="form-control rounded-3 border-light bg-light"
+                                   value="{{ request.user.first_name }}">
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">TELEFON</label>
-                            <input type="text" name="telefon" class="form-control rounded-3 border-light bg-light"
-                                   value="{{ profil.telefon }}">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold text-muted">PŘÍJMENÍ</label>
+                            <input type="text" name="last_name"
+                                   class="form-control rounded-3 border-light bg-light"
+                                   value="{{ request.user.last_name }}">
                         </div>
+                    </div>
 
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-muted">LOKALITA</label>
-                            <input type="text" name="lokalita" class="form-control rounded-3 border-light bg-light"
-                                   value="{{ profil.lokalita }}" placeholder="např. Praha">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">E-MAIL</label>
+                        <input type="email" name="email" class="form-control rounded-3 border-light bg-light"
+                               value="{{ request.user.email }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">TELEFON</label>
+                        <input type="text" name="telefon" class="form-control rounded-3 border-light bg-light"
+                               value="{{ profil.telefon }}">
+                    </div>
+
+                    <hr class="my-4" style="border-top: 1px dashed var(--border-color);">
+                    <h6 class="fw-bold mb-3" style="color: var(--accent-gold);">🎁 Doručovací adresa pro dárky</h6>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">ULICE A Č.P.</label>
+                        <input type="text" name="ulice_cp" class="form-control rounded-3 border-light bg-light"
+                               value="{{ profil.ulice_cp }}" placeholder="např. Psí 15">
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label small fw-bold text-muted">MĚSTO</label>
+                            <input type="text" name="mesto" class="form-control rounded-3 border-light bg-light"
+                                   value="{{ profil.mesto }}" placeholder="např. Brno">
                         </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label small fw-bold text-muted">PSČ</label>
+                            <input type="text" name="psc" class="form-control rounded-3 border-light bg-light"
+                                   value="{{ profil.psc }}" placeholder="602 00">
+                        </div>
+                    </div>
 
-                        <button type="submit" class="btn btn-brown w-100 py-3 fw-bold shadow">ULOŽIT ZMĚNY</button>
-                    </form>
-                </div>
+                    <button type="submit" class="btn btn-brown w-100 py-3 fw-bold shadow mt-3">ULOŽIT ZMĚNY</button>
+                </form>
             </div>
         </div>
     </div>
-    {% endblock %}
+</div>
+{% endblock %}
