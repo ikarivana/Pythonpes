@@ -1,92 +1,136 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <style>
-    /* Tohle je magický příkaz pro xhtml2pdf */
-    html, body, div, span, td, b, strong {
-        font-family: 'MojeCestina', sans-serif !important;
+        /* KLÍČOVÉ PRO ČEŠTINU: Musíš nadefinovat cestu k souboru */
+    @font-face {
+        font-family: 'DejaVu Sans';
+        src: url("{{ media_root }}/fonts/DejaVuSans.ttf");
     }
 
     @page {
         size: A4;
-        margin: 0.8cm;
+        margin: 1cm;
     }
 
-    /* Tohle je nejdůležitější část - vynutí font pro každý element */
+    /* Teď už toto pravidlo bude fungovat */
     * {
-        font-family: 'MojeCestina' !important;
+        font-family: 'DejaVu Sans', sans-serif !important;
     }
+        /* Definice fontů pro xhtml2pdf */
+        @page {
+            size: A4;
+            margin: 1cm;
+        }
 
-    body {
-        font-family: 'MojeCestina', sans-serif !important;
-        line-height: 1.1;
-    }
+        * {
+            font-family: 'DejaVu Sans', sans-serif !important; /* Standardní font s podporou češtiny */
+        }
 
-    /* Oprava chyby 'Not a float 100%' z terminálu */
-    img {
-        max-width: 300px; /* Místo 100% dej raději pevnou šířku */
-    }
+        body {
+            line-height: 1.2;
+            color: #3e2723;
+            background-color: #ffffff;
+        }
 
-    /* Zmenšení popisu pro 1 stránku */
-    .popis-box {
-        height: 60px;
-        overflow: hidden;
-        font-size: 9px;
-    }
-
-        /* Zajištění, aby se tabulky netrhaly mezi stránky */
-        table, div { page-break-inside: avoid; }
-
+        /* Hlavička */
         .header {
             text-align: center;
             border-bottom: 2px solid #c5a059;
-            padding-bottom: 5px;
-            margin-bottom: 10px;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
         }
-            .dog-name { font-size: 24px; font-weight: bold; margin: 0; color: #3e2723; }
-            .breed { color: #c5a059; font-size: 14px; font-weight: bold; }
+        .dog-name { font-size: 28px; font-weight: bold; margin: 0; color: #3e2723; }
+        .breed { color: #c5a059; font-size: 16px; font-weight: bold; text-transform: uppercase; }
 
-            /* Hlavní layout pomocí tabulky pro stabilitu v PDF */
-            .main-table { width: 100%; border-collapse: collapse; }
-            .photo-column { width: 40%; vertical-align: top; }
-            .info-column { width: 60%; vertical-align: top; padding-left: 20px; }
+        /* Hlavní layout */
+        .main-table { width: 100%; border-collapse: collapse; }
+        .photo-column { width: 45%; vertical-align: top; text-align: center; }
+        .info-column { width: 55%; vertical-align: top; padding-left: 25px; }
 
-            .section-title {
-                background: #3e2723; color: white;
-                padding: 4px 10px; font-size: 10px;
-                text-transform: uppercase; margin: 10px 0 5px 0;
-            }
+        /* Profilová fotka */
+        .profile-img {
+            width: 250px;
+            height: 250px;
+            border-radius: 15px;
+            object-fit: cover;
+        }
 
-            .data-row { margin-bottom: 4px; border-bottom: 1px solid #eee; padding-bottom: 2px; }
-            .label { font-weight: bold; color: #8d7d77; font-size: 9px; }
-            .value { float: right; font-weight: bold; }
+        /* QR Kód sekce - ZVĚTŠENO PRO TISK */
+        .qr-container {
+            margin-top: 25px;
+            padding: 15px;
+            border: 1px dashed #c5a059;
+            border-radius: 15px;
+            background-color: #fdfaf6;
+            text-align: center;
+        }
+        .qr-img {
+            width: 140px; /* Ideální velikost pro skenování z papíru */
+            height: 140px;
+        }
+        .qr-label {
+            font-size: 10px;
+            font-weight: bold;
+            margin-top: 8px;
+            color: #3e2723;
+        }
 
-            /* Rodokmen - zmenšený, aby se vešel */
-            .pedigree-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-            .pedigree-table td {
-                border: 1px solid #d1c4b9; padding: 5px;
-                font-size: 9px; vertical-align: middle; background: #fdfaf6;
-            }
-            .parent-label { color: #c5a059; font-weight: bold; font-size: 8px; }
+        /* Datové sekce */
+        .section-title {
+            background: #3e2723;
+            color: #ffffff;
+            padding: 6px 12px;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin: 15px 0 8px 0;
+            font-weight: bold;
+        }
 
-            .footer {
-                position: absolute; bottom: 0; width: 100%;
-                text-align: center; font-size: 8px; color: #8d7d77;
-                border-top: 1px solid #eee; padding-top: 5px;
-            }
-            /* Omezení výšky popisu, aby nevytlačil patičku na další stranu */
-        .description-box {
-            font-size: 9px;
+        .data-row {
+            padding: 5px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 11px;
+        }
+        .label { font-weight: bold; color: #8d7d77; }
+        .value { font-weight: bold; color: #3e2723; text-align: right; }
+
+        /* Rodokmen */
+        .pedigree-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .pedigree-table td {
+            border: 1px solid #e0d7ce;
+            padding: 10px;
+            font-size: 10px;
             background: #fdfaf6;
-            padding: 8px;
-            border: 1px solid #eee;
-            height: 50px; /* Fixní výška */
-            overflow: hidden;
+        }
+        .parent-type { color: #c5a059; font-weight: bold; font-size: 9px; margin-bottom: 3px; }
+
+        /* Popis */
+        .description-box {
+            font-size: 10px;
+            background: #fdfaf6;
+            padding: 12px;
+            border: 1px solid #e0d7ce;
+            margin-top: 5px;
+            min-height: 60px;
+        }
+
+        /* Patička */
+        .footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 9px;
+            color: #8d7d77;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
         }
     </style>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 <body>
+
 <div class="header">
     <div class="dog-name">{{ pes.jmeno|upper }}</div>
     <div class="breed">{{ pes.rasa|default:"Nezadané plemeno" }}</div>
@@ -96,43 +140,83 @@
     <tr>
         <td class="photo-column">
             {% if pes.fotka %}
-            <img src="{{ pes.fotka.url }}" style="width: 100%; border-radius: 10px;">
+                <img src="{{ pes.fotka.path }}" class="profile-img">
             {% else %}
-            <div style="width: 100%; height: 150px; background: #f5f5f5; border: 1px dashed #ccc; text-align: center; padding-top: 60px;">
-                Není foto
-            </div>
+                <div style="width: 250px; height: 250px; background: #f5f5f5; border: 1px solid #ccc; line-height: 250px; color: #ccc;">
+                    Bez fotografie
+                </div>
             {% endif %}
 
-            <div style="text-align: center; margin-top: 15px;">
-                {% if pes.qr_kod %}
-                <img src="{{ pes.qr_kod.url }}" style="width: 80px; height: 80px;">
-                <div style="font-size: 7px; font-weight: bold; margin-top: 5px;">SOS IDENTIFIKACE</div>
-                {% endif %}
+            {% if pes.qr_kod %}
+            <div class="qr-container">
+                <img src="{{ pes.qr_kod.path }}" class="qr-img">
+                <div class="qr-label">SOS IDENTITA PEJSKA - EPES.ONLINE</div>
+                <div style="font-size: 8px; color: #8d7d77; margin-top: 3px;">Naskenujte pro zobrazení kompletního profilu</div>
             </div>
+            {% endif %}
         </td>
 
         <td class="info-column">
-            <div class="section-title">Základní údaje</div>
-            <div class="data-row"><span class="label">ČIP:</span> <span class="value">{{ pes.cip|default:"-" }}</span>
+            <div class="section-title">Základní a identifikační údaje</div>
+            <div class="data-row">
+                <table width="100%">
+                    <tr>
+                        <td class="label">ČÍSLO ČIPU:</td>
+                        <td class="value">{{ pes.cip|default:"-" }}</td>
+                    </tr>
+                </table>
             </div>
-            <div class="data-row"><span class="label">NAROZENÍ:</span> <span class="value">{{ pes.datum_narozeni|date:"d. m. Y"|default:"-" }}</span>
+            <div class="data-row">
+                <table width="100%">
+                    <tr>
+                        <td class="label">DATUM NAROZENÍ:</td>
+                        <td class="value">{{ pes.datum_narozeni|date:"d. m. Y"|default:"-" }}</td>
+                    </tr>
+                </table>
             </div>
-            <div class="data-row"><span class="label">VĚK:</span> <span class="value">{{ pes.vek }}</span></div>
-            <div class="data-row"><span class="label">ZÁPIS:</span> <span class="value">{{ pes.cislo_zapisu|default:"-" }}</span>
+            <div class="data-row">
+                <table width="100%">
+                    <tr>
+                        <td class="label">AKTUÁLNÍ VĚK:</td>
+                        <td class="value">{{ pes.vek }}</td>
+                    </tr>
+                </table>
             </div>
 
-            <div class="section-title">Zdravotní výsledky</div>
-            <div class="data-row"><span class="label">RTG HD (DKK):</span> <span class="value">{{ pes.rtg_hd|default:"-" }}</span>
+            <div class="section-title">Zdravotní záznamy</div>
+            <div class="data-row">
+                <table width="100%">
+                    <tr>
+                        <td class="label">RTG HD (DKK):</td>
+                        <td class="value">{{ pes.rtg_hd|default:"-" }}</td>
+                    </tr>
+                </table>
             </div>
-            <div class="data-row"><span class="label">RTG ED (DLK):</span> <span class="value">{{ pes.rtg_ed|default:"-" }}</span>
+            <div class="data-row">
+                <table width="100%">
+                    <tr>
+                        <td class="label">RTG ED (DLK):</td>
+                        <td class="value">{{ pes.rtg_ed|default:"-" }}</td>
+                    </tr>
+                </table>
             </div>
-            <div class="data-row"><span class="label">PÁTEŘ:</span> <span
-                    class="value">{{ pes.rtg_pater|default:"-" }}</span></div>
 
-            <div class="section-title">Prevence</div>
-            <div class="data-row"><span class="label">POSLEDNÍ OČKOVÁNÍ:</span> <span class="value">{{ pes.posledni_ockovani|date:"d. m. Y"|default:"-" }}</span>
+            <div class="section-title">Důležité termíny</div>
+            <div class="data-row">
+                <table width="100%">
+                    <tr>
+                        <td class="label">POSLEDNÍ OČKOVÁNÍ:</td>
+                        <td class="value">{{ pes.posledni_ockovani|date:"d. m. Y"|default:"-" }}</td>
+                    </tr>
+                </table>
             </div>
-            <div class="data-row"><span class="label">ODČERVENÍ:</span> <span class="value">{{ pes.posledni_odcerveni|date:"d. m. Y"|default:"-" }}</span>
+            <div class="data-row">
+                <table width="100%">
+                    <tr>
+                        <td class="label">PŘÍŠTÍ TERMÍN:</td>
+                        <td class="value">{{ pes.pristi_ockovani|date:"d. m. Y"|default:"?" }}</td>
+                    </tr>
+                </table>
             </div>
         </td>
     </tr>
@@ -141,23 +225,26 @@
 <div class="section-title">Rodokmen (Rodiče)</div>
 <table class="pedigree-table">
     <tr>
-        <td style="width: 50%;">
-            <span class="parent-label">OTEC</span><br>
+        <td width="50%">
+            <div class="parent-type">OTEC</div>
             <strong>{{ pes.otec_manualni|default:"-" }}</strong>
         </td>
-        <td style="width: 50%;">
-            <span class="parent-label">MATKA</span><br>
+        <td width="50%">
+            <div class="parent-type">MATKA</div>
             <strong>{{ pes.matka_manualni|default:"-" }}</strong>
         </td>
     </tr>
 </table>
 
-<div class="section-title">Popis / Poznámka</div>
-<div class="description-box"> {{ pes.popis|default:"Bez popisu." }}
+<div class="section-title">O pejskovi / Poznámky majitele</div>
+<div class="description-box">
+    {{ pes.popis|default:"K tomuto pejskovi zatím nebyly přidány žádné podrobnější informace." }}
 </div>
 
 <div class="footer">
-    Generováno systémem MojePsíData &copy; 2026 | Dokument slouží pro vnitřní potřebu majitele.
+    Dokument vygenerován dne {{ "now"|date:"d. m. Y" }} v systému EPES.ONLINE<br>
+    Identifikátor pejska: #{{ pes.id }} | Majitel: {{ pes.majitel.user.username }}
 </div>
+
 </body>
 </html>

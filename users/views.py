@@ -89,47 +89,53 @@ def dashboard(request):
 
 @login_required
 def pridat_psa(request):
-    # 1. Získání profilu uživatele
     profil = get_object_or_404(ProfilMajitele, uzivatel=request.user)
 
-    # 2. OMEZENÍ PREMIUM: Pokud není premium/staff a už má 1 psa, nepustíme ho dál
+    # 1. Kontrola limitu pro neplatiče
     if not profil.is_premium and not request.user.is_staff and profil.psi.count() >= 1:
-        messages.warning(request, "Ve verzi zdarma můžete mít pouze jednoho pejska. Pro více psů si aktivujte Premium.")
+        messages.warning(request, "Ve verzi zdarma můžete mít pouze jednoho pejska.")
         return redirect('seznam_psu')
 
     if request.method == 'POST':
-        # FILES je nutné pro fotky a videa
         form = PesForm(request.POST, request.FILES, request=request)
         if form.is_valid():
             try:
                 pes = form.save(commit=False)
                 pes.majitel = profil
 
-                # Pojistka pro pole, která dříve házela chybu v DB
-                pole_k_oprave = ['otec_manualni', 'matka_manualni', 'zdravotni_testy', 'bonitace']
-                for pole in pole_k_oprave:
-                    if not getattr(pes, pole):
+                # Zpracování fotky
+                if 'fotka' in request.FILES:
+                    pes.fotka = zpracuj_foto(request.FILES['fotka'])
+
+                # Automatické vyplnění prázdných polí (aby formulář prošel)
+                # PŘIDAL JSEM SEM I TYP OCHRANY PRO KLÍŠŤATA
+                for pole in ['otec_manualni', 'matka_manualni', 'zdravotni_testy', 'bonitace', 'typ_ochrany_klistata']:
+                    if hasattr(pes, pole) and not getattr(pes, pole):
                         setattr(pes, pole, "Nezadáno")
 
-                # 3. GENEROVÁNÍ QR KÓDU
-                # Odkaz na detail psa (uprav doménu podle potřeby)
+                pes.save()
+
+                # Generování QR (zůstává stejné)
                 url_psa = f"https://epes.online/users/pes/{pes.id}/"
                 qr = qrcode.QRCode(version=1, box_size=10, border=5)
                 qr.add_data(url_psa)
                 qr.make(fit=True)
-
-                img = qr.make_image(fill_color="black", back_color="white")
+                img_qr = qr.make_image(fill_color="black", back_color="white")
                 buffer = io.BytesIO()
-                img.save(buffer, format='PNG')
+                img_qr.save(buffer, format='PNG')
+                filename = f'qr_{pes.id}_{slugify(pes.jmeno)}.png'
+                pes.qr_kod.save(filename, ContentFile(buffer.getvalue()), save=True)
 
-                # Uložení QR kódu do modelu
-                pes.qr_kod.save(f'qr_{pes.jmeno}.png', File(buffer), save=False)
-
-                pes.save()
-                messages.success(request, f"Pejsek {pes.jmeno} byl úspěšně přidán i s QR kódem!")
+                messages.success(request, f"Pejsek {pes.jmeno} byl úspěšně přidán!")
                 return redirect('seznam_psu')
+
             except Exception as e:
-                messages.error(request, f"Chyba při ukládání: {e}")
+                messages.error(request, f"Kritická chyba při ukládání: {e}")
+                print(f"DEBUG EXCEPTION: {e}")
+        else:
+            # TADY JE TA DŮLEŽITÁ ČÁST: Pokud formulář není validní, vypíše to chyby do konzole
+            print(f"CHYBY FORMULÁŘE: {form.errors}")
+            messages.error(request, "Formulář obsahuje chyby. Zkontrolujte vyplněná pole.")
     else:
         form = PesForm(request=request)
 
@@ -138,18 +144,37 @@ def pridat_psa(request):
 
 @login_required
 def upravit_psa(request, pk):
-    # Najdeme psa, který patří přihlášenému uživateli
-    # Pokud pes neexistuje nebo patří někomu jinému, vrátí 404
     pes = get_object_or_404(Pes, pk=pk, majitel=request.user.profil)
 
     if request.method == 'POST':
-        # instance=pes zajistí, že Django údaje přepíše a nevytvoří nového psa
         form = PesForm(request.POST, request.FILES, instance=pes, request=request)
+        # Přidáme kontrolu, jestli uživatel zaškrtl "Opravit QR kód"
+        opravit_qr = request.POST.get('regenerovat_qr') == 'on'
+
         if form.is_valid():
             try:
                 pes_upraveny = form.save(commit=False)
 
-                # Pojistka pro prázdná pole, která dříve shazovala databázi
+                if 'fotka' in request.FILES:
+                    pes_upraveny.fotka = zpracuj_foto(request.FILES['fotka'])
+
+                # QR KÓD SE PŘEGENERUJE JEN KDYŽ UŽIVATEL CHCE
+                if opravit_qr or not pes_upraveny.qr_kod:
+                    url_psa = f"https://epes.online/users/pes/{pes_upraveny.id}/"
+                    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+                    qr.add_data(url_psa)
+                    qr.make(fit=True)
+
+                    img_qr = qr.make_image(fill_color="black", back_color="white")
+                    buffer = io.BytesIO()
+                    img_qr.save(buffer, format='PNG')
+
+                    if pes_upraveny.qr_kod:
+                        pes_upraveny.qr_kod.delete(save=False)
+
+                    filename = f'qr_{pes_upraveny.id}_{slugify(pes_upraveny.jmeno)}.png'
+                    pes_upraveny.qr_kod.save(filename, ContentFile(buffer.getvalue()), save=False)
+
                 for pole in ['otec_manualni', 'matka_manualni', 'zdravotni_testy', 'bonitace']:
                     if hasattr(pes_upraveny, pole) and not getattr(pes_upraveny, pole):
                         setattr(pes_upraveny, pole, "Nezadáno")
@@ -163,7 +188,6 @@ def upravit_psa(request, pk):
         form = PesForm(instance=pes, request=request)
 
     return render(request, 'users/upravit_psa.html', {'form': form, 'pes': pes})
-
 
 @login_required
 def smazat_psa(request, pk):
@@ -206,13 +230,13 @@ def pridat_foto(request, pes_id):
 
 @login_required
 def smazat_foto(request, pk):
-    # ZMĚNA: Galerie -> GalerieFotka
+    # Přidána kontrola, aby se předešlo NoReverseMatch
     foto = get_object_or_404(GalerieFotka, id=pk, pes__majitel=request.user.profil)
     pes_id = foto.pes.id
     foto.delete()
     messages.success(request, "Fotka byla úspěšně smazána.")
-    # Tady se vracíme na detail_psa
-    return redirect('detail_psa', pes_id=pes_id)
+    # Vracíme se zpět do editoru, ne na detail (který může zlobit v URL)
+    return redirect('upravit_psa', pk=pes_id)
 
 
 @login_required
@@ -237,12 +261,13 @@ def pridat_video(request, pes_id):
 
 @login_required
 def smazat_video(request, pk):
-    # ZMĚNA: Video -> GalerieVideo
     video = get_object_or_404(GalerieVideo, id=pk, pes__majitel=request.user.profil)
     p_id = video.pes.id
     video.delete()
     messages.success(request, "Video smazáno.")
+    # Sjednoceno na 'pk', aby to odpovídalo vašim URL patternům
     return redirect('upravit_psa', pk=p_id)
+
 
 # --- 3. DETAIL, SOS A POLOHA ---
 def detail_psa(request, pes_id):
@@ -319,16 +344,30 @@ def prepnout_ztratu(request, pes_id):
 
     return redirect('detail_psa', pes_id=pes_id)
 
+
 @csrf_exempt
 def odeslat_polohu_nalezu(request, pes_id):
     if request.method == 'POST':
         data = json.loads(request.body)
         lat, lng = data.get('lat'), data.get('lng')
         pes = get_object_or_404(Pes, id=pes_id)
-        map_url = f"https://www.google.com/maps?q={lat},{lng}"
-        zprava = f"QR kód pejska {pes.jmeno} byl naskenován. Poloha: {map_url}"
-        send_mail("📍 POLOHA NÁLEZU", zprava, 'noreply@pes.cz', [pes.majitel.uzivatel.email])
-        return JsonResponse({'status': 'ok'})
+
+        # TATO PODMÍNKA JE KLÍČOVÁ:
+        if pes.je_ztraceny:
+            map_url = f"https://www.google.com/maps?q={lat},{lng}"
+            zprava = f"QR kód pejska {pes.jmeno} byl naskenován. Poloha: {map_url}"
+
+            send_mail(
+                "📍 POLOHA NÁLEZU",
+                zprava,
+                'noreply@pes.cz',
+                [pes.majitel.uzivatel.email]
+            )
+            return JsonResponse({'status': 'email_odeslan'})
+
+        # Pokud pes není ztracený, jen potvrdíme příjem polohy, ale nic neposíláme
+        return JsonResponse({'status': 'pes_neni_ztracen_nic_neposlano'})
+
     return JsonResponse({'status': 'error'}, status=400)
 
 def seznam_hledanych_psu(request):
@@ -417,20 +456,21 @@ def link_callback(uri, rel):
 def export_pes_pdf(request, pes_id):
     pes = get_object_or_404(Pes, id=pes_id, majitel=request.user.profil)
 
-    # TADY vytváříme font_path - musí to být PŘEDTÍM, než ji použiješ
+    # Definice cesty k fontu
     font_path = os.path.join(settings.MEDIA_ROOT, 'fonts', 'DejaVuSans.ttf')
 
+    # Kontrola pro tebe do terminálu
     print(f"--- CESTA K FONTU: {font_path} ---")
     print(f"--- EXISTUJE SOUBOR?: {os.path.exists(font_path)} ---")
 
-    # Teď už font_path nebude červená, protože už existuje
-    pdfmetrics.registerFont(TTFont('MojeCestina', font_path))
+    # REGISTRACE: Název 'DejaVu Sans' musí být PŘESNĚ jako v HTML šabloně
+    pdfmetrics.registerFont(TTFont('DejaVu Sans', font_path))
 
     template = get_template('users/pdf_sablona.html')
 
     context = {
         'pes': pes,
-        'media_root': settings.MEDIA_ROOT,
+        'media_root': settings.MEDIA_ROOT, # Předáváme absolutní cestu pro link_callback
     }
 
     html = template.render(context)
@@ -499,8 +539,8 @@ def profil_uzivatele(request):
     # Pokud ne, použij: request.user.pes_set.all()
     context = {
         'profil': profil,
-        'libi_se_mi': [], # Sem později dopojíme lajky
-        'komentare': [],  # Sem později dopojíme komentáře
+        'libi_se_mi': [],
+        'komentare': [],
     }
     return render(request, 'users/profil.html', context)
 
@@ -522,7 +562,6 @@ def upravit_profil(request):
         form = UserUpdateForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
-            # OPRAVA: Směrujeme na name='profil' z tvého urls.py
             messages.success(request, "Profil byl úspěšně upraven.")
             return render(request, 'users/upravit_profil.html', {'form': form})
     else:

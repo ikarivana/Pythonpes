@@ -23,4 +23,5 @@ urlpatterns = [
     path('cenik/', views.cenik, name='cenik'),
 
     path('simpleshop/webhook/', simpleshop_webhook, name='simpleshop_webhook'),
+    path('dekujeme-za-nakup/', views.dekujeme_za_nakup, name='dekujeme_za_nakup'),
 ]

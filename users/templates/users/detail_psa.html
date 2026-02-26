@@ -18,7 +18,6 @@
         overflow-x: hidden;
     }
 
-    /* HLAVNÍ BANNER */
     .hero-banner {
         background: white;
         border-radius: 35px;
@@ -33,99 +32,28 @@
     }
 
     .hero-left { display: flex; align-items: center; gap: 30px; }
-
-    .hero-img {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 4px solid var(--alfa-gold);
-    }
-
-    .hero-info h1 {
-        font-size: clamp(2.2rem, 5vw, 3.5rem);
-        font-weight: 800;
-        margin: 0;
-        color: var(--alfa-brown);
-    }
-
-    .hero-meta {
-        display: flex;
-        gap: 20px;
-        margin-top: 10px;
-        color: var(--alfa-muted);
-        font-weight: 600;
-        font-size: 0.95rem;
-    }
-
+    .hero-img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid var(--alfa-gold); }
+    .hero-info h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 800; margin: 0; color: var(--alfa-brown); }
+    .hero-meta { display: flex; gap: 20px; margin-top: 10px; color: var(--alfa-muted); font-weight: 600; font-size: 0.95rem; }
     .hero-meta span { display: flex; align-items: center; gap: 8px; }
     .hero-meta i { color: var(--alfa-gold); }
 
-    /* QR A TLAČÍTKA */
     .hero-right { display: flex; align-items: center; gap: 25px; }
-
     .qr-box-clean { text-align: center; background: #fff; padding: 5px; }
     .qr-image { width: 105px; height: 105px; border-radius: 5px; }
     .qr-text { font-size: 0.6rem; font-weight: 800; color: var(--alfa-gold); margin-top: 4px; text-transform: uppercase; }
 
     .btn-stack { display: flex; flex-direction: column; gap: 10px; }
+    .btn-alfa-gold { background: var(--alfa-gold); color: white !important; border-radius: 12px; padding: 10px 22px; font-weight: 800; text-align: center; text-decoration: none !important; font-size: 0.85rem; }
+    .btn-alfa-outline { border: 2px solid var(--alfa-brown); color: var(--alfa-brown) !important; border-radius: 12px; padding: 8px 22px; font-weight: 700; text-align: center; text-decoration: none !important; font-size: 0.85rem; }
 
-    .btn-alfa-gold {
-        background: var(--alfa-gold);
-        color: white !important;
-        border-radius: 12px;
-        padding: 10px 22px;
-        font-weight: 800;
-        text-align: center;
-        text-decoration: none !important;
-        font-size: 0.85rem;
-    }
-
-    .btn-alfa-outline {
-        border: 2px solid var(--alfa-brown);
-        color: var(--alfa-brown) !important;
-        border-radius: 12px;
-        padding: 8px 22px;
-        font-weight: 700;
-        text-align: center;
-        text-decoration: none !important;
-        font-size: 0.85rem;
-    }
-
-    /* KARTY */
-    .info-card {
-        background: white;
-        border-radius: 25px;
-        padding: 30px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.03);
-        height: 100%;
-        border: 1px solid rgba(0,0,0,0.02);
-    }
-
-    .section-header {
-        font-weight: 800;
-        font-size: 1.1rem;
-        margin-bottom: 25px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        text-transform: uppercase;
-        color: var(--alfa-brown);
-    }
-
-    .prevence-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px 0;
-        border-bottom: 1px solid #f8f8f8;
-    }
-
+    .info-card { background: white; border-radius: 25px; padding: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.03); height: 100%; border: 1px solid rgba(0,0,0,0.02); }
+    .section-header { font-weight: 800; font-size: 1.1rem; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; color: var(--alfa-brown); }
+    .prevence-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f8f8f8; }
     .label-sm { color: var(--alfa-muted); font-weight: 700; font-size: 0.75rem; text-transform: uppercase; }
     .val-main { font-weight: 800; color: var(--alfa-brown); }
     .val-next { color: var(--alfa-brown); font-weight: 800; font-size: 0.9rem; margin-left: 15px; }
 
-    /* GALERIE */
     .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
     .media-item { width: 100%; height: 130px; object-fit: cover; border-radius: 15px; background: #eee; }
 
@@ -140,15 +68,14 @@
 </style>
 
 <div class="container pb-5">
-
     <div class="hero-banner">
         <div class="hero-left">
             {% if pes.fotka %}
-            <img src="{{ pes.fotka.url }}" class="hero-img">
+                <img src="{{ pes.fotka.url }}" class="hero-img">
             {% else %}
-            <div class="hero-img d-flex align-items-center justify-content-center bg-light">
-                <i class="fas fa-dog fa-3x text-muted"></i>
-            </div>
+                <div class="hero-img d-flex align-items-center justify-content-center bg-light">
+                    <i class="fas fa-dog fa-3x text-muted"></i>
+                </div>
             {% endif %}
             <div class="hero-info">
                 <h1>{{ pes.jmeno }}</h1>
@@ -162,25 +89,23 @@
 
         <div class="hero-right">
             {% if pes.qr_kod %}
-            <div class="qr-box-clean">
-                <img src="{{ pes.qr_kod.url }}" class="qr-image">
-                <div class="qr-text">SOS Identita</div>
-            </div>
+                <div class="qr-box-clean">
+                    <img src="{{ pes.qr_kod.url }}" class="qr-image">
+                    <div class="qr-text">SOS Identita</div>
+                </div>
             {% endif %}
 
             <div class="btn-stack">
                 <form action="{% url 'prepnout_ztratu' pes.id %}" method="POST" style="margin-bottom: 0;">
                     {% csrf_token %}
                     {% if pes.je_ztraceny %}
-                    <button type="submit" class="btn w-100 mb-2 fw-bold"
-                            style="background-color: #28a745; color: white; border-radius: 12px; padding: 10px; font-size: 0.85rem; border: none;">
-                        <i class="fas fa-check-circle me-1"></i> PEJSEK SE NAŠEL
-                    </button>
+                        <button type="submit" class="btn w-100 mb-2 fw-bold" style="background-color: #28a745; color: white; border-radius: 12px; padding: 10px; font-size: 0.85rem; border: none;">
+                            <i class="fas fa-check-circle me-1"></i> PEJSEK SE NAŠEL
+                        </button>
                     {% else %}
-                    <button type="submit" class="btn w-100 mb-2 fw-bold"
-                            style="background-color: #dc3545; color: white; border-radius: 12px; padding: 10px; font-size: 0.85rem; border: none;">
-                        <i class="fas fa-bullhorn me-1"></i> NAHLÁSIT ZTRÁTU
-                    </button>
+                        <button type="submit" class="btn w-100 mb-2 fw-bold" style="background-color: #dc3545; color: white; border-radius: 12px; padding: 10px; font-size: 0.85rem; border: none;">
+                            <i class="fas fa-bullhorn me-1"></i> NAHLÁSIT ZTRÁTU
+                        </button>
                     {% endif %}
                 </form>
 
@@ -197,8 +122,7 @@
     <div class="row g-4">
         <div class="col-lg-7">
             <div class="info-card">
-                <h5 class="section-header"><i class="fas fa-heartbeat" style="color: var(--alfa-gold);"></i> Zdravotní
-                    prevence</h5>
+                <h5 class="section-header"><i class="fas fa-heartbeat" style="color: var(--alfa-gold);"></i> Zdravotní prevence</h5>
                 <div class="prevence-row">
                     <span class="label-sm">Poslední očkování</span>
                     <div>
@@ -223,30 +147,15 @@
             </div>
         </div>
 
-        <div class="col-lg-7 mt-4">
-            <div class="info-card">
-                <h5 class="section-header">
-                    <i class="fas fa-quote-left" style="color: var(--alfa-gold);"></i> O mně
-                </h5>
-                <p class="text-muted" style="line-height: 1.6; font-size: 1rem; white-space: pre-wrap;">
-                    {% if pes.popis %}
-                    {{ pes.popis }}
-                    {% else %}
-                    <em>O tomto pejskovi zatím není nic napsáno. Popis můžete přidat v úpravách psa.</em>
-                    {% endif %}
-                </p>
-            </div>
-        </div>
-
         <div class="col-lg-5">
             <div class="info-card" style="position: relative; overflow: hidden;">
                 {% if not user.profil.is_premium %}
-                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.6); backdrop-filter: blur(4px); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
-                    <i class="fas fa-lock mb-2" style="color: var(--alfa-gold); font-size: 1.5rem;"></i>
-                    <h6 class="fw-bold m-0" style="font-size: 0.9rem;">Chovné údaje</h6>
-                    <p style="font-size: 0.7rem; color: var(--alfa-muted);">Dostupné pouze pro ALFA členy</p>
-                    <a href="{% url 'cenik' %}" class="btn-alfa-gold" style="padding: 5px 15px; font-size: 0.7rem;">AKTIVOVAT</a>
-                </div>
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.6); backdrop-filter: blur(4px); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+                        <i class="fas fa-lock mb-2" style="color: var(--alfa-gold); font-size: 1.5rem;"></i>
+                        <h6 class="fw-bold m-0" style="font-size: 0.9rem;">Chovné údaje</h6>
+                        <p style="font-size: 0.7rem; color: var(--alfa-muted);">Dostupné pouze pro ALFA členy</p>
+                        <a href="{% url 'cenik' %}" class="btn-alfa-gold" style="padding: 5px 15px; font-size: 0.7rem;">AKTIVOVAT</a>
+                    </div>
                 {% endif %}
 
                 <h5 class="section-header"><i class="fas fa-dna" style="color: var(--alfa-gold);"></i> Původ a chov</h5>
@@ -271,72 +180,100 @@
                     </div>
                 </div>
                 <div class="mt-2">
-                    <div class="mb-1"><span class="label-sm">Otec:</span> <span class="fw-bold small">{{ pes.otec_manualni|default:"-" }}</span>
-                    </div>
-                    <div class="mb-1"><span class="label-sm">Matka:</span> <span class="fw-bold small">{{ pes.matka_manualni|default:"-" }}</span>
-                    </div>
-                    <div><span class="label-sm">Stanice:</span> <span class="fw-bold small"
-                                                                      style="color:var(--alfa-gold)">{{ pes.chovna_stanice|default:"-" }}</span>
-                    </div>
+                    <div class="mb-1"><span class="label-sm">Otec:</span> <span class="fw-bold small">{{ pes.otec_manualni|default:"-" }}</span></div>
+                    <div class="mb-1"><span class="label-sm">Matka:</span> <span class="fw-bold small">{{ pes.matka_manualni|default:"-" }}</span></div>
+                    <div><span class="label-sm">Stanice:</span> <span class="fw-bold small" style="color:var(--alfa-gold)">{{ pes.chovna_stanice|default:"-" }}</span></div>
                 </div>
             </div>
         </div>
 
-        <div class="col-12 mt-4">
+        <div class="col-12">
             <div class="info-card">
-                <div class="d-flex justify-content-between align-items-center mb-3"><h5 class="section-header m-0"><i
-                        class="fas fa-images" style="color: var(--alfa-gold);"></i> Fotogalerie </h5>
-                    <div class="d-flex align-items-center gap-2"><span class="label-sm">{{ pes.galerie_fotky.count }} / 5</span>
-                        <button class="btn-alfa-gold" onclick="document.getElementById('gallery-photo-input').click()"
-                                style="padding: 5px 15px; font-size: 0.7rem;"><i class="fas fa-plus"></i> Přidat fotku
-                        </button>
-                    </div>
-                </div>
-                <div class="media-grid"> {% for foto in pes.galerie_fotky.all %} <img src="{{ foto.obrazek.url }}"
-                                                                                      class="media-item"
-                                                                                      onclick="window.open(this.src)">
-                    {% empty %}
-                    <div class="col-12 text-center py-4 text-muted small"> Zatím žádné fotky v galerii.</div>
-                    {% endfor %}
-                </div>
-                <form id="photo-upload-form" method="POST" action="{% url 'pridat_foto' pes.id %}"
-                      enctype="multipart/form-data" class="d-none"> {% csrf_token %} <input type="file" name="obrazek"
-                                                                                            id="gallery-photo-input"
-                                                                                            accept="image/*"></form>
+                <h5 class="section-header"><i class="fas fa-quote-left" style="color: var(--alfa-gold);"></i> O mně</h5>
+                <p class="text-muted" style="line-height: 1.6; font-size: 1rem; white-space: pre-wrap;">
+                    {% if pes.popis %}{{ pes.popis }}{% else %}<em>O tomto pejskovi zatím není nic napsáno.</em>{% endif %}
+                </p>
             </div>
         </div>
 
-        <div class="col-12 mt-4">
+        <div class="col-12">
             <div class="info-card">
-                <div class="d-flex justify-content-between align-items-center mb-3"><h5 class="section-header m-0"><i
-                        class="fas fa-video" style="color: var(--alfa-gold);"></i> Videa </h5>
-                    <div class="d-flex align-items-center gap-2"><span class="label-sm">{{ pes.galerie_videa.count }} / 1</span>
-                        {% if pes.galerie_videa.count < 1 %}
-                        <button class="btn-alfa-gold" onclick="document.getElementById('gallery-video-input').click()"
-                                style="padding: 5px 15px; font-size: 0.7rem;"><i class="fas fa-plus"></i> Přidat video
-                        </button>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="section-header m-0"><i class="fas fa-images" style="color: var(--alfa-gold);"></i> Fotogalerie</h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="label-sm">
+                            {% if user.profil.is_premium %}{{ pes.galerie_fotky.count }} / ALFA{% else %}{{ pes.galerie_fotky.count }} / 5{% endif %}
+                        </span>
+                        {% if user.profil.is_premium or pes.galerie_fotky.count < 5 %}
+                            <button class="btn-alfa-gold" onclick="document.getElementById('gallery-photo-input').click()" style="padding: 5px 15px; font-size: 0.7rem;">
+                                <i class="fas fa-plus"></i> Přidat fotku
+                            </button>
                         {% endif %}
                     </div>
                 </div>
-                <div class="media-grid"> {% for vid in pes.galerie_videa.all %}
-                    <video src="{{ vid.video_soubor.url }}" controls class="media-item"></video>
+                <div class="media-grid">
+                    {% for foto in pes.galerie_fotky.all %}
+                        <img src="{{ foto.obrazek.url }}" class="media-item" onclick="window.open(this.src)">
                     {% empty %}
-                    <div class="col-12 text-center py-4 text-muted small"> Zatím žádná videa.</div>
+                        <div class="col-12 text-center py-4 text-muted small">Zatím žádné fotky.</div>
                     {% endfor %}
                 </div>
-                <form id="video-upload-form" method="POST" action="{% url 'pridat_video' pes.id %}"
-                      enctype="multipart/form-data" class="d-none"> {% csrf_token %} <input type="file"
-                                                                                            name="video_soubor"
-                                                                                            id="gallery-video-input"
-                                                                                            accept="video/*"></form>
+                <form id="photo-upload-form" method="POST" action="{% url 'pridat_foto' pes.id %}" enctype="multipart/form-data" class="d-none">
+                    {% csrf_token %}
+                    <input type="file" name="obrazek" id="gallery-photo-input" accept="image/*">
+                </form>
             </div>
         </div>
-        <script>
-            document.getElementById('gallery-photo-input').addEventListener('change', function() {
-                document.getElementById('photo-upload-form').submit();
-            });
-            document.getElementById('gallery-video-input').addEventListener('change', function() { document.getElementById('video-upload-form').submit();
-        </script>
 
+        <div class="col-12">
+            <div class="info-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="section-header m-0"><i class="fas fa-video" style="color: var(--alfa-gold);"></i> Videa</h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="label-sm">
+                            {% if user.profil.is_premium %}{{ pes.galerie_videa.count }} / ALFA{% else %}{{ pes.galerie_videa.count }} / 1{% endif %}
+                        </span>
+                        {% if user.profil.is_premium or pes.galerie_videa.count < 1 %}
+                            <button class="btn-alfa-gold" onclick="document.getElementById('gallery-video-input').click()" style="padding: 5px 15px; font-size: 0.7rem;">
+                                <i class="fas fa-plus"></i> Přidat video
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="media-grid">
+                    {% for vid in pes.galerie_videa.all %}
+                        <video src="{{ vid.video_soubor.url }}" controls class="media-item"></video>
+                    {% empty %}
+                        <div class="col-12 text-center py-4 text-muted small">Zatím žádná videa.</div>
+                    {% endfor %}
+                </div>
+                <form id="video-upload-form" method="POST" action="{% url 'pridat_video' pes.id %}" enctype="multipart/form-data" class="d-none">
+                    {% csrf_token %}
+                    <input type="file" name="video_soubor" id="gallery-video-input" accept="video/*">
+                </form>
+            </div>
+        </div>
     </div>
-    {% endblock %}
+</div>
+
+<script>
+    // Správně uzavřený JavaScript
+    const photoInput = document.getElementById('gallery-photo-input');
+    if (photoInput) {
+        photoInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                document.getElementById('photo-upload-form').submit();
+            }
+        });
+    }
+
+    const videoInput = document.getElementById('gallery-video-input');
+    if (videoInput) {
+        videoInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                document.getElementById('video-upload-form').submit();
+            }
+        });
+    }
+</script>
+{% endblock %}

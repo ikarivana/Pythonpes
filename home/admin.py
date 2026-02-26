@@ -1,26 +1,35 @@
 from django.contrib import admin
-from .models import Sluzba, KontaktniZprava
-
+from django.utils.html import format_html
+from .models import Sluzba, KontaktniZprava, ProfilMajitele # Všechny importy z jednoho místa
 
 @admin.register(Sluzba)
 class SluzbaAdmin(admin.ModelAdmin):
-    # Přehledná tabulka služeb
     list_display = ('nazev', 'typ', 'adresa', 'schvaleno', 'vytvoreno')
-
-    # Filtrování v pravém panelu
     list_filter = ('typ', 'schvaleno', 'vytvoreno')
-
-    # Vyhledávání podle názvu a adresy
     search_fields = ('nazev', 'adresa', 'popis')
-
-    # Možnost rychle schválit službu přímo ze seznamu
     list_editable = ('schvaleno',)
-
 
 @admin.register(KontaktniZprava)
 class KontaktniZpravaAdmin(admin.ModelAdmin):
     list_display = ('jmeno', 'email', 'predmet', 'vytvoreno')
     list_filter = ('vytvoreno',)
     search_fields = ('jmeno', 'email', 'predmet', 'zprava')
-    # Zprávy v adminu většinou nechceme editovat, jen číst
     readonly_fields = ('vytvoreno',)
+
+# OPRAVENO: Pouze jeden zavináč
+@admin.register(ProfilMajitele)
+class ProfilMajiteleAdmin(admin.ModelAdmin):
+    list_display = ('uzivatel_link', 'premium_status', 'premium_do', 'mesto', 'telefon')
+    list_filter = ('is_premium',)
+    search_fields = ('uzivatel__email', 'uzivatel__username', 'telefon')
+    list_editable = ('premium_do',)
+
+    def uzivatel_link(self, obj):
+        return obj.uzivatel.username
+    uzivatel_link.short_description = 'Uživatel'
+
+    def premium_status(self, obj):
+        if obj.is_premium:
+            return format_html('<b style="color: #c5a059;">👑 ALFA</b>')
+        return "Běžný"
+    premium_status.short_description = 'Status'

@@ -1,148 +1,151 @@
 {% extends 'home/base.html' %}
-{% load crispy_forms_tags %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
-      rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
-    :root {
-        --t-gold: #c5a059;
-        --t-brown: #3e2723;
-        --t-bg: #fdfaf4;
-    }
+    :root { --t-gold: #c5a059; --t-brown: #3e2723; --t-bg: #fdfaf4; --t-card-bg: #ffffff; }
     body { background-color: var(--t-bg); font-family: 'Plus Jakarta Sans', sans-serif; color: var(--t-brown); }
-
-    .add-dog-card {
-        max-width: 850px; margin: 30px auto;
-        background: white; border-radius: 35px;
-        padding: 40px; border: 1px solid rgba(197, 160, 89, 0.2);
-        box-shadow: 0 15px 40px rgba(0,0,0,0.05);
-    }
-
-    .section-divider {
-        margin: 30px 0 20px 0; border-top: 1px solid #eee; padding-top: 20px;
-    }
-
-    .section-title {
-        color: var(--t-gold); font-weight: 800; font-size: 0.75rem;
-        text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px;
-        display: flex; align-items: center; gap: 10px;
-    }
-    .section-title::after { content: ""; flex: 1; height: 1px; background: #eee; }
-
-    .btn-save-dog {
-        background: var(--t-brown); color: white; border: 2px solid var(--t-gold);
-        padding: 18px; border-radius: 20px; font-weight: 800;
-        transition: 0.3s; width: 100%; margin-top: 30px;
-        text-transform: uppercase; letter-spacing: 1px;
-    }
-    .btn-save-dog:hover { background: var(--t-gold); transform: translateY(-2px); color: white; }
-
-    /* Stylování Crispy polí */
-    .form-control, .form-select {
-        border-radius: 15px !important; padding: 12px !important;
-        border: 1px solid #eee !important; background: #fafafa !important;
-        transition: 0.3s;
-    }
-    .form-control:focus { border-color: var(--t-gold) !important; box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.1) !important; background: #fff !important; }
-
-    .help-text { font-size: 0.75rem; color: #999; margin-top: 4px; }
-    .alert-premium { background: #fff9eb; border: 1px solid #ffeeba; border-radius: 15px; padding: 15px; }
+    .form-container { max-width: 900px; margin: 40px auto; padding: 0 15px; }
+    .edit-card { position: relative; background: var(--t-card-bg); border-radius: 25px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid rgba(197, 160, 89, 0.1); overflow: hidden; }
+    .section-title { font-size: 1.1rem; font-weight: 800; color: var(--t-brown); margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    .label-gold { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--t-gold); display: block; margin-bottom: 5px; }
+    .input-clean { width: 100%; border: 1px solid #eee; border-radius: 12px; padding: 12px 15px; font-size: 0.95rem; transition: 0.3s; background: #fff; }
+    .btn-save-main { background: var(--t-brown); color: white; border: none; padding: 18px; border-radius: 20px; font-weight: 800; transition: 0.3s; cursor: pointer; border: 2px solid var(--t-gold); width: 100%; margin-top: 20px; }
 </style>
 
-<div class="container py-2">
-    <div class="add-dog-card">
-        <div class="text-center mb-5">
-            <div class="d-inline-flex align-items-center justify-content-center mb-3"
-                 style="width: 70px; height: 70px; background: rgba(197, 160, 89, 0.1); border-radius: 25px; color: var(--t-gold);">
-                <i class="fas fa-paw fa-2x"></i>
+<div class="form-container">
+    <div class="text-center mb-5">
+        <h2 class="fw-800 m-0">Nový profil pejska</h2>
+        <p class="text-muted">Všechny údaje pro digitální vizitku</p>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="edit-card">
+            <h5 class="section-title"><i class="fas fa-dog me-2"></i>Základní informace</h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="label-gold">Jméno psa *</label>
+                    <input type="text" name="jmeno" class="input-clean" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="label-gold">Rasa *</label>
+                    <input type="text" name="rasa" class="input-clean" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="label-gold">Datum narozeni</label>
+                    <input type="date" name="datum_narozeni" class="input-clean">
+                </div>
+                <div class="col-md-6">
+                    <label class="label-gold">Číslo čipu</label>
+                    <input type="text" name="cip" class="input-clean">
+                </div>
+                <div class="col-md-12">
+                    <label class="label-gold">Profilová fotografie</label>
+                    <input type="file" name="fotka" class="input-clean">
+                </div>
             </div>
-            <h2 class="fw-800" style="color: var(--t-brown);">Nový hrdina</h2>
-            <p class="text-muted small">Zadejte údaje vašeho parťáka. Systém mu po uložení automaticky vytvoří unikátní
-                QR kód pro digitální pas.</p>
         </div>
 
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-
-            {% if form.errors %}
-            <div class="alert alert-danger rounded-4 border-0 shadow-sm mb-4">
-                <h6 class="fw-bold"><i class="fas fa-exclamation-circle me-2"></i>Chyba ve formuláři:</h6>
-                <small>{{ form.errors }}</small>
-            </div>
-            {% endif %}
-
-            <div class="section-title">Základní informace</div>
+        <div class="edit-card">
+            <h5 class="section-title"><i class="fas fa-heartbeat me-2"></i>Zdravotní termíny a prevence</h5>
             <div class="row g-3">
-                <div class="col-md-6">{{ form.jmeno|as_crispy_field }}</div>
-                <div class="col-md-6">{{ form.rasa|as_crispy_field }}</div>
                 <div class="col-md-6">
-                    {{ form.datum_narozeni|as_crispy_field }}
+                    <label class="label-gold">Poslední očkování</label>
+                    <input type="date" name="posledni_ockovani" id="id_ocko_last" class="input-clean">
                 </div>
-                <div class="col-md-6">{{ form.cip|as_crispy_field }}</div>
-            </div>
-
-            <div class="section-divider"></div>
-            <div class="section-title">Zdravotní prevence</div>
-            <div class="row g-3">
-                <div class="col-md-4">{{ form.posledni_ockovani|as_crispy_field }}</div>
-                <div class="col-md-4">{{ form.posledni_odcerveni|as_crispy_field }}</div>
-                <div class="col-md-4">{{ form.posledni_klistata|as_crispy_field }}</div>
-                <div class="col-12">
-                    <div class="alert-premium">
-                        <div class="d-flex gap-3 align-items-start">
-                            <i class="fas fa-shield-virus text-warning mt-1"></i>
-                            <div>
-                                <small class="fw-bold d-block mb-1 text-dark">Délka ochrany proti parazitům</small>
-                                <small class="text-muted">Zadejte počet dní, po kterých ochrana vyprší. Web vás pak včas
-                                    upozorní na novou aplikaci.</small>
-                                <div class="mt-2">{{ form.typ_ochrany_klistata|as_crispy_field }}</div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="col-md-6">
+                    <label class="label-gold">Příští očkování</label>
+                    <input type="date" name="pristi_ockovani" id="id_ocko_next" class="input-clean">
+                </div>
+                <div class="col-md-6">
+                    <label class="label-gold">Poslední odčervení</label>
+                    <input type="date" name="posledni_odcerveni" id="id_odcerv_last" class="input-clean">
+                </div>
+                <div class="col-md-6">
+                    <label class="label-gold">Příští odčervení</label>
+                    <input type="date" name="pristi_odcerveni" id="id_odcerv_next" class="input-clean">
+                </div>
+                <div class="col-md-12">
+                     <label class="label-gold">Ochrana proti klíšťatům (Typ a datum)</label>
+                     <input type="text" name="typ_ochrany_klistata" class="input-clean" placeholder="Obojek / Pipeta - Datum">
                 </div>
             </div>
+        </div>
 
-            <div class="section-divider"></div>
-            <div class="section-title">Zdravotní výsledky & Rodokmen</div>
+        <div class="edit-card">
+            <h5 class="section-title"><i class="fas fa-certificate me-2"></i>Chovnost a původ</h5>
             <div class="row g-3">
-                <div class="col-md-6">{{ form.rtg_hd|as_crispy_field }}</div>
-                <div class="col-md-6">{{ form.rtg_ed|as_crispy_field }}</div>
-                <div class="col-12">{{ form.zdravotni_testy|as_crispy_field }}</div>
+                <div class="col-md-6">
+                    <label class="label-gold">Bonitace</label>
+                    <input type="text" name="bonitace" class="input-clean" placeholder="Kód bonitace">
+                </div>
+                <div class="col-md-6">
+                    <label class="label-gold">Zdravotní testy</label>
+                    <input type="text" name="zdravotni_testy" class="input-clean" placeholder="Locus, PRA, atd.">
+                </div>
+                <div class="col-md-6">
+                    <label class="label-gold">Otec (manuálně)</label>
+                    <input type="text" name="otec_manualni" class="input-clean">
+                </div>
+                <div class="col-md-6">
+                    <label class="label-gold">Matka (manuálně)</label>
+                    <input type="text" name="matka_manualni" class="input-clean">
+                </div>
+                <div class="col-md-6">
+                    <label class="label-gold">Chovná stanice</label>
+                    <input type="text" name="chovna_stanice" class="input-clean">
+                </div>
+                <div class="col-md-2">
+                    <label class="label-gold">RTG HD</label>
+                    <input type="text" name="rtg_hd" class="input-clean">
+                </div>
+                <div class="col-md-2">
+                    <label class="label-gold">RTG ED</label>
+                    <input type="text" name="rtg_ed" class="input-clean">
+                </div>
+                <div class="col-md-2">
+                    <label class="label-gold">RTG Páteř</label>
+                    <input type="text" name="rtg_pater" class="input-clean">
+                </div>
+            </div>
+        </div>
 
-                <div class="col-md-6">{{ form.otec_manualni|as_crispy_field }}</div>
-                <div class="col-md-6">{{ form.matka_manualni|as_crispy_field }}</div>
-                <div class="col-12">{{ form.genetika_dna|as_crispy_field }}</div>
-            </div>
-            <div class="section-divider"></div>
-            <div class="section-title">Profilová fotografie</div>
-            <div class="p-4 rounded-4 text-center" style="background: #fafafa; border: 2px dashed #eee;">
-                <i class="fas fa-image fa-2x mb-2 text-muted opacity-50"></i>
-                {{ form.fotka|as_crispy_field }}
-                <p class="small text-muted mb-0">Nahrajte nejhezčí fotku vašeho hrdiny.</p>
-            </div>
-            <div class="section-divider"></div>
-            <div class="section-title">Video hrdiny</div>
-            <div class="p-4 rounded-4 text-center" style="background: #fafafa; border: 2px dashed #eee;">
-                <i class="fas fa-video fa-2x mb-2 text-muted opacity-50"></i>
-                {{ form.video|as_crispy_field }}
-                <p class="small text-muted mb-0">Nahrajte krátké video vašeho parťáka (volitelné).</p>
-            </div>
-
-            <button type="submit" class="btn-save-dog shadow">
-                Uložit a vygenerovat QR kód
-            </button>
-        </form>
-    </div>
+        <button type="submit" class="btn-save-main shadow mb-5">
+            <i class="fas fa-plus-circle me-2"></i> ZAREGISTROVAT PEJSKA
+        </button>
+    </form>
 </div>
 
 <script>
-    // Opravené ID podle tvého modelu
-    const dateField = document.getElementById('id_datum_narozeni');
-    if (dateField) {
-        dateField.placeholder = 'dd.mm.rrrr';
+document.addEventListener('DOMContentLoaded', function() {
+    const ockoLast = document.getElementById('id_ocko_last');
+    const ockoNext = document.getElementById('id_ocko_next');
+    const odcervLast = document.getElementById('id_odcerv_last');
+    const odcervNext = document.getElementById('id_odcerv_next');
+
+    if(ockoLast) {
+        ockoLast.addEventListener('change', function() {
+            if (this.value) {
+                let date = new Date(this.value);
+                date.setFullYear(date.getFullYear() + 1);
+                ockoNext.value = date.toISOString().split('T')[0];
+            }
+        });
     }
+
+    if(odcervLast) {
+        odcervLast.addEventListener('change', function() {
+            if (this.value) {
+                let date = new Date(this.value);
+                date.setMonth(date.getMonth() + 3);
+                odcervNext.value = date.toISOString().split('T')[0];
+            }
+        });
+    }
+});
 </script>
 {% endblock %}

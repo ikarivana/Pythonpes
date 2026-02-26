@@ -1,0 +1,95 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<style>
+    /* Používáme tvoji barvu a styl z indexu */
+    .success-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+
+    .success-card {
+        background: #ffffff;
+        border-radius: 25px;
+        padding: 50px 30px;
+        text-align: center;
+        box-shadow: 0 15px 35px rgba(62, 39, 35, 0.1);
+        border: 1px solid rgba(197, 160, 89, 0.2);
+    }
+
+    .success-icon {
+        width: 80px;
+        height: 80px;
+        background: #fffdf5;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 25px;
+        font-size: 2.5rem;
+        border: 2px solid #c5a059;
+        box-shadow: 0 5px 15px rgba(197, 160, 89, 0.2);
+    }
+
+    .success-card h2 {
+        font-family: 'Playfair Display', serif;
+        color: #2d1b19;
+        font-size: 2.4rem;
+        margin-bottom: 15px;
+    }
+
+    .success-card p {
+        color: #8d7d77;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 35px;
+    }
+
+    .btn-finish {
+        background: #c5a059;
+        color: white !important;
+        font-weight: 700;
+        padding: 15px 35px;
+        border-radius: 15px;
+        text-decoration: none !important;
+        transition: 0.3s;
+        display: inline-block;
+        box-shadow: 0 10px 20px rgba(197, 160, 89, 0.2);
+    }
+
+    .btn-finish:hover {
+        background: #3e2723;
+        transform: translateY(-3px);
+    }
+
+    /* Dekorativní tlapky na pozadí */
+    .paw-bg {
+        position: absolute;
+        opacity: 0.03;
+        font-size: 5rem;
+        z-index: -1;
+    }
+</style>
+
+<div class="success-container">
+    <div class="success-card position-relative overflow-hidden">
+        <i class="fas fa-paw paw-bg" style="top: 10%; left: 5%; transform: rotate(-15deg);"></i>
+        <i class="fas fa-paw paw-bg" style="bottom: 10%; right: 5%; transform: rotate(20deg);"></i>
+
+        <div class="success-icon">
+            <i class="fas fa-crown" style="color: #c5a059;"></i>
+        </div>
+
+        <h2>Vítejte v ALFA smečce!</h2>
+        <p>
+            Platba proběhla v pořádku. Váš profil byl úspěšně povýšen. <br>
+            Nyní u vašeho jména svítí korunka a máte přístup ke všem prémiovým funkcím.
+        </p>
+
+        <a href="{% url 'profil' %}" class="btn-finish">
+            <i class="fas fa-arrow-left me-2"></i> ZPĚT DO MÉHO DENÍKU
+        </a>
+    </div>
+</div>
+{% endblock %}

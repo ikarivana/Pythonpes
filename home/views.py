@@ -47,48 +47,39 @@ def index(request):
 
 @csrf_exempt
 def simpleshop_webhook(request):
-    """
-    Tato funkce čeká na 'pípnutí' ze SimpleShopu.
-    """
     if request.method == 'POST':
         try:
-            # SimpleShop posílá data o objednávce
-            data = json.loads(request.body)
-
-            # 1. Získáme e-mail zákazníka a typ události
-            email = data.get('customer', {}).get('email')
-            event = data.get('event')  # Očekáváme 'invoice.paid'
+            # Zkusíme nejdřív JSON, pokud selže, vezmeme to z POST (formuláře)
+            try:
+                data = json.loads(request.body)
+                email = data.get('customer', {}).get('email')
+                event = data.get('event')
+            except:
+                # Tohle SimpleShop používá nejčastěji
+                email = request.POST.get('customer_email') or request.POST.get('email')
+                event = request.POST.get('event')
 
             # Pokud je faktura zaplacená, jdeme do akce
             if event == 'invoice.paid' and email:
-                try:
-                    # Najdeme uživatele podle e-mailu
-                    user = User.objects.get(email=email)
+                user = User.objects.get(email=email)
+                profil = user.profil  # related_name='profil'
 
-                    # Máš v modelu: related_name='profil'
-                    profil = user.profil
+                profil.is_premium = True
+                profil.premium_do = date.today() + timedelta(days=365)
+                profil.save()
 
-                    # AKTIVACE PREMIUM
-                    profil.is_premium = True
-                    # Nastavíme platnost na 1 rok
-                    profil.premium_do = date.today() + timedelta(days=365)
-                    profil.save()
-
-                    print(f"Úspěch: Uživatel {email} je nyní ALFA!")
-                    return HttpResponse(status=200)
-
-                except User.DoesNotExist:
-                    print(f"Webhook: E-mail {email} u nás nemá účet.")
-                    # Vrátíme 200, aby SimpleShop neházel chybu,
-                    # ale v logu to uvidíme.
-                    return HttpResponse(status=200)
+                print(f"✅ Úspěch: Uživatel {email} je nyní ALFA!")
+                return HttpResponse("OK", status=200)
 
         except Exception as e:
-            print(f"Chyba Webhooku: {e}")
-            return HttpResponse(status=400)
+            print(f"⚠️ Chyba Webhooku: {e}")
+            return HttpResponse(status=200)  # Lepší vrátit 200, ať SimpleShop nezkouší zbytečně znovu
 
     return HttpResponse("Metoda není povolena", status=405)
 
+@login_required
+def dekujeme_za_nakup(request):
+    return render(request, 'home/dekujeme.html')
 
 # --- 2. BAZAR (INZERCE) ---
 def seznam_inzeratu(request):

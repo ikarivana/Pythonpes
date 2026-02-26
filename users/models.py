@@ -71,21 +71,37 @@ class Pes(models.Model):
     def vek(self):
         if self.datum_narozeni:
             today = date.today()
-            # Výpočet: letošní rok - rok narození
-            # A odečteme 1, pokud ještě v tomto roce neměl narozeniny
-            age = today.year - self.datum_narozeni.year - (
+            # Rozdíl v letech
+            years = today.year - self.datum_narozeni.year - (
                     (today.month, today.day) < (self.datum_narozeni.month, self.datum_narozeni.day)
             )
 
-            # Formátování pro češtinu
-            if age == 1:
-                return f"{age} rok"
-            elif 1 < age < 5:
-                return f"{age} roky"
-            else:
-                return f"{age} let"
-        return "Nezadáno"
+            # Pokud je pejskovi 1 a více let
+            if years >= 1:
+                if years == 1:
+                    return f"{years} rok"
+                elif 1 < years < 5:
+                    return f"{years} roky"
+                else:
+                    return f"{years} let"
 
+            # Pokud je pejskovi méně než rok, počítáme měsíce
+            else:
+                months = (today.year - self.datum_narozeni.year) * 12 + today.month - self.datum_narozeni.month
+                if today.day < self.datum_narozeni.day:
+                    months -= 1
+
+                # Zamezíme záporným měsícům u čerstvě narozených
+                months = max(0, months)
+
+                if months == 1:
+                    return f"{months} měsíc"
+                elif 1 < months < 5:
+                    return f"{months} měsíce"
+                else:
+                    return f"{months} měsíců"
+
+        return "Nezadáno"
     @property
     def pristi_ockovani(self):
         """Vypočítá datum za 1 rok od posledního očkování"""
