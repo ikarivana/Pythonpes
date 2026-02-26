@@ -1,7 +1,9 @@
+from datetime import timedelta, date
+
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Pes, Ockovani, Prispevek, Plemeno, ProfilMajitele
+from .models import Pes, Ockovani, Prispevek, Plemeno, ProfilMajitele, PromoKod
 from django import forms
 from .models import Pes
 
@@ -54,14 +56,25 @@ class PesForm(forms.ModelForm):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
 
+        # Hromadné přidání CSS tříd
         for name, field in self.fields.items():
             field.widget.attrs.update({'class': 'form-control custom-brown-input'})
 
-     # Omezení pro FREE uživatele
-        if self.request and not (self.request.user.is_staff or self.request.user.profil.ma_aktivni_premium):
-            self.fields['rtg_hd'].help_text = "🔒 Pouze pro ALFA pány"
-            self.fields['rtg_ed'].help_text = "🔒 Pouze pro ALFA pány"
-            self.fields['genetika_dna'].help_text = "🔒 Pouze pro ALFA pány"
+        # Omezení pro FREE uživatele (kontrola is_premium)
+        if self.request and not (self.request.user.is_staff or self.request.user.profil.is_premium):
+            # Seznam polí, kam NECHCEME nechat uživatele psát
+            premium_pole = ['rtg_hd', 'rtg_ed', 'genetika_dna', 'zdravotni_testy', 'rtg_pater']
+
+            for field_name in premium_pole:
+                if field_name in self.fields:
+                    # 1. Zamezí zápisu a výběru (políčko zešedne)
+                    self.fields[field_name].disabled = True
+
+                    # 2. Přidá textovou nápovědu pod políčko
+                    self.fields[field_name].help_text = "🔒 Pouze pro ALFA pány"
+
+                    # 3. Přidá informaci přímo do vnitřku pole pro lepší UX
+                    self.fields[field_name].widget.attrs['placeholder'] = "Dostupné v Premium verzi"
 
 # --- 2. FORMULÁŘE PRO UŽIVATELE ---
 

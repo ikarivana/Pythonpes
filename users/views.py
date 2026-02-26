@@ -5,7 +5,7 @@ from datetime import timedelta, timezone
 from django.core.files import File
 
 import qrcode
-from PIL import Image, ImageOps
+from PIL import Image
 from pillow_heif import register_heif_opener
 
 from django.conf import settings
@@ -174,7 +174,7 @@ def smazat_psa(request, pk):
         jmeno_psa = pes.jmeno
         pes.delete()
         messages.success(request, f"Pejsek {jmeno_psa} byl úspěšně smazán.")
-        return redirect('muj_profil')
+        return redirect('profil')
 
     return render(request, 'users/smazat_psa_potvrzeni.html', {'pes': pes})
 
@@ -510,8 +510,8 @@ def register(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            # TADY: Použij přesně ten název, který máš v urls.py (pravděpodobně 'muj_profil')
-            return redirect('muj_profil')
+            # Změna z 'muj_profil' na 'profil' podle vašeho urls.py
+            return redirect('profil')
     else:
         form = ExtendedRegistrationForm()
     return render(request, 'users/register.html', {'form': form})
@@ -524,7 +524,7 @@ def upravit_profil(request):
             form.save()
             # OPRAVA: Směrujeme na name='profil' z tvého urls.py
             messages.success(request, "Profil byl úspěšně upraven.")
-            return redirect('profil')
+            return render(request, 'users/upravit_profil.html', {'form': form})
     else:
         form = UserUpdateForm(instance=request.user)
     return render(request, 'users/profil.html', {'form': form}) # Upravujeme přímo v profilu
@@ -575,7 +575,8 @@ def smazat_prispevek(request, pk):
         prispevek.delete()
         messages.success(request, "Příspěvek byl smazán.")
         return redirect('zed_plemene', slug=slug)
-    slug = prispevek.plemeno.slug if prispevek.plemeno else prispevek.sekce_slug
+    # TADY CHYBÍ NÁVRAT (např. redirect zpět, pokud uživatel jen klikne na URL bez POSTu)
+    return redirect('zed_plemene', slug=slug)
 
 @login_required
 def pridej_like(request, post_id):
@@ -667,16 +668,3 @@ def smazat_komentar(request, pk):
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
-@login_required
-def upravit_profil(request):
-    if request.method == 'POST':
-        form = UserUpdateForm(request.POST, instance=request.user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Váš profil byl úspěšně aktualizován.")
-            # OPRAVA: Změň 'profil_uzivatele' na 'profil'
-            return redirect('profil')
-    else:
-        form = UserUpdateForm(instance=request.user)
-
-    return render(request, 'users/upravit_profil.html', {'form': form})
