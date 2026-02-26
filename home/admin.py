@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Sluzba, KontaktniZprava, ProfilMajitele # Všechny importy z jednoho místa
+from .models import Sluzba, KontaktniZprava
+from users.models import ProfilMajitele
 
 @admin.register(Sluzba)
 class SluzbaAdmin(admin.ModelAdmin):
