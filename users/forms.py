@@ -47,7 +47,7 @@ class PesForm(forms.ModelForm):
             'posledni_ockovani': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'posledni_odcerveni': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'posledni_klistata': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'typ_ochrany_klistata': forms.NumberInput(attrs={'inputmode': 'numeric'}),
+            'typ_ochrany_klistata': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Obojek / Pipeta'}),
             'popis': forms.Textarea(attrs={'rows': 3}),
             'zdravotni_testy': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Např. Lokus S, DM...'}),
         }

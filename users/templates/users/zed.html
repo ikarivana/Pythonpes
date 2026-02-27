@@ -62,6 +62,16 @@
         cursor: pointer;
     }
 
+    /* Styl pro zpětný odkaz a šipku */
+.back-link {                /* Ujistěte se, že odkaz má tuto třídu, nebo použijte příslušný selektor */
+    color: #c5a059 !important; /* Hnědozlatá barva textu */
+    text-decoration: none;
+    font-weight: 600;
+}
+.back-link i {
+    color: #c5a059 !important; /* Hnědozlatá barva šipky */
+}
+
     /* PŘÍSPĚVEK */
     .post-card { background: white; border-radius: 24px; margin-bottom: 35px; box-shadow: 0 8px 25px rgba(0,0,0,0.03); overflow: hidden; border: 1px solid rgba(234,221,207,0.4); }
     .post-header { padding: 15px 20px; border-bottom: 1px solid #f9f1e7; }
@@ -73,8 +83,8 @@
 </style>
 
 <div class="feed-container" style="padding-bottom: 0;">
-    <a href="{% url 'seznam_zdi' %}" class="btn-back-custom">
-        <i class="fas fa-arrow-left"></i> Zpět na výběr zdi
+    <a href="{% url 'seznam_zdi' %}" class="back-link">
+        <i class="fas fa-arrow-left"></i> Zpět na sociální síť
     </a>
 </div>
 
@@ -95,12 +105,14 @@
                     <label class="mini-upload-btn" id="l-photo">
                         <div class="icon-box-gold"><i class="fas fa-images"></i></div>
                         <span>Foto</span>
-                        <input type="file" name="obrazek" accept="image/*" style="display: none;" onchange="updateUI(this, 'l-photo')">
+                        <input type="file" name="obrazek" accept="image/*" style="display: none;"
+                               onchange="updateUI(this, 'l-photo')">
                     </label>
                     <label class="mini-upload-btn" id="l-video">
                         <div class="icon-box-gold"><i class="fas fa-video"></i></div>
                         <span>Video</span>
-                        <input type="file" name="video" accept="video/*" style="display: none;" onchange="updateUI(this, 'l-video')">
+                        <input type="file" name="video" accept="video/*" style="display: none;"
+                               onchange="updateUI(this, 'l-video')">
                     </label>
                 </div>
                 <button type="submit" name="btn_prispevek" class="btn-gold-action">Publikovat</button>
@@ -160,7 +172,8 @@
                 {% csrf_token %}
                 <input type="hidden" name="prispevek_id" value="{{ post.id }}">
                 <div class="input-group">
-                    <input type="text" name="text_komentare" class="form-control border-0" placeholder="Napište komentář..." required>
+                    <input type="text" name="text_komentare" class="form-control border-0"
+                           placeholder="Napište komentář..." required>
                     <button class="btn btn-gold-action" name="btn_komentar" type="submit">Poslat</button>
                 </div>
             </form>

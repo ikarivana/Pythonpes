@@ -1,6 +1,5 @@
 import json
 from datetime import timedelta, date
-
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
@@ -8,15 +7,11 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.utils import timezone
 from django.contrib import messages
-from django.core.mail import send_mail
-from django.views.decorators.csrf import csrf_exempt
 
 # Importy tvých modelů a forem
 from .models import Sluzba, KontaktniZprava
 from .forms import SluzbaForm, KontaktForm
-from inzerce.models import Inzerat, InzeratFoto
-from inzerce.forms import InzeratForm
-from users.models import Plemeno, Prispevek, Pes, ProfilMajitele
+from users.models import Prispevek, Pes, ProfilMajitele
 
 
 # --- 1. HLAVNÍ STRÁNKA (OPRAVENÁ) ---
@@ -45,111 +40,80 @@ def index(request):
     })
 
 
+import json
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+from django.contrib.auth.models import User
+from datetime import date, timedelta
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
+
+# from .models import Profil # Importuj svůj model profilu
+
+import json
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+from django.contrib.auth.models import User
+from datetime import date, timedelta
+from django.shortcuts import render
+
+
+# importuj svůj model profilu, např.: from users.models import Profile
+
 @csrf_exempt
 def simpleshop_webhook(request):
+    """Webhook pro zpracování plateb ze Simpleshopu."""
     if request.method == 'POST':
         try:
-            # Zkusíme nejdřív JSON, pokud selže, vezmeme to z POST (formuláře)
+            # 1. Načtení dat ze Simpleshopu
             try:
                 data = json.loads(request.body)
                 email = data.get('customer', {}).get('email')
                 event = data.get('event')
+                product_id = data.get('product', {}).get('id')
             except:
-                # Tohle SimpleShop používá nejčastěji
                 email = request.POST.get('customer_email') or request.POST.get('email')
                 event = request.POST.get('event')
+                product_id = request.POST.get('product_id')
 
-            # Pokud je faktura zaplacená, jdeme do akce
+            # 2. Zpracování úspěšné platby
             if event == 'invoice.paid' and email:
-                user = User.objects.get(email=email)
-                profil = user.profil  # related_name='profil'
+                try:
+                    user = User.objects.get(email=email)
+                    profil = user.profil  # Předpokládám, že máš profil přes related_name='profil'
 
-                profil.is_premium = True
-                profil.premium_do = date.today() + timedelta(days=365)
-                profil.save()
+                    # 3. ROZLIŠENÍ PLÁNŮ PODLE ID PRODUKTU
+                    # --- TADY ZMĚŇ ID NA TVOJE SKUTEČNÁ ID ZE SIMPLESHOPU ---
+                    if product_id == '142677':
+                        profil.is_premium = True
+                        profil.premium_do = date.today() + timedelta(days=30)  # Příklad 30 dní
+                        print(f"✅ Aktivován Chovatel pro: {email}")
 
-                print(f"✅ Úspěch: Uživatel {email} je nyní ALFA!")
-                return HttpResponse("OK", status=200)
+                    elif product_id == '142680':
+                        profil.is_premium = True
+                        profil.premium_do = date.today() + timedelta(days=365)
+                        print(f"✅ Aktivován Profi pro: {email}")
+
+                    profil.save()
+                    return HttpResponse("OK", status=200)
+
+                except User.DoesNotExist:
+                    print(f"⚠️ Uživatel s e-mailem {email} nenalezen.")
+                    return HttpResponse("User not found", status=404)
+
+            return HttpResponse("Event ignored", status=200)
 
         except Exception as e:
             print(f"⚠️ Chyba Webhooku: {e}")
-            return HttpResponse(status=200)  # Lepší vrátit 200, ať SimpleShop nezkouší zbytečně znovu
+            return HttpResponse("Error", status=500)
 
-    return HttpResponse("Metoda není povolena", status=405)
+    return HttpResponse("Method not allowed", status=405)
 
 @login_required
 def dekujeme_za_nakup(request):
+    """Stránka po úspěšném nákupu."""
     return render(request, 'home/dekujeme.html')
-
-# --- 2. BAZAR (INZERCE) ---
-def seznam_inzeratu(request):
-    kraj_filtr = request.GET.get('kraj')
-    typ_filtr = request.GET.get('typ')
-    inzeraty = Inzerat.objects.all().order_by('-vytvoreno')
-
-    if kraj_filtr:
-        inzeraty = inzeraty.filter(kraj=kraj_filtr)
-    if typ_filtr:
-        inzeraty = inzeraty.filter(pohlavi=typ_filtr)
-
-    context = {
-        'inzeraty': inzeraty,
-        'kraje': Inzerat.KRAJE_CHOICES,
-    }
-    return render(request, 'inzerce/seznam_inzeratu.html', context)
-
-
-def detail_inzeratu(request, pk):
-    inzerat = get_object_or_404(Inzerat, pk=pk)
-    galerie = InzeratFoto.objects.filter(inzerat=inzerat)
-    return render(request, 'inzerce/detail_inzeratu.html', {
-        'inzerat': inzerat,
-        'galerie': galerie
-    })
-
-
-@login_required
-def pridat_inzerat(request):
-    if request.method == 'POST':
-        form = InzeratForm(request.POST, request.FILES)
-        if form.is_valid():
-            novy_inzerat = form.save(commit=False)
-            novy_inzerat.autor = request.user
-            novy_inzerat.save()
-
-            extra_fotky = request.FILES.getlist('galerie_fotky')
-            for f in extra_fotky:
-                InzeratFoto.objects.create(inzerat=novy_inzerat, foto=f)
-
-            messages.success(request, "Inzerát byl úspěšně přidán.")
-            return redirect('seznam_inzeratu')
-    else:
-        form = InzeratForm()
-    return render(request, 'inzerce/pridat_inzerat.html', {'form': form})
-
-
-@login_required
-def upravit_inzerat(request, pk):
-    inzerat = get_object_or_404(Inzerat, pk=pk, autor=request.user)
-    if request.method == 'POST':
-        form = InzeratForm(request.POST, request.FILES, instance=inzerat)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Inzerát byl upraven.")
-            return redirect('detail_inzeratu', pk=inzerat.pk)
-    else:
-        form = InzeratForm(instance=inzerat)
-    return render(request, 'inzerce/pridat_inzerat.html', {'form': form, 'editace': True})
-
-
-@login_required
-def smazat_inzerat(request, pk):
-    inzerat = get_object_or_404(Inzerat, pk=pk, autor=request.user)
-    if request.method == 'POST':
-        inzerat.delete()
-        messages.success(request, "Inzerát byl smazán.")
-        return redirect('seznam_inzeratu')
-    return render(request, 'inzerce/smazat_confirm.html', {'inzerat': inzerat})
 
 
 # --- 3. MAPA SLUŽEB ---
@@ -272,7 +236,15 @@ def kontakt(request):
     return render(request, 'home/kontakt.html', {'form': KontaktForm()})
 
 
-def podminky(request): return render(request, 'home/podminky.html')
+def podminky(request):
+    # --- TADY NASTAV SVOJE INFORMACE ---
+    moje_info = {
+        'jmeno': 'Ivana Elšíková',  # Tvoje jméno nebo název firmy
+        'ico': '12345678',          # Tvoje IČO
+        'adresa': 'Ulice 123, Město', # Tvoje adresa
+    }
+    # ------------------------------------
+    return render(request, 'home/podminky.html', {'kontaktni_info': moje_info})
 
 
 def cookies(request): return render(request, 'home/cookies.html')

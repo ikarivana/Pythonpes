@@ -2,7 +2,6 @@ import os
 import json
 import io
 from datetime import timedelta, timezone
-from django.core.files import File
 
 import qrcode
 from PIL import Image
@@ -454,23 +453,25 @@ def link_callback(uri, rel):
 
 @login_required
 def export_pes_pdf(request, pes_id):
+    # BEZPEČNOST: Kontrola, že pes patří přihlášenému uživateli
     pes = get_object_or_404(Pes, id=pes_id, majitel=request.user.profil)
+
+    # Získání profilu uživatele pro kontrolu is_premium
+    profil = request.user.profil
 
     # Definice cesty k fontu
     font_path = os.path.join(settings.MEDIA_ROOT, 'fonts', 'DejaVuSans.ttf')
-
-    # Kontrola pro tebe do terminálu
-    print(f"--- CESTA K FONTU: {font_path} ---")
-    print(f"--- EXISTUJE SOUBOR?: {os.path.exists(font_path)} ---")
 
     # REGISTRACE: Název 'DejaVu Sans' musí být PŘESNĚ jako v HTML šabloně
     pdfmetrics.registerFont(TTFont('DejaVu Sans', font_path))
 
     template = get_template('users/pdf_sablona.html')
 
+    # PŘIDÁNO: 'profil': profil
     context = {
         'pes': pes,
-        'media_root': settings.MEDIA_ROOT, # Předáváme absolutní cestu pro link_callback
+        'profil': profil,
+        'media_root': settings.MEDIA_ROOT,
     }
 
     html = template.render(context)
@@ -488,6 +489,7 @@ def export_pes_pdf(request, pes_id):
         return HttpResponse(f'Chyba při generování PDF: {pisa_status.err}')
 
     return response
+
 
 # --- 5. SOCIÁLNÍ SÍŤ A OSTATNÍ ---
 

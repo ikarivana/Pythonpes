@@ -61,7 +61,7 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="label-gold">Jméno psa</label>
-                    <input type="text" name="jmeno" class="input-clean" value="{{ pes.jmeno }}">
+                    <input type="text" name="jmeno" class="input-clean" value="{{ pes.jmeno }}" required>
                 </div>
                 <div class="col-md-6">
                     <label class="label-gold">Rasa</label>
@@ -76,6 +76,12 @@
                     <label class="label-gold">Číslo čipu</label>
                     <input type="text" name="cip" class="input-clean" value="{{ pes.cip }}">
                 </div>
+
+                <div class="col-md-6">
+                    <label class="label-gold">Váha (kg)</label>
+                    <input type="number" name="vaha" class="input-clean" value="{{ pes.vaha }}" step="0.1">
+                </div>
+
                 <div class="col-md-12">
                     <label class="label-gold">Profilová fotka</label>
                     <input type="file" name="fotka" class="input-clean">
@@ -100,6 +106,31 @@
                     <label class="label-gold">Příští očkování (termín)</label>
                     <input type="date" name="pristi_ockovani" class="input-clean"
                            value="{{ pes.pristi_ockovani|date:'Y-m-d' }}">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="label-gold">Poslední odčervení</label>
+                    <input type="date" name="posledni_odcerveni" class="input-clean"
+                           value="{{ pes.posledni_odcerveni|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="label-gold">Příští odčervení</label>
+                    <input type="date" name="pristi_odcerveni" class="input-clean"
+                           value="{{ pes.pristi_odcerveni|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="label-gold">Ochrana proti klíšťatům</label>
+                    <input type="text" name="typ_ochrany_klistata" class="input-clean" value="{{ pes.typ_ochrany_klistata }}" placeholder="Např. obojek, tableta">
+                </div>
+                <div class="col-md-4">
+                    <label class="label-gold">Poslední aplikace</label>
+                    <input type="date" name="posledni_klistata" class="input-clean"
+                           value="{{ pes.posledni_klistata|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="label-gold">Příští aplikace</label>
+                    <input type="date" name="pristi_klistata" class="input-clean"
+                           value="{{ pes.pristi_klistata|date:'Y-m-d' }}">
                 </div>
             </div>
         </div>
@@ -126,15 +157,20 @@
                 </div>
                 <div class="col-md-4">
                     <label class="label-gold">Páteř / Jiné RTG</label>
-                    <input type="text" name="rtg_hd" class="input-clean" value="{{ pes.rtg_hd }}" {% if not user.profil.is_premium %} disabled {% endif %}>
+                    <input type="text" name="rtg_pater" class="input-clean" value="{{ pes.rtg_pater }}" {% if not user.profil.is_premium %} disabled {% endif %}>
                 </div>
                 <div class="col-md-6">
                     <label class="label-gold">Chovná stanice</label>
                     <input type="text" name="chovna_stanice" class="input-clean" value="{{ pes.chovna_stanice }}" {% if not user.profil.is_premium %} disabled {% endif %}>
                 </div>
-                <div class="col-md-6">
-                    <label class="label-gold">Otec / Matka (manuálně)</label>
-                    <input type="text" name="rodice_manualni" class="input-clean" value="{{ pes.otec_manualni }} / {{ pes.matka_manualni }}" placeholder="Otec / Matka" {% if not user.profil.is_premium %} disabled {% endif %}>
+
+                <div class="col-md-3">
+                    <label class="label-gold">Otec</label>
+                    <input type="text" name="otec_manualni" class="input-clean" value="{{ pes.otec_manualni }}" {% if not user.profil.is_premium %} disabled {% endif %}>
+                </div>
+                <div class="col-md-3">
+                    <label class="label-gold">Matka</label>
+                    <input type="text" name="matka_manualni" class="input-clean" value="{{ pes.matka_manualni }}" {% if not user.profil.is_premium %} disabled {% endif %}>
                 </div>
             </div>
         </div>

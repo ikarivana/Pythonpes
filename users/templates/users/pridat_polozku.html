@@ -1,6 +1,7 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
     :root {
         --bg-cream: #fdfaf5;
@@ -85,17 +86,34 @@
         background: linear-gradient(135deg, var(--gold-accent), var(--primary-brown));
     }
 
+    /* STYLING ZPĚTNÉHO ODKAZU SE ŠIPKOU */
     .back-link {
         color: var(--gold-accent);
         font-weight: 600;
         text-decoration: none;
         font-size: 0.9rem;
-        transition: 0.2s;
+        transition: all 0.3s;
+        padding: 10px 15px;
+        border-radius: 12px;
+        display: inline-block;
     }
 
     .back-link:hover {
-        color: var(--primary-brown);
-        text-decoration: underline;
+        color: white;
+        background-color: var(--primary-brown);
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(93, 64, 55, 0.2);
+    }
+
+    .back-link i {
+        color: var(--gold-accent);
+        margin-right: 5px;
+        transition: transform 0.3s;
+    }
+
+    .back-link:hover i {
+        color: white;
+        transform: translateX(-3px); /* Jemný pohyb šipky doleva při hoveru */
     }
 
     /* IKONA V KRUHU */
@@ -152,7 +170,7 @@
 
         <div class="mt-4">
             <a href="{% url 'seznam_zdi' %}" class="back-link">
-                <i class="fas fa-arrow-left me-1"></i> Zpět na seznam
+                <i class="fas fa-arrow-left"></i> Zpět na seznam
             </a>
         </div>
     </div>

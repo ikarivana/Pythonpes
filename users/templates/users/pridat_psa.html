@@ -43,9 +43,19 @@
                     <label class="label-gold">Číslo čipu</label>
                     <input type="text" name="cip" class="input-clean">
                 </div>
+
+                <div class="col-md-6">
+                    <label class="label-gold">Váha (kg)</label>
+                    <input type="number" name="vaha" class="input-clean" step="0.1">
+                </div>
+
                 <div class="col-md-12">
                     <label class="label-gold">Profilová fotografie</label>
                     <input type="file" name="fotka" class="input-clean">
+                </div>
+                <div class="col-12">
+                    <label class="label-gold">O mně / Příběh</label>
+                    <textarea name="popis" class="input-clean" style="height: 100px; resize: none;"></textarea>
                 </div>
             </div>
         </div>
@@ -69,9 +79,17 @@
                     <label class="label-gold">Příští odčervení</label>
                     <input type="date" name="pristi_odcerveni" id="id_odcerv_next" class="input-clean">
                 </div>
-                <div class="col-md-12">
-                     <label class="label-gold">Ochrana proti klíšťatům (Typ a datum)</label>
-                     <input type="text" name="typ_ochrany_klistata" class="input-clean" placeholder="Obojek / Pipeta - Datum">
+                <div class="col-md-6">
+                     <label class="label-gold">Ochrana proti klíšťatům (Typ)</label>
+                     <input type="text" name="typ_ochrany_klistata" class="input-clean" placeholder="Obojek / Pipeta">
+                </div>
+                <div class="col-md-3">
+                     <label class="label-gold">Poslední aplikace</label>
+                     <input type="date" name="posledni_klistata" class="input-clean">
+                </div>
+                <div class="col-md-3">
+                     <label class="label-gold">Příští aplikace</label>
+                     <input type="date" name="pristi_klistata" class="input-clean">
                 </div>
             </div>
         </div>

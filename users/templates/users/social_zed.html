@@ -7,6 +7,7 @@
         --text-dark: #4a3728;
         --light-tan: #fdfaf5;
         --card-border: #eaddcf;
+        --alfa-gold: #c5a059;
     }
 
     html { scroll-behavior: smooth; }
@@ -71,19 +72,30 @@
     }
     .breed-item:hover { background: var(--light-tan); border-color: var(--primary-brown); }
 
-    .btn-back {
-        display: inline-flex;
-        align-items: center;
+   .back-link {
+        color: var(--alfa-gold) !important;
         text-decoration: none;
-        color: var(--primary-brown);
         font-weight: 600;
-        margin-bottom: 20px;
+        transition: 0.2s;
+    }
+    .back-link i {
+        color: var(--alfa-gold) !important;
+        margin-right: 5px;
+    }
+    .back-link:hover {
+        color: var(--primary-brown) !important; /* Tmavší hnědá při najetí */
+        text-decoration: underline;
+    }
+    .back-link:hover i {
+        color: var(--primary-brown) !important;
     }
 </style>
 
 <div class="container mt-4">
-    <a href="{% url 'home' %}" class="btn-back">⬅ Zpět na hlavní stranu</a>
-
+    <a href="{% url 'home' %}" class="back-link">
+        <i class="fas fa-arrow-left"></i> Zpět na domovskou stránku
+    </a>
+    </div>
     <div class="text-center mb-5">
         <h1 class="fw-bold" style="color: var(--primary-brown);">🐾 Sociální síť</h1>
     </div>

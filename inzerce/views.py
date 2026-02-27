@@ -13,8 +13,8 @@ def seznam_inzeratu(request):
     typ_filtr = request.GET.get('typ')
     kategorie_filtr = request.GET.get('kategorie')
 
-    # 2. Základní QuerySet (seřazený primárně podle času)
-    inzeraty_queryset = Inzerat.objects.all().order_by('-vytvoreno')
+    # 2. Základní QuerySet (optimalizovaný pro načtení profilů)
+    inzeraty_queryset = Inzerat.objects.all().select_related('autor__profil').order_by('-vytvoreno')
 
     # 3. Aplikace filtrů
     if kraj_filtr:
@@ -35,6 +35,7 @@ def seznam_inzeratu(request):
     context = {
         'inzeraty': inzeraty_list,
         'kraje': Inzerat.KRAJE_CHOICES,
+        'kategorie_list': Inzerat.KATEGORIE_CHOICES,
     }
 
     return render(request, 'inzerce/seznam_inzeratu.html', context)

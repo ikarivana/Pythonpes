@@ -4,28 +4,18 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <style>
         /* KLÍČOVÉ PRO ČEŠTINU: Musíš nadefinovat cestu k souboru */
-    @font-face {
-        font-family: 'DejaVu Sans';
-        src: url("{{ media_root }}/fonts/DejaVuSans.ttf");
-    }
+        @font-face {
+            font-family: 'DejaVu Sans';
+            src: url("{{ media_root }}/fonts/DejaVuSans.ttf");
+        }
 
-    @page {
-        size: A4;
-        margin: 1cm;
-    }
-
-    /* Teď už toto pravidlo bude fungovat */
-    * {
-        font-family: 'DejaVu Sans', sans-serif !important;
-    }
-        /* Definice fontů pro xhtml2pdf */
         @page {
             size: A4;
             margin: 1cm;
         }
 
         * {
-            font-family: 'DejaVu Sans', sans-serif !important; /* Standardní font s podporou češtiny */
+            font-family: 'DejaVu Sans', sans-serif !important;
         }
 
         body {
@@ -93,8 +83,8 @@
             border-bottom: 1px solid #f0f0f0;
             font-size: 11px;
         }
-        .label { font-weight: bold; color: #8d7d77; }
-        .value { font-weight: bold; color: #3e2723; text-align: right; }
+        .label { font-weight: bold; color: #8d7d77; width: 50%; }
+        .value { font-weight: bold; color: #3e2723; text-align: right; width: 50%; }
 
         /* Rodokmen */
         .pedigree-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
@@ -126,6 +116,18 @@
             color: #8d7d77;
             border-top: 1px solid #eee;
             padding-top: 10px;
+        }
+
+        /* Styl pro zprávu o Premium verzi */
+        .premium-message {
+            text-align: center;
+            color: #c5a059;
+            font-style: italic;
+            padding: 15px;
+            border: 1px solid #e0d7ce;
+            background: #fffdf9;
+            font-size: 10px;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -159,70 +161,49 @@
         <td class="info-column">
             <div class="section-title">Základní a identifikační údaje</div>
             <div class="data-row">
-                <table width="100%">
-                    <tr>
-                        <td class="label">ČÍSLO ČIPU:</td>
-                        <td class="value">{{ pes.cip|default:"-" }}</td>
-                    </tr>
-                </table>
+                <table width="100%"><tr><td class="label">ČÍSLO ČIPU:</td><td class="value">{{ pes.cip|default:"-" }}</td></tr></table>
             </div>
             <div class="data-row">
-                <table width="100%">
-                    <tr>
-                        <td class="label">DATUM NAROZENÍ:</td>
-                        <td class="value">{{ pes.datum_narozeni|date:"d. m. Y"|default:"-" }}</td>
-                    </tr>
-                </table>
+                <table width="100%"><tr><td class="label">DATUM NAROZENÍ:</td><td class="value">{{ pes.datum_narozeni|date:"d. m. Y"|default:"-" }}</td></tr></table>
             </div>
             <div class="data-row">
-                <table width="100%">
-                    <tr>
-                        <td class="label">AKTUÁLNÍ VĚK:</td>
-                        <td class="value">{{ pes.vek }}</td>
-                    </tr>
-                </table>
+                <table width="100%"><tr><td class="label">AKTUÁLNÍ VĚK:</td><td class="value">{{ pes.vek }}</td></tr></table>
             </div>
+
+            {% if profil.is_premium %}
+            <div class="data-row">
+                <table width="100%"><tr><td class="label">VÁHA (KG):</td><td class="value">{{ pes.vaha|default:"-" }}</td></tr></table>
+            </div>
+            {% endif %}
 
             <div class="section-title">Zdravotní záznamy</div>
             <div class="data-row">
-                <table width="100%">
-                    <tr>
-                        <td class="label">RTG HD (DKK):</td>
-                        <td class="value">{{ pes.rtg_hd|default:"-" }}</td>
-                    </tr>
-                </table>
+                <table width="100%"><tr><td class="label">RTG HD (DKK):</td><td class="value">{{ pes.rtg_hd|default:"-" }}</td></tr></table>
             </div>
             <div class="data-row">
-                <table width="100%">
-                    <tr>
-                        <td class="label">RTG ED (DLK):</td>
-                        <td class="value">{{ pes.rtg_ed|default:"-" }}</td>
-                    </tr>
-                </table>
+                <table width="100%"><tr><td class="label">RTG ED (DLK):</td><td class="value">{{ pes.rtg_ed|default:"-" }}</td></tr></table>
+            </div>
+
+            <div class="data-row">
+                <table width="100%"><tr><td class="label">POSLEDNÍ ODČERVENÍ:</td><td class="value">{{ pes.posledni_odcerveni|date:"d. m. Y"|default:"-" }}</td></tr></table>
+            </div>
+            <div class="data-row">
+                <table width="100%"><tr><td class="label">OCHRANA PROTI KLÍŠŤATŮM:</td><td class="value">{{ pes.typ_ochrany_klistata|default:"-" }}</td></tr></table>
             </div>
 
             <div class="section-title">Důležité termíny</div>
             <div class="data-row">
-                <table width="100%">
-                    <tr>
-                        <td class="label">POSLEDNÍ OČKOVÁNÍ:</td>
-                        <td class="value">{{ pes.posledni_ockovani|date:"d. m. Y"|default:"-" }}</td>
-                    </tr>
-                </table>
+                <table width="100%"><tr><td class="label">POSLEDNÍ OČKOVÁNÍ:</td><td class="value">{{ pes.posledni_ockovani|date:"d. m. Y"|default:"-" }}</td></tr></table>
             </div>
             <div class="data-row">
-                <table width="100%">
-                    <tr>
-                        <td class="label">PŘÍŠTÍ TERMÍN:</td>
-                        <td class="value">{{ pes.pristi_ockovani|date:"d. m. Y"|default:"?" }}</td>
-                    </tr>
-                </table>
+                <table width="100%"><tr><td class="label">PŘÍŠTÍ TERMÍN:</td><td class="value">{{ pes.pristi_ockovani|date:"d. m. Y"|default:"?" }}</td></tr></table>
             </div>
         </td>
     </tr>
 </table>
 
 <div class="section-title">Rodokmen (Rodiče)</div>
+{% if profil.is_premium %}
 <table class="pedigree-table">
     <tr>
         <td width="50%">
@@ -235,6 +216,11 @@
         </td>
     </tr>
 </table>
+{% else %}
+<div class="premium-message">
+    Rodokmen je dostupný pouze v Premium verzi. Aktivujte si Premium na epes.online
+</div>
+{% endif %}
 
 <div class="section-title">O pejskovi / Poznámky majitele</div>
 <div class="description-box">
@@ -243,7 +229,7 @@
 
 <div class="footer">
     Dokument vygenerován dne {{ "now"|date:"d. m. Y" }} v systému EPES.ONLINE<br>
-    Identifikátor pejska: #{{ pes.id }} | Majitel: {{ pes.majitel.user.username }}
+    Identifikátor pejska: #{{ pes.id }} | Majitel: {{ pes.majitel.uzivatel.username }}
 </div>
 
 </body>

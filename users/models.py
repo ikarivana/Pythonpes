@@ -41,6 +41,7 @@ class Pes(models.Model):
     fotka = models.ImageField(upload_to='profily_psu/', blank=True, null=True)
     video = models.FileField(upload_to='videa_psu/', null=True, blank=True)
     popis = models.TextField(blank=True, null=True)
+    vaha = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, verbose_name="Váha (kg)")
     otec_manualni = models.CharField(max_length=200, blank=True, null=True, verbose_name="Otec (jméno)")
     matka_manualni = models.CharField(max_length=200, blank=True, null=True, verbose_name="Matka (jméno)")
     datum_narozeni = models.DateField(null=True, blank=True, verbose_name="Datum narození")

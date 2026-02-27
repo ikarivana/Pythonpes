@@ -25,8 +25,6 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path('inzerce/', include('inzerce.urls')),
 ]
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-else:
-    # Na Roští (produkce) to musí fungovat i bez DEBUG, pokud není nastaven server jinak
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# TENTO ŘÁDEK ZAJISTÍ FOTKY VÝVOJI I PRODUKCI
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
