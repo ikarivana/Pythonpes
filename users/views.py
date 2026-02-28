@@ -9,12 +9,10 @@ from django.contrib.admin.views.decorators import staff_member_required
 from pillow_heif import register_heif_opener
 
 from django.conf import settings
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.contrib.auth import login, logout
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth import login
 from django.core.mail import send_mail
-from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
+from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
 from django.utils.text import slugify
 from django.views.decorators.csrf import csrf_exempt
@@ -624,19 +622,6 @@ def upravit_komentar(request, pk):
     else:
         messages.error(request, "Nemáte oprávnění.")
         return redirect('zed_plemene', slug=komentar.prispevek.plemeno.slug)
-
-@login_required
-def smazat_komentar(request, pk):
-    komentar = get_object_or_404(Komentar, id=pk)
-    # Kontrola: smaže vlastník komentáře, autor příspěvku nebo admin
-    if komentar.autor == request.user or komentar.prispevek.autor == request.user or request.user.is_staff:
-        slug = komentar.prispevek.plemeno.slug
-        komentar.delete()
-        messages.success(request, "Komentář byl smazán.")
-        return redirect('zed_plemene', slug=slug)
-    else:
-        messages.error(request, "Nemáte oprávnění.")
-        return redirect(request.META.get('HTTP_REFERER', '/'))
 
 # --- 3. PŘIDÁNÍ POLOŽKY (S KATEGORIÍ) ---
 @login_required

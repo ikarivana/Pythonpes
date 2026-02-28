@@ -59,6 +59,9 @@ urlpatterns = [
     path('plemeno/smazat/<int:plemeno_id>/', views.smazat_plemeno, name='smazat_plemeno'),
     path('prispevek/upravit/<int:pk>/', views.upravit_prispevek, name='upravit_prispevek'),
     path('prispevek/smazat/<int:pk>/', views.smazat_prispevek, name='smazat_prispevek'),
+    path('zed/hlidani/', views.zed_plemene, {'slug': 'hlidani'}, name='zed_hlidani'),
+    path('zed/venceni/', views.zed_plemene, {'slug': 'venceni'}, name='zed_venceni'),
+    path('zed/psi-hriste/', views.zed_plemene, {'slug': 'psi-hriste'}, name='zed_psi_hriste'),
 
     # --- KOMENTÁŘE ---
     path('komentar/smazat/<int:pk>/', views.smazat_komentar, name='smazat_komentar'),

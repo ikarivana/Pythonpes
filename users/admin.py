@@ -43,7 +43,13 @@ class PrispevekAdmin(admin.ModelAdmin):
     list_filter = ('plemeno', 'datum_pridani')
 
 
-admin.site.register(models.Plemeno)
+@admin.register(models.Plemeno)
+class PlemenoAdmin(admin.ModelAdmin):
+    list_display = ('nazev', 'kategorie', 'slug') # Zobrazí tyto sloupce v seznamu
+    prepopulated_fields = {'slug': ('nazev',)} # Automaticky vygeneruje slug z názvu
+    list_filter = ('kategorie',) # Umožní filtrovat podle kategorie
+    search_fields = ('nazev', 'slug') # Umožní vyhledávat podle názvu nebo slugu
+
 admin.site.register(models.Komentar)
 admin.site.register(models.Notifikace)
 admin.site.register(models.ZdravotniZaznam)
