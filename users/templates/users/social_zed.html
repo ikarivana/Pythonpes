@@ -1,4 +1,5 @@
 {% extends 'home/base.html' %}
+{% load static %}
 
 {% block content %}
 <style>
@@ -10,6 +11,7 @@
         --alfa-gold: #c5a059;
     }
 
+    body { background-color: var(--light-tan); color: var(--text-dark); }
     html { scroll-behavior: smooth; }
 
     .nav-card {
@@ -25,10 +27,11 @@
         height: 100%;
     }
     .nav-card:hover {
-        background: var(--light-tan);
+        background: #fff;
         border-color: var(--primary-brown);
         transform: translateY(-5px);
         color: var(--primary-brown);
+        box-shadow: 0 10px 20px rgba(139, 94, 60, 0.1) !important;
     }
 
     .section-header {
@@ -41,7 +44,7 @@
     }
 
     .action-link-box {
-        border: 2px solid var(--primary-brown);
+        border: 2px solid var(--card-border);
         border-radius: 15px;
         background: white;
         text-decoration: none;
@@ -53,9 +56,11 @@
         height: 100%;
     }
     .action-link-box:hover {
-        background: var(--light-tan);
+        background: #fff;
+        border-color: var(--primary-brown);
         transform: scale(1.02);
         color: var(--primary-brown);
+        box-shadow: 0 5px 15px rgba(139, 94, 60, 0.05) !important;
     }
 
     .breed-item {
@@ -72,30 +77,28 @@
     }
     .breed-item:hover { background: var(--light-tan); border-color: var(--primary-brown); }
 
-   .back-link {
-        color: var(--alfa-gold) !important;
-        text-decoration: none;
+    /* --- NOVÉ STYLY PRO DROPDOWN --- */
+    .breed-dropdown {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid var(--card-border);
+        border-radius: 15px;
+        background-color: white;
+        color: var(--text-dark);
         font-weight: 600;
-        transition: 0.2s;
+        font-size: 1.1rem;
+        cursor: pointer;
+        appearance: none; /* Skryje defaultní šipku */
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b5e3c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.5em;
     }
-    .back-link i {
-        color: var(--alfa-gold) !important;
-        margin-right: 5px;
-    }
-    .back-link:hover {
-        color: var(--primary-brown) !important; /* Tmavší hnědá při najetí */
-        text-decoration: underline;
-    }
-    .back-link:hover i {
-        color: var(--primary-brown) !important;
-    }
+    .breed-dropdown:focus { outline: none; border-color: var(--primary-brown); box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.1); }
 </style>
 
 <div class="container mt-4">
-    <a href="{% url 'home' %}" class="back-link">
-        <i class="fas fa-arrow-left"></i> Zpět na domovskou stránku
-    </a>
-    </div>
     <div class="text-center mb-5">
         <h1 class="fw-bold" style="color: var(--primary-brown);">🐾 Sociální síť</h1>
     </div>
@@ -150,19 +153,18 @@
     </div>
 
     <h4 class="section-header">Aktuální zdi plemen</h4>
-    <div class="row g-3 mb-4">
-        {% for p in vsechna_plemena %}
-            {# Zobrazíme plemeno, pokud to není jedna ze speciálních kategorií nebo hřiště #}
-            {% if p.kategorie != 'vystavy' and p.kategorie != 'lovecka' and p.slug != 'psi-hriste' and p.slug != 'venceni' and p.slug != 'hlidani' %}
-                <div class="col-md-3 col-6">
-                    <a href="{% url 'zed_plemene' p.slug %}" class="breed-item shadow-sm">
-                        🐾 {{ p.nazev }}
-                    </a>
-                </div>
-            {% endif %}
-        {% empty %}
-            <p class="text-muted ps-3">Zatím tu nejsou žádná plemena.</p>
-        {% endfor %}
+    <div class="mb-4">
+        <select class="breed-dropdown" onchange="location = this.value;">
+            <option value="">-- Vyberte plemeno --</option>
+            {% for p in vsechna_plemena %}
+                {# Kontrola speciálních slugů #}
+                {% if p.slug != 'psi-hriste' and p.slug != 'venceni' and p.slug != 'hlidani' %}
+                    <option value="{% url 'zed_plemene' p.slug %}">🐾 {{ p.nazev }}</option>
+                {% endif %}
+            {% empty %}
+                <option value="">Zatím tu nejsou žádná plemena.</option>
+            {% endfor %}
+        </select>
     </div>
 
     <h4 class="section-header">Probíhající Výstavy</h4>

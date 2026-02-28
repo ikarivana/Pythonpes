@@ -215,23 +215,41 @@ class Plemeno(models.Model):
     slug = models.SlugField(unique=True)
     ikona = models.ImageField(upload_to='plemena_ikony/', blank=True)
 
+    # --- OPRAVA: Pole pro kategorizaci ---
+    # Hodnoty: 'vystavy', 'lovecka', 'ostatni'
+    kategorie = models.CharField(max_length=50, default='ostatni', db_index=True)
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.nazev)
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return f"{self.nazev} ({self.kategorie})"
+
 
 class Prispevek(models.Model):
     autor = models.ForeignKey(User, on_delete=models.CASCADE)
-    # Necháme null=True, aby zeď fungovala i pro služby bez plemene
-    plemeno = models.ForeignKey(Plemeno, on_delete=models.CASCADE, related_name='prispevky_na_zed', null=True, blank=True)
-    # TOTO JE KLÍČOVÉ POLE:
+    # Propojení na plemeno/sekci
+    plemeno = models.ForeignKey(Plemeno, on_delete=models.CASCADE, related_name='prispevky_na_zed', null=True,
+                                blank=True)
     sekce_slug = models.CharField(max_length=100, db_index=True, blank=True)
+
     text = models.TextField()
+
+    # --- OPRAVA: Nahrávání souborů ---
     obrazek = models.ImageField(upload_to='prispevky/', blank=True, null=True)
     video = models.FileField(upload_to='videa/', blank=True, null=True)
+
     datum_pridani = models.DateTimeField(auto_now_add=True)
     likes = models.ManyToManyField(User, related_name='libi_se_mi', blank=True)
+
+    class Meta:
+        # --- OPRAVA: Řazení od nejnovějších ---
+        ordering = ['-datum_pridani']
+
+    def __str__(self):
+        return f"Příspěvek od {self.autor.username}"
 
 
 class Komentar(models.Model):
@@ -239,6 +257,9 @@ class Komentar(models.Model):
     autor = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
     datum_pridani = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['datum_pridani']  # Komentáře od nejstarších
 
 
 class Notifikace(models.Model):

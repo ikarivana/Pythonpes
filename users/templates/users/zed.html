@@ -1,4 +1,5 @@
 {% extends 'home/base.html' %}
+{% load static %}
 
 {% block content %}
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
@@ -22,8 +23,6 @@
         box-shadow: 0 10px 30px rgba(139, 94, 60, 0.08); margin-bottom: 40px;
         border: 1px solid var(--card-border);
     }
-
-    /* Styl pro Django form textarea */
     .add-post-card textarea {
         width: 100%;
         border: 1.5px solid var(--card-border) !important;
@@ -35,11 +34,6 @@
         color: var(--text-dark);
         display: block !important;
     }
-    .add-post-card textarea:focus {
-        outline: none;
-        border-color: var(--gold-accent) !important;
-        background: white !important;
-    }
 
     /* TLAČÍTKA NAHRÁVÁNÍ */
     .mini-upload-btn {
@@ -48,80 +42,66 @@
         font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: 0.3s;
     }
     .mini-upload-btn:hover { border-color: var(--gold-accent); transform: translateY(-2px); }
-
     .icon-box-gold {
         width: 32px; height: 32px; border-radius: 10px;
         display: flex; align-items: center; justify-content: center;
         background: var(--gold-light); color: var(--gold-accent);
     }
-
     .btn-gold-action {
         background: linear-gradient(135deg, var(--gold-accent), var(--primary-brown));
         color: white; border: none; border-radius: 12px; padding: 10px 25px;
-        font-weight: 700; box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2);
-        cursor: pointer;
+        font-weight: 700; cursor: pointer;
     }
-
-    /* Styl pro zpětný odkaz a šipku */
-.back-link {                /* Ujistěte se, že odkaz má tuto třídu, nebo použijte příslušný selektor */
-    color: #c5a059 !important; /* Hnědozlatá barva textu */
-    text-decoration: none;
-    font-weight: 600;
-}
-.back-link i {
-    color: #c5a059 !important; /* Hnědozlatá barva šipky */
-}
 
     /* PŘÍSPĚVEK */
     .post-card { background: white; border-radius: 24px; margin-bottom: 35px; box-shadow: 0 8px 25px rgba(0,0,0,0.03); overflow: hidden; border: 1px solid rgba(234,221,207,0.4); }
     .post-header { padding: 15px 20px; border-bottom: 1px solid #f9f1e7; }
-    .post-media { background: #000; display: flex; justify-content: center; }
+    .post-media { background: #fdfaf5; display: flex; justify-content: center; }
     .post-media img, .post-media video { max-width: 100%; max-height: 500px; }
 
     .comment-section { background: #fdfbf9; padding: 20px; border-top: 1px solid #f9f1e7; }
     .comment-bubble { background: white; border-radius: 15px; padding: 10px 15px; margin-bottom: 10px; border: 1px solid #f3f0ec; }
 </style>
 
-<div class="feed-container" style="padding-bottom: 0;">
-    <a href="{% url 'seznam_zdi' %}" class="back-link">
-        <i class="fas fa-arrow-left"></i> Zpět na sociální síť
-    </a>
-</div>
-
 <div class="feed-container">
-    <h1 class="text-center fw-bold mb-5" style="color: var(--primary-brown);">🐾 Zeď: {{ nazev_sekce }}</h1>
+    <div class="text-center mb-5">
+        <h1 class="fw-bold" style="color: var(--primary-brown);">🐾 Zeď: {{ plemeno.nazev }}</h1>
+
+        {% if user.is_staff %}
+        <form action="{% url 'smazat_plemeno' plemeno.id %}" method="post" class="mt-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Opravdu chcete smazat celé plemeno {{ plemeno.nazev }} a všechna data?')">
+                <i class="fas fa-trash-alt me-1"></i>Smazat celou zeď
+            </button>
+        </form>
+        {% endif %}
+    </div>
 
     {% if user.is_authenticated %}
     <div class="add-post-card">
-        <form method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data" id="post-form">
             {% csrf_token %}
-
+            <div style="display:none">
+                {{ form.obrazek }}
+                {{ form.video }}
+            </div>
             <div class="mb-3">
                 {{ form.text }}
             </div>
-
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex gap-2">
-                    <label class="mini-upload-btn" id="l-photo">
+                    <label class="mini-upload-btn" id="label-photo">
                         <div class="icon-box-gold"><i class="fas fa-images"></i></div>
                         <span>Foto</span>
-                        <input type="file" name="obrazek" accept="image/*" style="display: none;"
-                               onchange="updateUI(this, 'l-photo')">
                     </label>
-                    <label class="mini-upload-btn" id="l-video">
+                    <label class="mini-upload-btn" id="label-video">
                         <div class="icon-box-gold"><i class="fas fa-video"></i></div>
                         <span>Video</span>
-                        <input type="file" name="video" accept="video/*" style="display: none;"
-                               onchange="updateUI(this, 'l-video')">
                     </label>
                 </div>
                 <button type="submit" name="btn_prispevek" class="btn-gold-action">Publikovat</button>
             </div>
         </form>
-    </div>
-    {% else %}
-    <div class="alert alert-info border-0 shadow-sm text-center" style="border-radius: 15px;">
-        Pro přidávání příspěvků se prosím <a href="{% url 'login' %}" class="fw-bold">přihlaste</a>.
     </div>
     {% endif %}
 
@@ -135,11 +115,33 @@
                     <small class="text-muted">{{ post.datum_pridani|date:"j. n. Y H:i" }}</small>
                 </div>
             </div>
+
+            {% if post.autor == user or user.is_staff %}
+            <div class="dropdown">
+                <button class="btn btn-sm btn-link text-muted" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    {% if post.autor == user %}
+                    <li><a class="dropdown-item" href="{% url 'upravit_prispevek' post.id %}"><i class="fas fa-edit me-2"></i>Upravit</a></li>
+                    {% endif %}
+
+                    <li>
+                        <form action="{% url 'smazat_prispevek' post.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Opravdu smazat příspěvek?')">
+                                <i class="fas fa-trash me-2"></i>Smazat příspěvek
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            {% endif %}
         </div>
 
         {% if post.obrazek %}
         <div class="post-media">
-            <img src="{{ post.obrazek.url }}" alt="Foto k příspěvku">
+            <img src="{{ post.obrazek.url }}" alt="Foto">
         </div>
         {% elif post.video %}
         <div class="post-media">
@@ -162,7 +164,14 @@
         <div class="comment-section">
             {% for komentar in post.komentare.all %}
             <div class="comment-bubble">
-                <strong class="small" style="color: var(--gold-accent);">@{{ komentar.autor.username }}</strong>
+                <div class="d-flex justify-content-between">
+                    <strong class="small" style="color: var(--gold-accent);">@{{ komentar.autor.username }}</strong>
+                    {% if komentar.autor == user or post.autor == user or user.is_staff %}
+                    <a href="{% url 'smazat_komentar' komentar.id %}" class="text-danger small" onclick="return confirm('Smazat komentář?')">
+                        <i class="fas fa-times"></i>
+                    </a>
+                    {% endif %}
+                </div>
                 <p class="mb-0 small">{{ komentar.text }}</p>
             </div>
             {% endfor %}
@@ -172,29 +181,35 @@
                 {% csrf_token %}
                 <input type="hidden" name="prispevek_id" value="{{ post.id }}">
                 <div class="input-group">
-                    <input type="text" name="text_komentare" class="form-control border-0"
-                           placeholder="Napište komentář..." required>
+                    <input type="text" name="text_komentare" class="form-control" placeholder="Napište komentář..." required>
                     <button class="btn btn-gold-action" name="btn_komentar" type="submit">Poslat</button>
                 </div>
             </form>
             {% endif %}
         </div>
     </div>
-    {% empty %}
-    <div class="text-center py-5">
-        <p class="text-muted">Zatím tu nejsou žádné příspěvky. Buďte první!</p>
-    </div>
     {% endfor %}
 </div>
 
 <script>
-    function updateUI(input, labelId) {
-        const label = document.getElementById(labelId);
-        if (input.files.length > 0) {
-            label.style.borderColor = '#c5a059';
-            label.style.background = '#f9f1e7';
-            label.querySelector('span').innerText = 'Vybráno';
+    document.addEventListener('DOMContentLoaded', function() {
+        const photoLabel = document.getElementById('label-photo');
+        const videoLabel = document.getElementById('label-video');
+
+        const photoInput = document.querySelector('input[name="obrazek"]');
+        const videoInput = document.querySelector('input[name="video"]');
+
+        if (photoLabel && photoInput) {
+            photoLabel.addEventListener('click', function() {
+                photoInput.click();
+            });
         }
-    }
+
+        if (videoLabel && videoInput) {
+            videoLabel.addEventListener('click', function() {
+                videoInput.click();
+            });
+        }
+    });
 </script>
 {% endblock %}

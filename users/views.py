@@ -5,6 +5,7 @@ from datetime import timedelta, timezone
 
 import qrcode
 from PIL import Image
+from django.contrib.admin.views.decorators import staff_member_required
 from pillow_heif import register_heif_opener
 
 from django.conf import settings
@@ -491,95 +492,6 @@ def export_pes_pdf(request, pes_id):
     return response
 
 
-# --- 5. SOCIÁLNÍ SÍŤ A OSTATNÍ ---
-
-def seznam_zdi(request):
-    return render(request, 'users/social_zed.html', {'vsechna_plemena': Plemeno.objects.all().order_by('nazev')})
-
-
-def zed_plemene(request, slug):
-    plemeno = Plemeno.objects.filter(slug=slug).first()
-    # Tady byla ta chyba - změň plemeno_slug na sekce_slug
-    prispevky = Prispevek.objects.filter(sekce_slug=slug).order_by('-datum_pridani')
-
-    form = PrispevekForm()
-
-    if request.method == 'POST' and 'btn_prispevek' in request.POST:
-        form = PrispevekForm(request.POST, request.FILES)
-        if form.is_valid():
-            prispevek = form.save(commit=False)
-            prispevek.autor = request.user
-            prispevek.plemeno = plemeno
-            prispevek.sekce_slug = slug  # Tady se to uloží správně
-            prispevek.save()
-            return redirect('zed_plemene', slug=slug)
-
-    return render(request, 'users/zed.html', {
-        'form': form,  # Toto zajistí zobrazení pole
-        'plemeno': plemeno,
-        'prispevky': prispevky,
-        'nazev_sekce': plemeno.nazev if plemeno else slug.capitalize(),
-        'slug': slug
-    })
-
-
-@login_required
-def smazat_prispevek(request, post_id):
-    prispevek = get_object_or_404(Prispevek, id=post_id)
-    # Kontrola, že maže jen autor
-    if prispevek.autor == request.user:
-        slug = prispevek.sekce_slug
-        prispevek.delete()
-        messages.success(request, "Příspěvek smazán.")
-        return redirect('zed_plemene', slug=slug)
-    return HttpResponseForbidden()
-
-@login_required
-def profil_uzivatele(request):
-    profil, created = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
-    # Získání psů přes related_name='psi', pokud ho máš v modelu
-    # Pokud ne, použij: request.user.pes_set.all()
-    context = {
-        'profil': profil,
-        'libi_se_mi': [],
-        'komentare': [],
-    }
-    return render(request, 'users/profil.html', context)
-
-def register(request):
-    if request.method == 'POST':
-        form = ExtendedRegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            # Změna z 'muj_profil' na 'profil' podle vašeho urls.py
-            return redirect('profil')
-    else:
-        form = ExtendedRegistrationForm()
-    return render(request, 'users/register.html', {'form': form})
-
-@login_required
-def upravit_profil(request):
-    if request.method == 'POST':
-        form = UserUpdateForm(request.POST, instance=request.user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Profil byl úspěšně upraven.")
-            return render(request, 'users/upravit_profil.html', {'form': form})
-    else:
-        form = UserUpdateForm(instance=request.user)
-    return render(request, 'users/profil.html', {'form': form}) # Upravujeme přímo v profilu
-
-@login_required
-def smazat_profil(request):
-    # Tohle je ta klíčová funkce, která ti chyběla!
-    uzivatel = request.user
-    logout(request)
-    uzivatel.delete()
-    messages.warning(request, "Tvůj účet byl smazán.")
-    return redirect('home')
-
-
 # --- DOPLNĚK: ÚSPĚCHY ---
 @login_required
 def pridat_uspech(request, pes_id):
@@ -594,31 +506,214 @@ def pridat_uspech(request, pes_id):
         messages.success(request, "Úspěch byl přidán.")
     return redirect('detail_psa', pes_id=pes.id)
 
-# --- DOPLNĚK: SOCIÁLNÍ SÍŤ (Příspěvky a interakce) ---
+
+# --- 5. SOCIÁLNÍ SÍŤ A OSTATNÍ ---
+
+# --- 1. SOCIÁLNÍ SÍŤ - SEZNAM ZDÍ (ŘAZENÍ) ---
+def seznam_zdi(request):
+    # Načteme všechna plemena a seřadíme je podle názvu
+    vsechna_plemena = Plemeno.objects.all().order_by('nazev')
+
+    context = {
+        # Filtrujeme plemena podle kategorie pro zobrazení v sekcích
+        'vsechna_plemena': vsechna_plemena.filter(kategorie='ostatni'),
+        'plemena_vystavy': vsechna_plemena.filter(kategorie='vystavy'),
+        'plemena_lovecka': vsechna_plemena.filter(kategorie='lovecka'),
+    }
+    return render(request, 'users/social_zed.html', context)
+
+
+# --- 2. ZED PŘÍSPĚVKŮ (ŘAZENÍ OD NEJNOVĚJŠÍCH) ---
+@login_required
+def zed_plemene(request, slug):
+    plemeno = get_object_or_404(Plemeno, slug=slug)
+
+    # Řazení příspěvků od nejnovějších
+    prispevky = Prispevek.objects.filter(plemeno=plemeno).order_by('-datum_pridani')
+
+    form = PrispevekForm()
+
+    if request.method == 'POST':
+        # Zpracování formuláře pro nový příspěvek
+        if 'btn_prispevek' in request.POST:
+            form = PrispevekForm(request.POST, request.FILES)
+            if form.is_valid():
+                prispevek = form.save(commit=False)
+                prispevek.autor = request.user
+                prispevek.plemeno = plemeno
+                prispevek.save()
+                messages.success(request, "Příspěvek byl publikován.")
+                return redirect('zed_plemene', slug=slug)
+
+        # Zpracování komentářů
+        elif 'btn_komentar' in request.POST:
+            prispevek_id = request.POST.get('prispevek_id')
+            # Bezpečná kontrola přítomnosti ID
+            if prispevek_id:
+                prispevek = get_object_or_404(Prispevek, id=prispevek_id)
+                text = request.POST.get('text_komentare')
+                if text:
+                    Komentar.objects.create(
+                        prispevek=prispevek,
+                        autor=request.user,
+                        text=text
+                    )
+                    # Notifikace vlastníkovi příspěvku
+                    if prispevek.autor != request.user:
+                        Notifikace.objects.create(
+                            prijemce=prispevek.autor,
+                            odesilatel=request.user,
+                            typ='komentar',
+                            prispevek=prispevek
+                        )
+                    messages.success(request, "Komentář přidán.")
+                    return redirect('zed_plemene', slug=slug)
+
+    return render(request, 'users/zed.html', {
+        'form': form,
+        'plemeno': plemeno,
+        'prispevky': prispevky,
+        'nazev_sekce': plemeno.nazev,
+        'slug': slug
+    })
+
 
 @login_required
-def upravit_prispevek(request, pk):
-    p = get_object_or_404(Prispevek, pk=pk, autor=request.user)
+def pridat_odpoved(request, parent_id):
+    parent_komentar = get_object_or_404(Komentar, id=parent_id)
+
     if request.method == 'POST':
-        form = PrispevekForm(request.POST, request.FILES, instance=p)
+        text = request.POST.get('text_odpovedi')
+        if text:
+            # Vytvoření odpovědi (komentáře, který má rodiče)
+            nova_odpoved = Komentar.objects.create(
+                prispevek=parent_komentar.prispevek,
+                autor=request.user,
+                text=text,
+                parent=parent_komentar  # Zde je nutné mít pole 'parent' v modelu Komentar
+            )
+
+            # Notifikace vlastníkovi rodičovského komentáře
+            if parent_komentar.autor != request.user:
+                Notifikace.objects.create(
+                    prijemce=parent_komentar.autor,
+                    odesilatel=request.user,
+                    typ='odpoved',
+                    komentar=nova_odpoved
+                )
+            messages.success(request, "Odpověď byla přidána.")
+
+        return redirect('zed_plemene', slug=parent_komentar.prispevek.plemeno.slug)
+
+    return redirect('zed_plemene', slug=parent_komentar.prispevek.plemeno.slug)
+
+@login_required
+def upravit_komentar(request, pk):
+    komentar = get_object_or_404(Komentar, id=pk)
+    # Kontrola, zda je uživatel autorem komentáře
+    if komentar.autor == request.user:
+        if request.method == 'POST':
+            # Logika pro uložení změn (např. pomocí CommentForm)
+            text = request.POST.get('text_komentare')
+            if text:
+                komentar.text = text
+                komentar.save()
+                messages.success(request, "Komentář byl upraven.")
+                return redirect('zed_plemene', slug=komentar.prispevek.plemeno.slug)
+        return render(request, 'users/upravit_komentar.html', {'komentar': komentar})
+    else:
+        messages.error(request, "Nemáte oprávnění.")
+        return redirect('zed_plemene', slug=komentar.prispevek.plemeno.slug)
+
+@login_required
+def smazat_komentar(request, pk):
+    komentar = get_object_or_404(Komentar, id=pk)
+    # Kontrola: smaže vlastník komentáře, autor příspěvku nebo admin
+    if komentar.autor == request.user or komentar.prispevek.autor == request.user or request.user.is_staff:
+        slug = komentar.prispevek.plemeno.slug
+        komentar.delete()
+        messages.success(request, "Komentář byl smazán.")
+        return redirect('zed_plemene', slug=slug)
+    else:
+        messages.error(request, "Nemáte oprávnění.")
+        return redirect(request.META.get('HTTP_REFERER', '/'))
+
+# --- 3. PŘIDÁNÍ POLOŽKY (S KATEGORIÍ) ---
+@login_required
+def pridat_polozku_vse(request, typ_kategorie):
+    if request.method == 'POST':
+        form = PlemenoForm(request.POST, request.FILES)
+        if form.is_valid():
+            plemeno = form.save(commit=False)
+
+            # Nastavení kategorie podle URL (vystavy/lovecka/ostatni)
+            plemeno.kategorie = typ_kategorie
+
+            navrzeny_slug = slugify(plemeno.nazev)
+
+            # Kontrola duplicity
+            if Plemeno.objects.filter(slug=navrzeny_slug).exists():
+                messages.error(request, f"Položka s názvem '{plemeno.nazev}' již existuje!")
+                return render(request, 'users/pridat_polozku.html', {'form': form, 'typ': typ_kategorie})
+
+            plemeno.slug = navrzeny_slug
+            plemeno.save()
+            messages.success(request, f"Položka {plemeno.nazev} byla přidána.")
+            return redirect('seznam_zdi')
+    else:
+        form = PlemenoForm()
+    return render(request, 'users/pridat_polozku.html', {'form': form, 'typ': typ_kategorie})
+
+
+# --- 4. ADMIN TLAČÍTKA (MAZÁNÍ) ---
+@staff_member_required
+def smazat_plemeno(request, plemeno_id):
+    plemeno = get_object_or_404(Plemeno, id=plemeno_id)
+    if request.method == 'POST':
+        plemeno.delete()
+        messages.success(request, "Položka byla smazána.")
+    return redirect('seznam_zdi')
+
+
+# --- 5. ÚPRAVA A MAZÁNÍ PŘÍSPĚVKŮ (OPRÁVNĚNÍ) ---
+@login_required
+def upravit_prispevek(request, pk):
+    prispevek = get_object_or_404(Prispevek, pk=pk, autor=request.user)
+
+    if request.method == 'POST':
+        form = PrispevekForm(request.POST, request.FILES, instance=prispevek)
         if form.is_valid():
             form.save()
-            return redirect('zed_plemene', slug=p.plemeno.slug)
+            messages.success(request, "Příspěvek byl upraven.")
+            return redirect('zed_plemene', slug=prispevek.plemeno.slug)
     else:
-        form = PrispevekForm(instance=p)
-    return redirect('zed_plemene', slug=p.plemeno.slug if p.plemeno else p.sekce_slug)
+        form = PrispevekForm(instance=prispevek)
+
+    return render(request, 'users/upravit_prispevek.html', {'form': form, 'prispevek': prispevek})
+
 
 @login_required
 def smazat_prispevek(request, pk):
-    prispevek = get_object_or_404(Prispevek, pk=pk, autor=request.user)
-    slug = prispevek.plemeno.slug
+    # Povolit vlastníkovi nebo adminovi
+    if request.user.is_staff:
+        prispevek = get_object_or_404(Prispevek, pk=pk)
+    else:
+        prispevek = get_object_or_404(Prispevek, pk=pk, autor=request.user)
+
+    slug = prispevek.plemeno.slug if prispevek.plemeno else None
+
     if request.method == 'POST':
         prispevek.delete()
         messages.success(request, "Příspěvek byl smazán.")
-        return redirect('zed_plemene', slug=slug)
-    # TADY CHYBÍ NÁVRAT (např. redirect zpět, pokud uživatel jen klikne na URL bez POSTu)
-    return redirect('zed_plemene', slug=slug)
+        if slug:
+            return redirect('zed_plemene', slug=slug)
+        else:
+            return redirect('seznam_zdi')
 
+    return render(request, 'users/smazat_prispevek_potvrzeni.html', {'prispevek': prispevek})
+
+
+# --- 6. LAJKY A KOMENTÁŘE ---
 @login_required
 def pridej_like(request, post_id):
     p = get_object_or_404(Prispevek, id=post_id)
@@ -626,6 +721,7 @@ def pridej_like(request, post_id):
         p.likes.remove(request.user)
     else:
         p.likes.add(request.user)
+        # Notifikace autorovi
         if p.autor != request.user:
             Notifikace.objects.create(
                 prijemce=p.autor,
@@ -635,77 +731,61 @@ def pridej_like(request, post_id):
             )
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
-@login_required
-def pridat_odpoved(request, parent_id):
-    parent = get_object_or_404(Komentar, id=parent_id)
-    if request.method == "POST":
-        novy_komentar = Komentar.objects.create(
-            prispevek=parent.prispevek,
-            autor=request.user,
-            text=request.POST.get('text_odpovedi'),
-        )
-        # TADY pošli notifikaci autorovi původního komentáře
-        if parent.autor != request.user:
-            Notifikace.objects.create(
-                prijemce=parent.autor,
-                odesilatel=request.user,
-                typ='odpoved',
-                prispevek=parent.prispevek
-            )
-    return redirect(request.META.get('HTTP_REFERER', '/'))
-
-@login_required
-def seznam_notifikaci(request):
-    # Načte notifikace, které uživateli přišly
-    nots = request.user.prijate_notifikace.all().order_by('-datum_vytvoreni')
-    # Označí je za přečtené
-    nots.filter(precteno=False).update(precteno=True)
-    return render(request, 'users/notifikace.html', {'nots': nots})
-
-
-@login_required
-def pridat_polozku_vse(request, typ_kategorie):
-    if request.method == 'POST':
-        form = PlemenoForm(request.POST, request.FILES)
-        if form.is_valid():
-            plemeno = form.save(commit=False)
-            # Slug se vytvoří automaticky z názvu, pokud to máš v modelu,
-            # nebo ho vytvoříme tady:
-            plemeno.slug = slugify(plemeno.nazev)
-            plemeno.save()
-            messages.success(request, f"Položka {plemeno.nazev} byla přidána do kategorie {typ_kategorie}.")
-            return redirect('seznam_zdi')
-    else:
-        form = PlemenoForm()
-
-    return render(request, 'users/pridat_polozku.html', {
-        'form': form,
-        'typ': typ_kategorie
-    })
-
-@login_required
-def upravit_komentar(request, pk):
-    komentar = get_object_or_404(Komentar, id=pk, autor=request.user)
-    if request.method == "POST":
-        novy_text = request.POST.get('text_komentare')
-        if novy_text:
-            komentar.text = novy_text
-            komentar.save()
-            messages.success(request, "Komentář byl upraven.")
-        return redirect('zed_plemene', slug=komentar.prispevek.plemeno.slug)
-    return render(request, 'users/upravit_komentar.html', {'komentar': komentar})
 
 @login_required
 def smazat_komentar(request, pk):
     komentar = get_object_or_404(Komentar, id=pk)
-    # Komentář může smazat buď jeho autor, nebo autor příspěvku
-    if komentar.autor == request.user or komentar.prispevek.autor == request.user:
+    # Povolit vlastníkovi komentáře, autorovi příspěvku nebo adminovi
+    if komentar.autor == request.user or komentar.prispevek.autor == request.user or request.user.is_staff:
         slug = komentar.prispevek.plemeno.slug
         komentar.delete()
         messages.success(request, "Komentář byl smazán.")
         return redirect('zed_plemene', slug=slug)
     else:
-        messages.error(request, "Nemáte oprávnění smazat tento komentář.")
+        messages.error(request, "Nemáte oprávnění.")
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
+# --- Profilové funkce zůstávají stejné ---
+def profil_uzivatele(request):
+    profil, created = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
+    context = {'profil': profil, 'libi_se_mi': [], 'komentare': []}
+    return render(request, 'users/profil.html', context)
 
+
+def register(request):
+    if request.method == 'POST':
+        form = ExtendedRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('profil')
+    else:
+        form = ExtendedRegistrationForm()
+    return render(request, 'users/register.html', {'form': form})
+
+
+@login_required
+def upravit_profil(request):
+    if request.method == 'POST':
+        form = UserUpdateForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profil upraven.")
+            return redirect('profil')
+    else:
+        form = UserUpdateForm(instance=request.user)
+    return render(request, 'users/profil.html', {'form': form})
+
+
+@login_required
+def smazat_profil(request):
+    uzivatel = request.user
+    logout(request)
+    uzivatel.delete()
+    messages.warning(request, "Účet smazán.")
+    return redirect('home')
+
+@login_required
+def seznam_notifikaci(request):
+    notifikace = Notifikace.objects.filter(prijemce=request.user).order_by('-datum_vytvoreni')
+    return render(request, 'users/notifikace.html', {'notifikace': notifikace})

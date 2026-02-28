@@ -56,6 +56,7 @@ urlpatterns = [
     path('zdi/', views.seznam_zdi, name='seznam_zdi'),
     path('zdi/pridat/<str:typ_kategorie>/', views.pridat_polozku_vse, name='pridat_polozku'),
     path('zed/<slug:slug>/', views.zed_plemene, name='zed_plemene'),
+    path('plemeno/smazat/<int:plemeno_id>/', views.smazat_plemeno, name='smazat_plemeno'),
     path('prispevek/upravit/<int:pk>/', views.upravit_prispevek, name='upravit_prispevek'),
     path('prispevek/smazat/<int:pk>/', views.smazat_prispevek, name='smazat_prispevek'),
 

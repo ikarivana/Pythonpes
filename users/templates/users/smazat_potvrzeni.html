@@ -1,31 +1,58 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-lg border-0 text-center p-4" style="border-radius: 25px;">
-                <div class="mb-3">
-                    <span class="fs-1">⚠️</span>
-                </div>
-                <h2 class="fw-bold mb-3" style="color: var(--primary-brown);">Opravdu smazat?</h2>
-                <p class="text-muted mb-4">
-                    Tento příspěvek bude nenávratně odstraněn. Jste si jistí?
-                </p>
-                
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-danger btn-lg" style="border-radius: 15px;">
-                            Ano, smazat navždy
-                        </button>
-                        <a href="{{ request.META.get('HTTP_REFERER', '/') }}" class="btn btn-light" style="border-radius: 15px;">
-                            Zrušit a vrátit se
-                        </a>
-                    </div>
-                </form>
-            </div>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --bg-page: #fdfaf5;
+        --card-border: #eaddcf;
+        --text-dark: #4a3728;
+        --primary-brown: #8b5e3c;
+        --gold-accent: #c5a059;
+    }
+    body { background-color: var(--bg-page); color: var(--text-dark); font-family: 'Plus Jakarta Sans', sans-serif; }
+    .feed-container { max-width: 500px; margin: 0 auto; padding: 50px 20px; }
+
+    .add-post-card {
+        background: white; border-radius: 24px; padding: 40px;
+        box-shadow: 0 10px 30px rgba(139, 94, 60, 0.08);
+        border: 1px solid var(--card-border); text-align: center;
+    }
+
+    .btn-danger-custom {
+        background: #dc3545; color: white; border: none;
+        border-radius: 15px; padding: 12px 25px; font-weight: 700;
+        text-decoration: none; width: 100%; display: block;
+    }
+    .btn-cancel-custom {
+        border-radius: 15px; padding: 12px 25px; font-weight: 700;
+        border: 1px solid var(--card-border); color: var(--text-dark);
+        background: white; text-decoration: none; width: 100%; display: block;
+    }
+</style>
+
+<div class="feed-container">
+    <div class="add-post-card">
+        <div class="mb-3">
+            <span class="fs-1">⚠️</span>
         </div>
+        <h2 class="fw-bold mb-3" style="color: var(--primary-brown);">Opravdu smazat?</h2>
+        <p class="text-muted mb-4">
+            Tento příspěvek bude nenávratně odstraněn. Jste si jistí?
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn-danger-custom">
+                    Ano, smazat navždy
+                </button>
+                <a href="{{ request.META.get('HTTP_REFERER', '/') }}" class="btn-cancel-custom">
+                    Zrušit a vrátit se
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}
