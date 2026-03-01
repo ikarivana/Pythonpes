@@ -38,7 +38,7 @@
         <h2 class="fw-bold" style="color: var(--primary-brown); font-family: 'Playfair Display', serif;">🐾 Moji psi</h2>
 
         {% if not user.profil.is_premium and not user.is_staff and psi.count >= 1 %}
-            <a href="{% url 'pricing' %}" class="btn px-4 shadow-sm fw-bold"
+            <a href="{% url 'cenik' %}" class="btn px-4 shadow-sm fw-bold"
                style="background-color: var(--accent-gold); color: white; border-radius: 15px; transition: 0.3s;">
                 <i class="fas fa-crown me-1"></i> Chci více psů
             </a>

@@ -1,0 +1,53 @@
+{% extends 'home/base.html' %}
+
+{% block title %}Zásady ochrany osobních údajů | epes.online{% endblock %}
+
+{% block content %}
+<div class="py-2">
+    <h1 class="fw-bold mb-4"
+        style="font-family: 'Playfair Display', serif; color: var(--dark-cocoa); border-bottom: 3px solid var(--gold); padding-bottom: 15px;">
+        Zásady ochrany osobních údajů
+    </h1>
+
+    <p class="text-muted small mb-5">Verze platná od: 1. 1. 2026</p>
+
+    <div class="legal-text" style="line-height: 1.8; color: #333; font-size: 0.95rem; text-align: justify;">
+
+        <section class="mb-5">
+            <h4 class="fw-bold" style="color: var(--mid-brown);">1. Správce osobních údajů</h4>
+            <p>
+                Správcem osobních údajů je Provozovatel portálu epes.online,
+                <strong>{{ kontaktni_info.jmeno }}</strong>, IČO: {{ kontaktni_info.ico }},
+                se sídlem {{ kontaktni_info.adresa }}.
+            </p>
+        </section>
+
+        <section class="mb-5">
+            <h4 class="fw-bold" style="color: var(--mid-brown);">2. Účel zpracování</h4>
+            <p>
+                Osobní údaje zpracováváme za účelem:
+                <ul>
+                    <li>Plnění smlouvy (správa vašeho uživatelského účtu a poskytování služeb).</li>
+                    <li>Komunikace mezi uživateli (v rámci inzerce a bazaru).</li>
+                    <li>Zajištění bezpečnosti portálu.</li>
+                </ul>
+            </p>
+        </section>
+
+        <section class="mb-5">
+            <h4 class="fw-bold" style="color: var(--mid-brown);">3. Práva uživatele</h4>
+            <p>
+                Máte právo na přístup ke svým údajům, jejich opravu, výmaz ("právo být zapomenut") nebo omezení zpracování.
+                Pokud máte jakékoli dotazy, kontaktujte nás na e-mailu: {{ kontaktni_info.email }}.
+            </p>
+        </section>
+
+        <div class="d-flex justify-content-center mt-5">
+            <a href="{% url 'podminky' %}" class="btn btn-sm px-4 py-2"
+               style="color: var(--mid-brown); border: 1px solid var(--mid-brown); border-radius: 10px; text-decoration: none; font-weight: 600;">
+                <i class="fas fa-arrow-left me-2"></i>Zpět na VOP
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

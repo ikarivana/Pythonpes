@@ -268,6 +268,7 @@ def smazat_video(request, pk):
 
 
 # --- 3. DETAIL, SOS A POLOHA ---
+@login_required
 def detail_psa(request, pes_id):
     pes = get_object_or_404(Pes, id=pes_id)
 
@@ -731,6 +732,7 @@ def smazat_komentar(request, pk):
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
 # --- Profilové funkce zůstávají stejné ---
+@login_required
 def profil_uzivatele(request):
     profil, created = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
     context = {'profil': profil, 'libi_se_mi': [], 'komentare': []}

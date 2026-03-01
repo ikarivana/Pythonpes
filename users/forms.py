@@ -36,7 +36,7 @@ class PesForm(forms.ModelForm):
         model = Pes
         # PŘIDÁNA POLE: 'zdravotni_testy' a 'video', aby to sedělo na šablonu
         fields = [
-            'jmeno', 'rasa', 'datum_narozeni', 'cip', 'fotka', 'video',
+            'jmeno', 'rasa', 'datum_narozeni', 'cip', 'vaha', 'fotka', 'video',
             'posledni_ockovani', 'posledni_odcerveni', 'posledni_klistata', 'typ_ochrany_klistata',
             'rtg_hd', 'rtg_ed', 'rtg_pater', 'zdravotni_testy', 'genetika_dna', 'popis',
             'bonitace', 'otec_manualni', 'matka_manualni'
@@ -50,8 +50,8 @@ class PesForm(forms.ModelForm):
             'typ_ochrany_klistata': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Obojek / Pipeta'}),
             'popis': forms.Textarea(attrs={'rows': 3}),
             'zdravotni_testy': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Např. Lokus S, DM...'}),
-            # --- OPRAVA: Pro lepší podporu mobilů ---
             'fotka': forms.FileInput(attrs={'accept': 'image/*'}),
+            'vaha': forms.NumberInput(attrs={'step': '0.1', 'placeholder': 'Např. 12.5'}),
         }
 
     def __init__(self, *args, **kwargs):

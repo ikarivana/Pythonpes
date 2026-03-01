@@ -78,9 +78,14 @@
         <section class="mb-5">
             <h4 class="fw-bold" style="color: var(--mid-brown);">6. Ochrana osobních údajů (GDPR)</h4>
             <p>
-                Provozovatel zpracovává osobní údaje Uživatele za účelem správy účtu a plnění smlouvy.
-                Podrobné informace o zpracování údajů a právech Uživatele jsou obsaženy v samostatném dokumentu
-                <strong>Zásady ochrany osobních údajů</strong>.
+                Provozovatel zpracovává osobní údaje Uživatele za účelem správy účtu, plnění smlouvy a v případě
+                využití inzertních služeb také za účelem komunikace mezi Uživateli.
+            </p>
+            <p>
+                Podrobné informace o zpracování údajů a právech Uživatele naleznete v našich
+                <strong><a href="{% url 'gdpr' %}" style="color: var(--gold);">Zásadách ochrany osobních
+                    údajů</a></strong>,
+                které jsou nedílnou součástí těchto VOP.
             </p>
         </section>
 
@@ -108,17 +113,17 @@
 </div>
 
 <script>
-function zavritNeboZpet() {
-    // Pokusí se zavřít kartu
-    window.close();
+    function zavritNeboZpet() {
+        // Pokusí se zavřít kartu
+        window.close();
 
-    // Pokud se karta po 200ms nezavřela (prohlížeč to zablokoval),
-    // tak uživatele aspoň pošle zpět na předchozí stránku (registraci)
-    setTimeout(function() {
-        if (!window.closed) {
-            window.history.back();
-        }
-    }, 200);
-}
+        // Pokud se karta po 200ms nezavřela (prohlížeč to zablokoval),
+        // tak uživatele aspoň pošle zpět na předchozí stránku (registraci)
+        setTimeout(function() {
+            if (!window.closed) {
+                window.history.back();
+            }
+        }, 200);
+    }
 </script>
 {% endblock %}

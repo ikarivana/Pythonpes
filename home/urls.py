@@ -20,6 +20,7 @@ urlpatterns = [
     path('kontakt/', views.kontakt, name='kontakt'),
     path('podminky/', views.podminky, name='podminky'),
     path('cookies/', views.cookies, name='cookies'),
+    path('gdpr/', views.gdpr, name='gdpr'),
     path('cenik/', views.cenik, name='cenik'),
 
     path('simpleshop/webhook/', simpleshop_webhook, name='simpleshop_webhook'),

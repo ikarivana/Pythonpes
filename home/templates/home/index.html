@@ -2,6 +2,7 @@
 
 {% block content %}
 <style>
+    /* ... (tvoje CSS styly zůstávají stejné) ... */
     /* Hlavní kontejner - čistý a přehledný */
     .home-container {
         max-width: 1000px;
@@ -234,40 +235,40 @@
     <div class="hero-alfa">
         <h2>Ahoj, {{ user.username }}! 🐾</h2>
         <div class="status-badge">
-    {% if user.profil.is_premium %}
-        <i class="fas fa-crown" style="color: gold !important;"></i> TVŮJ ALFA PROFIL JE AKTIVNÍ
-    {% else %}
-        <i class="fas fa-paw"></i> BĚŽNÝ PÁNÍČEK
-    {% endif %}
-</div>
+            {% if user.profil.is_premium %}
+            <i class="fas fa-crown" style="color: gold !important;"></i> TVŮJ ALFA PROFIL JE AKTIVNÍ
+            {% else %}
+            <i class="fas fa-paw"></i> BĚŽNÝ PÁNÍČEK
+            {% endif %}
+        </div>
     </div>
-{% if ztraceni_psi %}
-<div class="sos-section">
-    <h4 class="fw-bold mb-3" style="color: #b33939; font-size: 1rem;">
-        <i class="fas fa-bullhorn me-2"></i> AKTUÁLNĚ HLEDÁME
-    </h4>
-    <div class="row g-3">
-        {% for hledany_pes in ztraceni_psi %}
-        <div class="col-md-6 col-lg-4">
-            <a href="{% url 'nouzovy_profil_psa' pes_id=hledany_pes.id %}" class="sos-card">
-                {% if hledany_pes.fotka %}
+    {% if ztraceni_psi %}
+    <div class="sos-section">
+        <h4 class="fw-bold mb-3" style="color: #b33939; font-size: 1rem;">
+            <i class="fas fa-bullhorn me-2"></i> AKTUÁLNĚ HLEDÁME
+        </h4>
+        <div class="row g-3">
+            {% for hledany_pes in ztraceni_psi %}
+            <div class="col-md-6 col-lg-4">
+                <a href="{% url 'nouzovy_profil_psa' pes_id=hledany_pes.id %}" class="sos-card">
+                    {% if hledany_pes.fotka %}
                     <img src="{{ hledany_pes.fotka.url }}" class="sos-img">
-                {% else %}
+                    {% else %}
                     <div class="sos-img bg-light d-flex align-items-center justify-content-center">
                         <i class="fas fa-paw text-muted"></i>
                     </div>
-                {% endif %}
-                <div class="ms-3">
-                    <span class="sos-badge">Ztracen</span>
-                    <h6 class="fw-bold m-0" style="color: #2d1b19;">{{ hledany_pes.jmeno }}</h6>
-                    <small class="text-muted d-block" style="font-size: 0.7rem;">{{ hledany_pes.rasa }}</small>
-                </div>
-            </a>
+                    {% endif %}
+                    <div class="ms-3">
+                        <span class="sos-badge">Ztracen</span>
+                        <h6 class="fw-bold m-0" style="color: #2d1b19;">{{ hledany_pes.jmeno }}</h6>
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">{{ hledany_pes.rasa }}</small>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
-</div>
-{% endif %}
+    {% endif %}
 
     {% if not user.profil.is_premium %}
     <div class="premium-banner">
@@ -321,18 +322,27 @@
         <h4>Aktuálně na zdi</h4>
         <div class="line"></div>
     </div>
+
     {% for prispevek in posledni_prispevky %}
-    <div class="post-card">
-        <div class="d-flex align-items-center mb-2">
-            <div class="bg-light rounded-circle p-2 me-2" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-user text-muted small"></i></div>
-            <span class="fw-bold small">{{ prispevek.autor.username }}</span>
-            <span class="text-muted mx-2">•</span>
-            <small class="text-muted">{{ prispevek.datum_pridani|timesince }} zpět</small>
-        </div>
-        <p class="mb-0 text-secondary small">{{ prispevek.text }}</p>
-    </div>
+        {% if prispevek.zed.slug %}
+            <a href="{% url 'zed_plemene' prispevek.zed.slug %}#post-{{ prispevek.id }}" class="post-card d-block text-decoration-none">
+        {% else %}
+            <a href="{% url 'seznam_zdi' %}" class="post-card d-block text-decoration-none">
+        {% endif %}
+
+            <div class="d-flex align-items-center mb-2">
+                <div class="bg-light rounded-circle p-2 me-2"
+                     style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-user text-muted small"></i>
+                </div>
+                <span class="fw-bold small text-dark">{{ prispevek.autor.username }}</span>
+                <span class="text-muted mx-2">•</span>
+                <small class="text-muted">{{ prispevek.datum_pridani|timesince }} zpět</small>
+            </div>
+            <p class="mb-0 text-secondary small">{{ prispevek.text }}</p>
+        </a>
     {% empty %}
-    <div class="text-center py-4 text-muted small">Na zdi je zatím ticho... 🐾</div>
+        <div class="text-center py-4 text-muted small">Na zdi je zatím ticho... 🐾</div>
     {% endfor %}
 </div>
 {% endblock %}

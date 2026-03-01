@@ -1,9 +1,7 @@
 import json
 from datetime import timedelta, date
-from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, HttpResponse
-from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.db.models import Q
 from django.utils import timezone
 from django.contrib import messages
@@ -12,7 +10,13 @@ from django.contrib import messages
 from .models import Sluzba, KontaktniZprava
 from .forms import SluzbaForm, KontaktForm
 from users.models import Prispevek, Pes, ProfilMajitele
-
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.http import HttpResponse
+from django.contrib.auth.models import User
+from datetime import date, timedelta
+from django.shortcuts import render
 
 # --- 1. HLAVNÍ STRÁNKA (OPRAVENÁ) ---
 def index(request):
@@ -38,28 +42,6 @@ def index(request):
         'ztraceni_psi': ztraceni_psi,
         'posledni_prispevky': posledni_prispevky,
     })
-
-
-import json
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
-from django.contrib.auth.models import User
-from datetime import date, timedelta
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-
-
-# from .models import Profil # Importuj svůj model profilu
-
-import json
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
-from django.contrib.auth.models import User
-from datetime import date, timedelta
-from django.shortcuts import render
-
-
-# importuj svůj model profilu, např.: from users.models import Profile
 
 @csrf_exempt
 def simpleshop_webhook(request):
@@ -240,11 +222,26 @@ def podminky(request):
     # --- TADY NASTAV SVOJE INFORMACE ---
     moje_info = {
         'jmeno': 'Ivana Elšíková',  # Tvoje jméno nebo název firmy
-        'ico': '12345678',          # Tvoje IČO
-        'adresa': 'Ulice 123, Město', # Tvoje adresa
+        'ico': '23834838',          # Tvoje IČO
+        'adresa': 'Sokolská 29, Hvozdná, 76310', # Tvoje adresa
     }
     # ------------------------------------
     return render(request, 'home/podminky.html', {'kontaktni_info': moje_info})
+
+def gdpr(request):
+    """
+    Zobrazí stránku se zásadami ochrany osobních údajů.
+    """
+    context = {
+        'kontaktni_info': {
+            'jmeno': 'Ivana Elšíková',
+            'ico': '23834838',
+            'adresa': 'Sokolská 29, Hvozdná, 763 10',
+            'email': 'elivdruhy@gmail.com',
+        }
+    }
+    return render(request, 'home/gdpr.html', context)
+
 
 
 def cookies(request): return render(request, 'home/cookies.html')
