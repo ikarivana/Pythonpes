@@ -13,7 +13,7 @@ urlpatterns = [
     path('moji-psi/', views.seznam_psu, name='seznam_psu'),
     path('dashboard/', views.dashboard, name='dashboard'),
 
-    # --- DETAIL A NOUZOVÝ SYSTÉM ---
+    # --- DETAIL A NOUZOVÝ SYSTÉM (SOS) ---
     path('pes-detail/<int:pes_id>/', views.detail_psa, name='detail_psa'),
     path('pes/<int:pes_id>/', views.nouzovy_profil_psa, name='nouzovy_profil_psa'),
     path('pes/<int:pes_id>/odeslat-polohu/', views.odeslat_polohu_nalezu, name='odeslat_polohu'),
@@ -23,7 +23,6 @@ urlpatterns = [
 
     # --- ZDRAVOTNÍ ZÁZNAMY ---
     path('zaznam/upravit/<int:pk>/', views.upravit_zaznam, name='upravit_zaznam'),
-    path('pes/<int:pes_id>/prepnout-ztratu/', views.prepnout_ztratu, name='prepnout_ztratu'),
 
     # --- SPRÁVA GALERIE A ÚSPĚCHŮ ---
     path('pes/<int:pes_id>/galerie/pridat-foto/', views.pridat_foto, name='pridat_foto'),

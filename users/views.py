@@ -18,9 +18,10 @@ from django.utils.text import slugify
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.base import ContentFile
 
-from .forms import UserUpdateForm, PlemenoForm, PrispevekForm, ExtendedRegistrationForm, OckovaniForm, PesForm
+from .forms import UserUpdateForm, PlemenoForm, PrispevekForm, ExtendedRegistrationForm, OckovaniForm, PesForm, \
+    ProfilUpdateForm
 from .models import Plemeno, Prispevek, Komentar, GalerieFotka, GalerieVideo, ProfilMajitele, Uspech, Pes, \
-    ZdravotniZaznam, Notifikace
+    ZdravotniZaznam, Notifikace, Like
 
 # Ostatní nástroje
 from reportlab.pdfbase import pdfmetrics
@@ -205,26 +206,28 @@ def smazat_psa(request, pk):
 @login_required
 def pridat_foto(request, pes_id):
     if request.method == 'POST':
-        pes = get_object_or_404(Pes, id=pes_id, majitel=request.user.profil)
+        # Používáme related_name 'profil' z tvého ProfilMajitele
+        pes = get_object_or_404(Pes, id=pes_id, majitel__uzivatel=request.user)
         profil = request.user.profil
 
-        # KONTROLA LIMITU FOTEK (5 fotek pro Free)
         if not profil.is_premium and not request.user.is_staff:
             if pes.galerie_fotky.count() >= 5:
-                messages.warning(request, "V bezplatné verzi můžete mít u pejska maximálně 5 fotek.")
-                return redirect('upravit_psa', pk=pes_id)
+                messages.warning(request, "V bezplatné verzi můžete mít maximálně 5 fotek.")
+                return redirect(request.META.get('HTTP_REFERER', 'detail_psa'))
 
         img = request.FILES.get('obrazek')
         if img:
             try:
+                # Pokud máš funkci zpracuj_foto, nech ji, jinak nahraj přímo:
+                # GalerieFotka.objects.create(pes=pes, obrazek=img)
                 zpracovany_obrazek = zpracuj_foto(img)
-                # ZMĚNA: Galerie -> GalerieFotka
                 GalerieFotka.objects.create(pes=pes, obrazek=zpracovany_obrazek)
                 messages.success(request, "Fotka nahrána.")
             except Exception as e:
                 messages.error(request, f"Chyba: {e}")
 
-    return redirect('upravit_psa', pk=pes_id)
+    # CHYTRÝ REDIRECT: vrátí tě tam, kde jsi byl (Detail nebo Editor)
+    return redirect(request.META.get('HTTP_REFERER', 'detail_psa'))
 
 @login_required
 def smazat_foto(request, pk):
@@ -240,22 +243,21 @@ def smazat_foto(request, pk):
 @login_required
 def pridat_video(request, pes_id):
     if request.method == 'POST':
-        pes = get_object_or_404(Pes, id=pes_id, majitel=request.user.profil)
+        pes = get_object_or_404(Pes, id=pes_id, majitel__uzivatel=request.user)
         profil = request.user.profil
 
-        # KONTROLA LIMITU VIDEÍ (1 video pro Free)
         if not profil.is_premium and not request.user.is_staff:
             if pes.galerie_videa.count() >= 1:
-                messages.warning(request, "V bezplatné verzi můžete mít u pejska pouze 1 video.")
-                return redirect('upravit_psa', pk=pes_id)
+                messages.warning(request, "V bezplatné verzi můžete mít pouze 1 video.")
+                return redirect(request.META.get('HTTP_REFERER', 'detail_psa'))
 
         vid = request.FILES.get('video_soubor')
         if vid:
-            # ZMĚNA: Video -> GalerieVideo
             GalerieVideo.objects.create(pes=pes, video_soubor=vid)
             messages.success(request, "Video nahráno.")
 
-    return redirect('upravit_psa', pk=pes_id)
+    return redirect(request.META.get('HTTP_REFERER', 'detail_psa'))
+
 
 @login_required
 def smazat_video(request, pk):
@@ -267,37 +269,42 @@ def smazat_video(request, pk):
     return redirect('upravit_psa', pk=p_id)
 
 
-# --- 3. DETAIL, SOS A POLOHA ---
 @login_required
 def detail_psa(request, pes_id):
     pes = get_object_or_404(Pes, id=pes_id)
+    profil, _ = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
 
     # --- INTELIGENTNÍ VÝHYBKA ---
-    # Pokud prohlížející NENÍ majitel, uvidí jen SOS kartu
-    if not request.user.is_authenticated or pes.majitel.uzivatel != request.user:
+    if pes.majitel.uzivatel != request.user:
         return render(request, 'users/nouzovy_profil.html', {
             'pes': pes,
-            'majitel': pes.majitel,
+            'profil': profil,
             'nouzovy_rezim': pes.je_ztraceny,
         })
 
-    # Pokud jsi to ty (majitel), vidíš svůj plný deník
+    # --- PLNÝ DENÍK PRO MAJITELE ---
     return render(request, 'users/detail_psa.html', {
         'pes': pes,
+        'profil': profil,
+        # Zde jsou data pro nová pole:
         'uspechy': pes.uspechy.all(),
         'fotky': pes.galerie_fotky.all(),
         'videa': pes.galerie_videa.all(),
         'ockovani': pes.vsechna_ockovani.all(),
     })
 
+
 def nouzovy_profil_psa(request, pes_id):
-    # Tato funkce je tu teď jako pojistka pro přímé URL /pes/2/
+    # Tady by měla být logika pro zobrazení nouzového profilu
+    # (pokud pes není ztracený, přesměrovat na normální detail, atd.)
     pes = get_object_or_404(Pes, id=pes_id)
-    return render(request, 'users/nouzovy_profil.html', {
+
+    context = {
         'pes': pes,
-        'majitel': pes.majitel,
         'nouzovy_rezim': pes.je_ztraceny,
-    })
+    }
+    return render(request, 'users/nouzovy_profil.html', context)
+
 
 
 def odeslat_sos_email(request, pes_id):
@@ -528,7 +535,7 @@ def zed_plemene(request, slug):
     plemeno = get_object_or_404(Plemeno, slug=slug)
 
     # Řazení příspěvků od nejnovějších
-    prispevky = Prispevek.objects.filter(plemeno=plemeno).order_by('-datum_pridani')
+    prispevky = Prispevek.objects.filter(sekce_slug=plemeno).order_by('-datum_pridani')
 
     form = PrispevekForm()
 
@@ -731,11 +738,25 @@ def smazat_komentar(request, pk):
         messages.error(request, "Nemáte oprávnění.")
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
-# --- Profilové funkce zůstávají stejné ---
+
 @login_required
 def profil_uzivatele(request):
+    # Získání nebo vytvoření profilu
     profil, created = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
-    context = {'profil': profil, 'libi_se_mi': [], 'komentare': []}
+
+    # --- OPRAVA: Načtení reálných dat ---
+    # Získání lajků, které dal uživatel (nebo dostal, záleží na logice)
+    lajky = Like.objects.filter(uzivatel=request.user)
+
+    # Získání komentářů, které uživatel napsal
+    komentare = Komentar.objects.filter(autor=request.user)
+    # ------------------------------------
+
+    context = {
+        'profil': profil,
+        'libi_se_mi': lajky,
+        'komentare': komentare,
+    }
     return render(request, 'users/profil.html', context)
 
 
@@ -744,6 +765,8 @@ def register(request):
         form = ExtendedRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            # Automaticky vytvořit profil při registraci
+            ProfilMajitele.objects.create(uzivatel=user)
             login(request, user)
             return redirect('profil')
     else:
@@ -754,14 +777,26 @@ def register(request):
 @login_required
 def upravit_profil(request):
     if request.method == 'POST':
-        form = UserUpdateForm(request.POST, instance=request.user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Profil upraven.")
+        # Formulář pro uživatelské jméno/email
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        # Formulář pro telefon/adresu
+        profil_form = ProfilUpdateForm(request.POST, instance=request.user.profilmajitele)
+
+        if user_form.is_valid() and profil_form.is_valid():
+            user_form.save()
+            profil_form.save()
+            messages.success(request, "Profil byl úspěšně upraven.")
             return redirect('profil')
     else:
-        form = UserUpdateForm(instance=request.user)
-    return render(request, 'users/profil.html', {'form': form})
+        user_form = UserUpdateForm(instance=request.user)
+        profil_form = ProfilUpdateForm(instance=request.user.profilmajitele)
+
+    context = {
+        'user_form': user_form,
+        'profil_form': profil_form,
+        'profil': request.user.profilmajitele
+    }
+    return render(request, 'users/profil.html', context)
 
 
 @login_required
@@ -769,10 +804,20 @@ def smazat_profil(request):
     uzivatel = request.user
     logout(request)
     uzivatel.delete()
-    messages.warning(request, "Účet smazán.")
+    messages.warning(request, "Účet byl smazán.")
     return redirect('home')
+
 
 @login_required
 def seznam_notifikaci(request):
-    notifikace = Notifikace.objects.filter(prijemce=request.user).order_by('-datum_vytvoreni')
-    return render(request, 'users/notifikace.html', {'notifikace': notifikace})
+    # Načtení notifikací pro uživatele
+    notifikace = Notifikace.objects.filter(prijemce=request.user)
+
+    # Označení jako přečtené (všechny)
+    notifikace.filter(precteno=False).update(precteno=True)
+
+    # Do kontextu předáváme 'nots' podle vaší šablony
+    context = {
+        'nots': notifikace,
+    }
+    return render(request, 'users/notifikace.html', context)

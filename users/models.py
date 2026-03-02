@@ -1,11 +1,12 @@
 from datetime import timedelta, date
-
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 import qrcode
 from io import BytesIO
 from django.core.files import File
 from django.db import models
+from django.contrib.auth.models import User
+
 
 
 class PromoKod(models.Model):
@@ -215,7 +216,6 @@ class Plemeno(models.Model):
     slug = models.SlugField(unique=True)
     ikona = models.ImageField(upload_to='plemena_ikony/', blank=True)
 
-    # --- OPRAVA: Pole pro kategorizaci ---
     # Hodnoty: 'vystavy', 'lovecka', 'ostatni'
     kategorie = models.CharField(max_length=50, default='ostatni', db_index=True)
 
@@ -230,22 +230,15 @@ class Plemeno(models.Model):
 
 class Prispevek(models.Model):
     autor = models.ForeignKey(User, on_delete=models.CASCADE)
-    # Propojení na plemeno/sekci
-    plemeno = models.ForeignKey(Plemeno, on_delete=models.CASCADE, related_name='prispevky_na_zed', null=True,
-                                blank=True)
+    plemeno = models.ForeignKey(Plemeno, on_delete=models.CASCADE, related_name='prispevky_na_zed', null=True, blank=True)
     sekce_slug = models.CharField(max_length=100, db_index=True, blank=True)
-
     text = models.TextField()
-
-    # --- OPRAVA: Nahrávání souborů ---
     obrazek = models.ImageField(upload_to='prispevky/', blank=True, null=True)
     video = models.FileField(upload_to='videa/', blank=True, null=True)
-
     datum_pridani = models.DateTimeField(auto_now_add=True)
     likes = models.ManyToManyField(User, related_name='libi_se_mi', blank=True)
 
     class Meta:
-        # --- OPRAVA: Řazení od nejnovějších ---
         ordering = ['-datum_pridani']
 
     def __str__(self):
@@ -253,19 +246,36 @@ class Prispevek(models.Model):
 
 
 class Komentar(models.Model):
-    prispevek = models.ForeignKey(Prispevek, on_delete=models.CASCADE, related_name='komentare')
+    # Odkaz na Prispevek, uvozovky jsou bezpečnější, pokud by byl Prispevek níže
+    prispevek = models.ForeignKey('Prispevek', on_delete=models.CASCADE, related_name='komentare')
     autor = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
     datum_pridani = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['datum_pridani']  # Komentáře od nejstarších
+        ordering = ['datum_pridani']
 
 
 class Notifikace(models.Model):
     prijemce = models.ForeignKey(User, on_delete=models.CASCADE, related_name='prijate_notifikace')
-    odesilatel = models.ForeignKey(User, on_delete=models.CASCADE)
+    odesilatel = models.ForeignKey(User, on_delete=models.CASCADE, related_name='odeslane_notifikace')
     typ = models.CharField(max_length=20)  # 'like', 'komentar'
-    prispevek = models.ForeignKey(Prispevek, on_delete=models.CASCADE, null=True)
+
+    # --- OPRAVA: Použití názvu třídy Prispevek ---
+    prispevek = models.ForeignKey('Prispevek', on_delete=models.CASCADE, null=True, blank=True)
+    # ---------------------------------------------
+
     precteno = models.BooleanField(default=False)
     datum_vytvoreni = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-datum_vytvoreni']
+
+class Like(models.Model):
+    uzivatel = models.ForeignKey(User, on_delete=models.CASCADE)
+    prispevek = models.ForeignKey(Prispevek, on_delete=models.CASCADE)
+    datum_pridani = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # Zajistí, že uživatel může dát jeden lajk příspěvku jen jednou
+        unique_together = ('uzivatel', 'prispevek')

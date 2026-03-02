@@ -1,5 +1,6 @@
 from django.contrib import admin
 from . import models
+from .models import Prispevek
 
 
 # --- INLINES ---
@@ -37,10 +38,10 @@ class PromoKodAdmin(admin.ModelAdmin):
 
 
 # --- OSTATNÍ REGISTRACE ---
-@admin.register(models.Prispevek)
+@admin.register(Prispevek)
 class PrispevekAdmin(admin.ModelAdmin):
-    list_display = ('autor', 'plemeno', 'datum_pridani')
-    list_filter = ('plemeno', 'datum_pridani')
+    list_display = ('autor', 'text', 'datum_pridani')
+    list_filter = ('autor', 'datum_pridani')
 
 
 @admin.register(models.Plemeno)

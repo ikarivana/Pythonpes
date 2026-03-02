@@ -202,3 +202,8 @@ class OckovaniForm(forms.ModelForm):
             'nazev_vakciny': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Např. Nobivac'}),
             'poznamka': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }
+
+class ProfilUpdateForm(forms.ModelForm):
+    class Meta:
+        model = ProfilMajitele
+        fields = ['telefon', 'ulice_cp', 'mesto', 'psc'] # Pole, která chceš upravovat

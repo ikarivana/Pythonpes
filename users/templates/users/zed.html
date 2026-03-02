@@ -34,6 +34,22 @@
         color: var(--text-dark);
         display: block !important;
     }
+    .add-post-card {
+    background: white; border-radius: 24px; padding: 25px;
+    box-shadow: 0 10px 30px rgba(139, 94, 60, 0.08); margin-bottom: 40px;
+    border: 1px solid var(--card-border);
+}
+.add-post-card textarea {
+    width: 100%;
+    border: 1.5px solid var(--card-border) !important;
+    background: #fafafa !important;
+    border-radius: 18px !important;
+    padding: 15px 20px !important;
+    resize: none;
+    min-height: 100px;
+    color: var(--text-dark);
+    display: block !important;
+}
 
     /* TLAČÍTKA NAHRÁVÁNÍ */
     .mini-upload-btn {
@@ -61,6 +77,23 @@
 
     .comment-section { background: #fdfbf9; padding: 20px; border-top: 1px solid #f9f1e7; }
     .comment-bubble { background: white; border-radius: 15px; padding: 10px 15px; margin-bottom: 10px; border: 1px solid #f3f0ec; }
+
+@media (max-width: 576px) {
+    .add-post-card .d-flex.justify-content-between {
+        flex-direction: column; /* Tlačítka pod sebe */
+        gap: 15px; /* Mezera mezi řádky */
+        align-items: stretch; /* Roztáhne prvky na plnou šířku */
+    }
+
+    .add-post-card .d-flex.gap-2 {
+        width: 100%;
+        justify-content: space-between; /* Foto a Video tlačítka roztáhnout */
+    }
+
+    .btn-gold-action {
+        width: 100%; /* Publikovat přes celou šířku */
+    }
+}
 </style>
 
 <div class="feed-container">
