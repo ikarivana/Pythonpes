@@ -9,7 +9,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from pillow_heif import register_heif_opener
 
 from django.conf import settings
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import login
 from django.core.mail import send_mail
 from django.http import HttpResponse, JsonResponse
@@ -30,7 +30,6 @@ from xhtml2pdf import pisa
 
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
 from django.contrib import messages
 
 
@@ -532,15 +531,17 @@ def seznam_zdi(request):
 # --- 2. ZED PŘÍSPĚVKŮ (ŘAZENÍ OD NEJNOVĚJŠÍCH) ---
 @login_required
 def zed_plemene(request, slug):
+    # Načtení konkrétní zdi (Plemena)
     plemeno = get_object_or_404(Plemeno, slug=slug)
 
-    # Řazení příspěvků od nejnovějších
-    prispevky = Prispevek.objects.filter(sekce_slug=plemeno).order_by('-datum_pridani')
-
-    form = PrispevekForm()
+    # DŮLEŽITÉ: Načteme příspěvky patřící k tomuto plemeni
+    # select_related a prefetch_related zrychlí načítání autora a komentářů
+    prispevky = Prispevek.objects.filter(plemeno=plemeno) \
+        .select_related('autor') \
+        .prefetch_related('komentare__autor') \
+        .order_by('-datum_pridani')
 
     if request.method == 'POST':
-        # Zpracování formuláře pro nový příspěvek
         if 'btn_prispevek' in request.POST:
             form = PrispevekForm(request.POST, request.FILES)
             if form.is_valid():
@@ -551,38 +552,28 @@ def zed_plemene(request, slug):
                 messages.success(request, "Příspěvek byl publikován.")
                 return redirect('zed_plemene', slug=slug)
 
-        # Zpracování komentářů
+        # Zpracování komentáře (používá related_name='komentare')
         elif 'btn_komentar' in request.POST:
             prispevek_id = request.POST.get('prispevek_id')
-            # Bezpečná kontrola přítomnosti ID
-            if prispevek_id:
-                prispevek = get_object_or_404(Prispevek, id=prispevek_id)
-                text = request.POST.get('text_komentare')
-                if text:
-                    Komentar.objects.create(
-                        prispevek=prispevek,
-                        autor=request.user,
-                        text=text
-                    )
-                    # Notifikace vlastníkovi příspěvku
-                    if prispevek.autor != request.user:
-                        Notifikace.objects.create(
-                            prijemce=prispevek.autor,
-                            odesilatel=request.user,
-                            typ='komentar',
-                            prispevek=prispevek
-                        )
-                    messages.success(request, "Komentář přidán.")
-                    return redirect('zed_plemene', slug=slug)
+            prispevek = get_object_or_404(Prispevek, id=prispevek_id)
+            text = request.POST.get('text_komentare')
+            if text:
+                Komentar.objects.create(
+                    prispevek=prispevek,
+                    autor=request.user,
+                    text=text
+                )
+                return redirect('zed_plemene', slug=slug)
+
+    else:
+        form = PrispevekForm()
 
     return render(request, 'users/zed.html', {
         'form': form,
         'plemeno': plemeno,
         'prispevky': prispevky,
-        'nazev_sekce': plemeno.nazev,
         'slug': slug
     })
-
 
 @login_required
 def pridat_odpoved(request, parent_id):
@@ -710,11 +701,12 @@ def smazat_prispevek(request, pk):
 @login_required
 def pridej_like(request, post_id):
     p = get_object_or_404(Prispevek, id=post_id)
+    liked = False
     if request.user in p.likes.all():
         p.likes.remove(request.user)
     else:
         p.likes.add(request.user)
-        # Notifikace autorovi
+        liked = True
         if p.autor != request.user:
             Notifikace.objects.create(
                 prijemce=p.autor,
@@ -722,7 +714,14 @@ def pridej_like(request, post_id):
                 typ='like',
                 prispevek=p
             )
-    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+    # Pokud je požadavek z JavaScriptu (AJAX), vrať jen JSON
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({
+            'liked': liked,
+            'count': p.likes.count()
+        })
+    return redirect(f"{request.META.get('HTTP_REFERER', '/')}#post-{p.id}")
 
 
 @login_required
@@ -739,18 +738,31 @@ def smazat_komentar(request, pk):
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
+# --- REGISTRACE ---
+def register(request):
+    if request.method == 'POST':
+        form = ExtendedRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Automaticky vytvořit profil při registraci
+            ProfilMajitele.objects.get_or_create(uzivatel=user)
+            login(request, user)
+            messages.success(request, f"Vítej, {user.first_name}! Registrace proběhla úspěšně.")
+            return redirect('profil_uzivatele')  # Změň na název tvé URL pro profil
+    else:
+        form = ExtendedRegistrationForm()
+    return render(request, 'users/register.html', {'form': form})
+
+
+# --- PROFIL ---
 @login_required
 def profil_uzivatele(request):
     # Získání nebo vytvoření profilu
     profil, created = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
 
-    # --- OPRAVA: Načtení reálných dat ---
-    # Získání lajků, které dal uživatel (nebo dostal, záleží na logice)
+    # Statistiky pro šablonu
     lajky = Like.objects.filter(uzivatel=request.user)
-
-    # Získání komentářů, které uživatel napsal
     komentare = Komentar.objects.filter(autor=request.user)
-    # ------------------------------------
 
     context = {
         'profil': profil,
@@ -760,51 +772,42 @@ def profil_uzivatele(request):
     return render(request, 'users/profil.html', context)
 
 
-def register(request):
-    if request.method == 'POST':
-        form = ExtendedRegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            # Automaticky vytvořit profil při registraci
-            ProfilMajitele.objects.create(uzivatel=user)
-            login(request, user)
-            return redirect('profil')
-    else:
-        form = ExtendedRegistrationForm()
-    return render(request, 'users/register.html', {'form': form})
-
-
+# --- UPRAVIT PROFIL ---
 @login_required
 def upravit_profil(request):
-    if request.method == 'POST':
-        # Formulář pro uživatelské jméno/email
-        user_form = UserUpdateForm(request.POST, instance=request.user)
-        # Formulář pro telefon/adresu
-        profil_form = ProfilUpdateForm(request.POST, instance=request.user.profilmajitele)
+    profil, created = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
 
-        if user_form.is_valid() and profil_form.is_valid():
+    if request.method == 'POST':
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        profil_form = ProfilUpdateForm(request.POST, request.FILES, instance=profil)
+
+        if user_form.is_white() and profil_form.is_valid():
             user_form.save()
             profil_form.save()
             messages.success(request, "Profil byl úspěšně upraven.")
-            return redirect('profil')
+            return redirect('profil_uzivatele')
     else:
         user_form = UserUpdateForm(instance=request.user)
-        profil_form = ProfilUpdateForm(instance=request.user.profilmajitele)
+        profil_form = ProfilUpdateForm(instance=profil)
 
+    # Statistiky potřebujeme i zde, pokud se zobrazují ve stejné šabloně
     context = {
         'user_form': user_form,
         'profil_form': profil_form,
-        'profil': request.user.profilmajitele
+        'profil': profil,
+        'libi_se_mi': Like.objects.filter(uzivatel=request.user),
+        'komentare': Komentar.objects.filter(autor=request.user),
     }
     return render(request, 'users/profil.html', context)
 
 
+# --- SMAZAT PROFIL ---
 @login_required
 def smazat_profil(request):
     uzivatel = request.user
     logout(request)
     uzivatel.delete()
-    messages.warning(request, "Účet byl smazán.")
+    messages.warning(request, "Tvůj účet byl smazán.")
     return redirect('home')
 
 

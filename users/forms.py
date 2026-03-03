@@ -182,7 +182,13 @@ class PrispevekForm(forms.ModelForm):
         model = Prispevek
         fields = ['text', 'obrazek', 'video']
         widgets = {
-            'text': forms.Textarea(attrs={'placeholder': 'Co je nového?'}),
+            'text': forms.Textarea(attrs={
+                'placeholder': 'Co je nového?',
+                'class': 'form-control' # aby vypadal hezky
+            }),
+            # PŘIDEJ TYTO ŘÁDKY:
+            'obrazek': forms.FileInput(attrs={'id': 'id_obrazek', 'accept': 'image/*'}),
+            'video': forms.FileInput(attrs={'id': 'id_video', 'accept': 'video/*'}),
         }
 
 
