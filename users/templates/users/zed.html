@@ -24,15 +24,10 @@
         border: 1px solid var(--card-border);
     }
     .add-post-card textarea {
-        width: 100%;
-        border: 1.5px solid var(--card-border) !important;
-        background: #fafafa !important;
-        border-radius: 18px !important;
-        padding: 15px 20px !important;
-        resize: none;
-        min-height: 100px;
-        color: var(--text-dark);
-        display: block !important;
+        width: 100%; border: 1.5px solid var(--card-border) !important;
+        background: #fafafa !important; border-radius: 18px !important;
+        padding: 15px 20px !important; resize: none; min-height: 100px;
+        color: var(--text-dark); display: block !important;
     }
 
     /* TLAČÍTKA NAHRÁVÁNÍ */
@@ -56,36 +51,29 @@
     /* PŘÍSPĚVEK */
     .post-card { background: white; border-radius: 24px; margin-bottom: 35px; box-shadow: 0 8px 25px rgba(0,0,0,0.03); overflow: hidden; border: 1px solid rgba(234,221,207,0.4); }
     .post-header { padding: 15px 20px; border-bottom: 1px solid #f9f1e7; }
-    .post-media { background: #fdfaf5; display: flex; justify-content: center; }
-    .post-media img, .post-media video { max-width: 100%; max-height: 500px; object-fit: contain; }
+    .post-media { background: #fdfaf5; display: flex; justify-content: center; width: 100%; }
+    .post-media img, .post-media video { width: 100%; max-height: 500px; object-fit: contain; }
 
     .comment-section { background: #fdfbf9; padding: 20px; border-top: 1px solid #f9f1e7; }
     .comment-bubble {
-        background: #f0f2f5;
-        border-radius: 18px;
-        padding: 10px 15px;
-        margin-bottom: 8px;
-        border: none;
-        max-width: 90%;
-        display: inline-block;
+        background: #f0f2f5; border-radius: 18px; padding: 10px 15px;
+        margin-bottom: 8px; border: none; max-width: 90%; display: inline-block;
     }
-    .comment-bubble strong { font-size: 0.8rem; display: block; margin-bottom: 2px; }
 
     /* ŠIPKA ZPĚT */
     .back-arrow-container { margin-bottom: 25px; }
     .back-link {
         display: inline-flex; align-items: center; text-decoration: none !important;
-        color: #3e2723; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; transition: 0.3s;
+        color: #3e2723; font-weight: 700; font-size: 0.85rem; text-transform: uppercase;
     }
     .back-icon {
         width: 38px; height: 38px; background: white; border-radius: 12px;
         display: flex; align-items: center; justify-content: center; margin-right: 12px;
-        border: 1px solid #eaddcf; box-shadow: 0 4px 12px rgba(62, 39, 35, 0.08); color: #c5a059;
+        border: 1px solid #eaddcf; color: #c5a059;
     }
 
     @media (max-width: 576px) {
-        .add-post-card .d-flex.justify-content-between { flex-direction: column; gap: 15px; align-items: stretch; }
-        .add-post-card .d-flex.gap-2 { width: 100%; justify-content: space-between; }
+        .add-post-card .d-flex.justify-content-between { flex-direction: column; gap: 15px; }
         .btn-gold-action { width: 100%; }
     }
 </style>
@@ -108,6 +96,7 @@
         </h1>
     </div>
 
+    {# 1. SEKCE PRO PŘIDÁVÁNÍ #}
     {% if user.is_authenticated %}
     <div class="add-post-card">
         <form method="post" enctype="multipart/form-data" id="post-form">
@@ -122,20 +111,18 @@
 
             <div id="preview-container" class="mb-3" style="display:none;">
                 <div class="position-relative d-inline-block">
-                    <img id="image-preview" src="#" alt="Náhled"
-                         style="max-width: 200px; border-radius: 15px; border: 2px solid var(--gold-accent);">
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                          style="cursor:pointer;" id="clear-media">✕</span>
+                    <img id="image-preview" src="#" alt="Náhled" style="max-width: 200px; border-radius: 15px; border: 2px solid var(--gold-accent);">
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="cursor:pointer;" id="clear-media">✕</span>
                 </div>
             </div>
 
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex gap-2">
-                    <label class="mini-upload-btn" id="label-photo" style="cursor: pointer;">
+                    <label class="mini-upload-btn" id="label-photo">
                         <div class="icon-box-gold"><i class="fas fa-images"></i></div>
                         <span>Foto</span>
                     </label>
-                    <label class="mini-upload-btn" id="label-video" style="cursor: pointer;">
+                    <label class="mini-upload-btn" id="label-video">
                         <div class="icon-box-gold"><i class="fas fa-video"></i></div>
                         <span>Video</span>
                     </label>
@@ -144,8 +131,18 @@
             </div>
         </form>
     </div>
+    {% else %}
+    <div class="add-post-card text-center" style="background: var(--gold-light); border: 2px dashed var(--gold-accent);">
+        <h3 style="color: var(--primary-brown); font-weight: 800;">Chcete se zapojit do komunity? 🐾</h3>
+        <p>Pro přidávání vlastních příspěvků a fotek se prosím přihlaste.</p>
+        <div class="d-flex gap-2 justify-content-center mt-3">
+            <a href="{% url 'login' %}" class="btn-gold-action text-decoration-none">Přihlásit se</a>
+            <a href="{% url 'register' %}" class="btn-gold-action text-decoration-none" style="background: var(--primary-brown);">Vytvořit účet</a>
+        </div>
+    </div>
     {% endif %}
 
+    {# 2. VÝPIS PŘÍSPĚVKŮ #}
     <div class="posts-wrapper">
         {% for post in prispevky %}
         <div id="post-{{ post.id }}" class="post-card">
@@ -159,17 +156,12 @@
                 </div>
                 {% if post.autor == user or user.is_staff %}
                 <div class="dropdown">
-                    <button class="btn btn-sm btn-link text-muted" type="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </button>
+                    <button class="btn btn-sm btn-link text-muted" data-bs-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
                         <li><a class="dropdown-item" href="{% url 'upravit_prispevek' post.id %}"><i class="fas fa-edit me-2"></i>Upravit</a></li>
                         <li>
                             <form action="{% url 'smazat_prispevek' post.id %}" method="post">
-                                {% csrf_token %}
-                                <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Smazat?')">
-                                    <i class="fas fa-trash me-2"></i>Smazat
-                                </button>
+                                {% csrf_token %}<button type="submit" class="dropdown-item text-danger" onclick="return confirm('Smazat?')"><i class="fas fa-trash me-2"></i>Smazat</button>
                             </form>
                         </li>
                     </ul>
@@ -181,34 +173,21 @@
                 <div class="post-media"><img src="{{ post.obrazek.url }}" alt="Příspěvek"></div>
             {% elif post.video %}
                 <div class="post-media">
-                    <video controls style="width: 100%;">
-                        <source src="{{ post.video.url }}" type="video/mp4">
-                    </video>
+                    <video controls style="width: 100%;"><source src="{{ post.video.url }}" type="video/mp4"></video>
                 </div>
             {% endif %}
 
             <div class="p-4">
-                {% if plemeno.slug == 'venceni' or plemeno.slug == 'hlidani' %}
-                <div class="mb-3 d-flex gap-2 flex-wrap">
-                    {% if plemeno.slug == 'venceni' and "spolu" in post.text|lower or plemeno.slug == 'venceni' and "parťák" in post.text|lower %}
-                        <span class="badge rounded-pill px-3 py-2" style="background: #6f42c1; font-weight: 600;">🐾 Spoluvenčení</span>
-                    {% elif "nabízím" in post.text|lower or "nabídka" in post.text|lower or "pohlídám" in post.text|lower or "azyl" in post.text|lower %}
-                        <span class="badge rounded-pill px-3 py-2 bg-success" style="font-weight: 600;">📢 Nabídka</span>
-                    {% elif "hledám" in post.text|lower or "poptávka" in post.text|lower or "potřebuji" in post.text|lower %}
-                        <span class="badge rounded-pill px-3 py-2 bg-warning text-dark" style="font-weight: 600;">🔍 Poptávka</span>
-                    {% endif %}
-                </div>
-                {% endif %}
-
                 <p class="fs-5">{{ post.text }}</p>
 
                 <div class="d-flex align-items-center gap-2 mt-3">
-                    <a href="javascript:void(0);"
-                       data-url="{% url 'like_post' post.id %}"
-                       class="like-btn text-decoration-none fs-4"
-                       id="like-icon-{{ post.id }}">
-                        {% if user in post.likes.all %}❤️{% else %}🤍{% endif %}
-                    </a>
+                    {% if user.is_authenticated %}
+                        <a href="javascript:void(0);" data-url="{% url 'like_post' post.id %}" class="like-btn text-decoration-none fs-4" id="like-icon-{{ post.id }}">
+                            {% if user in post.likes.all %}❤️{% else %}🤍{% endif %}
+                        </a>
+                    {% else %}
+                        <span class="fs-4" title="Pro lajkování se přihlaste">🤍</span>
+                    {% endif %}
                     <span id="like-count-{{ post.id }}" class="small fw-bold">{{ post.likes.count }} lajků</span>
                 </div>
             </div>
@@ -232,13 +211,13 @@
                         <button class="btn btn-gold-action border-0" name="btn_komentar" type="submit" style="border-radius: 0;">Poslat</button>
                     </div>
                 </form>
+                {% else %}
+                <p class="text-center mt-3"><small><a href="{% url 'login' %}" style="color: var(--gold-accent);">Přihlaste se</a> pro přidání komentáře.</small></p>
                 {% endif %}
             </div>
         </div>
         {% empty %}
-        <div class="text-center py-5">
-            <p class="text-muted">Zatím tu nejsou žádné příspěvky. Buďte první! 🐾</p>
-        </div>
+        <div class="text-center py-5"><p class="text-muted">Zatím tu nejsou žádné příspěvky. 🐾</p></div>
         {% endfor %}
     </div>
 </div>
@@ -251,67 +230,37 @@
         const videoInput = document.querySelector('input[name="video"]');
         const previewDiv = document.getElementById('preview-container');
         const previewImg = document.getElementById('image-preview');
-        const postForm = document.getElementById('post-form');
 
-        if (photoLabel && photoInput) photoLabel.addEventListener('click', () => photoInput.click());
-        if (videoLabel && videoInput) videoLabel.addEventListener('click', () => videoInput.click());
+        // Kliknutí na vlastní tlačítka aktivuje skryté inputy
+        if (photoLabel) photoLabel.addEventListener('click', () => photoInput.click());
+        if (videoLabel) videoLabel.addEventListener('click', () => videoInput.click());
 
         if (photoInput) {
             photoInput.addEventListener('change', function() {
                 if (this.files && this.files[0]) {
                     photoLabel.style.border = "2px solid #28a745";
-                    photoLabel.querySelector('span').innerText = "FOTKA VYBRÁNA";
                     const reader = new FileReader();
-                    reader.onload = function(e) {
-                        previewImg.src = e.target.result;
-                        previewDiv.style.display = 'block';
-                    }
+                    reader.onload = (e) => { previewImg.src = e.target.result; previewDiv.style.display = 'block'; }
                     reader.readAsDataURL(this.files[0]);
                 }
             });
         }
 
-        if (videoInput) {
-            videoInput.addEventListener('change', function() {
-                if (this.files && this.files[0]) {
-                    videoLabel.style.border = "2px solid #28a745";
-                    videoLabel.querySelector('span').innerText = "VIDEO VYBRÁNO";
-                }
-            });
-        }
+        document.getElementById('clear-media')?.addEventListener('click', () => {
+            photoInput.value = ""; previewDiv.style.display = 'none';
+            photoLabel.style.border = "1px solid var(--card-border)";
+        });
 
-        const clearBtn = document.getElementById('clear-media');
-        if (clearBtn) {
-            clearBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                photoInput.value = "";
-                videoInput.value = "";
-                previewDiv.style.display = 'none';
-                photoLabel.style.border = "1px solid var(--card-border)";
-                photoLabel.querySelector('span').innerText = "Foto";
-            });
-        }
-
-        if (postForm) {
-            postForm.addEventListener('submit', function() {
-                const btn = this.querySelector('button[name="btn_prispevek"]');
-                btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Posílám...';
-                btn.disabled = true;
-            });
-        }
-
+        // AJAX Lajkování
         document.querySelectorAll('.like-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', function() {
                 const url = this.getAttribute('data-url');
                 const icon = this;
                 const postId = url.split('/').filter(Boolean).pop();
                 const countSpan = document.getElementById(`like-count-${postId}`);
 
-                fetch(url, {
-                    method: 'GET',
-                    headers: {'X-Requested-With': 'XMLHttpRequest'}
-                })
-                .then(response => {
+                fetch(url, { headers: {'X-Requested-With': 'XMLHttpRequest'} })
+                .then(r => {
                     if (icon.innerText === '🤍') {
                         icon.innerText = '❤️';
                         countSpan.innerText = (parseInt(countSpan.innerText) + 1) + " lajků";
@@ -319,7 +268,7 @@
                         icon.innerText = '🤍';
                         countSpan.innerText = (parseInt(countSpan.innerText) - 1) + " lajků";
                     }
-                }).catch(err => console.log(err));
+                });
             });
         });
     });

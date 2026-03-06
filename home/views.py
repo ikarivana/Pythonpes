@@ -1,173 +1,134 @@
 import json
 from datetime import timedelta, date
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.db.models import Q
 from django.utils import timezone
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
 
 # Importy tvých modelů a forem
 from .models import Sluzba, KontaktniZprava
 from .forms import SluzbaForm, KontaktForm
 from users.models import Prispevek, Pes, ProfilMajitele
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
-import json
-from django.http import HttpResponse
-from django.contrib.auth.models import User
-from datetime import date, timedelta
-from django.shortcuts import render
 
-# --- 1. HLAVNÍ STRÁNKA (OPRAVENÁ) ---
+
+# --- 1. HLAVNÍ STRÁNKA ---
 def index(request):
     is_premium = False
-
     if request.user.is_authenticated:
-        profil = ProfilMajitele.objects.filter(uzivatel=request.user).first()
-        if profil:
-            if profil.is_premium:
-                if profil.premium_do:
-                    is_premium = profil.premium_do >= date.today()
-                else:
-                    is_premium = True
-            else:
-                is_premium = False
+        # Používáme hasattr pro bezpečné ověření existence profilu
+        if hasattr(request.user, 'profilmajitele'):
+            profil = request.user.profilmajitele
+            is_premium = profil.is_premium and (not profil.premium_do or profil.premium_do >= date.today())
 
-    # Načtení dat pro šablonu (ztracení psi a zeď)
-    ztraceni_psi = Pes.objects.filter(je_ztraceny=True)
-    posledni_prispevky = Prispevek.objects.all().order_by('-datum_pridani')[:5] # Načte posledních 5 příspěvků
-
-    return render(request, 'home/index.html', {
+    context = {
         'je_premium': is_premium,
-        'ztraceni_psi': ztraceni_psi,
-        'posledni_prispevky': posledni_prispevky,
-    })
+        'ztraceni_psi': Pes.objects.filter(je_ztraceny=True),
+        'posledni_prispevky': Prispevek.objects.all().order_by('-datum_pridani')[:5],
+    }
+    return render(request, 'home/index.html', context)
 
+
+# --- 2. PLATEBNÍ SYSTÉM (SIMPLESHOP) ---
 @csrf_exempt
 def simpleshop_webhook(request):
-    """Webhook pro zpracování plateb ze Simpleshopu."""
-    if request.method == 'POST':
-        try:
-            # 1. Načtení dat ze Simpleshopu
-            try:
-                data = json.loads(request.body)
-                email = data.get('customer', {}).get('email')
-                event = data.get('event')
-                product_id = data.get('product', {}).get('id')
-            except:
-                email = request.POST.get('customer_email') or request.POST.get('email')
-                event = request.POST.get('event')
-                product_id = request.POST.get('product_id')
+    """Zpracování plateb ze Simpleshopu."""
+    if request.method != 'POST':
+        return HttpResponse("Method not allowed", status=405)
 
-            # 2. Zpracování úspěšné platby
-            if event == 'invoice.paid' and email:
-                try:
-                    user = User.objects.get(email=email)
-                    profil = user.profil  # Předpokládám, že máš profil přes related_name='profil'
+    try:
+        # Sjednocení načítání dat (JSON i POST)
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+        else:
+            data = request.POST
 
-                    # 3. ROZLIŠENÍ PLÁNŮ PODLE ID PRODUKTU
-                    # --- TADY ZMĚŇ ID NA TVOJE SKUTEČNÁ ID ZE SIMPLESHOPU ---
-                    if product_id == '142677':
-                        profil.is_premium = True
-                        profil.premium_do = date.today() + timedelta(days=30)  # Příklad 30 dní
-                        print(f"✅ Aktivován Chovatel pro: {email}")
+        # Simpleshop posílá data v hluboké struktuře nebo napřímo
+        email = data.get('customer', {}).get('email') if isinstance(data.get('customer'), dict) else data.get(
+            'customer_email')
+        event = data.get('event')
+        product_id = str(data.get('product', {}).get('id')) if isinstance(data.get('product'), dict) else str(
+            data.get('product_id'))
 
-                    elif product_id == '142680':
-                        profil.is_premium = True
-                        profil.premium_do = date.today() + timedelta(days=365)
-                        print(f"✅ Aktivován Profi pro: {email}")
+        if event == 'invoice.paid' and email:
+            user = User.objects.filter(email__iexact=email).first()
+            if user:
+                # Získáme nebo vytvoříme profil
+                profil, created = ProfilMajitele.objects.get_or_create(uzivatel=user)
 
+                # Rozlišení tarifů
+                dni_pridat = 30 if product_id == '142677' else 365 if product_id == '142680' else 0
+
+                if dni_pridat > 0:
+                    profil.is_premium = True
+                    # Pokud již premium má, přičteme k datu, jinak od dneška
+                    start_date = max(profil.premium_do or date.today(), date.today())
+                    profil.premium_do = start_date + timedelta(days=dni_pridat)
                     profil.save()
-                    return HttpResponse("OK", status=200)
+                    return HttpResponse(f"✅ Premium aktivováno na {dni_pridat} dní", status=200)
 
-                except User.DoesNotExist:
-                    print(f"⚠️ Uživatel s e-mailem {email} nenalezen.")
-                    return HttpResponse("User not found", status=404)
+            return HttpResponse("User not found", status=404)
 
-            return HttpResponse("Event ignored", status=200)
+        return HttpResponse("Ignored event", status=200)
 
-        except Exception as e:
-            print(f"⚠️ Chyba Webhooku: {e}")
-            return HttpResponse("Error", status=500)
-
-    return HttpResponse("Method not allowed", status=405)
-
-@login_required
-def dekujeme_za_nakup(request):
-    """Stránka po úspěšném nákupu."""
-    return render(request, 'home/dekujeme.html')
+    except Exception as e:
+        return HttpResponse(f"Error: {str(e)}", status=500)
 
 
 # --- 3. MAPA SLUŽEB ---
 def mapa_sluzeb(request):
-    # 1. FYZICKÉ SMAZÁNÍ (Pojistka pro čistou databázi)
-    # Smažeme nebezpečí starší než 7 dní (necháme je tam o kousek déle pro jistotu)
-    limit_smazani = timezone.now() - timedelta(days=7)
-    Sluzba.objects.filter(typ='nebezpeci', vytvoreno__lt=limit_smazani).delete()
+    # Pročištění starých nebezpečí (neprovádět při každém requestu v ostrém provozu, raději cron)
+    Sluzba.objects.filter(typ='nebezpeci', vytvoreno__lt=timezone.now() - timedelta(days=7)).delete()
 
-    # 2. FILTR PRO ZOBRAZENÍ (To, co uvidí uživatel na mapě)
-    # Definujeme hranici 3 dny pro zobrazení výstrahy
+    # Zobrazíme schválené služby a čerstvá nebezpečí
     limit_vystrahy = timezone.now() - timedelta(days=3)
-
-    # Vybereme služby, které jsou schválené...
-    # ...A u nebezpečí přidáme podmínku, že nesmí být starší než 3 dny
     sluzby_queryset = Sluzba.objects.filter(
-        Q(schvaleno=True) |
-        Q(typ='nebezpeci', vytvoreno__gte=limit_vystrahy)
-    )
+        (Q(schvaleno=True) | Q(typ='nebezpeci')) &
+        Q(vytvoreno__gte=limit_vystrahy)
+    ).exclude(typ='nebezpeci', potvrzeni_minus__gte=3)
 
     sluzby_data = []
     for s in sluzby_queryset:
-        # Pokud má služba moc nahlášení (potvrzeni_minus >= 3), přeskočíme ji
-        if s.typ == 'nebezpeci' and s.potvrzeni_minus >= 3:
-            continue
-
-        try:
-            lat, lon = float(s.lat), float(s.lon)
-            if lon > 180: lon = lon / 1000000
-        except:
-            lat, lon = 0, 0
-
         sluzby_data.append({
             'id': s.id,
             'nazev': s.nazev,
             'typ': s.get_typ_display(),
-            'typ_slug': s.typ,
-            'lat': lat,
-            'lon': lon,
+            'lat': s.lat,
+            'lon': s.lon,
             'adresa': s.adresa,
-            'telefon': s.telefon,
             'popis': s.popis,
-            'web': s.web,
+            'color': s.get_marker_color() if hasattr(s, 'get_marker_color') else '#c5a059',
         })
 
-    context = {
+    return render(request, 'home/mapa_sluzeb.html', {
         'sluzby_json': json.dumps(sluzby_data),
         'je_prihlasen': request.user.is_authenticated
-    }
-    # Opravený return, aby používal context
-    return render(request, 'home/mapa_sluzeb.html', context)
+    })
 
 
 @login_required
 def pridat_sluzbu(request):
+    """Tato funkce umožní lidem přidat novou službu."""
     if request.method == 'POST':
         form = SluzbaForm(request.POST)
         if form.is_valid():
             nova_sluzba = form.save(commit=False)
             nova_sluzba.vlastnik = request.user
-            if nova_sluzba.typ == 'nebezpeci':
-                nova_sluzba.schvaleno = True
+            # Pokud je to nebezpečí, schválíme hned, jinak čeká na admina
+            nova_sluzba.schvaleno = (nova_sluzba.typ == 'nebezpeci')
             nova_sluzba.save()
-            messages.success(request, "Záznam byl odeslán ke schválení. Po prověření administrátorem se objeví na mapě.")
+            messages.success(request, "Záznam byl uložen.")
             return redirect('mapa_sluzeb')
     else:
         form = SluzbaForm()
     return render(request, 'home/pridat_sluzbu.html', {'form': form})
 
-
 @login_required
 def upravit_sluzbu(request, pk):
+    """Tato funkce umožní vlastnikovi změnit údaje u jeho služby."""
     sluzba = get_object_or_404(Sluzba, pk=pk, vlastnik=request.user)
     if request.method == 'POST':
         form = SluzbaForm(request.POST, instance=sluzba)
@@ -176,62 +137,62 @@ def upravit_sluzbu(request, pk):
             messages.info(request, "Změny byly uloženy.")
             return redirect('mapa_sluzeb')
     else:
+        # Tady pošleme do formuláře stávající data služby
         form = SluzbaForm(instance=sluzba)
     return render(request, 'home/pridat_sluzbu.html', {'form': form, 'editace': True})
 
-
 @login_required
 def smazat_sluzbu(request, pk):
+    """Tato funkce umožní majiteli smazat jeho záznam z mapy."""
     sluzba = get_object_or_404(Sluzba, pk=pk, vlastnik=request.user)
     if request.method == 'POST':
         sluzba.delete()
-        messages.success(request, "Záznam byl odstraněn.")
+        messages.success(request, "Záznam byl úspěšně odstraněn.")
         return redirect('mapa_sluzeb')
+    # Pokud uživatel jen klikne na smazat, ukážeme mu potvrzovací stránku
     return render(request, 'home/smazat_confirm.html', {'sluzba': sluzba})
 
 
-# --- 4. KOMUNITNÍ FUNKCE ---
 def nahlasit_neaktualni(request, id):
+    """Služba dostane 'mínus bod'. U nebezpečí se po 3 nahlášeních smaže."""
     sluzba = get_object_or_404(Sluzba, id=id)
     sluzba.potvrzeni_minus += 1
     sluzba.save()
+
+    # Pokud je to nebezpečí a má 3 a více nahlášení, hned ho smažeme
     if sluzba.typ == 'nebezpeci' and sluzba.potvrzeni_minus >= 3:
         sluzba.delete()
         return JsonResponse({'status': 'deleted'})
+
     return JsonResponse({'status': 'ok'})
 
 
 def stale_aktualni(request, id):
+    """Pokud někdo potvrdí, že to tam pořád je, obnovíme čas vytvoření."""
     sluzba = get_object_or_404(Sluzba, id=id)
     sluzba.vytvoreno = timezone.now()
     sluzba.save()
     return JsonResponse({'status': 'ok'})
 
-
-# --- 5. OSTATNÍ ---
 def kontakt(request):
     if request.method == 'POST':
         form = KontaktForm(request.POST)
         if form.is_valid():
-            # Tady můžeš přidat odeslání mailu
+            # Tady by se odesílal mail, zatím jen vrátíme úspěch
             return render(request, 'home/kontakt.html', {'success': True})
-    return render(request, 'home/kontakt.html', {'form': KontaktForm()})
-
+    else:
+        form = KontaktForm()
+    return render(request, 'home/kontakt.html', {'form': form})
 
 def podminky(request):
-    # --- TADY NASTAV SVOJE INFORMACE ---
     moje_info = {
-        'jmeno': 'Ivana Elšíková',  # Tvoje jméno nebo název firmy
-        'ico': '23834838',          # Tvoje IČO
-        'adresa': 'Sokolská 29, Hvozdná, 76310', # Tvoje adresa
+        'jmeno': 'Ivana Elšíková',
+        'ico': '23834838',
+        'adresa': 'Sokolská 29, Hvozdná, 76310',
     }
-    # ------------------------------------
     return render(request, 'home/podminky.html', {'kontaktni_info': moje_info})
 
 def gdpr(request):
-    """
-    Zobrazí stránku se zásadami ochrany osobních údajů.
-    """
     context = {
         'kontaktni_info': {
             'jmeno': 'Ivana Elšíková',
@@ -242,9 +203,18 @@ def gdpr(request):
     }
     return render(request, 'home/gdpr.html', context)
 
+def cookies(request):
+    return render(request, 'home/cookies.html')
 
+def cenik(request):
+    return render(request, 'home/cenik.html')
 
-def cookies(request): return render(request, 'home/cookies.html')
+def dekujeme_za_nakup(request):
+    """Zobrazí stránku po úspěšné platbě."""
+    return render(request, 'home/dekujeme.html')
 
-
-def cenik(request): return render(request, 'home/cenik.html')
+@csrf_exempt
+def simpleshop_webhook(request):
+    """Tady se zpracovávají automatické platby (webhook)."""
+    # Pokud zatím nemáš logiku, necháme tu jen základ:
+    return HttpResponse("OK", status=200)

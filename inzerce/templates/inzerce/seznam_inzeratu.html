@@ -7,13 +7,14 @@
         --brown-mid: #8d6e63;
         --accent-gold: #d4a373;
         --premium-bg: #fdfaf5;
+        --soft-shadow: 0 10px 30px rgba(0,0,0,0.05);
     }
 
-    .bazar-container { padding: 20px 10px; }
+    .bazar-container { padding: 40px 15px; }
 
-    /* Opravený kontejner pro obrázek - bez duchů a dvojitých fotek */
+    /* Fix kontejneru pro obrázek - bez deformací */
     .card-img-container {
-        height: 250px; /* Trochu jsem zvýšil pro lepší dojem */
+        height: 240px;
         background-color: #fcfaf8;
         display: flex;
         align-items: center;
@@ -27,75 +28,94 @@
     .card-img-custom {
         width: 100%;
         height: 100%;
-        object-fit: contain; /* Fotka se celá vejde a neořízne se */
-        transition: transform 0.5s ease;
-        padding: 10px;
+        object-fit: cover; /* Pro seznam je lepší cover pro jednotný vzhled, contain v detailu */
+        transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
     }
 
     .card:hover .card-img-custom {
-        transform: scale(1.05);
+        transform: scale(1.1);
     }
 
     .card {
         transition: all 0.3s ease;
         border-radius: 18px !important;
-        border: 1px solid #eee;
+        border: 1px solid rgba(0,0,0,0.05);
         background-color: white;
         height: 100%;
+        box-shadow: var(--soft-shadow);
     }
 
     .card-premium {
-        border: 2px solid var(--accent-gold) !important;
-        background-color: var(--premium-bg) !important;
-        box-shadow: 0 8px 25px rgba(212, 163, 115, 0.2);
+        border: 1px solid var(--accent-gold) !important;
+        background: linear-gradient(180deg, var(--premium-bg) 0%, #ffffff 100%) !important;
+        box-shadow: 0 12px 35px rgba(212, 163, 115, 0.15);
     }
 
     .premium-badge-top {
         position: absolute;
-        top: 12px;
-        left: 12px; /* Přesunuto vlevo, aby neřezalo "TOP" */
-        background: linear-gradient(135deg, #d4a373 0%, #b38b5d 100%);
+        top: 15px;
+        left: 15px;
+        background: linear-gradient(135deg, var(--accent-gold) 0%, #b38b5d 100%);
         color: white;
-        padding: 5px 15px;
-        border-radius: 20px;
+        padding: 6px 14px;
+        border-radius: 50px;
         font-weight: 800;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         z-index: 10;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .price-tag {
+        color: var(--brown-dark);
+        font-weight: 800;
+        font-size: 1.25rem;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .filter-section {
+        background: #f8f5f2;
+        border-radius: 25px;
+        border: 1px solid rgba(141, 110, 99, 0.1);
     }
 </style>
 
 <div class="container bazar-container">
-    <div class="d-flex justify-content-between align-items-center mb-4 section-header">
-        <h2 style="color: var(--brown-dark); font-family: 'Playfair Display', serif; font-weight: bold;" class="mb-0 fs-3">🐶 Psí bazar</h2>
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h2 style="color: var(--brown-dark); font-family: 'Playfair Display', serif; font-weight: 900;" class="mb-1 fs-2">E-PES Bazar</h2>
+            <p class="text-muted small">Najděte vše pro své čtyřnohé parťáky</p>
+        </div>
         {% if user.is_authenticated %}
-            <a href="{% url 'pridat_inzerat' %}" class="premium-btn shadow-sm py-2 px-4 text-decoration-none" style="background-color: var(--brown-dark); color: white; border-radius: 12px; font-weight: 600;">
-                ➕ Vložit inzerát
+            <a href="{% url 'pridat_inzerat' %}" class="btn shadow-sm py-2 px-4 d-none d-md-block" style="background-color: var(--brown-dark); color: white; border-radius: 15px; font-weight: 700; transition: 0.3s;">
+                <i class="fas fa-plus-circle me-2"></i> Vložit inzerát
             </a>
         {% endif %}
     </div>
 
-    <div class="p-3 p-md-4 mb-5 border-0 shadow-sm" style="background-color: #f3efeb; border-radius: 20px;">
-        <form method="get" class="row g-3 align-items-center">
+    <div class="p-4 mb-5 filter-section shadow-sm">
+        <form method="get" class="row g-3">
             <div class="col-12 col-md-4">
-                <select name="kraj" class="form-select border-0 shadow-sm py-2" style="border-radius: 10px;">
-                    <option value="">🌍 Celá ČR (Všechny kraje)</option>
+                <label class="small fw-bold text-muted ms-2 mb-1">Lokalita</label>
+                <select name="kraj" class="form-select border-0 py-2 px-3 shadow-sm" style="border-radius: 12px;">
+                    <option value="">🌍 Celá ČR</option>
                     {% for kod, nazev in kraje %}
                     <option value="{{ kod }}" {% if request.GET.kraj == kod %}selected{% endif %}>{{ nazev }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="col-12 col-md-4">
-                <select name="kategorie" class="form-select border-0 shadow-sm py-2" style="border-radius: 10px;">
+                <label class="small fw-bold text-muted ms-2 mb-1">Co hledáte?</label>
+                <select name="kategorie" class="form-select border-0 py-2 px-3 shadow-sm" style="border-radius: 12px;">
                     <option value="">📦 Všechny kategorie</option>
                     {% for kod, nazev in kategorie_list %}
                     <option value="{{ kod }}" {% if request.GET.kategorie == kod %}selected{% endif %}>{{ nazev }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-12 col-md-4">
-                <button type="submit" class="btn w-100 fw-bold text-white shadow-sm py-2" style="background-color: var(--brown-dark); border-radius: 10px;">
-                    🔍 Vyhledat inzeráty
+            <div class="col-12 col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn w-100 fw-bold text-white shadow py-2" style="background-color: var(--brown-mid); border-radius: 12px; height: 45px;">
+                    🔍 Filtrovat nabídku
                 </button>
             </div>
         </form>
@@ -104,42 +124,42 @@
     <div class="row g-4">
         {% for inzerat in inzeraty %}
         <div class="col-12 col-md-6 col-lg-4">
-            <div class="card shadow-sm border-0 {% if inzerat.autor.profil.is_premium %}card-premium{% endif %}">
+            <div class="card border-0 {% if inzerat.je_premium %}card-premium{% endif %}">
 
                 <a href="{% url 'detail_inzeratu' inzerat.pk %}" class="card-img-container">
-                    {% if inzerat.autor.profil.is_premium %}
-                        <div class="premium-badge-top"><i class="fas fa-crown me-1"></i> TOP INZERÁT</div>
+                    {% if inzerat.je_premium %}
+                        <div class="premium-badge-top"><i class="fas fa-crown me-1"></i> ALFA TIP</div>
                     {% endif %}
 
                     {% if inzerat.obrazek %}
                         <img src="{{ inzerat.obrazek.url }}" class="card-img-custom" alt="{{ inzerat.titulek }}">
                     {% else %}
-                        <div class="text-center py-5 text-muted opacity-50"><i class="fas fa-paw fa-4x"></i><br><small>Bez foto</small></div>
+                        <div class="text-center py-5 text-muted opacity-25">
+                            <i class="fas fa-paw fa-4x"></i>
+                        </div>
                     {% endif %}
                 </a>
 
-                <div class="card-body d-flex flex-column">
-                    <div class="mb-2">
-                        <span class="badge" style="background-color: var(--accent-gold); color: var(--brown-dark); font-size: 0.7rem;">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="mb-2 d-flex justify-content-between">
+                        <span class="badge px-3 py-2" style="background-color: rgba(212, 163, 115, 0.15); color: var(--brown-dark); font-size: 0.65rem; border-radius: 8px; text-transform: uppercase; font-weight: 700;">
                             {{ inzerat.get_kategorie_display }}
                         </span>
+                        <small class="text-muted" style="font-size: 0.7rem;">{{ inzerat.vytvoreno|date:"j. n." }}</small>
                     </div>
 
-                    <h5 class="card-title fw-bold mb-3">
+                    <h5 class="card-title fw-bold mb-3 font-playfair" style="line-height: 1.4;">
                         <a href="{% url 'detail_inzeratu' inzerat.pk %}" class="text-dark text-decoration-none">
-                            {{ inzerat.titulek }}
+                            {{ inzerat.titulek|truncatechars:50 }}
                         </a>
                     </h5>
 
-                    <div class="mt-auto pt-3 border-top">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-bold fs-5" style="color: var(--brown-mid);">
-                                {% if inzerat.cena %}{{ inzerat.cena }} Kč{% else %}Dohodou{% endif %}
-                            </span>
-                            <div class="text-end small text-muted">
-                                <i class="fas fa-map-marker-alt"></i> {{ inzerat.mesto }} <br>
-                                <small>({{ inzerat.get_kraj_display }})</small>
-                            </div>
+                    <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                        <span class="price-tag">
+                            {% if inzerat.cena %}{{ inzerat.cena }}<small class="ms-1 fs-6">Kč</small>{% else %}Dohodou{% endif %}
+                        </span>
+                        <div class="text-end" style="font-size: 0.75rem; color: var(--brown-mid); font-weight: 600;">
+                            <i class="fas fa-map-marker-alt me-1 text-gold"></i>{{ inzerat.mesto }}
                         </div>
                     </div>
                 </div>
@@ -147,9 +167,19 @@
         </div>
         {% empty %}
         <div class="col-12 text-center py-5">
-            <p class="text-muted">Nebyly nalezeny žádné inzeráty odpovídající vašemu výběru.</p>
+            <div class="mb-3 opacity-25"><i class="fas fa-search fa-4x"></i></div>
+            <h4 class="text-muted">Nenašli jsme žádné inzeráty</h4>
+            <p class="text-muted">Zkuste upravit filtry nebo být první, kdo v této kategorii inzeruje!</p>
         </div>
         {% endfor %}
     </div>
 </div>
+
+{% if user.is_authenticated %}
+<a href="{% url 'pridat_inzerat' %}" class="d-md-none position-fixed bottom-0 end-0 m-4 shadow-lg d-flex align-items-center justify-content-center"
+   style="width: 60px; height: 60px; background-color: var(--brown-dark); color: white; border-radius: 50%; z-index: 1000; font-size: 24px;">
+    <i class="fas fa-plus"></i>
+</a>
+{% endif %}
+
 {% endblock %}

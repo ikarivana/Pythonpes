@@ -1,26 +1,105 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<div class="container mt-5">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary-brown: #5d4037;
+        --accent-gold: #c5a059;
+        --sos-red: #dc3545;
+    }
+
+    body {
+        background-color: #fdfaf5 !important;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .delete-container {
+        padding-top: 80px;
+        padding-bottom: 80px;
+    }
+
+    .card-confirm {
+        border-radius: 30px !important;
+        border: 1px solid #eaddcf !important;
+        box-shadow: 0 20px 40px rgba(93, 64, 55, 0.1) !important;
+        overflow: hidden;
+    }
+
+    .icon-circle {
+        width: 90px;
+        height: 90px;
+        background: #fff5f5;
+        color: var(--sos-red);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 25px;
+        font-size: 2.5rem;
+        border: 2px solid #ffe3e3;
+    }
+
+    .btn-delete {
+        background: var(--sos-red);
+        color: white;
+        border: none;
+        border-radius: 18px;
+        padding: 15px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: 0.3s;
+    }
+    .btn-delete:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(220, 53, 69, 0.3);
+        color: white;
+    }
+
+    .btn-back {
+        border-radius: 18px;
+        padding: 15px;
+        font-weight: 700;
+        color: var(--primary-brown);
+        background: white;
+        border: 2px solid #eaddcf;
+        transition: 0.3s;
+    }
+    .btn-back:hover {
+        background: #f8f9fa;
+        color: var(--accent-gold);
+    }
+</style>
+
+<div class="container delete-container">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-lg border-0 text-center p-4" style="border-radius: 25px;">
-                <div class="mb-3">
-                    <span class="fs-1">🐕</span>
+        <div class="col-md-6 col-lg-5">
+            <div class="card card-confirm p-4 p-md-5 text-center bg-white">
+
+                <div class="icon-circle">
+                    {% if object.druh == 'kocka' %}
+                        <i class="fas fa-cat"></i>
+                    {% else %}
+                        <i class="fas fa-dog"></i>
+                    {% endif %}
                 </div>
-                <h2 class="fw-bold mb-3" style="color: var(--primary-brown);">Opravdu smazat parťáka?</h2>
-                <p class="text-muted mb-4">
-                    Údaje o pejskovi <strong>{{ object.jmeno }}</strong> budou nenávratně odstraněny z naší smečky. Jste
-                    si jistí?
+
+                <h2 class="fw-bold mb-3" style="color: var(--primary-brown);">Opravdu smazat?</h2>
+
+                <p class="text-muted mb-4 px-lg-3">
+                    Profil parťáka <strong>{{ object.jmeno }}</strong> a všechna jeho data budou nenávratně odstraněna. Tato akce nelze vrátit zpět.
                 </p>
 
                 <form method="post">
                     {% csrf_token %}
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-danger btn-lg" style="border-radius: 15px;">
-                            Ano, smazat navždy
+                    <div class="d-grid gap-3">
+                        <button type="submit" class="btn btn-delete shadow-sm">
+                            ANO, SMAZAT NAVŽDY
                         </button>
-                        <a href="/users/moji-psi/" class="btn btn-light" style="border-radius: 15px;">
+                        <a href="{% url 'seznam_psu' %}" class="btn btn-back">
                             Zrušit a vrátit se
                         </a>
                     </div>
@@ -30,3 +109,4 @@
     </div>
 </div>
 {% endblock %}
+

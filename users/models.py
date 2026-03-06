@@ -1,5 +1,4 @@
 from datetime import timedelta, date
-from django.contrib.auth.models import User
 from django.utils.text import slugify
 import qrcode
 from io import BytesIO
@@ -35,10 +34,25 @@ class ProfilMajitele(models.Model):
 
 # --- MODEL PSA ---
 class Pes(models.Model):
+    # Volby pro druh zvířete
+    DRUH_CHOICES = [
+        ('pes', 'Pes'),
+        ('kocka', 'Kočka'),
+    ]
+    druh = models.CharField(
+        max_length=10,
+        choices=DRUH_CHOICES,
+        default='pes',
+        verbose_name="Druh zvířete"
+    )
+
     majitel = models.ForeignKey(ProfilMajitele, on_delete=models.CASCADE, related_name='psi')
     jmeno = models.CharField(max_length=100)
     rasa = models.CharField(max_length=100)
-    cip = models.CharField(max_length=50, blank=True)
+    majitel = models.ForeignKey(ProfilMajitele, on_delete=models.CASCADE, related_name='psi')
+    jmeno = models.CharField(max_length=100)
+    rasa = models.CharField(max_length=100)
+    cip = models.CharField(max_length=50, blank=True, null=True, verbose_name="Číslo čipu")
     fotka = models.ImageField(upload_to='profily_psu/', blank=True, null=True)
     video = models.FileField(upload_to='videa_psu/', null=True, blank=True)
     popis = models.TextField(blank=True, null=True)
@@ -71,39 +85,36 @@ class Pes(models.Model):
     # --- PŘIDANÉ METODY PRO ŠABLONU ---
     @property
     def vek(self):
-        if self.datum_narozeni:
-            today = date.today()
-            # Rozdíl v letech
-            years = today.year - self.datum_narozeni.year - (
-                    (today.month, today.day) < (self.datum_narozeni.month, self.datum_narozeni.day)
-            )
+        if not self.datum_narozeni:
+            return "Nezadáno"
 
-            # Pokud je pejskovi 1 a více let
-            if years >= 1:
-                if years == 1:
-                    return f"{years} rok"
-                elif 1 < years < 5:
-                    return f"{years} roky"
-                else:
-                    return f"{years} let"
+        today = date.today()
+        # Rozdíl v letech
+        years = today.year - self.datum_narozeni.year - (
+                (today.month, today.day) < (self.datum_narozeni.month, self.datum_narozeni.day)
+        )
 
-            # Pokud je pejskovi méně než rok, počítáme měsíce
+        if years >= 1:
+            if years == 1:
+                return f"{years} rok"
+            elif 1 < years < 5:
+                return f"{years} roky"
             else:
-                months = (today.year - self.datum_narozeni.year) * 12 + today.month - self.datum_narozeni.month
-                if today.day < self.datum_narozeni.day:
-                    months -= 1
+                return f"{years} let"
+        else:
+            # Výpočet měsíců
+            months = (today.year - self.datum_narozeni.year) * 12 + today.month - self.datum_narozeni.month
+            if today.day < self.datum_narozeni.day:
+                months -= 1
+            months = max(0, months)
 
-                # Zamezíme záporným měsícům u čerstvě narozených
-                months = max(0, months)
+            if months == 1:
+                return f"{months} měsíc"
+            elif 1 < months < 5:
+                return f"{months} měsíce"
+            else:
+                return f"{months} měsíců"
 
-                if months == 1:
-                    return f"{months} měsíc"
-                elif 1 < months < 5:
-                    return f"{months} měsíce"
-                else:
-                    return f"{months} měsíců"
-
-        return "Nezadáno"
     @property
     def pristi_ockovani(self):
         """Vypočítá datum za 1 rok od posledního očkování"""
@@ -113,14 +124,21 @@ class Pes(models.Model):
 
     @property
     def pristi_odcerveni(self):
-        """Vypočítá datum za 6 měsíců (182 dní) od posledního odčervení"""
+        """
+        Psi obvykle po 6 měsících (182 dní).
+        U koček se doporučuje po 3 měsících (92 dní), pokud jsou venkovní.
+        """
+        dny = 92 if self.druh == 'kocka' else 182
         if self.posledni_odcerveni:
-            return self.posledni_odcerveni + timedelta(days=182)
+            return self.posledni_odcerveni + timedelta(days=dny)
         return None
 
     @property
     def pristi_klistata(self):
-        """Vypočítá datum za 3 měsíce (90 dní) od poslední ochrany"""
+        """
+        Vypočítá datum od poslední ochrany.
+        Většina spot-onů/tablet trvá 1-3 měsíce (90 dní).
+        """
         if self.posledni_klistata:
             return self.posledni_klistata + timedelta(days=90)
         return None

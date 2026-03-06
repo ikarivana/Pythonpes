@@ -1,53 +1,140 @@
 {% extends 'home/base.html' %}
 
-{% block title %}Zásady ochrany osobních údajů | epes.online{% endblock %}
+{% block title %}Ochrana údajů | epes.online{% endblock %}
 
 {% block content %}
-<div class="py-2">
-    <h1 class="fw-bold mb-4"
-        style="font-family: 'Playfair Display', serif; color: var(--dark-cocoa); border-bottom: 3px solid var(--gold); padding-bottom: 15px;">
-        Zásady ochrany osobních údajů
-    </h1>
+<style>
+    .legal-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        padding: 40px;
+        border-radius: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        border: 1px solid var(--border-tan);
+    }
 
-    <p class="text-muted small mb-5">Verze platná od: 1. 1. 2026</p>
+    .legal-header {
+        font-family: 'Playfair Display', serif;
+        color: var(--dark-cocoa);
+        font-weight: 800;
+        border-bottom: 3px solid var(--gold);
+        padding-bottom: 20px;
+        margin-bottom: 10px;
+    }
 
-    <div class="legal-text" style="line-height: 1.8; color: #333; font-size: 0.95rem; text-align: justify;">
+    .legal-section {
+        margin-bottom: 40px;
+        padding-left: 20px;
+        border-left: 3px solid #fdfaf6;
+        transition: 0.3s;
+    }
 
-        <section class="mb-5">
-            <h4 class="fw-bold" style="color: var(--mid-brown);">1. Správce osobních údajů</h4>
-            <p>
-                Správcem osobních údajů je Provozovatel portálu epes.online,
-                <strong>{{ kontaktni_info.jmeno }}</strong>, IČO: {{ kontaktni_info.ico }},
-                se sídlem {{ kontaktni_info.adresa }}.
-            </p>
-        </section>
+    .legal-section:hover {
+        border-left-color: var(--gold);
+        background: #fffdfa;
+    }
 
-        <section class="mb-5">
-            <h4 class="fw-bold" style="color: var(--mid-brown);">2. Účel zpracování</h4>
-            <p>
-                Osobní údaje zpracováváme za účelem:
-                <ul>
-                    <li>Plnění smlouvy (správa vašeho uživatelského účtu a poskytování služeb).</li>
-                    <li>Komunikace mezi uživateli (v rámci inzerce a bazaru).</li>
-                    <li>Zajištění bezpečnosti portálu.</li>
+    .legal-section h4 {
+        color: var(--mid-brown);
+        font-weight: 700;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .legal-text {
+        line-height: 1.8;
+        color: #5d4037;
+        font-size: 0.95rem;
+    }
+
+    .legal-list {
+        padding-left: 20px;
+        list-style-type: none;
+    }
+
+    .legal-list li {
+        margin-bottom: 10px;
+        position: relative;
+    }
+
+    .legal-list li::before {
+        content: "🐾";
+        position: absolute;
+        left: -25px;
+        font-size: 0.8rem;
+    }
+</style>
+
+<div class="py-4">
+    <div class="legal-container">
+        <h1 class="legal-header">Zásady ochrany osobních údajů</h1>
+        <p class="text-muted small mb-5">
+            <i class="far fa-calendar-alt me-1"></i> Verze platná od: 1. března 2026
+        </p>
+
+        <div class="legal-text">
+
+            <section class="legal-section">
+                <h4><i class="fas fa-user-tie"></i> 1. Správce osobních údajů</h4>
+                <p>
+                    Správcem osobních údajů v rámci projektu <strong>epes.online</strong> je:<br>
+                    <strong class="text-dark">{{ kontaktni_info.jmeno }}</strong><br>
+                    IČO: {{ kontaktni_info.ico }}<br>
+                    Sídlo: {{ kontaktni_info.adresa }}
+                </p>
+                <p>
+                    V případě dotazů nás můžete kontaktovat na:
+                    <a href="mailto:{{ kontaktni_info.email }}" class="fw-bold" style="color: var(--gold);">{{ kontaktni_info.email }}</a>
+                </p>
+            </section>
+
+            <section class="legal-section">
+                <h4><i class="fas fa-clipboard-list"></i> 2. Účel zpracování údajů</h4>
+                <p>Vaše údaje a údaje o vašich zvířecích parťácích zpracováváme za účelem:</p>
+                <ul class="legal-list">
+                    <li><strong>Plnění smlouvy:</strong> Správa vašeho uživatelského účtu, SOS profilů zvířat a doručování prémiových služeb.</li>
+                    <li><strong>Bezpečnost:</strong> Ochrana portálu a jeho uživatelů před zneužitím.</li>
+                    <li><strong>Komunikace:</strong> Propojení uživatelů v rámci komunitních zdí, bazaru a hlídání.</li>
+                    <li><strong>Zákonné povinnosti:</strong> Zejména v oblasti účetnictví u placeného členství ALFA.</li>
                 </ul>
-            </p>
-        </section>
+            </section>
 
-        <section class="mb-5">
-            <h4 class="fw-bold" style="color: var(--mid-brown);">3. Práva uživatele</h4>
-            <p>
-                Máte právo na přístup ke svým údajům, jejich opravu, výmaz ("právo být zapomenut") nebo omezení zpracování.
-                Pokud máte jakékoli dotazy, kontaktujte nás na e-mailu: {{ kontaktni_info.email }}.
-            </p>
-        </section>
+            <section class="legal-section">
+                <h4><i class="fas fa-shield-alt"></i> 3. Vaše práva (GDPR)</h4>
+                <p>Jako uživatel máte plnou kontrolu nad svými daty. Máte právo na:</p>
+                <ul class="legal-list">
+                    <li>Přístup k údajům a jejich opravu.</li>
+                    <li><strong>Právo na výmaz:</strong> Možnost smazat svůj profil i profily zvířat ("právo být zapomenut").</li>
+                    <li>Omezení zpracování nebo vznesení námitky proti zpracování.</li>
+                    <li>Přenositelnost údajů.</li>
+                </ul>
+            </section>
 
-        <div class="d-flex justify-content-center mt-5">
-            <a href="{% url 'podminky' %}" class="btn btn-sm px-4 py-2"
-               style="color: var(--mid-brown); border: 1px solid var(--mid-brown); border-radius: 10px; text-decoration: none; font-weight: 600;">
-                <i class="fas fa-arrow-left me-2"></i>Zpět na VOP
-            </a>
+            <section class="legal-section">
+                <h4><i class="fas fa-lock"></i> 4. Zabezpečení dat</h4>
+                <p>
+                    Data našich uživatelů jsou šifrována a uložena na zabezpečených serverech. Citlivé údaje z nouzových profilů (SOS) jsou veřejně přístupné pouze v případě, že je zvíře označeno jako "ztracené", nebo po naskenování vašeho unikátního QR kódu nálezcem.
+                </p>
+            </section>
+
+            <div class="d-flex flex-column flex-md-row justify-content-center align-items-center mt-5 gap-3">
+                <a href="{% url 'podminky' %}" class="btn px-4 py-2"
+                   style="color: var(--mid-brown); border: 2px solid var(--mid-brown); border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.9rem;">
+                    <i class="fas fa-file-contract me-2"></i>OBCHODNÍ PODMÍNKY (VOP)
+                </a>
+                <a href="{% url 'home' %}" class="btn px-4 py-2"
+                   style="background: var(--gold); color: var(--dark-cocoa); border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.9rem;">
+                    <i class="fas fa-home me-2"></i>ZPĚT NA ÚVOD
+                </a>
+            </div>
         </div>
     </div>
+
+    <p class="text-center mt-4 text-muted small">
+        Tento dokument je pravidelně revidován, aby odpovídal aktuální legislativě EU (GDPR).
+    </p>
 </div>
 {% endblock %}

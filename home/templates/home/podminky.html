@@ -1,111 +1,155 @@
 {% extends 'home/base.html' %}
 
+{% block title %}Obchodní podmínky | epes.online{% endblock %}
+
 {% block content %}
-<div class="py-2">
-    <h1 class="fw-bold mb-4"
-        style="font-family: 'Playfair Display', serif; color: var(--dark-cocoa); border-bottom: 3px solid var(--gold); padding-bottom: 15px;">
-        Všeobecné obchodní podmínky (VOP)
-    </h1>
+<style>
+    .legal-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        padding: 40px;
+        border-radius: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        border: 1px solid var(--border-tan);
+    }
 
-    <p class="text-muted small mb-5">Verze platná od: 1. 1. 2026</p>
+    .legal-header {
+        font-family: 'Playfair Display', serif;
+        color: var(--dark-cocoa);
+        font-weight: 800;
+        border-bottom: 3px solid var(--gold);
+        padding-bottom: 20px;
+        margin-bottom: 10px;
+    }
 
-    <div class="legal-text" style="line-height: 1.8; color: #333; font-size: 0.95rem; text-align: justify;">
+    .legal-section {
+        margin-bottom: 40px;
+        padding-left: 20px;
+        border-left: 3px solid #fdfaf6;
+    }
 
-        <section class="mb-5">
-            <h4 class="fw-bold" style="color: var(--mid-brown);">1. Úvodní ustanovení a definice</h4>
-            <p>
-                Tyto Všeobecné obchodní podmínky (dále jen „VOP“) upravují vzájemná práva a povinnosti mezi
-                Provozovatelem, kterým je
-                <strong>{{ kontaktni_info.jmeno }}</strong>, IČO: {{ kontaktni_info.ico }}, se sídlem {{
-                kontaktni_info.adresa }} (dále jen „Provozovatel“),
-                a uživateli internetového portálu <strong>EPES.ONLINE</strong> (dále jen „Portál“).
-            </p>
-            <p>
-                Uživatelem se rozumí každá fyzická nebo právnická osoba, která Portál navštíví nebo využívá jeho služby
-                (dále jen „Uživatel“).
-                Registrací nebo užíváním Portálu Uživatel vyjadřuje bezvýhradný souhlas s těmito VOP.
-            </p>
-        </section>
+    .legal-section h4 {
+        color: var(--mid-brown);
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
 
-        <section class="mb-5">
-            <h4 class="fw-bold" style="color: var(--mid-brown);">2. Rozsah poskytovaných služeb</h4>
-            <p>
-                Portál nabízí služby digitální správy dat o psech, komunitní funkce (Zdi plemen) a inzertní prostor
-                (Bazar).
-                Provozovatel poskytuje Portál ve verzi „Free“ (zdarma) a verzi „Premium“ (zpoplatněná dle aktuálního
-                ceníku).
-                Provozovatel si vyhrazuje právo měnit rozsah služeb nebo Portál dočasně odstavit z důvodu údržby.
-            </p>
-        </section>
+    .legal-text {
+        line-height: 1.8;
+        color: #5d4037;
+        font-size: 0.95rem;
+        text-align: justify;
+    }
 
-        <section class="mb-5">
-            <h4 class="fw-bold" style="color: var(--mid-brown);">3. Podmínky inzerce a Bazaru</h4>
-            <p>
-                Portál slouží pouze jako <strong>technická platforma pro propojení poptávky a nabídky</strong>.
-                Provozovatel není prodávajícím ani kupujícím u žádného inzerátu.
-            </p>
-            <div class="p-4 my-3 bg-light border-start border-4 border-danger shadow-sm">
-                <p class="mb-0"><strong>Vyloučení odpovědnosti:</strong> Provozovatel neodpovídá za správnost, úplnost a
-                    pravdivost údajů v inzerci, ani za kvalitu, zdravotní stav či původ nabízených zvířat. Veškeré
-                    obchodní vztahy vznikají přímo mezi Uživateli. Provozovatel nenese odpovědnost za případné škody či
-                    vady plnění vzniklé z těchto vztahů.</p>
-            </div>
-            <p>Uživatel se zavazuje inzerovat v souladu se zákonem č. 246/1992 Sb., na ochranu zvířat proti týrání.</p>
-        </section>
+    .warning-box {
+        background-color: #fff9f0;
+        border: 1px dashed var(--gold) !important;
+        border-radius: 20px;
+        padding: 20px;
+    }
 
-        <section class="mb-5">
-            <h4 class="fw-bold" style="color: var(--mid-brown);">4. Práva a povinnosti Uživatele</h4>
-            <p>
-                Uživatel je povinen chránit své přístupové údaje. Provozovatel nenese odpovědnost za jejich zneužití.
-                Uživatel nesmí na Portál nahrávat obsah, který porušuje autorská práva třetích osob, je vulgární,
-                urážlivý nebo diskriminační.
-                Provozovatel je oprávněn bez předchozího upozornění smazat jakýkoliv obsah či uživatelský účet, který
-                porušuje tyto VOP.
-            </p>
-        </section>
+    .danger-box {
+        border-left: 5px solid var(--sos-red);
+        background: #fff5f5;
+        padding: 20px;
+        border-radius: 0 15px 15px 0;
+    }
 
-        <section class="mb-5">
-            <h4 class="fw-bold" style="color: var(--mid-brown);">5. Platební podmínky a odstoupení</h4>
-            <p>
-                Cena za Premium služby je uvedena v ceníku. Vzhledem k tomu, že se jedná o digitální obsah poskytovaný
-                okamžitě,
-                Uživatel výslovně souhlasí s tím, že ztrácí právo na odstoupení od smlouvy ve 14denní lhůtě po započetí
-                plnění (aktivaci služeb),
-                pokud mu byly služby zpřístupněny před uplynutím této lhůty.
-            </p>
-        </section>
+    .btn-confirm {
+        background: var(--mid-brown);
+        color: white !important;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 30px;
+        font-weight: 700;
+        transition: 0.3s;
+    }
 
-        <section class="mb-5">
-            <h4 class="fw-bold" style="color: var(--mid-brown);">6. Ochrana osobních údajů (GDPR)</h4>
-            <p>
-                Provozovatel zpracovává osobní údaje Uživatele za účelem správy účtu, plnění smlouvy a v případě
-                využití inzertních služeb také za účelem komunikace mezi Uživateli.
-            </p>
-            <p>
-                Podrobné informace o zpracování údajů a právech Uživatele naleznete v našich
-                <strong><a href="{% url 'gdpr' %}" style="color: var(--gold);">Zásadách ochrany osobních
-                    údajů</a></strong>,
-                které jsou nedílnou součástí těchto VOP.
-            </p>
-        </section>
+    .btn-confirm:hover {
+        background: var(--dark-cocoa);
+        transform: translateY(-2px);
+    }
+</style>
 
-        <div class="d-flex justify-content-center mt-5">
-            <div class="text-center p-4"
-                 style="max-width: 500px; background: #fdfaf7; border-radius: 20px; box-shadow: 0 10px 25px rgba(62, 39, 35, 0.1); border: 1px solid #efe0d5;">
-                <p style="color: #5d4037; font-size: 0.95rem; margin-bottom: 20px;">
-                    Děkujeme za přečtení našich pravidel.
+<div class="py-4">
+    <div class="legal-container">
+        <h1 class="legal-header">Všeobecné obchodní podmínky (VOP)</h1>
+        <p class="text-muted small mb-5"><i class="far fa-calendar-alt me-1"></i> Verze platná od: 1. 3. 2026</p>
+
+        <div class="legal-text">
+
+            <section class="legal-section">
+                <h4>1. Úvodní ustanovení</h4>
+                <p>
+                    Tyto Všeobecné obchodní podmínky (dále jen „VOP“) upravují vzájemná práva a povinnosti mezi Provozovatelem, kterým je
+                    <strong class="text-dark">{{ kontaktni_info.jmeno }}</strong>, IČO: {{ kontaktni_info.ico }}, se sídlem {{ kontaktni_info.adresa }} (dále jen „Provozovatel“),
+                    a uživateli portálu <strong>EPES.ONLINE</strong>.
+                </p>
+                <p>
+                    Užíváním portálu nebo registrací Uživatel vyjadřuje svůj bezvýhradný souhlas s těmito podmínkami.
+                </p>
+            </section>
+
+            <section class="legal-section">
+                <h4>2. Charakter služeb a nouzový profil</h4>
+                <p>
+                    Portál nabízí digitální správu dat o zvířecích parťácích (psu, kočkách a dalších), komunitní funkce a <strong>SOS nouzový profil zvířete (QR identita)</strong>.
                 </p>
 
-                <div class="d-flex justify-content-center gap-3">
-                    <button onclick="zavritNeboZpet()" class="btn btn-sm px-4 py-2 fw-bold text-white shadow-sm"
-                            style="background: var(--mid-brown); border: none; border-radius: 10px; transition: 0.3s;">
-                        ROZUMÍM A POTVRZUJI
-                    </button>
+                <div class="warning-box my-4">
+                    <p class="mb-0 small">
+                        <strong>⚠️ Právní upozornění:</strong> Portál <strong>není oficiálním registrem zvířat</strong> ve smyslu platných zákonů ČR.
+                        Vložení dat do portálu slouží pro soukromé účely a jako nouzový informační systém. Tato registrace
+                        <strong>nenahrazuje zákonnou povinnost čipování</strong> a evidenci zvířete v oficiálních registrech obcí či státu.
+                    </p>
+                </div>
+            </section>
 
-                    <a href="{% url 'home' %}" class="btn btn-sm px-4 py-2"
-                       style="color: var(--mid-brown); border: 1px solid var(--mid-brown); border-radius: 10px; text-decoration: none; font-weight: 600;">
-                        DOMŮ
-                    </a>
+            <section class="legal-section">
+                <h4>3. Inzerce, Bazar a Hlídání</h4>
+                <p>
+                    Portál slouží výhradně jako technická platforma pro propojení uživatelů. Provozovatel není účastníkem obchodních vztahů mezi uživateli.
+                </p>
+                <div class="danger-box my-4">
+                    <p class="mb-0">
+                        <strong>Vyloučení odpovědnosti:</strong> Provozovatel neodpovídá za správnost inzerátů, zdravotní stav nabízených zvířat ani kvalitu poskytovaných služeb (např. hlídání). Všechny vztahy vznikají přímo mezi uživateli.
+                    </p>
+                </div>
+                <p>Uživatel se zavazuje jednat v souladu se zákonem na ochranu zvířat proti týrání.</p>
+            </section>
+
+            <section class="legal-section">
+                <h4>4. Platební podmínky a Premium</h4>
+                <p>
+                    Cena za služby Premium (ALFA členství) je uvedena v ceníku. Vzhledem k tomu, že se jedná o digitální obsah poskytovaný okamžitě,
+                    Uživatel aktivací služby souhlasí se započetím plnění a bere na vědomí, že tím ztrácí právo na odstoupení od smlouvy ve 14denní lhůtě.
+                </p>
+            </section>
+
+            <section class="legal-section">
+                <h4>5. Ochrana údajů</h4>
+                <p>
+                    Informace o tom, jak nakládáme s vašimi daty, naleznete v našich
+                    <a href="{% url 'gdpr' %}" class="fw-bold" style="color: var(--gold);">Zásadách ochrany osobních údajů</a>,
+                    které jsou nedílnou součástí těchto VOP.
+                </p>
+            </section>
+
+            <div class="d-flex justify-content-center mt-5">
+                <div class="text-center p-4" style="max-width: 500px; background: #fdfaf7; border-radius: 25px; border: 1px solid var(--border-tan);">
+                    <p class="mb-4" style="color: var(--mid-brown); font-weight: 600;">
+                        Přečtením a potvrzením pomáháte udržovat epes.online bezpečným místem pro všechny páníčky.
+                    </p>
+
+                    <div class="d-flex justify-content-center gap-3">
+                        <button onclick="zavritNeboZpet()" class="btn-confirm shadow-sm">
+                            ROZUMÍM A POTVRZUJI
+                        </button>
+                        <a href="{% url 'home' %}" class="btn px-4 py-2" style="color: var(--mid-brown); font-weight: 700; text-decoration: none;">
+                            DOMŮ
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -114,16 +158,11 @@
 
 <script>
     function zavritNeboZpet() {
-        // Pokusí se zavřít kartu
-        window.close();
-
-        // Pokud se karta po 200ms nezavřela (prohlížeč to zablokoval),
-        // tak uživatele aspoň pošle zpět na předchozí stránku (registraci)
-        setTimeout(function() {
-            if (!window.closed) {
-                window.history.back();
-            }
-        }, 200);
+        if (window.opener || window.history.length === 1) {
+            window.close();
+        } else {
+            window.history.back();
+        }
     }
 </script>
 {% endblock %}

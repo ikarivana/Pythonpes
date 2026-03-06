@@ -5,7 +5,7 @@
     :root {
         --subtle-cream: #f9f5f0;
         --border-tan: #e2d1c3;
-        --deep-hazel: #8d6e63; /* Sytější oříšková pro texty */
+        --deep-hazel: #8d6e63;
     }
 
     /* Hlavní box s informacemi - neumorfní stínování */
@@ -19,7 +19,7 @@
 
     .icon-box-styled {
         background: white;
-        color: var(--brown-mid);
+        color: var(--mid-brown);
         width: 50px;
         height: 50px;
         display: flex;
@@ -30,25 +30,26 @@
         font-size: 1.2rem;
     }
 
-    /* Formulářová pole s jemným vnitřním stínem */
-    input, textarea {
+    /* Formulářová pole */
+    input, textarea, select {
         border: 1.5px solid var(--border-tan) !important;
         background-color: #fff !important;
         border-radius: 15px !important;
         padding: 14px !important;
         box-shadow: inset 2px 2px 5px rgba(0,0,0,0.02) !important;
+        width: 100%;
     }
 
     input:focus, textarea:focus {
-        border-color: var(--brown-mid) !important;
-        box-shadow: 0 0 10px rgba(141, 110, 99, 0.15) !important;
+        border-color: var(--gold) !important;
+        box-shadow: 0 0 10px rgba(197, 160, 89, 0.15) !important;
         outline: none !important;
     }
 
-    /* Tlačítko s výrazným stínem a přechodem */
+    /* Tlačítko */
     .btn-shadow-gold {
-        background: var(--gold) !important; /* Hned zlaté */
-        color: var(--dark-cocoa) !important; /* Tmavý text pro kontrast */
+        background: var(--gold) !important;
+        color: var(--dark-cocoa) !important;
         border: none;
         border-radius: 50px;
         padding: 15px 35px;
@@ -68,7 +69,7 @@
     }
 
     .contact-title {
-        color: var(--brown-dark);
+        color: var(--mid-brown);
         font-family: 'Playfair Display', serif;
         font-weight: 800;
         text-shadow: 1px 1px 0px white;
@@ -79,17 +80,17 @@
     <div class="row g-5 align-items-stretch">
         <div class="col-lg-5">
             <div class="contact-info-card h-100">
-                <h2 class="contact-title mb-2">Kontakt <i class="fas fa-paw ms-2" style="color: var(--accent-gold);"></i></h2>
+                <h2 class="contact-title mb-2">Kontakt <i class="fas fa-paw ms-2" style="color: var(--gold);"></i></h2>
 
                 <p class="mb-4" style="color: var(--deep-hazel); font-style: italic; font-weight: 500;">
-                    Potřebujete poradit s registrací, Premium členstvím nebo máte nápad na vylepšení webu? Jsme tu pro vás.
+                    Potřebujete poradit s registrací, Premium členstvím nebo máte nápad na vylepšení našeho zvířecího světa? Jsme tu pro vás.
                 </p>
 
                 <div class="mb-5">
-                    <h5 class="fw-bold mb-1" style="color: var(--brown-mid);">Ivana Elšíková</h5>
+                    <h5 class="fw-bold mb-1" style="color: var(--mid-brown);">Ivana Elšíková</h5>
                     <p class="text-muted mb-0">Sokolská 29, Hvozdná 763 10</p>
                     <p class="text-muted fw-bold small">IČO: 23834838</p>
-                    <div class="mt-3" style="width: 50px; height: 3px; border-bottom: 3px solid var(--accent-gold);"></div>
+                    <div class="mt-3" style="width: 50px; height: 3px; border-bottom: 3px solid var(--gold);"></div>
                 </div>
 
                 <div class="d-flex align-items-center mb-4 p-2 rounded-4">
@@ -104,17 +105,17 @@
 
                 <div class="d-flex align-items-center mb-4 p-2 rounded-4">
                     <div class="icon-box-styled me-3">
-                        <i class="fas fa-map-marked-alt"></i>
+                        <i class="fas fa-comment-dots"></i>
                     </div>
                     <div>
-                        <small class="d-block text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Kde nás najdete</small>
-                        <span class="fw-bold fs-5 text-dark">Hvozdná, Česká republika</span>
+                        <small class="d-block text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Sociální sítě</small>
+                        <span class="fw-bold fs-5 text-dark">Sledujte naši smečku</span>
                     </div>
                 </div>
 
                 <div class="mt-5 p-3 rounded-4" style="background: rgba(255,255,255,0.5); border: 1px dashed var(--border-tan);">
                     <p class="small text-muted mb-0 italic text-center">
-                        <i class="fas fa-history me-1 text-warning"></i> Odpovídáme obvykle do druhého dne.
+                        <i class="fas fa-history me-1" style="color: var(--gold);"></i> Odpovídáme obvykle do druhého dne.
                     </p>
                 </div>
             </div>
@@ -124,12 +125,12 @@
             <div class="px-3 py-2">
                 {% if success %}
                     <div class="text-center py-5">
-                        <div class="icon-box-styled mx-auto mb-4" style="width: 100px; height: 100px; font-size: 3rem; color: #81c784;">
-                            <i class="fas fa-check"></i>
+                        <div class="icon-box-styled mx-auto mb-4" style="width: 100px; height: 100px; font-size: 3rem; color: var(--gold);">
+                            <i class="fas fa-paper-plane"></i>
                         </div>
                         <h2 class="fw-bold">Zpráva odeslána!</h2>
-                        <p class="text-muted fs-5">Alík už běží s vaší zprávou. Brzy se ozveme!</p>
-                        <a href="{% url 'kontakt' %}" class="btn btn-shadow-gold mt-3">POSLAT DALŠÍ</a>
+                        <p class="text-muted fs-5">Váš vzkaz je na cestě k nám. Brzy se ozveme zpět!</p>
+                        <a href="{% url 'kontakt' %}" class="btn btn-shadow-gold mt-3">POSLAT DALŠÍ ZPRÁVU</a>
                     </div>
                 {% else %}
                     <h3 class="contact-title mb-4">Napište nám zprávu</h3>

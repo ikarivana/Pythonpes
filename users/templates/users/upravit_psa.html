@@ -1,19 +1,27 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
-      rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
-    .swal2-popup { border-radius: 30px !important; font-family: 'Plus Jakarta Sans', sans-serif !important; background-color: #fdfaf4 !important; }
-    .swal2-title { color: #3e2723 !important; }
-    .swal2-confirm { background-color: #d63031 !important; border-radius: 15px !important; padding: 12px 30px !important; font-weight: 700 !important; }
-    .swal2-cancel { background-color: #f1f1f1 !important; color: #333 !important; border-radius: 15px !important; font-weight: 700 !important; }
+    /* ZÁKLADNÍ BARVY (PES) */
+    :root {
+        --t-gold: #c5a059;
+        --t-brown: #3e2723;
+        --t-bg: #fdfaf4;
+        --t-card-bg: #ffffff;
+    }
 
-    :root { --t-gold: #c5a059; --t-brown: #3e2723; --t-bg: #fdfaf4; --t-card-bg: #ffffff; }
-    body { background-color: var(--t-bg); font-family: 'Plus Jakarta Sans', sans-serif; color: var(--t-brown); }
+    /* LILA BARVY (KOČKA) */
+    .is-kocka {
+        --t-gold: #9b86bd;
+        --t-brown: #2d1b4d;
+        --t-bg: #f8f7ff;
+    }
+
+    body { background-color: var(--t-bg); font-family: 'Plus Jakarta Sans', sans-serif; color: var(--t-brown); transition: 0.5s; }
     .form-container { max-width: 900px; margin: 20px auto; padding: 0 15px; }
 
     .edit-card { position: relative; background: var(--t-card-bg); border-radius: 25px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid rgba(197, 160, 89, 0.1); overflow: hidden; }
@@ -23,24 +31,23 @@
     .label-gold { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--t-gold); display: block; margin-bottom: 5px; }
     .input-clean { width: 100%; border: 1px solid #eee; border-radius: 12px; padding: 12px 15px; font-size: 0.95rem; transition: 0.3s; background: #fff; }
     .input-clean:focus { outline: none; border-color: var(--t-gold); box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.1); }
-    .input-clean:disabled { background-color: #f9f9f9; cursor: not-allowed; }
 
-    .upload-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 15px; }
     .upload-box { border: 2px dashed var(--t-gold); border-radius: 20px; aspect-ratio: 1/1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--t-gold); background: #fffcf8; transition: 0.3s; }
-    .media-item { position: relative; aspect-ratio: 1/1; border-radius: 20px; overflow: hidden; border: 1px solid #eee; }
-    .media-item img, .media-item video { width: 100%; height: 100%; object-fit: cover; }
-    .video-badge { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 1.5rem; text-shadow: 0 2px 10px rgba(0,0,0,0.5); pointer-events: none; }
-    .btn-delete-media { position: absolute; top: 8px; right: 8px; background: rgba(227, 93, 106, 0.9); color: white; border: none; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; text-decoration: none; z-index: 10; }
-
     .btn-save-main { background: var(--t-brown); color: white; border: none; padding: 16px 50px; border-radius: 20px; font-weight: 800; transition: 0.3s; cursor: pointer; border: 2px solid var(--t-gold); width: 100%; }
-    .btn-save-main:hover { background: var(--t-gold); transform: translateY(-2px); }
+    .btn-save-main:hover { opacity: 0.9; transform: translateY(-2px); }
 
     .sos-switch { background: #fff5f5; border: 1px solid #ffcfcf; padding: 10px 15px; border-radius: 15px; }
-    .award-row { background: #fdfcfb; padding: 12px 15px; border-radius: 15px; margin-bottom: 8px; border: 1px solid #f0e6d2; }
     .btn-alfa-slim { background: var(--t-gold); color: white !important; font-weight: 700; font-size: 0.75rem; padding: 8px 15px; border-radius: 10px; text-decoration: none !important; }
+
+    /* SweetAlert úpravy */
+    .swal2-popup { border-radius: 30px !important; font-family: 'Plus Jakarta Sans', sans-serif !important; }
 </style>
 
-<div class="form-container">
+<div class="form-container {% if pes.druh == 'kocka' %}is-kocka{% endif %}">
+    <div class="text-center mb-4">
+        <h2 class="fw-800">{% if pes.druh == 'kocka' %}Upravit kočičku{% else %}Upravit pejska{% endif %}</h2>
+    </div>
+
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
@@ -53,43 +60,44 @@
                 <div class="sos-switch d-flex align-items-center gap-2">
                     <span class="small fw-800 text-danger">REŽIM ZTRÁTY</span>
                     <div class="form-check form-switch m-0">
-                        <input class="form-check-input" type="checkbox" name="je_ztraceny" {% if pes.je_ztraceny %} checked {% endif %}>
+                        <input class="form-check-input" type="checkbox" name="je_ztraceny" {% if pes.je_ztraceny %}checked{% endif %}>
                     </div>
                 </div>
             </div>
 
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="label-gold">Jméno psa</label>
+                    <label class="label-gold">Jméno {% if pes.druh == 'kocka' %}kočky{% else %}psa{% endif %}</label>
                     <input type="text" name="jmeno" class="input-clean" value="{{ pes.jmeno }}" required>
                 </div>
                 <div class="col-md-6">
-                    <label class="label-gold">Rasa</label>
+                    <label class="label-gold">{% if pes.druh == 'kocka' %}Plemeno{% else %}Rasa{% endif %}</label>
                     <input type="text" name="rasa" class="input-clean" value="{{ pes.rasa }}">
                 </div>
                 <div class="col-md-6">
                     <label class="label-gold">Datum narození</label>
-                    <input type="date" name="datum_narozeni" class="input-clean"
-                           value="{{ pes.datum_narozeni|date:'Y-m-d' }}">
+                    <input type="date" name="datum_narozeni" class="input-clean" value="{{ pes.datum_narozeni|date:'Y-m-d' }}">
                 </div>
                 <div class="col-md-6">
-                    <label class="label-gold">Číslo čipu</label>
-                    <input type="text" name="cip" class="input-clean" value="{{ pes.cip }}">
+                    <label class="label-gold d-flex justify-content-between align-items-center">
+                        <span>Číslo čipu</span>
+                        <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1" style="font-size: 0.55rem; border-radius: 8px;">
+                            <i class="fas fa-lightbulb me-1"></i> DOPORUČENO
+                        </span>
+                    </label>
+                    <input type="text" name="cip" class="input-clean" value="{{ pes.cip }}" placeholder="Např. 15místný kód" style="border-left: 3px solid #0dcaf0;">
                 </div>
-
                 <div class="col-md-6">
                     <label class="label-gold">Váha (kg)</label>
                     <input type="number" name="vaha" class="input-clean" value="{{ pes.vaha }}" step="0.1">
                 </div>
-
                 <div class="col-md-12">
                     <label class="label-gold">Profilová fotka</label>
                     <input type="file" name="fotka" class="input-clean">
                 </div>
                 <div class="col-12">
                     <label class="label-gold">O mně / Příběh</label>
-                    <textarea name="popis" class="input-clean"
-                              style="height: 100px; resize: none;">{{ pes.popis }}</textarea>
+                    <textarea name="popis" class="input-clean" style="height: 100px; resize: none;">{{ pes.popis }}</textarea>
                 </div>
             </div>
         </div>
@@ -99,217 +107,58 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="label-gold">Poslední očkování</label>
-                    <input type="date" name="posledni_ockovani" class="input-clean"
-                           value="{{ pes.posledni_ockovani|date:'Y-m-d' }}">
+                    <input type="date" name="posledni_ockovani" class="input-clean" value="{{ pes.posledni_ockovani|date:'Y-m-d' }}">
                 </div>
                 <div class="col-md-6">
                     <label class="label-gold">Příští očkování (termín)</label>
-                    <input type="date" name="pristi_ockovani" class="input-clean"
-                           value="{{ pes.pristi_ockovani|date:'Y-m-d' }}">
+                    <input type="date" name="pristi_ockovani" class="input-clean" value="{{ pes.pristi_ockovani|date:'Y-m-d' }}">
                 </div>
-
                 <div class="col-md-6">
                     <label class="label-gold">Poslední odčervení</label>
-                    <input type="date" name="posledni_odcerveni" class="input-clean"
-                           value="{{ pes.posledni_odcerveni|date:'Y-m-d' }}">
+                    <input type="date" name="posledni_odcerveni" class="input-clean" value="{{ pes.posledni_odcerveni|date:'Y-m-d' }}">
                 </div>
                 <div class="col-md-6">
                     <label class="label-gold">Příští odčervení</label>
-                    <input type="date" name="pristi_odcerveni" class="input-clean"
-                           value="{{ pes.pristi_odcerveni|date:'Y-m-d' }}">
-                </div>
-                <div class="col-md-4">
-                    <label class="label-gold">Ochrana proti klíšťatům</label>
-                    <input type="text" name="typ_ochrany_klistata" class="input-clean" value="{{ pes.typ_ochrany_klistata }}" placeholder="Např. obojek, tableta">
-                </div>
-                <div class="col-md-4">
-                    <label class="label-gold">Poslední aplikace</label>
-                    <input type="date" name="posledni_klistata" class="input-clean"
-                           value="{{ pes.posledni_klistata|date:'Y-m-d' }}">
-                </div>
-                <div class="col-md-4">
-                    <label class="label-gold">Příští aplikace</label>
-                    <input type="date" name="pristi_klistata" class="input-clean"
-                           value="{{ pes.pristi_klistata|date:'Y-m-d' }}">
+                    <input type="date" name="pristi_odcerveni" class="input-clean" value="{{ pes.pristi_odcerveni|date:'Y-m-d' }}">
                 </div>
             </div>
         </div>
 
+        {% if pes.druh == 'pes' %}
         <div class="edit-card">
             {% if not user.profil.is_premium %}
             <div class="lock-overlay">
                 <i class="fas fa-lock mb-2" style="color: var(--t-gold); font-size: 1.5rem;"></i>
                 <h6 class="fw-bold m-0">Původ a chovné údaje</h6>
-                <p style="font-size: 0.7rem; color: var(--t-brown);">Dostupné pouze pro ALFA členy</p>
+                <p style="font-size: 0.7rem;">Dostupné pouze pro ALFA členy</p>
                 <a href="{% url 'cenik' %}" class="btn-alfa-slim">AKTIVOVAT</a>
             </div>
             {% endif %}
 
             <h5 class="section-title">Původ a RTG</h5>
             <div class="row g-3">
-                <div class="col-md-4">
-                    <label class="label-gold">DKK (HD)</label>
-                    <input type="text" name="rtg_hd" class="input-clean" value="{{ pes.rtg_hd }}" {% if not user.profil.is_premium %} disabled {% endif %}>
-                </div>
-                <div class="col-md-4">
-                    <label class="label-gold">DLK (ED)</label>
-                    <input type="text" name="rtg_ed" class="input-clean" value="{{ pes.rtg_ed }}" {% if not user.profil.is_premium %} disabled {% endif %}>
-                </div>
-                <div class="col-md-4">
-                    <label class="label-gold">Páteř / Jiné RTG</label>
-                    <input type="text" name="rtg_pater" class="input-clean" value="{{ pes.rtg_pater }}" {% if not user.profil.is_premium %} disabled {% endif %}>
-                </div>
-                <div class="col-md-6">
-                    <label class="label-gold">Chovná stanice</label>
-                    <input type="text" name="chovna_stanice" class="input-clean" value="{{ pes.chovna_stanice }}" {% if not user.profil.is_premium %} disabled {% endif %}>
-                </div>
-
-                <div class="col-md-3">
-                    <label class="label-gold">Otec</label>
-                    <input type="text" name="otec_manualni" class="input-clean" value="{{ pes.otec_manualni }}" {% if not user.profil.is_premium %} disabled {% endif %}>
-                </div>
-                <div class="col-md-3">
-                    <label class="label-gold">Matka</label>
-                    <input type="text" name="matka_manualni" class="input-clean" value="{{ pes.matka_manualni }}" {% if not user.profil.is_premium %} disabled {% endif %}>
-                </div>
+                <div class="col-md-4"><label class="label-gold">DKK (HD)</label><input type="text" name="rtg_hd" class="input-clean" value="{{ pes.rtg_hd }}" {% if not user.profil.is_premium %}disabled{% endif %}></div>
+                <div class="col-md-4"><label class="label-gold">DLK (ED)</label><input type="text" name="rtg_ed" class="input-clean" value="{{ pes.rtg_ed }}" {% if not user.profil.is_premium %}disabled{% endif %}></div>
+                <div class="col-md-4"><label class="label-gold">Páteř / RTG</label><input type="text" name="rtg_pater" class="input-clean" value="{{ pes.rtg_pater }}" {% if not user.profil.is_premium %}disabled{% endif %}></div>
+                <div class="col-md-6"><label class="label-gold">Chovná stanice</label><input type="text" name="chovna_stanice" class="input-clean" value="{{ pes.chovna_stanice }}" {% if not user.profil.is_premium %}disabled{% endif %}></div>
+                <div class="col-md-3"><label class="label-gold">Otec</label><input type="text" name="otec_manualni" class="input-clean" value="{{ pes.otec_manualni }}" {% if not user.profil.is_premium %}disabled{% endif %}></div>
+                <div class="col-md-3"><label class="label-gold">Matka</label><input type="text" name="matka_manualni" class="input-clean" value="{{ pes.matka_manualni }}" {% if not user.profil.is_premium %}disabled{% endif %}></div>
             </div>
         </div>
+        {% endif %}
 
         <div class="edit-card border-warning" style="background: #fffdf5;">
             <h5 class="section-title text-warning"><i class="fas fa-qrcode me-2"></i>Správa QR identity</h5>
             <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="regenerovat_qr" id="regenerovat_qr"
-                       style="border-color: #c5a059;">
-                <label class="form-check-label fw-800" for="regenerovat_qr" style="color: var(--t-brown);">
-                    ⚠️ Přegenerovat QR kód psa
-                </label>
-                <p class="small text-muted mb-0 mt-1">
-                    <strong>Zaškrtněte pouze pokud:</strong> Stávající QR kód nefunguje nebo vede na špatnou adresu.
-                    <br>
-                    <span class="text-danger"><strong>Varování:</strong> Pokud již máte vytištěnou fyzickou známku, po přegenerování přestane fungovat!</span>
-                </p>
+                <input class="form-check-input" type="checkbox" name="regenerovat_qr" id="regenerovat_qr">
+                <label class="form-check-label fw-800" for="regenerovat_qr">⚠️ Přegenerovat QR kód</label>
             </div>
         </div>
 
-        <button type="submit" class="btn-save-main mb-4 shadow">ULOŽIT VŠECHNY ZMĚNY</button>
+        <button type="submit" class="btn-save-main mb-4 shadow">ULOŽIT ZMĚNY</button>
     </form>
 
-    <div class="edit-card">
-        {% if not user.profil.is_premium %}
-        <div class="lock-overlay">
-            <i class="fas fa-trophy mb-2" style="color: var(--t-gold); font-size: 1.5rem;"></i>
-            <h6 class="fw-bold m-0">Výstavy a úspěchy</h6>
-            <p style="font-size: 0.7rem; color: var(--t-brown);">Zapisujte kariéru svého psa s ALFA profilem</p>
-            <a href="{% url 'cenik' %}" class="btn-alfa-slim">AKTIVOVAT</a>
-        </div>
-        {% endif %}
-        <h5 class="section-title">Výstavy a úspěchy</h5>
-        <form method="POST" action="{% url 'pridat_uspech' pes.id %}" class="mb-4">
-            {% csrf_token %}
-            <div class="row g-2">
-                <div class="col-7 col-md-8">
-                    <label class="label-gold">Název titulu / výstavy</label>
-                    <input type="text" name="nazev" class="input-clean" placeholder="Např. CAJC, BOJ..." required {% if not user.profil.is_premium %} disabled {% endif %}>
-                </div>
-                <div class="col-5 col-md-4">
-                    <label class="label-gold">Datum</label>
-                    <div class="d-flex gap-2">
-                        <input type="date" name="datum" class="input-clean" required {% if not user.profil.is_premium %} disabled {% endif %}>
-                        <button type="submit" class="btn btn-gold text-white px-3 rounded-3" style="background: var(--t-gold); height: 48px;" {% if not user.profil.is_premium %} disabled {% endif %}><i class="fas fa-plus"></i></button>
-                    </div>
-                </div>
-            </div>
-        </form>
-        <div class="awards-list">
-            {% for uspech in pes.uspechy.all %}
-            <div class="award-row d-flex justify-content-between align-items-center">
-                <div>
-                    <span class="fw-bold d-block">{{ uspech.nazev }}</span>
-                    <small class="text-muted">{{ uspech.datum|date:"d.m.Y" }}</small>
-                </div>
-                <a href="#" onclick="confirmSmartDelete('{% url 'smazat_uspech' uspech.id %}', 'úspěch')"
-                   class="text-danger opacity-50"><i class="fas fa-trash-alt"></i></a>
-            </div>
-            {% empty %}
-            <p class="small text-muted text-center m-0 italic">Zatím žádné úspěchy.</p>
-            {% endfor %}
-        </div>
     </div>
-
-    <div class="edit-card">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="section-title mb-0">Galerie a Média</h5>
-            <span class="text-muted small">
-                {% if user.profil.is_premium %}
-                    Celkem: {{ pes.galerie_fotky.count }} fotek | {{ pes.galerie_videa.count }} video
-                {% else %}
-                    Foto: {{ pes.galerie_fotky.count }}/5 | Video: {{ pes.galerie_videa.count }}/1
-                {% endif %}
-            </span>
-        </div>
-
-        <div class="upload-grid">
-            {# Tlačítko FOTO #}
-            {% if user.profil.is_premium or pes.galerie_fotky.count < 5 %}
-            <div class="upload-box" onclick="document.getElementById('gallery-photo-input').click()">
-                <i class="fas fa-images fa-lg mb-1"></i>
-                <span class="small fw-bold">+ GALERIE</span>
-            </div>
-            {% else %}
-            <div class="upload-box disabled-box" title="Limit 5 fotek vyčerpán">
-                <i class="fas fa-lock mb-1"></i>
-                <span class="small">LIMIT</span>
-            </div>
-            {% endif %}
-
-            {# Tlačítko VIDEO #}
-            {% if user.profil.is_premium or pes.galerie_videa.count < 1 %}
-            <div class="upload-box" onclick="document.getElementById('gallery-video-input').click()">
-                <i class="fas fa-film fa-lg mb-1"></i>
-                <span class="small fw-bold">+ VIDEO</span>
-            </div>
-            {% else %}
-            <div class="upload-box disabled-box" title="Limit 1 video vyčerpán">
-                <i class="fas fa-lock mb-1"></i>
-                <span class="small">LIMIT</span>
-            </div>
-            {% endif %}
-
-            {# ZOBRAZENÍ FOTEK #}
-            {% for foto in pes.galerie_fotky.all %}
-            <div class="media-item">
-                <img src="{{ foto.obrazek.url }}">
-                <a href="#" class="btn-delete-media"
-                   onclick="confirmSmartDelete('{% url 'smazat_foto' foto.id %}', 'fotku')">×</a>
-            </div>
-            {% endfor %}
-
-            {# ZOBRAZENÍ VIDEÍ #}
-            {% for video in pes.galerie_videa.all %}
-            <div class="media-item">
-                <video muted playsinline onclick="this.paused ? this.play() : this.pause();">
-                    <source src="{{ video.video_soubor.url }}">
-                </video>
-                <div class="video-badge"><i class="fas fa-play"></i></div>
-                <a href="#" class="btn-delete-media"
-                   onclick="confirmSmartDelete('{% url 'smazat_video' video.id %}', 'video')">×</a>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</div>
-
-<form id="auto-photo-form" method="POST" action="{% url 'pridat_foto' pes.id %}" enctype="multipart/form-data"
-      class="d-none">
-    {% csrf_token %}
-    <input type="file" name="obrazek" id="gallery-photo-input" accept="image/*">
-</form>
-
-<form id="auto-video-form" method="POST" action="{% url 'pridat_video' pes.id %}" enctype="multipart/form-data"
-      class="d-none">
-    {% csrf_token %}
-    <input type="file" name="video_soubor" id="gallery-video-input" accept="video/*">
-</form>
 
 <script>
     function confirmSmartDelete(deleteUrl, itemType) {
@@ -323,26 +172,7 @@
             reverseButtons: true,
             confirmButtonColor: '#d63031',
             cancelButtonColor: '#f1f1f1',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = deleteUrl;
-            }
-        })
-    }
-
-    // Opravené odesílání formulářů pro nahrávání v úpravách
-    const photoInput = document.getElementById('gallery-photo-input');
-    if (photoInput) {
-        photoInput.onchange = function() {
-            if(this.files.length > 0) document.getElementById('auto-photo-form').submit();
-        };
-    }
-
-    const videoInput = document.getElementById('gallery-video-input');
-    if (videoInput) {
-        videoInput.onchange = function() {
-            if(this.files.length > 0) document.getElementById('auto-video-form').submit();
-        };
+        }).then((result) => { if (result.isConfirmed) { window.location.href = deleteUrl; } })
     }
 </script>
 {% endblock %}

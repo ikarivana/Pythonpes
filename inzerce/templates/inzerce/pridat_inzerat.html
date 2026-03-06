@@ -2,12 +2,8 @@
 
 {% block content %}
 <style>
-    .inzerat-wrapper {
-        min-height: 100vh;
-        padding-top: 20px;
-        padding-bottom: 50px;
-    }
-
+    .inzerat-wrapper { min-height: 100vh; padding: 40px 0; background: #fdfaf7; }
+    
     .inzerat-card {
         background: linear-gradient(145deg, #ffffff, #fdfaf7);
         border-radius: 30px;
@@ -26,70 +22,30 @@
     }
 
     .section-title::after {
-        content: '';
-        position: absolute;
-        bottom: -10px;
-        left: 0;
-        width: 60%;
-        height: 4px;
-        background: var(--gold);
-        border-radius: 2px;
+        content: ''; position: absolute; bottom: -10px; left: 0; width: 60%; height: 4px;
+        background: var(--gold); border-radius: 2px;
     }
 
-    .form-control, .form-select {
-        border: 1.5px solid #eeebe7 !important;
-        border-radius: 15px !important;
-        padding: 12px 18px !important;
-        background-color: #fdfcfb !important;
-        transition: all 0.3s ease !important;
-        box-shadow: inset 2px 2px 5px rgba(0,0,0,0.03) !important;
-    }
-
-    .form-label {
-        font-weight: 700;
-        color: var(--mid-brown);
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 8px;
-        margin-left: 5px;
-    }
-
-    .form-label i {
-        color: var(--gold);
-        width: 20px;
-        margin-right: 5px;
+    /* Styl pro média sekci */
+    .media-section {
+        background: rgba(197, 160, 89, 0.03);
+        padding: 30px;
+        border-radius: 25px;
+        border: 2px dashed var(--gold);
+        margin-top: 20px;
     }
 
     .btn-submit-premium {
         background: linear-gradient(135deg, var(--mid-brown) 0%, var(--dark-cocoa) 100%);
-        color: white;
-        border: none;
-        padding: 18px;
-        border-radius: 18px;
-        font-weight: 800;
-        font-size: 1.1rem;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        box-shadow: 0 10px 20px rgba(45, 27, 25, 0.2);
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        width: 100%;
-        margin-top: 30px;
+        color: white; border: none; padding: 18px; border-radius: 18px;
+        font-weight: 800; font-size: 1.1rem; width: 100%; margin-top: 30px;
+        transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        text-transform: uppercase; letter-spacing: 2px;
     }
 
     .btn-submit-premium:hover {
-        background: var(--gold);
-        color: var(--dark-cocoa);
-        transform: scale(1.02) translateY(-3px);
+        background: var(--gold); color: var(--dark-cocoa); transform: translateY(-3px);
         box-shadow: 0 15px 30px rgba(197, 160, 89, 0.3);
-    }
-
-    .media-section {
-        background: rgba(197, 160, 89, 0.05);
-        padding: 25px;
-        border-radius: 20px;
-        border: 1px dashed var(--gold);
-        margin-top: 20px;
     }
 </style>
 
@@ -97,72 +53,62 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-11 col-xl-10">
-                <div class="inzerat-card">
-                    <h2 class="section-title">Inzerát <i class="fas fa-paw ms-2" style="color: var(--gold);"></i></h2>
+                
+                <div class="mb-4 d-flex justify-content-between align-items-center">
+                    <a href="{% url 'seznam_inzeratu' %}" class="text-decoration-none fw-bold" style="color: var(--mid-brown);">
+                        <i class="fas fa-chevron-left me-2"></i>Zpět do bazaru
+                    </a>
+                </div>
+
+                <div class="inzerat-card shadow">
+                    <h2 class="section-title">Nový inzerát <i class="fas fa-paw ms-2 text-gold"></i></h2>
 
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
 
                         <div class="row g-4">
                             <div class="col-md-8">
-                                <label class="form-label"><i class="fas fa-pen-nib"></i> Titulek inzerátu</label>
+                                <label class="form-label fw-bold text-uppercase small"><i class="fas fa-pen-nib text-gold me-2"></i>Titulek</label>
                                 {{ form.titulek }}
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label"><i class="fas fa-th-large"></i> Kategorie</label>
+                                <label class="form-label fw-bold text-uppercase small"><i class="fas fa-th-large text-gold me-2"></i>Kategorie</label>
                                 {{ form.kategorie }}
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label"><i class="fas fa-quote-left"></i> Podrobný popis</label>
+                                <label class="form-label fw-bold text-uppercase small"><i class="fas fa-quote-left text-gold me-2"></i>Popis inzerátu</label>
                                 {{ form.text }}
                             </div>
 
                             <div class="col-md-4">
-                                <label class="form-label"><i class="fas fa-coins"></i> Cena (Kč)</label>
+                                <label class="form-label fw-bold text-uppercase small"><i class="fas fa-coins text-gold me-2"></i>Cena (Kč)</label>
                                 {{ form.cena }}
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label"><i class="fas fa-map"></i> Kraj</label>
+                                <label class="form-label fw-bold text-uppercase small"><i class="fas fa-map text-gold me-2"></i>Kraj</label>
                                 {{ form.kraj }}
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label"><i class="fas fa-city"></i> Město / Lokalita</label>
+                                <label class="form-label fw-bold text-uppercase small"><i class="fas fa-city text-gold me-2"></i>Město</label>
                                 {{ form.mesto }}
                             </div>
 
-                            <div class="col-md-12 mt-4">
+                            <div class="col-md-12">
                                 <div class="media-section">
+                                    <h5 class="font-playfair mb-4" style="color: var(--dark-cocoa);">Fotografie a kontakt</h5>
                                     <div class="row g-4">
                                         <div class="col-md-6">
-                                            <label class="form-label"><i class="fas fa-phone-alt"></i> Telefon</label>
+                                            <label class="form-label fw-bold small"><i class="fas fa-phone-alt text-gold me-2"></i>Telefon</label>
                                             {{ form.telefon }}
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label"><i class="fas fa-envelope"></i> Kontaktní email</label>
-                                            {{ form.email_kontakni }}
-                                        </div>
-
-                                        <div class="col-md-6">
-                                            <label class="form-label"><i class="fas fa-image"></i> Hlavní fotka</label>
+                                            <label class="form-label fw-bold small"><i class="fas fa-image text-gold me-2"></i>Hlavní náhledová fotka</label>
                                             {{ form.obrazek }}
-                                            {% if inzerat.obrazek %}
-                                            <div class="mt-2 small text-muted">
-                                                <i class="fas fa-check-circle text-success"></i> Aktuálně:
-                                                <a href="{{ inzerat.obrazek.url }}" target="_blank">{{ inzerat.obrazek.name }}</a>
-                                            </div>
-                                            {% endif %}
                                         </div>
-
-                                        <div class="col-md-6">
-                                            <label class="form-label"><i class="fas fa-film"></i> Video (volitelné)</label>
-                                            {{ form.video }}
-                                        </div>
-
                                         <div class="col-md-12">
-                                            <label class="form-label"><i class="fas fa-images"></i> Další fotky do galerie</label>
+                                            <label class="form-label fw-bold small"><i class="fas fa-images text-gold me-2"></i>Galerie (vyberte více fotek najednou)</label>
                                             {{ form.galerie_fotky }}
-                                            <small class="text-muted ms-2">Vyberte snímky z galerie najednou.</small>
                                         </div>
                                     </div>
                                 </div>
@@ -170,7 +116,7 @@
                         </div>
 
                         <button type="submit" class="btn-submit-premium">
-                            <i class="fas fa-save me-2"></i> Uložit inzerát
+                            <i class="fas fa-rocket me-2"></i> Publikovat inzerát
                         </button>
                     </form>
                 </div>

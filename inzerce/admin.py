@@ -1,34 +1,64 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from .models import Inzerat, InzeratFoto
 
 
-# Umožní přidávat/vidět další fotky přímo u inzerátu
 class InzeratFotoInline(admin.TabularInline):
     model = InzeratFoto
     extra = 1
+    readonly_fields = ('nahled_fotky',)
+
+    def nahled_fotky(self, obj):
+        if obj.foto:
+            return format_html('<img src="{}" style="width: 100px; height: auto; border-radius: 5px;" />', obj.foto.url)
+        return "Žádná fotka"
+
+    nahled_fotky.short_description = 'Náhled'
 
 
 @admin.register(Inzerat)
 class InzeratAdmin(admin.ModelAdmin):
-    # Tady definuješ sloupce, které uvidíš v tom hlavním seznamu
-    # Přidal jsem 'telefon' a 'get_email'
-    list_display = ('titulek', 'kategorie', 'get_email', 'telefon', 'kraj', 'aktivni', 'vytvoreno')
+    # Zobrazení klíčových informací včetně náhledu a statusu Premium
+    list_display = ('nahled_hlavni_fotky', 'titulek', 'kategorie', 'je_premium_uzivatel', 'kraj', 'aktivni',
+                    'vytvoreno')
 
-    # Umožní filtrovat v pravém panelu
-    list_filter = ('kategorie', 'kraj', 'aktivni')
+    # Filtrování podle důležitých metrik
+    list_filter = ('aktivni', 'kategorie', 'kraj', 'vytvoreno')
 
-    # Vyhledávání (můžeš hledat i podle telefonu)
-    search_fields = ('titulek', 'telefon', 'autor__email', 'mesto')
+    # Rozšířené vyhledávání
+    search_fields = ('titulek', 'text', 'autor__username', 'autor__email', 'mesto', 'telefon')
 
-    # Přidání fotek do detailu
+    # Možnost rychle změnit aktivitu inzerátu přímo v seznamu
+    list_editable = ('aktivni',)
+
     inlines = [InzeratFotoInline]
 
-    # Speciální funkce pro zobrazení emailu autora v seznamu
-    def get_email(self, obj):
-        return obj.autor.email
+    # Funkce pro náhled hlavní fotky v seznamu
+    def nahled_hlavni_fotky(self, obj):
+        if obj.obrazek:
+            return format_html(
+                '<img src="{}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 1px solid #c5a059;" />',
+                obj.obrazek.url)
+        return "—"
 
-    get_email.short_description = 'Email autora'
+    nahled_hlavni_fotky.short_description = 'Foto'
+
+    # Funkce pro zobrazení Premium statusu autora
+    def je_premium_uzivatel(self, obj):
+        status = getattr(obj.autor.profil, 'is_premium', False)
+        if status:
+            return format_html('<span style="color: #c5a059; font-weight: bold;">👑 ALFA</span>')
+        return "Běžný"
+
+    je_premium_uzivatel.short_description = 'Status'
 
 
-# Registrace modelu pro fotky, abys je mohla spravovat i samostatně
-admin.site.register(InzeratFoto)
+# Samostatná registrace fotek (pokud bys je chtěla hromadně mazat/spravovat)
+@admin.register(InzeratFoto)
+class InzeratFotoAdmin(admin.ModelAdmin):
+    list_display = ('id', 'inzerat', 'nahled_foto')
+
+    def nahled_foto(self, obj):
+        if obj.foto:
+            return format_html('<img src="{}" style="width: 80px; border-radius: 5px;" />', obj.foto.url)
+        return "—"

@@ -1,57 +1,148 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
 <style>
-    .login-container { max-width: 450px; margin: 60px auto; }
+    :root {
+        --alfa-brown: #4a3728;
+        --alfa-gold: #c5a059;
+        --alfa-accent: #8b5e3c;
+        --alfa-border: #eaddcf;
+    }
+
+    body {
+        background-color: #fdfaf6;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .login-container {
+        max-width: 450px;
+        margin: 80px auto;
+        padding: 0 20px;
+    }
+
     .login-card {
         background: white;
-        border: 1px solid #eaddcf;
-        border-radius: 20px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border: 1px solid var(--alfa-border);
+        border-radius: 30px;
+        box-shadow: 0 10px 40px rgba(74, 55, 40, 0.05);
+        position: relative;
+        overflow: hidden;
     }
-    .btn-login {
-        background-color: #8b5e3c; color: white; border-radius: 12px;
-        font-weight: 600; padding: 12px; border: none; transition: 0.3s;
-    }
-    .btn-login:hover { background-color: #6d4a30; transform: translateY(-2px); color: white; }
 
-    .form-control { border-radius: 10px; border: 1px solid #eaddcf; padding: 10px 15px; }
+    /* Dekorační prvek v rohu */
+    .login-card::before {
+        content: '🐾';
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        font-size: 5rem;
+        opacity: 0.03;
+        transform: rotate(20deg);
+    }
+
+    .btn-login {
+        background-color: var(--alfa-accent);
+        color: white !important;
+        border-radius: 15px;
+        font-weight: 700;
+        padding: 14px;
+        border: none;
+        transition: 0.3s;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-login:hover {
+        background-color: var(--alfa-brown);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(139, 94, 60, 0.2);
+    }
+
+    .form-control {
+        border-radius: 12px;
+        border: 1.5px solid var(--alfa-border);
+        padding: 12px 15px;
+        background-color: #fafafa;
+    }
+
     .form-control:focus {
-        border-color: #8b5e3c;
-        box-shadow: 0 0 0 0.2rem rgba(139, 94, 60, 0.15);
+        border-color: var(--alfa-accent);
+        background-color: white;
+        box-shadow: 0 0 0 4px rgba(139, 94, 60, 0.08);
+    }
+
+    .login-header h2 {
+        color: var(--alfa-brown);
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .badge-community {
+        display: inline-block;
+        padding: 5px 15px;
+        background: #fff4e6;
+        color: var(--alfa-gold);
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin-bottom: 15px;
     }
 </style>
 
 <div class="container login-container">
     <div class="login-card p-4 p-md-5">
-        <div class="text-center mb-4">
-            <h2 class="fw-bold" style="color: #4a3728;">Přihlášení 🐾</h2>
+        <div class="text-center login-header mb-4">
+            <div class="badge-community">Pro psy i kočky</div>
+            <h2>Vítejte zpět</h2>
+            <p class="text-muted small">Vstupte do světa svého mazlíčka</p>
         </div>
 
         <form method="post">
             {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger small py-2 rounded-3">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
             <div class="mb-3">
                 <label class="form-label small fw-bold text-muted">Uživatelské jméno</label>
-                <input type="text" name="username" class="form-control" placeholder="Tvé jméno" required>
+                <div class="input-group">
+                    <input type="text" name="username" class="form-control" placeholder="Tvé jméno" required>
+                </div>
             </div>
 
             <div class="mb-3">
-                <div class="d-flex justify-content-between">
-                    <label class="form-label small fw-bold text-muted">Heslo</label>
-                    <a href="{% url 'password_reset' %}" class="small" style="color: #c5a059; text-decoration: none;">Zapomenuté heslo?</a>
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="form-label small fw-bold text-muted mb-0">Heslo</label>
+                    <a href="{% url 'password_reset' %}" class="small fw-600" style="color: var(--alfa-gold); text-decoration: none;">Zapomenuto?</a>
                 </div>
                 <input type="password" name="password" class="form-control" placeholder="••••••••" required>
             </div>
 
-            <button type="submit" class="btn btn-login w-100 shadow-sm mt-2">
-                Vstoupit do deníku
+            <div class="form-check mb-4">
+                <input class="form-check-input" type="checkbox" value="" id="rememberMe">
+                <label class="form-check-label small text-muted" for="rememberMe">
+                    Pamatovat si mě
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-login w-100 shadow-sm">
+                VSTOUPIT DO DENÍKU
             </button>
         </form>
 
-        <div class="text-center mt-4">
-            <p class="small text-muted mb-0">Ještě nemáte účet?</p>
-            <a href="{% url 'register' %}" class="small fw-bold" style="color: #8b5e3c; text-decoration: none;">Zaregistrujte se zde</a>
+        <div class="text-center mt-5">
+            <p class="small text-muted mb-1">Ještě nemáte svůj ALFA profil?</p>
+            <a href="{% url 'register' %}" class="small fw-bold" style="color: var(--alfa-accent); text-decoration: none;">Vytvořit účet zdarma</a>
         </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <p class="small text-muted" style="opacity: 0.6;">&copy; 2026 EPES.ONLINE | Spolehlivá identita mazlíčků</p>
     </div>
 </div>
 {% endblock %}

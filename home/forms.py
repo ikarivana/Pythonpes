@@ -1,39 +1,79 @@
 from django import forms
 from .models import Sluzba
 
-
 class SluzbaForm(forms.ModelForm):
     # Přidáme explicitně pole typ s ikonkami přímo pro uživatele
     typ = forms.ChoiceField(
         choices=Sluzba.TYPY_SLUZEB,
-        widget=forms.Select(attrs={'class': 'form-control custom-brown-input'})
+        label="Co je to za místo?"
     )
 
     class Meta:
         model = Sluzba
         fields = ['nazev', 'typ', 'adresa', 'popis', 'web', 'telefon', 'lat', 'lon']
+        labels = {
+            'nazev': 'Název podniku nebo místa',
+            'adresa': 'Přesná adresa (ulice, město)',
+            'popis': 'Krátký popis pro ostatní páníčky',
+            'web': 'Webové stránky (nepovinné)',
+            'telefon': 'Kontaktní telefon',
+            'lat': 'Zeměpisná šířka (vyplní se z mapy)',
+            'lon': 'Zeměpisná délka (vyplní se z mapy)',
+        }
         widgets = {
-            'lat': forms.TextInput(attrs={'placeholder': 'Např. 49.397'}),
-            'lon': forms.TextInput(attrs={'placeholder': 'Např. 17.678'}),
+            'popis': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Např. Skvělá káva a miska s vodou vždy připravena...'}),
+            'lat': forms.TextInput(attrs={'readonly': 'readonly'}), # Uživatel by neměl psát ručně
+            'lon': forms.TextInput(attrs={'readonly': 'readonly'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for field_name, field in self.fields.items():
-            if field_name != 'typ':
-                field.widget.attrs.update({'class': 'form-control custom-brown-input'})
+        # Hromadné přidání třídy pro stylování všech polí najednou
+        for field in self.fields.values():
+            field.widget.attrs.update({
+                'class': 'form-control custom-brown-input',
+                'style': 'border-radius: 12px; border: 1.5px solid var(--border-tan); padding: 10px;'
+            })
 
 
 class KontaktForm(forms.Form):
-    jmeno = forms.CharField(label="Vaše jméno", max_length=100,
-                            widget=forms.TextInput(
-                                attrs={'class': 'form-control custom-brown-input', 'placeholder': 'Alík Novák'}))
-    email = forms.EmailField(label="E-mail",
-                             widget=forms.EmailInput(
-                                 attrs={'class': 'form-control custom-brown-input', 'placeholder': 'vas@email.cz'}))
-    predmet = forms.CharField(label="Předmět", max_length=200,
-                              widget=forms.TextInput(
-                                  attrs={'class': 'form-control custom-brown-input', 'placeholder': 'Předmět zprávy'}))
-    zprava = forms.CharField(label="Zpráva",
-                             widget=forms.Textarea(attrs={'class': 'form-control custom-brown-input', 'rows': 4,
-                                                          'placeholder': 'Co máte na srdci?'}))
+    jmeno = forms.CharField(
+        label="Vaše jméno",
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Např. Jana a Alík',
+            'class': 'form-control custom-brown-input'
+        })
+    )
+    email = forms.EmailField(
+        label="E-mail",
+        widget=forms.EmailInput(attrs={
+            'placeholder': 'vas@email.cz',
+            'class': 'form-control custom-brown-input'
+        })
+    )
+    predmet = forms.CharField(
+        label="Předmět",
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'S čím vám můžeme pomoci?',
+            'class': 'form-control custom-brown-input'
+        })
+    )
+    zprava = forms.CharField(
+        label="Vaše zpráva",
+        widget=forms.Textarea(attrs={
+            'rows': 5,
+            'placeholder': 'Napište nám, co máte na srdci...',
+            'class': 'form-control custom-brown-input'
+        })
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Sjednocení stylu i pro kontaktní formulář
+        for field in self.fields.values():
+            field.widget.attrs.update({
+                'class': 'form-control custom-brown-input',
+                'style': 'border-radius: 12px; border: 1.5px solid var(--border-tan);'
+            })

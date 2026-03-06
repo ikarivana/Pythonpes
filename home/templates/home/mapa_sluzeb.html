@@ -6,12 +6,12 @@
         height: 600px !important;
         width: 100%;
         border-radius: 20px;
-        border: 2px solid #e5e3df;
+        border: 2px solid var(--border-tan);
         z-index: 1;
     }
 
     .btn-call {
-        background-color: #8B4513;
+        background-color: var(--mid-brown);
         color: white !important;
         display: block;
         text-align: center;
@@ -22,8 +22,9 @@
         font-weight: bold;
     }
 
+    /* Upraveno pro SOS styl */
     .btn-danger-map {
-        background-color: #d32f2f;
+        background-color: var(--sos-red);
         color: white !important;
         border: none;
         width: 100%;
@@ -39,92 +40,86 @@
     .badge-filter {
         padding: 10px 18px;
         border-radius: 50px;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         color: white;
         border: none;
         cursor: pointer;
         transition: 0.3s;
-        font-weight: 500;
+        font-weight: 600;
+        white-space: nowrap;
     }
 
-    .badge-filter:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+    .badge-filter:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
 
+    /* SOS Pulsace */
     @keyframes pulse-red {
-        0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7); }
-        70% { box-shadow: 0 0 0 15px rgba(211, 47, 47, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
+        0% { box-shadow: 0 0 0 0 rgba(227, 93, 106, 0.7); }
+        70% { box-shadow: 0 0 0 15px rgba(227, 93, 106, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(227, 93, 106, 0); }
     }
     .pulse-danger { animation: pulse-red 2s infinite; border: 2px solid white; }
 
     .custom-brown-alert {
-        background-color: #f4ece4;
-        border: 1px solid #d7c4b3;
-        color: #5d4037;
+        background-color: #f9f4ef;
+        border: 1px solid var(--border-tan);
+        color: var(--mid-brown);
         padding: 15px;
-        border-radius: 8px;
+        border-radius: 15px;
         margin-bottom: 20px;
         text-align: center;
     }
 
     .custom-brown-alert a {
-        color: #8d6e63;
+        color: var(--gold);
         font-weight: bold;
         text-decoration: underline;
     }
+
+    .map-title {
+        color: var(--dark-cocoa);
+        font-family: 'Playfair Display', serif;
+        font-weight: 800;
+    }
 </style>
 
-<div class="p-4 bg-white">
-    <h2 style="color: #8B4513; font-weight: bold;" class="mb-4">📍 Interaktivní mapa služeb</h2>
+<div class="p-4 bg-white" style="border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+    <h2 class="map-title mb-2">📍 Interaktivní mapa služeb</h2>
 
-    <div style="margin-bottom: 12px; padding-left: 5px;">
-        <span style="font-size: 0.8rem; color: #666; font-style: italic;">
-            🐾 Informace v mapě jsou čerpány z veřejných zdrojů. Pro úpravu či smazání záznamu nás kontaktujte.
+    <div class="mb-4">
+        <span style="font-size: 0.8rem; color: #8d7d77; font-style: italic;">
+            🐾 Informace v mapě jsou pro celou komunitu. Pro úpravu či smazání záznamu nás kontaktujte.
         </span>
     </div>
 
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div class="d-flex flex-wrap gap-2">
-            <button class="badge-filter" style="background-color: #8B4513;" onclick="filtrujMapu('vse')">Vše</button>
-            <button class="badge-filter pulse-danger" style="background-color: #d32f2f;"
-                    onclick="filtrujMapu('nebezpeci')">⚠️ NEBEZPEČÍ
-            </button>
-            <button class="badge-filter" style="background-color: #212121;" onclick="filtrujMapu('veterina')">Veterina
-            </button>
-            <button class="badge-filter" style="background-color: #00bcd4;" onclick="filtrujMapu('strihani')">✂️
-                Stříhání psů
-            </button>
-            <button class="badge-filter" style="background-color: #1976d2;" onclick="filtrujMapu('obchod')">Obchody
-            </button>
-            <button class="badge-filter" style="background-color: #f57c00;" onclick="filtrujMapu('hotel')">Hotely
-            </button>
-            <button class="badge-filter" style="background-color: #388e3c;" onclick="filtrujMapu('wellness')">Wellness
-            </button>
-            <button class="badge-filter" style="background-color: #7b1fa2;" onclick="filtrujMapu('cvicak')">Cvičáky
-            </button>
-            <button class="badge-filter" style="background-color: #757575;" onclick="filtrujMapu('utulek')">Útulky
-            </button>
-            <button class="badge-filter" style="background-color: #ffc107; color: black;"
-                    onclick="filtrujMapu('chovna_stanice')">Chovné stanice
-            </button>
+            <button class="badge-filter" style="background-color: var(--mid-brown);" onclick="filtrujMapu('vse')">Vše</button>
+            <button class="badge-filter pulse-danger" style="background-color: var(--sos-red);" onclick="filtrujMapu('nebezpeci')">⚠️ NEBEZPEČÍ</button>
+            <button class="badge-filter" style="background-color: #212121;" onclick="filtrujMapu('veterina')">🩺 Veterina</button>
+            <button class="badge-filter" style="background-color: #00bcd4;" onclick="filtrujMapu('strihani')">✂️ Salóny / Grooming</button>
+            <button class="badge-filter" style="background-color: #1976d2;" onclick="filtrujMapu('obchod')">🛍️ Obchody</button>
+            <button class="badge-filter" style="background-color: #f57c00;" onclick="filtrujMapu('hotel')">🏠 Hotely / Hlídání</button>
+            <button class="badge-filter" style="background-color: #388e3c;" onclick="filtrujMapu('wellness')">🌊 Wellness / Reha</button>
+            <button class="badge-filter" style="background-color: #7b1fa2;" onclick="filtrujMapu('cvicak')">🎾 Výcvik & Hřiště</button>
+            <button class="badge-filter" style="background-color: #757575;" onclick="filtrujMapu('utulek')">🐾 Útulky</button>
+            <button class="badge-filter" style="background-color: var(--gold); color: var(--dark-cocoa);" onclick="filtrujMapu('chovna_stanice')">✨ Chovné stanice</button>
         </div>
 
-        <a href="mailto:vas-elivdruhy@gmail.com?subject=Zadost o upravu/smazani z PSI mapy&body=Dobrý den, žádám o úpravu/smazání tohoto záznamu v psí mapě: (doplňte název a důvod). Děkuji."
+        <a href="mailto:elivdruhy@gmail.com?subject=Zadost o upravu/smazani z mapy&body=Dobrý den, žádám o úpravu/smazání záznamu v mapě: (název a důvod). Děkuji."
            class="badge-filter"
-           style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; text-decoration: none; font-size: 0.8rem; font-weight: bold;">
-            🚩 Nahlásit / Smazat
+           style="background-color: #fff; color: var(--sos-red); border: 1.5px solid var(--sos-red); text-decoration: none; font-size: 0.75rem;">
+            🚩 Nahlásit chybu
         </a>
     </div>
 
     <div class="map-controls mb-4">
         {% if user.is_authenticated %}
-        <a href="{% url 'pridat_sluzbu' %}" class="btn btn-primary">
-            + Přidat službu nebo nebezpečí
+        <a href="{% url 'pridat_sluzbu' %}" class="btn btn-sm fw-bold px-4 py-2" style="background: var(--gold); color: var(--dark-cocoa); border-radius: 12px; text-decoration: none;">
+            <i class="fas fa-plus-circle me-1"></i> Přidat místo na mapu
         </a>
         {% else %}
         <div class="custom-brown-alert">
-            Pro přidání služby na mapu se prosím
-            <a href="{% url 'login' %}">přihlaste</a> nebo
-            <a href="{% url 'register' %}">registrujte</a>.
+            Chcete přidat novou službu? <a href="{% url 'login' %}">Přihlaste se</a> nebo se <a href="{% url 'register' %}">registrujte</a>.
         </div>
         {% endif %}
     </div>
@@ -143,34 +138,20 @@
     var map;
 
     document.addEventListener('DOMContentLoaded', function() {
-        // 1. Inicializace mapy
         map = L.map('map').setView([49.8, 15.5], 7);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // 2. Definice speciální tyrkysové ikonky pro stříhání (SVG)
-        // Toto vytvoří ikonku přímo v prohlížeči, nemusí se nic stahovat
-       var strihaniIcon = L.divIcon({
-    className: 'custom-div-icon',
-    // Tento kód vytvoří klasickou kapku (špendlík) s nožičkou
-    html: `<div style="
-        background-color: #00bcd4;
-        width: 20px;
-        height: 20px;
-        border-radius: 50% 50% 50% 0;
-        transform: rotate(-45deg);
-        border: 2px solid white;
-        box-shadow: 1px 1px 4px rgba(0,0,0,0.5);
-        position: relative;
-        top: -10px;
-    "></div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10], // Ukotvení na špičku
-    popupAnchor: [0, -20]
-});
+        // Ikonka pro salóny
+        var strihaniIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="background-color: #00bcd4; width: 20px; height: 20px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 2px solid white; box-shadow: 1px 1px 4px rgba(0,0,0,0.5); position: relative; top: -10px;"></div>`,
+            iconSize: [20, 20],
+            iconAnchor: [10, 10],
+            popupAnchor: [0, -20]
+        });
 
-        // Funkce pro ostatní ikonky
         function getOtherIcon(color) {
             return new L.Icon({
                 iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-' + color + '.png',
@@ -193,38 +174,32 @@
             'chovna_stanice': 'gold'
         };
 
-        // 3. Vykreslení bodů
         sluzby.forEach(function(s) {
             var lat = parseFloat(s.lat);
             var lon = parseFloat(s.lon);
 
             if (!isNaN(lat) && !isNaN(lon)) {
                 var marker;
-                var typText = (s.typ || "").toLowerCase();
+                var typSlug = s.typ_slug;
 
-                // Pokud je to stříhání, použijeme naši neprůstřelnou tyrkysovou ikonu
-                if (typText.includes('stříhání') || s.typ_slug === 'strihani') {
+                if (typSlug === 'strihani') {
                     marker = L.marker([lat, lon], { icon: strihaniIcon }).addTo(map);
                 } else {
-                    // Ostatní barvy podle mapy
-                    var color = barvyMap[s.typ_slug] || 'blue';
+                    var color = barvyMap[typSlug] || 'blue';
                     marker = L.marker([lat, lon], { icon: getOtherIcon(color) }).addTo(map);
                 }
 
-                // Popup obsah
-                var content = '<div style="min-width:180px; font-family:sans-serif;">';
-                content += '<b>' + s.nazev + '</b><br>';
-                content += '<span style="color:#666; font-size:0.8rem;">' + s.typ + '</span><br>';
-                content += '📍 ' + s.adresa + '<br>';
+                var content = '<div style="min-width:180px; font-family:sans-serif; padding: 5px;">';
+                content += '<b style="font-size: 1rem; color: var(--dark-cocoa);">' + s.nazev + '</b><br>';
+                content += '<span style="color:var(--gold); font-weight:bold; font-size:0.75rem; text-transform:uppercase;">' + s.typ + '</span><br>';
+                content += '<div style="margin-top: 5px;">📍 ' + s.adresa + '</div>';
                 if (s.web) {
-                    content += '<br><a href="' + s.web + '" target="_blank" style="display:block; background:#8B4513; color:white; text-align:center; padding:5px; border-radius:4px; text-decoration:none;">OTEVŘÍT WEB</a>';
+                    content += '<br><a href="' + s.web + '" target="_blank" style="display:block; background:var(--mid-brown); color:white; text-align:center; padding:8px; border-radius:8px; text-decoration:none; font-weight:bold; font-size:0.8rem;">NAVŠTÍVIT WEB</a>';
                 }
                 content += '</div>';
 
                 marker.bindPopup(content);
-
-                // Uložení pro filtry
-                allMarkers.push({ marker: marker, typ: s.typ_slug });
+                allMarkers.push({ marker: marker, typ: typSlug });
             }
         });
 

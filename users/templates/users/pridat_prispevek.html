@@ -16,88 +16,133 @@
     body { background-color: var(--bg-page); color: var(--text-dark); font-family: 'Plus Jakarta Sans', sans-serif; }
     .feed-container { max-width: 600px; margin: 0 auto; padding: 30px 20px; }
 
-    .add-post-card {
-        background: white; border-radius: 24px; padding: 30px;
-        box-shadow: 0 10px 30px rgba(139, 94, 60, 0.08);
+    .edit-post-card {
+        background: white; border-radius: 24px; padding: 40px;
+        box-shadow: 0 15px 35px rgba(139, 94, 60, 0.1);
         border: 1px solid var(--card-border);
     }
 
-    /* Styl pro textarea a inputy */
-    .add-post-card textarea, .add-post-card input[type="text"], .add-post-card input[type="file"] {
+    /* Úprava polí generovaných Djangem */
+    .edit-post-card textarea,
+    .edit-post-card input[type="text"],
+    .edit-post-card input[type="file"] {
         width: 100%;
         border: 1.5px solid var(--card-border) !important;
         background: #fafafa !important;
-        border-radius: 18px !important;
-        padding: 15px 20px !important;
+        border-radius: 15px !important;
+        padding: 12px 18px !important;
         color: var(--text-dark);
-        margin-bottom: 20px;
+        margin-top: 5px;
+        transition: 0.3s;
     }
 
-    .add-post-card textarea { resize: none; min-height: 150px; }
+    .edit-post-card textarea { min-height: 120px; resize: vertical; }
 
-    .add-post-card textarea:focus, .add-post-card input:focus {
+    .edit-post-card textarea:focus, .edit-post-card input:focus {
         outline: none;
         border-color: var(--gold-accent) !important;
         background: white !important;
+        box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.1);
+    }
+
+    .media-preview-box {
+        background: var(--gold-light);
+        padding: 15px;
+        border-radius: 18px;
+        margin-bottom: 20px;
+        border: 1px dashed var(--gold-accent);
+    }
+
+    .preview-img, .preview-video {
+        width: 100%;
+        max-height: 300px;
+        object-fit: cover;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
     .btn-gold-action {
         background: linear-gradient(135deg, var(--gold-accent), var(--primary-brown));
-        color: white; border: none; border-radius: 12px; padding: 12px 25px;
-        font-weight: 700; box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2);
-        cursor: pointer; text-decoration: none;
+        color: white !important; border: none; border-radius: 14px; padding: 14px 28px;
+        font-weight: 800; box-shadow: 0 6px 18px rgba(139, 94, 60, 0.2);
+        cursor: pointer; text-decoration: none; transition: 0.3s;
+        text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.9rem;
     }
 
+    .btn-gold-action:hover { transform: translateY(-2px); opacity: 0.95; }
+
     .btn-outline-secondary {
-        border-radius: 12px; padding: 12px 25px; font-weight: 700;
-        border: 1px solid var(--card-border); color: var(--text-dark);
-        background: white; text-decoration: none;
+        border-radius: 14px; padding: 14px 28px; font-weight: 700;
+        border: 1.5px solid var(--card-border); color: var(--text-dark);
+        background: white; text-decoration: none; transition: 0.2s;
+        font-size: 0.9rem;
     }
+    .btn-outline-secondary:hover { background: #f8f9fa; color: var(--primary-brown); }
+
+    /* Stylování "Současný soubor" textu od Djanga */
+    .edit-post-card a { color: var(--gold-accent); font-weight: 600; text-decoration: none; }
 </style>
 
 <div class="feed-container">
-    <div class="add-post-card">
-        <h2 class="fw-bold mb-4" style="color: var(--primary-brown);">Upravit příspěvek</h2>
+    <div class="edit-post-card">
+        <div class="text-center mb-4">
+            <span style="font-size: 2.5rem;">📝</span>
+            <h2 class="fw-bold mt-2" style="color: var(--primary-brown);">Upravit příspěvek</h2>
+            <p class="text-muted small">Aktualizujte svůj příspěvek na zdi</p>
+        </div>
 
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
-            <div class="mb-3">
-                <label class="fw-bold mb-2">Text příspěvku:</label>
+            <div class="mb-4">
+                <label class="fw-bold small text-uppercase" style="color: var(--primary-brown);">Text příspěvku</label>
                 {{ form.text }}
+                {% if form.text.errors %}<div class="text-danger small">{{ form.text.errors }}</div>{% endif %}
             </div>
 
-            {% if prispevek.obrazek %}
-                <div class="mb-3 text-center">
-                    <p class="small text-muted">Současný obrázek:</p>
-                    <img src="{{ prispevek.obrazek.url }}" style="max-height: 200px; border-radius: 15px;" class="shadow-sm">
-                </div>
-            {% endif %}
+            <hr class="my-4" style="opacity: 0.1;">
 
             <div class="mb-4">
-                <label class="fw-bold mb-2">Změnit obrázek / nahrát nový:</label>
-                {{ form.obrazek }}
+                <label class="fw-bold small text-uppercase" style="color: var(--primary-brown);">Obrázek</label>
+                {% if prispevek.obrazek %}
+                    <div class="media-preview-box text-center my-2">
+                        <p class="small fw-bold mb-2">Aktuální foto:</p>
+                        <img src="{{ prispevek.obrazek.url }}" class="preview-img">
+                    </div>
+                {% endif %}
+                <div class="mt-2">{{ form.obrazek }}</div>
             </div>
-
-            {% if prispevek.video %}
-                <div class="mb-3 text-center">
-                    <p class="small text-muted">Současné video:</p>
-                    <video controls style="max-height: 200px; border-radius: 15px;" class="shadow-sm">
-                        <source src="{{ prispevek.video.url }}" type="video/mp4">
-                    </video>
-                </div>
-            {% endif %}
 
             <div class="mb-4">
-                <label class="fw-bold mb-2">Změnit video / nahrát nové:</label>
-                {{ form.video }}
+                <label class="fw-bold small text-uppercase" style="color: var(--primary-brown);">Video</label>
+                {% if prispevek.video %}
+                    <div class="media-preview-box text-center my-2">
+                        <p class="small fw-bold mb-2">Aktuální video:</p>
+                        <video controls class="preview-video">
+                            <source src="{{ prispevek.video.url }}" type="video/mp4">
+                        </video>
+                    </div>
+                {% endif %}
+                <div class="mt-2">{{ form.video }}</div>
             </div>
 
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn-gold-action">Uložit změny</button>
-                <a href="{% url 'zed_plemene' prispevek.plemeno.slug %}" class="btn-outline-secondary">Zrušit</a>
+            <div class="d-flex flex-column flex-sm-row gap-2 mt-5">
+                <button type="submit" class="btn-gold-action flex-grow-1">Uložit změny</button>
+
+                {# Inteligentní návrat: Pokud není plemeno (kočky), jde na sekci #}
+                <a href="{% if prispevek.plemeno %}{% url 'zed_plemene' prispevek.plemeno.slug %}{% else %}{% url 'zed_sekce' prispevek.sekce_slug %}{% endif %}"
+                   class="btn-outline-secondary text-center">
+                    Zrušit
+                </a>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    // Automaticky přidat bootstrap třídy pro file inputy, které Django renderuje stroze
+    document.querySelectorAll('input[type="file"]').forEach(input => {
+        input.classList.add('form-control-sm');
+    });
+</script>
 {% endblock %}

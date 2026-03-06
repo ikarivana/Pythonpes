@@ -14,13 +14,11 @@
     <title>{% block title %}epes.online 🐾{% endblock %}</title>
 
     <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon-32.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
-    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
     <link rel="manifest" href="/static/manifest.json">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
-          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -34,14 +32,14 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-page); margin: 0; overflow-x: hidden; }
         #wrapper { display: flex; min-height: 100vh; position: relative; }
 
-        /* --- SIDEBAR ZÁKLAD --- */
+        /* --- SIDEBAR --- */
         #sidebar-wrapper {
             width: 280px; min-width: 280px;
             background: linear-gradient(180deg, var(--dark-cocoa) 0%, var(--mid-brown) 100%);
             color: white; display: flex; flex-direction: column;
             position: sticky; top: 0; height: 100vh;
             border-right: 2px solid var(--gold); z-index: 3000;
-            transition: transform 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .sidebar-header { padding: 40px 20px; text-align: center; }
@@ -70,48 +68,24 @@
         .logout-btn { background: none; border: none; color: rgba(255,255,255,0.2); transition: 0.3s; }
         .logout-btn:hover { color: #ff6b6b; }
 
-        /* --- CONTENT WRAPPER --- */
-        #page-content-wrapper { flex-grow: 1; padding: 40px; width: 100%; transition: 0.3s; }
+        #page-content-wrapper { flex-grow: 1; padding: 40px; width: 100%; }
 
-        /* --- MOBILE HEADER --- */
+        /* --- MOBILE --- */
         #mobile-header {
-            display: none;
-            background: var(--dark-cocoa);
-            padding: 10px 20px;
-            color: white;
-            border-bottom: 2px solid var(--gold);
-            position: sticky;
-            top: 0;
-            z-index: 2500;
-            justify-content: space-between;
-            align-items: center;
+            display: none; background: var(--dark-cocoa); padding: 10px 20px;
+            color: white; border-bottom: 2px solid var(--gold);
+            position: sticky; top: 0; z-index: 2500;
+            justify-content: space-between; align-items: center;
         }
 
-        /* --- RESPONSIVE LOGIC --- */
         @media (max-width: 991px) {
             #mobile-header { display: flex; }
-
-            #sidebar-wrapper {
-                position: fixed;
-                left: 0;
-                transform: translateX(-100%); /* Schované mimo obrazovku */
-            }
-
-            #sidebar-wrapper.active {
-                transform: translateX(0); /* Vysunuté */
-                box-shadow: 15px 0 30px rgba(0,0,0,0.5);
-            }
-
+            #sidebar-wrapper { position: fixed; left: 0; transform: translateX(-100%); height: 100%; }
+            #sidebar-wrapper.active { transform: translateX(0); box-shadow: 15px 0 30px rgba(0,0,0,0.5); }
             #page-content-wrapper { padding: 20px 15px; }
-
-            /* Overlay ztmaví pozadí, když je menu otevřené */
             .menu-overlay {
-                display: none;
-                position: fixed;
-                top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(0,0,0,0.4);
-                z-index: 2900;
-                backdrop-filter: blur(2px);
+                display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.4); z-index: 2900; backdrop-filter: blur(2px);
             }
             .menu-overlay.active { display: block; }
         }
@@ -139,28 +113,26 @@
             <a href="{% url 'home' %}" class="nav-link-custom"><i class="fas fa-home"></i> Domů</a>
 
             {% if user.is_authenticated %}
-            <a href="{% url 'seznam_psu' %}" class="nav-link-custom"><i class="fas fa-dog"></i> Moje smečka</a>
+            <a href="{% url 'seznam_psu' %}" class="nav-link-custom"><i class="fas fa-paw"></i> Moje zvířata</a>
             <a href="{% url 'profil' %}" class="nav-link-custom"><i class="fas fa-user-circle"></i> Můj profil</a>
             <a href="{% url 'seznam_notifikaci' %}" class="nav-link-custom">
                 <div class="position-relative">
                     <i class="fas fa-bell"></i>
                     {% if pocet_notifikaci > 0 %}
-                    <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle"
-                          style="font-size: 0.5rem;">{{ pocet_notifikaci }}</span>
+                    <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle" style="font-size: 0.5rem;">{{ pocet_notifikaci }}</span>
                     {% endif %}
                 </div>
                 <span class="ms-2">Notifikace</span>
             </a>
             {% endif %}
 
-            <div class="sidebar-label">SOS Záchrana</div>
+            <div class="sidebar-label">Záchranná síť</div>
             <a href="{% url 'seznam_hledanych' %}" class="nav-link-custom nav-link-sos">
-                <i class="fas fa-broadcast-tower"></i> Pátrání po psech
+                <i class="fas fa-broadcast-tower"></i> Pátrání / Ztráty
             </a>
 
-            <div class="sidebar-label">Inzerce a Služby</div>
-            <a href="{% url 'seznam_inzeratu' %}" class="nav-link-custom"><i class="fas fa-shopping-basket"></i> Psí
-                bazar</a>
+            <div class="sidebar-label">Služby a Bazar</div>
+            <a href="{% url 'seznam_inzeratu' %}" class="nav-link-custom"><i class="fas fa-shopping-basket"></i> Psí & Kočičí bazar</a>
             <a href="{% url 'mapa_sluzeb' %}" class="nav-link-custom"><i class="fas fa-map-marked-alt"></i> Mapa služeb</a>
 
             <div class="sidebar-label">Komunita</div>
@@ -171,8 +143,8 @@
         <div class="user-section">
             {% if user.is_authenticated %}
             <div class="user-pill mb-3">
-                <div class="user-info">
-                    <div style="color: var(--gold);"><i class="fas fa-paw"></i></div>
+                <div class="d-flex align-items: center;">
+                    <div style="color: var(--gold);"><i class="fas fa-shield-dog"></i></div>
                     <div class="ms-2">
                         <span class="user-name">{{ user.username }}</span>
                         <span class="user-role">{% if user.profil.is_premium %}👑 ALFA ČLEN{% else %}Páníček{% endif %}</span>
@@ -185,8 +157,7 @@
             </div>
             {% if not user.profil.is_premium %}
             <div class="d-grid mb-3">
-                <a href="{% url 'cenik' %}" class="btn btn-sm fw-bold"
-                   style="background: var(--gold); color: var(--dark-cocoa); border-radius: 10px; font-size: 0.75rem;">
+                <a href="{% url 'cenik' %}" class="btn btn-sm fw-bold" style="background: var(--gold); color: var(--dark-cocoa); border-radius: 10px; font-size: 0.75rem;">
                     👑 AKTIVOVAT PREMIUM
                 </a>
             </div>
@@ -194,31 +165,26 @@
             {% else %}
             <div class="d-grid gap-2 mb-3">
                 <a href="{% url 'login' %}" class="btn btn-sm text-white border-white-50">Přihlásit se</a>
-                <a href="{% url 'register' %}" class="btn btn-sm fw-bold"
-                   style="background: var(--gold); color: var(--dark-cocoa);">Registrace</a>
+                <a href="{% url 'register' %}" class="btn btn-sm fw-bold" style="background: var(--gold); color: var(--dark-cocoa);">Registrace</a>
             </div>
             {% endif %}
 
-            <div class="d-flex justify-content-center gap-3 pt-2 border-top border-white-10"
-                 style="border-top: 1px solid rgba(255,255,255,0.05);">
-                <a href="{% url 'podminky' %}"
-                   style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">Podmínky</a>
-                <span style="color: rgba(255,255,255,0.1); font-size: 0.65rem;">|</span>
-                <a href="{% url 'cookies' %}"
-                   style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">Cookies</a>
+            <div class="d-flex justify-content-center gap-3 pt-2" style="border-top: 1px solid rgba(255,255,255,0.05);">
+                <a href="{% url 'podminky' %}" style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">Podmínky</a>
+                <a href="{% url 'gdpr' %}" style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">GDPR</a>
+                <a href="{% url 'cookies' %}" style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">Cookies</a>
             </div>
         </div>
     </nav>
 
     <div id="page-content-wrapper">
         {% if messages %}
-        {% for message in messages %}
-        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show"
-             role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        {% endfor %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
         {% endif %}
 
         {% block content %}{% endblock %}
@@ -232,15 +198,20 @@
         const overlay = document.getElementById('sidebarOverlay');
         sidebar.classList.toggle('active');
         overlay.classList.toggle('active');
+
+        if (sidebar.classList.contains('active')) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
     }
 
-    // Zavření menu po kliknutí na odkaz (důležité pro mobilní UX)
-    const navLinks = document.querySelectorAll('.nav-link-custom');
-    navLinks.forEach(link => {
+    // Zavření menu po kliknutí na odkaz (pro mobily)
+    document.querySelectorAll('.nav-link-custom').forEach(link => {
         link.addEventListener('click', () => {
-            if (window.innerWidth < 992) {
-                toggleMenu();
-            }
+            document.getElementById('sidebar-wrapper').classList.remove('active');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+            document.body.style.overflow = 'auto';
         });
     });
 </script>

@@ -3,195 +3,204 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
+    :root {
+        --sos-red: #d63031;
+        --sos-bg: #fff8f8;
+        --text-dark: #2d1b19;
+        --card-shadow: rgba(214, 48, 49, 0.08);
+    }
+
     .search-page-container {
         max-width: 1100px;
-        margin: 20px auto;
+        margin: 40px auto;
         font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
-    /* Šipka zpět */
     .btn-back {
         background: white;
-        color: #2d1b19;
+        color: var(--text-dark);
         border-radius: 50px;
-        padding: 8px 20px;
+        padding: 10px 25px;
         text-decoration: none;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 0.9rem;
         box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         transition: 0.3s;
         display: inline-flex;
         align-items: center;
-        margin-bottom: 25px;
-    }
-    .btn-back:hover {
-        transform: translateX(-5px);
-        background: #fdfbf9;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-    }
-
-    .search-title {
-        font-weight: 800;
-        color: #2d1b19;
-        font-size: 2rem;
         margin-bottom: 30px;
     }
+    .btn-back:hover { transform: translateX(-5px); background: #fafafa; color: var(--sos-red); }
 
-    /* Karta psa */
-    .dog-card {
+    .search-title-box { margin-bottom: 40px; }
+    .search-title { font-weight: 800; color: var(--text-dark); font-size: 2.2rem; margin-bottom: 5px; }
+    .search-subtitle { color: #a0a0a0; font-size: 1.1rem; }
+
+    /* Karta mazlíčka */
+    .pet-card {
         background: white;
-        border-radius: 30px;
-        padding: 25px;
-        border: none;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.07); /* Výrazné stínování */
+        border-radius: 35px;
+        padding: 30px;
+        border: 2px solid transparent;
+        box-shadow: 0 15px 35px var(--card-shadow);
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         position: relative;
-        overflow: hidden;
         text-align: center;
         height: 100%;
     }
-    .dog-card:hover {
+    .pet-card:hover {
         transform: translateY(-10px);
-        box-shadow: 0 20px 45px rgba(0,0,0,0.12);
+        border-color: var(--sos-red);
+        box-shadow: 0 20px 45px rgba(214, 48, 49, 0.15);
     }
 
-    /* Odznak ZTRACEN */
     .status-badge {
         position: absolute;
-        top: 20px;
-        right: 20px;
-        background: #ff7675;
+        top: 25px;
+        right: 25px;
+        background: var(--sos-red);
         color: white;
-        font-size: 0.65rem;
+        font-size: 0.7rem;
         font-weight: 800;
-        padding: 5px 12px;
-        border-radius: 10px;
+        padding: 6px 14px;
+        border-radius: 12px;
         text-transform: uppercase;
         letter-spacing: 1px;
+        z-index: 2;
     }
 
-    /* Kontejner pro fotku a QR kód */
+    /* Druh zvířete - ikonka */
+    .species-indicator {
+        position: absolute;
+        top: 25px;
+        left: 25px;
+        width: 35px;
+        height: 35px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #bdc3c7;
+        font-size: 1rem;
+    }
+
     .photo-wrapper {
         position: relative;
         display: inline-block;
-        margin-bottom: 20px;
+        margin-bottom: 25px;
     }
-    .dog-avatar {
-        width: 130px;
-        height: 130px;
+    .pet-avatar {
+        width: 150px;
+        height: 150px;
         object-fit: cover;
         border-radius: 50%;
-        border: 5px solid #fff;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        border: 6px solid #fff;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
     .mini-qr {
         position: absolute;
-        bottom: 5px;
-        right: -5px;
-        width: 45px;
-        height: 45px;
+        bottom: 8px;
+        right: 0;
+        width: 50px;
+        height: 50px;
         background: white;
-        padding: 4px;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        border: 1px solid #eee;
+        padding: 5px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
 
-    .dog-name {
-        font-weight: 800;
-        color: #2d1b19;
-        font-size: 1.4rem;
-        margin-bottom: 2px;
-    }
-    .dog-breed {
-        color: #a0a0a0;
-        font-size: 0.9rem;
-        margin-bottom: 15px;
-    }
+    .pet-name { font-weight: 800; color: var(--text-dark); font-size: 1.6rem; margin-bottom: 2px; }
+    .pet-breed { color: #a0a0a0; font-size: 1rem; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
 
     .location-info {
-        background: #fff8f8;
-        color: #d63031;
-        padding: 8px 15px;
-        border-radius: 15px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        display: inline-block;
-        margin-bottom: 20px;
+        background: var(--sos-bg);
+        color: var(--sos-red);
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 25px;
     }
 
     .btn-help {
-        background: #d63031;
+        background: var(--sos-red);
         color: white !important;
-        border-radius: 18px;
-        font-weight: 700;
-        padding: 12px 25px;
+        border-radius: 20px;
+        font-weight: 800;
+        padding: 15px 30px;
         text-decoration: none;
         display: block;
         transition: 0.3s;
-        box-shadow: 0 8px 20px rgba(214, 48, 49, 0.25);
+        text-transform: uppercase;
+        letter-spacing: 1px;
     }
-    .btn-help:hover {
-        background: #b32525;
-        box-shadow: 0 10px 25px rgba(214, 48, 49, 0.4);
-    }
+    .btn-help:hover { filter: brightness(1.2); transform: scale(1.02); }
 
-    /* Prázdný stav */
     .empty-state {
         background: white;
-        border-radius: 30px;
-        padding: 60px;
+        border-radius: 40px;
+        padding: 80px 40px;
         text-align: center;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        border: 2px dashed #eee;
     }
 </style>
 
 <div class="search-page-container px-3">
     <a href="{% url 'home' %}" class="btn-back">
-        <i class="fas fa-arrow-left me-2"></i> Zpět na úvod
+        <i class="fas fa-chevron-left me-2"></i> Zpět na úvod
     </a>
 
-    <h2 class="search-title">
-        <i class="fas fa-bullhorn text-danger me-3"></i>Aktuální pátrání
-    </h2>
+    <div class="search-title-box">
+        <h2 class="search-title">Aktuální pátrání</h2>
+        <p class="search-subtitle">Pomozte nám vrátit tyto mazlíčky domů.</p>
+    </div>
 
     <div class="row g-4">
-        {% for pes in psi %}
+        {% for mazlicek in psi %}
         <div class="col-12 col-md-6 col-lg-4">
-            <div class="dog-card">
+            <div class="pet-card">
                 <div class="status-badge">Ztracen</div>
 
+                <div class="species-indicator">
+                    <i class="fas {% if mazlicek.druh == 'kocka' %}fa-cat{% else %}fa-dog{% endif %}"></i>
+                </div>
+
                 <div class="photo-wrapper">
-                    {% if pes.fotka %}
-                        <img src="{{ pes.fotka.url }}" class="dog-avatar">
+                    {% if mazlicek.fotka %}
+                        <img src="{{ mazlicek.fotka.url }}" class="pet-avatar">
                     {% else %}
-                        <div class="dog-avatar bg-light d-flex align-items-center justify-content-center">🐕</div>
+                        <div class="pet-avatar bg-light d-flex align-items-center justify-content-center">
+                            <span style="font-size: 3rem;">🐾</span>
+                        </div>
                     {% endif %}
 
-                    {% if pes.qr_kod %}
-                        <img src="{{ pes.qr_kod.url }}" class="mini-qr" alt="QR">
+                    {% if mazlicek.qr_kod %}
+                        <img src="{{ mazlicek.qr_kod.url }}" class="mini-qr" alt="QR">
                     {% endif %}
                 </div>
 
-                <div class="dog-name">{{ pes.jmeno }}</div>
-                <div class="dog-breed">{{ pes.rasa }}</div>
+                <div class="pet-name">{{ mazlicek.jmeno }}</div>
+                <div class="pet-breed">{{ mazlicek.rasa|default:"Kříženec" }}</div>
 
                 <div class="location-info">
-                    <i class="fas fa-map-marker-alt me-1"></i>
-                    {{ pes.oblast_ztraty }}
+                    <i class="fas fa-map-marker-alt me-2"></i>
+                    {{ mazlicek.oblast_ztraty }}
                 </div>
 
-                <a href="{% url 'nouzovy_profil_psa' pes.id %}" class="btn-help">
-                    POMOCT NAJÍT
+                <a href="{% url 'nouzovy_profil_psa' mazlicek.id %}" class="btn-help">
+                    <i class="fas fa-search me-2"></i>Zobrazit info
                 </a>
             </div>
         </div>
         {% empty %}
         <div class="col-12">
             <div class="empty-state">
-                <div class="display-1 mb-4">🌳</div>
-                <h3 class="fw-bold">Všichni pejsci jsou v bezpečí</h3>
-                <p class="text-muted">Momentálně neprobíhá žádné aktivní pátrání. To je dobrá zpráva!</p>
+                <div class="display-1 mb-4">🏠</div>
+                <h3 class="fw-bold">Všechna zvířátka jsou doma</h3>
+                <p class="text-muted">Momentálně neevidujeme žádné ztracené mazlíčky. Děkujeme, že vám to není lhostejné!</p>
             </div>
         </div>
         {% endfor %}

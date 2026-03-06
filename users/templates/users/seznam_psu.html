@@ -2,136 +2,162 @@
 
 {% block content %}
 <style>
-    /* CSS proměnné pro sjednocení barev */
     :root {
         --primary-brown: #5d4037;
         --accent-gold: #c5a059;
         --light-gold: #fdfaf5;
         --border-color: #e2d1c3;
+        --cat-purple: #6c5ce7; /* Nová barva pro kočičí akcenty */
     }
 
-    /* OPRAVA OŘEZU FOTKY */
+    .pet-card {
+        border-radius: 30px;
+        overflow: hidden;
+        background: white;
+        position: relative;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .pet-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(93, 64, 55, 0.12) !important;
+    }
+
+    /* Dynamická barva podle druhu */
+    .badge-species {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 5;
+        padding: 8px 15px;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        backdrop-filter: blur(5px);
+    }
+
+    .badge-dog { background: rgba(93, 64, 55, 0.8); color: white; }
+    .badge-cat { background: rgba(108, 92, 231, 0.8); color: white; }
+
     .dog-card-img {
         width: 100%;
-        height: 100%;
+        height: 250px;
         object-fit: cover;
-        object-position: center 20%;
-        transition: transform 0.5s ease;
+        transition: transform 0.6s ease;
     }
 
-    .card:hover .dog-card-img {
-        transform: scale(1.05);
+    .pet-card:hover .dog-card-img { transform: scale(1.1); }
+
+    .health-box {
+        background-color: var(--light-gold);
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        padding: 15px;
     }
 
-    .text-brown { color: var(--primary-brown); }
+    .btn-action {
+        border-radius: 15px;
+        padding: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: 0.3s;
+        border: none;
+    }
+
+    .btn-dog { background-color: var(--accent-gold); color: white; }
+    .btn-cat { background-color: var(--cat-purple); color: white; }
+
     .font-serif { font-family: 'Playfair Display', serif; }
-    .hover-brown:hover { color: var(--accent-gold) !important; }
-
-    .animate-pulse-red { animation: pulse-red 2s infinite; }
-    @keyframes pulse-red { 0%, 100% { color: #dc3545; } 50% { color: #ff8e8e; } }
-
-    .dropdown-item:hover { background-color: var(--light-gold); }
 </style>
 
-<div class="container mt-4 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold" style="color: var(--primary-brown); font-family: 'Playfair Display', serif;">🐾 Moji psi</h2>
+<div class="container mt-5 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h2 class="fw-bold text-brown font-serif mb-1">🐾 Moji mazlíčci</h2>
+            <p class="text-muted small">Správa vašich čtyřnohých parťáků</p>
+        </div>
 
         {% if not user.profil.is_premium and not user.is_staff and psi.count >= 1 %}
-            <a href="{% url 'cenik' %}" class="btn px-4 shadow-sm fw-bold"
-               style="background-color: var(--accent-gold); color: white; border-radius: 15px; transition: 0.3s;">
-                <i class="fas fa-crown me-1"></i> Chci více psů
+            <a href="{% url 'cenik' %}" class="btn btn-dog shadow-sm">
+                <i class="fas fa-crown me-2"></i>Chci více místa
             </a>
         {% else %}
-            <a href="{% url 'pridat_psa' %}" class="btn text-white px-4 shadow-sm fw-bold"
-               style="background-color: var(--primary-brown); border-radius: 15px; transition: 0.3s;">
-                <i class="fas fa-plus-circle me-1"></i> Přidat pejska
-            </a>
+            <div class="dropdown">
+                <button class="btn btn-dark px-4 shadow-sm fw-bold dropdown-toggle" type="button" data-bs-toggle="dropdown" style="border-radius: 15px;">
+                    <i class="fas fa-plus-circle me-2"></i>Přidat...
+                </button>
+                <ul class="dropdown-menu border-0 shadow" style="border-radius: 15px;">
+                    <li><a class="dropdown-item py-2" href="{% url 'pridat_psa' %}?druh=pes">🐶 Pejska</a></li>
+                    <li><a class="dropdown-item py-2" href="{% url 'pridat_psa' %}?druh=kocka">🐱 Kočičku</a></li>
+                </ul>
+            </div>
         {% endif %}
     </div>
 
-    {% if not user.profil.is_premium and not user.is_staff and psi.count >= 1 %}
-    <div class="alert shadow-sm border-0 mb-4" style="background-color: #fff3cd; border-radius: 15px; color: #856404;">
-        <i class="fas fa-info-circle me-2"></i>
-        Ve verzi <strong>ZDARMA</strong> můžete spravovat jednoho pejska. Pro neomezený počet pejsků a pokročilé funkce aktivujte <strong>Premium</strong>.
-    </div>
-    {% endif %}
-
     <div class="row g-4">
-        {% for pes in psi %}
+        {% for mazlicek in psi %}
         <div class="col-md-6 col-lg-4">
-            <div class="card shadow-sm border-0 h-100 {% if pes.je_ztraceny %}border border-danger border-3 animate-pulse{% endif %}"
-                 style="border-radius: 25px; overflow: hidden; background: white; position: relative;">
+            <div class="card pet-card shadow-sm border-0 h-100 {% if mazlicek.je_ztraceny %}border-top border-danger border-5{% endif %}">
 
-                {% if request.user.profil == pes.majitel %}
+                <div class="badge-species {% if mazlicek.druh == 'kocka' %}badge-cat{% else %}badge-dog{% endif %}">
+                    {% if mazlicek.druh == 'kocka' %}🐱 Kočka{% else %}🐶 Pes{% endif %}
+                </div>
+
                 <div class="position-absolute top-0 end-0 p-3" style="z-index: 10;">
                     <div class="dropdown">
-                        <button class="btn btn-light btn-sm shadow-sm rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="width: 32px; height: 32px; opacity: 0.9;">
-                            <i class="fas fa-ellipsis-v text-dark"></i>
+                        <button class="btn btn-light btn-sm shadow-sm rounded-circle" type="button" data-bs-toggle="dropdown" style="width: 35px; height: 35px; opacity: 0.9;">
+                            <i class="fas fa-ellipsis-h"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius: 15px;">
-                            <li>
-                                <a class="dropdown-item py-2" href="{% url 'upravit_psa' pes.pk %}">
-                                    <i class="fas fa-edit me-2 text-warning"></i> Upravit
-                                </a>
-                            </li>
+                            <li><a class="dropdown-item py-2" href="{% url 'upravit_psa' mazlicek.pk %}"><i class="fas fa-edit me-2 text-warning"></i> Upravit</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a class="dropdown-item py-2 text-danger" href="{% url 'smazat_psa' pes.pk %}" onclick="return confirm('Opravdu chcete smazat profil psa {{ pes.jmeno }}?')">
-                                    <i class="fas fa-trash-alt me-2"></i> Smazat
-                                </a>
-                            </li>
+                            <li><a class="dropdown-item py-2 text-danger" href="{% url 'smazat_psa' mazlicek.pk %}" onclick="return confirm('Opravdu smazat?')"><i class="fas fa-trash-alt me-2"></i> Smazat</a></li>
                         </ul>
                     </div>
                 </div>
-                {% endif %}
 
-                <div style="height: 250px; background-color: #f8f5f0; overflow: hidden;">
-                    {% if pes.fotka %}
-                        <img src="{{ pes.fotka.url }}" class="dog-card-img" alt="{{ pes.jmeno }}">
+                <div style="background-color: #f8f5f0; overflow: hidden;">
+                    {% if mazlicek.fotka %}
+                        <img src="{{ mazlicek.fotka.url }}" class="dog-card-img" alt="{{ mazlicek.jmeno }}">
                     {% else %}
-                        <div class="h-100 d-flex align-items-center justify-content-center text-muted" style="font-size: 4rem;">🐕</div>
+                        <div class="h-100 d-flex align-items-center justify-content-center text-muted" style="height: 250px; font-size: 5rem;">
+                            {% if mazlicek.druh == 'kocka' %}🐱{% else %}🐕{% endif %}
+                        </div>
                     {% endif %}
                 </div>
 
-                <div class="card-body d-flex flex-column p-4">
+                <div class="card-body p-4 d-flex flex-column">
                     <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h3 class="fw-bold mb-0">
-                            <a href="{% url 'detail_psa' pes.pk %}" class="text-decoration-none text-dark hover-brown font-serif">
-                                {{ pes.jmeno }}
+                        <h3 class="fw-bold mb-0 font-serif">
+                            <a href="{% url 'detail_psa' mazlicek.pk %}" class="text-decoration-none text-dark hover-brown">
+                                {{ mazlicek.jmeno }}
                             </a>
                         </h3>
-                        <span class="badge rounded-pill bg-white text-muted border px-3 py-2 shadow-sm small">{{ pes.vek }} let</span>
+                        <span class="badge rounded-pill bg-white text-muted border px-3 py-1 small shadow-sm">{{ mazlicek.vek }} let</span>
                     </div>
-                    <p class="text-muted mb-3"><i class="fas fa-paw me-1 opacity-50"></i> {{ pes.rasa }}</p>
+                    <p class="text-muted mb-4 small"><i class="fas fa-fingerprint me-1 opacity-50"></i> {{ mazlicek.rasa }}</p>
 
-                    <div class="p-3 mb-4" style="background-color: var(--light-gold); border-radius: 20px; border: 1px solid var(--border-color);">
+                    <div class="health-box mb-4">
                         <div class="d-flex justify-content-between small mb-2">
-                            <span class="text-muted"><i class="fas fa-syringe me-2" style="width: 15px;"></i> Očkování do:</span>
-                            <span class="fw-bold {% if pes.ockovani_propadle %}text-danger animate-pulse-red{% else %}text-brown{% endif %}">
-                                {{ pes.pristi_ockovani|date:"d.m.Y"|default:"--" }}
+                            <span><i class="fas fa-syringe me-2 text-muted"></i>Očkování:</span>
+                            <span class="fw-bold {% if mazlicek.ockovani_propadle %}text-danger animate-pulse-red{% endif %}">
+                                {{ mazlicek.pristi_ockovani|date:"d.m.Y"|default:"--" }}
                             </span>
                         </div>
-
-                        <div class="d-flex justify-content-between small mb-2">
-                            <span class="text-muted"><i class="fas fa-bug me-2" style="width: 15px;"></i> Klíšťata do:</span>
-                            <span class="fw-bold {% if pes.klistata_propadle %}text-danger animate-pulse-red{% else %}text-brown{% endif %}">
-                                {{ pes.pristi_klistata|date:"d.m.Y"|default:"--" }}
-                            </span>
-                        </div>
-
                         <div class="d-flex justify-content-between small">
-                            <span class="text-muted"><i class="fas fa-capsules me-2" style="width: 15px;"></i> Odčervení:</span>
-                            <span class="fw-bold {% if pes.odcerveni_propadle %}text-danger{% else %}text-brown{% endif %}">
-                                {{ pes.pristi_odcerveni|date:"d.m.Y"|default:"--" }}
+                            <span><i class="fas {% if mazlicek.druh == 'kocka' %}fa-fish{% else %}fa-bug{% endif %} me-2 text-muted"></i>Paraziti:</span>
+                            <span class="fw-bold">
+                                {{ mazlicek.pristi_klistata|date:"d.m.Y"|default:"--" }}
                             </span>
                         </div>
                     </div>
 
-                    <div class="d-grid gap-2 mt-auto">
-                        <a href="{% url 'detail_psa' pes.pk %}" class="btn fw-bold shadow-sm py-2 text-uppercase"
-                           style="background-color: var(--accent-gold); color: white; border-radius: 15px; border: none; letter-spacing: 0.5px;">
-                            Profil psa
+                    <div class="mt-auto">
+                        <a href="{% url 'detail_psa' mazlicek.pk %}" class="btn btn-action w-100 shadow-sm {% if mazlicek.druh == 'kocka' %}btn-cat{% else %}btn-dog{% endif %}">
+                            Otevřít deník
                         </a>
                     </div>
                 </div>
@@ -139,7 +165,10 @@
         </div>
         {% empty %}
         <div class="col-12 text-center py-5">
-            <h4 class="text-muted">Zatím tu nemáte žádné pejsky.</h4>
+            <div class="display-1 mb-4">🧶</div>
+            <h4 class="text-muted">Zatím tu nemáte žádné mazlíčky.</h4>
+            <p class="mb-4">Začněte tím, že přidáte svého prvního parťáka.</p>
+            <a href="{% url 'pridat_psa' %}" class="btn btn-dark px-5 py-3 fw-bold" style="border-radius: 20px;">PŘIDAT MAZLÍČKA</a>
         </div>
         {% endfor %}
     </div>

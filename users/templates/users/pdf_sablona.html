@@ -3,131 +3,64 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <style>
-        /* KLÍČOVÉ PRO ČEŠTINU: Musíš nadefinovat cestu k souboru */
         @font-face {
             font-family: 'DejaVu Sans';
             src: url("{{ media_root }}/fonts/DejaVuSans.ttf");
         }
 
-        @page {
-            size: A4;
-            margin: 1cm;
-        }
-
-        * {
-            font-family: 'DejaVu Sans', sans-serif !important;
-        }
+        @page { size: A4; margin: 1cm; }
+        * { font-family: 'DejaVu Sans', sans-serif !important; }
 
         body {
             line-height: 1.2;
-            color: #3e2723;
+            /* DYNAMICKÁ BARVA TEXTU */
+            color: {% if pes.druh == 'kocka' %}#2d1b4d{% else %}#3e2723{% endif %};
             background-color: #ffffff;
         }
 
-        /* Hlavička */
+        /* Hlavička s dynamickou barvou linky */
         .header {
             text-align: center;
-            border-bottom: 2px solid #c5a059;
+            border-bottom: 2px solid {% if pes.druh == 'kocka' %}#9b86bd{% else %}#c5a059{% endif %};
             padding-bottom: 10px;
             margin-bottom: 20px;
         }
-        .dog-name { font-size: 28px; font-weight: bold; margin: 0; color: #3e2723; }
-        .breed { color: #c5a059; font-size: 16px; font-weight: bold; text-transform: uppercase; }
+        .dog-name { font-size: 28px; font-weight: bold; margin: 0; }
+        .breed {
+            color: {% if pes.druh == 'kocka' %}#9b86bd{% else %}#c5a059{% endif %};
+            font-size: 16px; font-weight: bold; text-transform: uppercase;
+        }
 
-        /* Hlavní layout */
         .main-table { width: 100%; border-collapse: collapse; }
         .photo-column { width: 45%; vertical-align: top; text-align: center; }
         .info-column { width: 55%; vertical-align: top; padding-left: 25px; }
 
-        /* Profilová fotka */
         .profile-img {
-            width: 250px;
-            height: 250px;
-            border-radius: 15px;
-            object-fit: cover;
+            width: 250px; height: 250px; border-radius: 15px; object-fit: cover;
+            border: 3px solid {% if pes.druh == 'kocka' %}#9b86bd{% else %}#c5a059{% endif %};
         }
 
-        /* QR Kód sekce - ZVĚTŠENO PRO TISK */
         .qr-container {
-            margin-top: 25px;
-            padding: 15px;
-            border: 1px dashed #c5a059;
-            border-radius: 15px;
-            background-color: #fdfaf6;
-            text-align: center;
+            margin-top: 25px; padding: 15px;
+            border: 1px dashed {% if pes.druh == 'kocka' %}#9b86bd{% else %}#c5a059{% endif %};
+            border-radius: 15px; background-color: #fdfaf6; text-align: center;
         }
-        .qr-img {
-            width: 140px; /* Ideální velikost pro skenování z papíru */
-            height: 140px;
-        }
-        .qr-label {
-            font-size: 10px;
-            font-weight: bold;
-            margin-top: 8px;
-            color: #3e2723;
-        }
+        .qr-img { width: 130px; height: 130px; }
 
-        /* Datové sekce */
+        /* Dynamické sekce */
         .section-title {
-            background: #3e2723;
-            color: #ffffff;
-            padding: 6px 12px;
-            font-size: 11px;
-            text-transform: uppercase;
-            margin: 15px 0 8px 0;
-            font-weight: bold;
+            background: {% if pes.druh == 'kocka' %}#2d1b4d{% else %}#3e2723{% endif %};
+            color: #ffffff; padding: 6px 12px; font-size: 11px;
+            text-transform: uppercase; margin: 15px 0 8px 0; font-weight: bold;
         }
 
-        .data-row {
-            padding: 5px 0;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 11px;
-        }
-        .label { font-weight: bold; color: #8d7d77; width: 50%; }
-        .value { font-weight: bold; color: #3e2723; text-align: right; width: 50%; }
+        .data-row { padding: 5px 0; border-bottom: 1px solid #f0f0f0; font-size: 11px; }
+        .label { font-weight: bold; color: #8d7d77; }
+        .value { font-weight: bold; text-align: right; }
 
-        /* Rodokmen */
-        .pedigree-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .pedigree-table td {
-            border: 1px solid #e0d7ce;
-            padding: 10px;
-            font-size: 10px;
-            background: #fdfaf6;
-        }
-        .parent-type { color: #c5a059; font-weight: bold; font-size: 9px; margin-bottom: 3px; }
-
-        /* Popis */
-        .description-box {
-            font-size: 10px;
-            background: #fdfaf6;
-            padding: 12px;
-            border: 1px solid #e0d7ce;
-            margin-top: 5px;
-            min-height: 60px;
-        }
-
-        /* Patička */
         .footer {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            text-align: center;
-            font-size: 9px;
-            color: #8d7d77;
-            border-top: 1px solid #eee;
-            padding-top: 10px;
-        }
-
-        /* Styl pro zprávu o Premium verzi */
-        .premium-message {
-            text-align: center;
-            color: #c5a059;
-            font-style: italic;
-            padding: 15px;
-            border: 1px solid #e0d7ce;
-            background: #fffdf9;
-            font-size: 10px;
-            margin-top: 10px;
+            position: absolute; bottom: 0; width: 100%; text-align: center;
+            font-size: 9px; color: #8d7d77; border-top: 1px solid #eee; padding-top: 10px;
         }
     </style>
 </head>
@@ -135,7 +68,10 @@
 
 <div class="header">
     <div class="dog-name">{{ pes.jmeno|upper }}</div>
-    <div class="breed">{{ pes.rasa|default:"Nezadané plemeno" }}</div>
+    <div class="breed">
+        {% if pes.druh == 'kocka' %}KOČKA{% else %}PES{% endif %}
+        | {{ pes.rasa|default:"Nezadané plemeno" }}
+    </div>
 </div>
 
 <table class="main-table">
@@ -144,7 +80,7 @@
             {% if pes.fotka %}
                 <img src="{{ pes.fotka.path }}" class="profile-img">
             {% else %}
-                <div style="width: 250px; height: 250px; background: #f5f5f5; border: 1px solid #ccc; line-height: 250px; color: #ccc;">
+                <div style="width: 250px; height: 250px; background: #f5f5f5; border: 1px solid #ccc; line-height: 250px; color: #ccc; border-radius: 15px;">
                     Bez fotografie
                 </div>
             {% endif %}
@@ -152,14 +88,16 @@
             {% if pes.qr_kod %}
             <div class="qr-container">
                 <img src="{{ pes.qr_kod.path }}" class="qr-img">
-                <div class="qr-label">SOS IDENTITA PEJSKA - EPES.ONLINE</div>
-                <div style="font-size: 8px; color: #8d7d77; margin-top: 3px;">Naskenujte pro zobrazení kompletního profilu</div>
+                <div style="font-size: 10px; font-weight: bold; margin-top: 8px;">
+                    SOS IDENTITA {% if pes.druh == 'kocka' %}KOČIČKY{% else %}PEJSKA{% endif %}
+                </div>
+                <div style="font-size: 8px; color: #8d7d77; margin-top: 3px;">EPES.ONLINE - Naskenujte pro detaily</div>
             </div>
             {% endif %}
         </td>
 
         <td class="info-column">
-            <div class="section-title">Základní a identifikační údaje</div>
+            <div class="section-title">Identifikační údaje</div>
             <div class="data-row">
                 <table width="100%"><tr><td class="label">ČÍSLO ČIPU:</td><td class="value">{{ pes.cip|default:"-" }}</td></tr></table>
             </div>
@@ -170,66 +108,48 @@
                 <table width="100%"><tr><td class="label">AKTUÁLNÍ VĚK:</td><td class="value">{{ pes.vek }}</td></tr></table>
             </div>
 
-            {% if profil.is_premium %}
+            <div class="section-title">Zdravotní prevence</div>
+            {% if pes.druh == 'pes' %}
             <div class="data-row">
-                <table width="100%"><tr><td class="label">VÁHA (KG):</td><td class="value">{{ pes.vaha|default:"-" }}</td></tr></table>
+                <table width="100%"><tr><td class="label">RTG HD / ED:</td><td class="value">{{ pes.rtg_hd|default:"-" }} / {{ pes.rtg_ed|default:"-" }}</td></tr></table>
             </div>
             {% endif %}
-
-            <div class="section-title">Zdravotní záznamy</div>
-            <div class="data-row">
-                <table width="100%"><tr><td class="label">RTG HD (DKK):</td><td class="value">{{ pes.rtg_hd|default:"-" }}</td></tr></table>
-            </div>
-            <div class="data-row">
-                <table width="100%"><tr><td class="label">RTG ED (DLK):</td><td class="value">{{ pes.rtg_ed|default:"-" }}</td></tr></table>
-            </div>
-
             <div class="data-row">
                 <table width="100%"><tr><td class="label">POSLEDNÍ ODČERVENÍ:</td><td class="value">{{ pes.posledni_odcerveni|date:"d. m. Y"|default:"-" }}</td></tr></table>
             </div>
             <div class="data-row">
-                <table width="100%"><tr><td class="label">OCHRANA PROTI KLÍŠŤATŮM:</td><td class="value">{{ pes.typ_ochrany_klistata|default:"-" }}</td></tr></table>
-            </div>
-
-            <div class="section-title">Důležité termíny</div>
-            <div class="data-row">
                 <table width="100%"><tr><td class="label">POSLEDNÍ OČKOVÁNÍ:</td><td class="value">{{ pes.posledni_ockovani|date:"d. m. Y"|default:"-" }}</td></tr></table>
             </div>
             <div class="data-row">
-                <table width="100%"><tr><td class="label">PŘÍŠTÍ TERMÍN:</td><td class="value">{{ pes.pristi_ockovani|date:"d. m. Y"|default:"?" }}</td></tr></table>
+                <table width="100%"><tr><td class="label">PŘÍŠTÍ TERMÍN OČK.:</td><td class="value" style="color: {% if pes.druh == 'kocka' %}#9b86bd{% else %}#c5a059{% endif %};">{{ pes.pristi_ockovani|date:"d. m. Y"|default:"?" }}</td></tr></table>
             </div>
         </td>
     </tr>
 </table>
 
-<div class="section-title">Rodokmen (Rodiče)</div>
+{% if pes.druh == 'pes' %}
+<div class="section-title">Původ (Rodokmen)</div>
 {% if profil.is_premium %}
-<table class="pedigree-table">
+<table width="100%" style="border: 1px solid #eee; padding: 10px; background: #fdfaf6;">
     <tr>
-        <td width="50%">
-            <div class="parent-type">OTEC</div>
-            <strong>{{ pes.otec_manualni|default:"-" }}</strong>
-        </td>
-        <td width="50%">
-            <div class="parent-type">MATKA</div>
-            <strong>{{ pes.matka_manualni|default:"-" }}</strong>
-        </td>
+        <td><small style="color:#8d7d77">OTEC:</small><br><strong>{{ pes.otec_manualni|default:"-" }}</strong></td>
+        <td><small style="color:#8d7d77">MATKA:</small><br><strong>{{ pes.matka_manualni|default:"-" }}</strong></td>
     </tr>
 </table>
 {% else %}
-<div class="premium-message">
-    Rodokmen je dostupný pouze v Premium verzi. Aktivujte si Premium na epes.online
+<div style="font-size: 9px; text-align: center; padding: 10px; border: 1px solid #eee; color: #8d7d77;">
+    Rodokmen je dostupný v ALFA verzi na epes.online
 </div>
 {% endif %}
+{% endif %}
 
-<div class="section-title">O pejskovi / Poznámky majitele</div>
-<div class="description-box">
-    {{ pes.popis|default:"K tomuto pejskovi zatím nebyly přidány žádné podrobnější informace." }}
+<div class="section-title">Poznámky {% if pes.druh == 'kocka' %}o kočce{% else %}o pejskovi{% endif %}</div>
+<div style="font-size: 10px; padding: 10px; border: 1px solid #eee; min-height: 80px;">
+    {{ pes.popis|default:"Nebyl zadán žádný popis." }}
 </div>
 
 <div class="footer">
-    Dokument vygenerován dne {{ "now"|date:"d. m. Y" }} v systému EPES.ONLINE<br>
-    Identifikátor pejska: #{{ pes.id }} | Majitel: {{ pes.majitel.uzivatel.username }}
+    Dokument vygenerován {{ "now"|date:"d. m. Y" }} | EPES.ONLINE | Identifikátor: #{{ pes.id }}
 </div>
 
 </body>

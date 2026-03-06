@@ -1,57 +1,84 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
+    :root {
+        --primary-brown: #5d4037;
+        --accent-gold: #c5a059;
+        --soft-beige: #fdfaf7;
+        --text-muted: #8d6e63;
+    }
+
     .edit-wrapper {
         display: flex; justify-content: center; align-items: center;
-        min-height: 80vh; background-color: #fdfaf7; padding: 40px 20px;
+        min-height: 85vh; background-color: var(--soft-beige); padding: 50px 20px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
     }
     .edit-card {
-        background: white; width: 100%; max-width: 600px;
-        padding: 40px; border-radius: 24px;
-        box-shadow: 0 10px 30px rgba(141, 110, 99, 0.1); border: 1px solid #efebe9;
+        background: white; width: 100%; max-width: 650px;
+        padding: 45px; border-radius: 30px;
+        box-shadow: 0 20px 40px rgba(93, 64, 55, 0.08); border: 1px solid #efebe9;
     }
     .edit-card h2 {
-        color: #5d4037; font-weight: 800; text-align: center;
-        margin-bottom: 30px; font-family: 'Playfair Display', serif;
+        color: var(--primary-brown); font-weight: 800; text-align: center;
+        margin-bottom: 35px; font-family: 'Playfair Display', serif;
     }
-    
-    .form-section-title {
-        color: #c5a059; font-weight: 700; font-size: 0.9rem;
-        text-transform: uppercase; margin: 25px 0 15px;
-        display: flex; align-items: center; gap: 10px;
-    }
-    .form-section-title i { font-size: 1.1rem; }
 
-    .form-group { margin-bottom: 15px; }
+    .form-section-title {
+        color: var(--accent-gold); font-weight: 800; font-size: 0.85rem;
+        text-transform: uppercase; margin: 30px 0 20px;
+        display: flex; align-items: center; gap: 12px;
+        letter-spacing: 1px;
+    }
+    .form-section-title::after {
+        content: ""; flex: 1; height: 1px; background: #eee;
+    }
+
+    .form-group { margin-bottom: 20px; position: relative; }
+
     .edit-card label {
-        font-weight: 600; color: #8d6e63; margin-left: 5px; 
-        display: block; margin-bottom: 5px; font-size: 0.85rem;
+        font-weight: 700; color: var(--text-muted); margin-left: 2px;
+        display: block; margin-bottom: 8px; font-size: 0.85rem;
     }
-    
-    .edit-card input {
-        width: 100%; padding: 12px 18px; border: 2px solid #f3e5f5;
-        border-radius: 12px; background: #fafafa; transition: all 0.3s ease;
+
+    /* Cílení na všechny typy inputů generovaných Djangem */
+    .edit-card input, .edit-card select, .edit-card textarea {
+        width: 100%; padding: 14px 20px; border: 2px solid #f1ece9;
+        border-radius: 15px; background: #fafafa; transition: all 0.3s ease;
+        color: var(--primary-brown); font-weight: 500;
     }
+
     .edit-card input:focus {
-        border-color: #c5a059; background: white; outline: none;
-        box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.1);
+        border-color: var(--accent-gold); background: white; outline: none;
+        box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.15);
     }
+
+    /* Styling pro chyby ve formuláři */
+    .errorlist {
+        list-style: none; color: #dc3545; padding: 0; font-size: 0.8rem; margin-top: 5px;
+    }
+    .is-invalid { border-color: #dc3545 !important; }
 
     .btn-save {
-        background: #5d4037; color: white; border: none; width: 100%;
-        padding: 16px; border-radius: 12px; font-size: 1.1rem; font-weight: 700;
-        cursor: pointer; transition: 0.3s; margin-top: 20px;
+        background: var(--primary-brown); color: white; border: none; width: 100%;
+        padding: 18px; border-radius: 16px; font-size: 1.1rem; font-weight: 800;
+        cursor: pointer; transition: 0.3s; margin-top: 30px;
+        text-transform: uppercase; letter-spacing: 1px;
     }
-    .btn-save:hover { background: #452f29; transform: translateY(-2px); }
-    
+    .btn-save:hover { background: #452f29; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(69, 47, 41, 0.2); }
+
     .btn-back {
-        display: block; text-align: center; margin-top: 20px;
-        color: #a1887f; text-decoration: none; font-weight: 500; font-size: 0.9rem;
+        display: block; text-align: center; margin-top: 25px;
+        color: #a1887f; text-decoration: none; font-weight: 600; font-size: 0.95rem;
+        transition: 0.2s;
     }
-    .btn-back:hover { color: #5d4037; }
+    .btn-back:hover { color: var(--primary-brown); }
+
+    @media (max-width: 576px) {
+        .edit-card { padding: 30px 20px; border-radius: 20px; }
+    }
 </style>
 
 <div class="edit-wrapper">
@@ -61,59 +88,85 @@
         <form method="post">
             {% csrf_token %}
 
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
             <div class="form-section-title">
-                <i class="fas fa-user"></i> Osobní údaje
+                <i class="fas fa-user-circle"></i> Osobní údaje
             </div>
-            
+
             <div class="row">
                 <div class="col-md-6 form-group">
-                    <label>Jméno</label>
+                    <label for="{{ form.first_name.id_for_label }}">Jméno</label>
                     {{ form.first_name }}
+                    {{ form.first_name.errors }}
                 </div>
                 <div class="col-md-6 form-group">
-                    <label>Příjmení</label>
+                    <label for="{{ form.last_name.id_for_label }}">Příjmení</label>
                     {{ form.last_name }}
+                    {{ form.last_name.errors }}
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Uživatelské jméno</label>
+                <label for="{{ form.username.id_for_label }}">Uživatelské jméno</label>
                 {{ form.username }}
+                {{ form.username.errors }}
             </div>
 
-            <div class="form-group">
-                <label>E-mail</label>
-                {{ form.email }}
-            </div>
-
-            <div class="form-group">
-                <label>Telefon</label>
-                {{ form.telefon }}
+            <div class="row">
+                <div class="col-md-7 form-group">
+                    <label for="{{ form.email.id_for_label }}">E-mail</label>
+                    {{ form.email }}
+                    {{ form.email.errors }}
+                </div>
+                <div class="col-md-5 form-group">
+                    <label for="{{ form.telefon.id_for_label }}">Telefon</label>
+                    {{ form.telefon }}
+                    {{ form.telefon.errors }}
+                </div>
             </div>
 
             <div class="form-section-title">
-                <i class="fas fa-home"></i> Adresa pro dárky a známky
+                <i class="fas fa-map-marker-alt"></i> Adresa pro dárky a známky
             </div>
 
             <div class="form-group">
-                <label>Ulice a č.p.</label>
+                <label for="{{ form.ulice_cp.id_for_label }}">Ulice a č.p.</label>
                 {{ form.ulice_cp }}
+                {{ form.ulice_cp.errors }}
             </div>
 
             <div class="row">
                 <div class="col-md-8 form-group">
-                    <label>Město</label>
+                    <label for="{{ form.mesto.id_for_label }}">Město</label>
                     {{ form.mesto }}
+                    {{ form.mesto.errors }}
                 </div>
                 <div class="col-md-4 form-group">
-                    <label>PSČ</label>
+                    <label for="{{ form.psc.id_for_label }}">PSČ</label>
                     {{ form.psc }}
+                    {{ form.psc.errors }}
                 </div>
             </div>
 
-            <button type="submit" class="btn-save shadow-sm">Uložit změny</button>
-            <a href="{% url 'profil' %}" class="btn-back">Zpět na profil bez uložení</a>
+            <button type="submit" class="btn-save shadow-sm">
+                <i class="fas fa-check-circle me-2"></i> Uložit změny
+            </button>
+            <a href="{% url 'profil_uzivatele' %}" class="btn-back">Zrušit a vrátit se</a>
         </form>
     </div>
 </div>
+
+<script>
+    // Bonus: Automatické přidání Bootstrap třídy pro validaci, pokud Django vrátí chybu
+    document.addEventListener('DOMContentLoaded', function() {
+        const errors = document.querySelectorAll('.errorlist');
+        errors.forEach(error => {
+            const input = error.parentElement.querySelector('input');
+            if (input) input.classList.add('is-invalid');
+        });
+    });
+</script>
 {% endblock %}

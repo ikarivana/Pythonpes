@@ -2,94 +2,152 @@
 
 {% block content %}
 <style>
-    /* Používáme tvoji barvu a styl z indexu */
     .success-container {
         max-width: 800px;
-        margin: 40px auto;
+        margin: 60px auto;
         padding: 20px;
+        position: relative;
     }
 
     .success-card {
         background: #ffffff;
-        border-radius: 25px;
-        padding: 50px 30px;
+        border-radius: 35px;
+        padding: 60px 40px;
         text-align: center;
-        box-shadow: 0 15px 35px rgba(62, 39, 35, 0.1);
+        box-shadow: 0 25px 50px rgba(62, 39, 35, 0.1);
         border: 1px solid rgba(197, 160, 89, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Animovaná korunka */
+    @keyframes crown-bounce {
+        0%, 100% { transform: translateY(0) rotate(0); }
+        50% { transform: translateY(-10px) rotate(5deg); }
     }
 
     .success-icon {
-        width: 80px;
-        height: 80px;
+        width: 100px;
+        height: 100px;
         background: #fffdf5;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 25px;
-        font-size: 2.5rem;
-        border: 2px solid #c5a059;
-        box-shadow: 0 5px 15px rgba(197, 160, 89, 0.2);
+        margin: 0 auto 30px;
+        font-size: 3rem;
+        border: 2px solid var(--gold);
+        box-shadow: 0 10px 25px rgba(197, 160, 89, 0.2);
+        animation: crown-bounce 3s ease-in-out infinite;
     }
 
     .success-card h2 {
         font-family: 'Playfair Display', serif;
-        color: #2d1b19;
-        font-size: 2.4rem;
-        margin-bottom: 15px;
+        color: var(--dark-cocoa);
+        font-size: 2.6rem;
+        font-weight: 800;
+        margin-bottom: 20px;
     }
 
     .success-card p {
         color: #8d7d77;
-        font-size: 1.1rem;
+        font-size: 1.15rem;
         line-height: 1.6;
-        margin-bottom: 35px;
+        margin-bottom: 40px;
+        font-weight: 500;
     }
 
-    .btn-finish {
-        background: #c5a059;
-        color: white !important;
-        font-weight: 700;
-        padding: 15px 35px;
-        border-radius: 15px;
+    .btn-finish-premium {
+        background: var(--gold);
+        color: var(--dark-cocoa) !important;
+        font-weight: 800;
+        padding: 18px 45px;
+        border-radius: 20px;
         text-decoration: none !important;
         transition: 0.3s;
         display: inline-block;
-        box-shadow: 0 10px 20px rgba(197, 160, 89, 0.2);
+        box-shadow: 0 10px 20px rgba(197, 160, 89, 0.3);
+        letter-spacing: 1px;
     }
 
-    .btn-finish:hover {
-        background: #3e2723;
-        transform: translateY(-3px);
+    .btn-finish-premium:hover {
+        background: var(--mid-brown);
+        color: white !important;
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(62, 39, 35, 0.2);
     }
 
-    /* Dekorativní tlapky na pozadí */
-    .paw-bg {
+    /* Dekorativní tlapky */
+    .paw-decoration {
         position: absolute;
-        opacity: 0.03;
-        font-size: 5rem;
-        z-index: -1;
+        color: var(--gold);
+        opacity: 0.05;
+        font-size: 6rem;
+        z-index: 0;
     }
 </style>
 
 <div class="success-container">
-    <div class="success-card position-relative overflow-hidden">
-        <i class="fas fa-paw paw-bg" style="top: 10%; left: 5%; transform: rotate(-15deg);"></i>
-        <i class="fas fa-paw paw-bg" style="bottom: 10%; right: 5%; transform: rotate(20deg);"></i>
+    <i class="fas fa-paw paw-decoration" style="top: -20px; left: -40px; transform: rotate(-15deg);"></i>
+    <i class="fas fa-paw paw-decoration" style="bottom: -20px; right: -40px; transform: rotate(25deg);"></i>
 
+    <div class="success-card">
         <div class="success-icon">
-            <i class="fas fa-crown" style="color: #c5a059;"></i>
+            <i class="fas fa-crown" style="color: var(--gold);"></i>
         </div>
 
-        <h2>Vítejte v ALFA smečce!</h2>
+        <h2>Vítejte v ALFA rodině! 👑</h2>
+
         <p>
-            Platba proběhla v pořádku. Váš profil byl úspěšně povýšen. <br>
-            Nyní u vašeho jména svítí korunka a máte přístup ke všem prémiovým funkcím.
+            Platba proběhla úspěšně a váš profil byl právě povýšen.<br>
+            Nyní u vašeho jména svítí korunka a celá komunita ví, že jste srdcem našeho zvířecího světa.
+            Všechny prémiové funkce jsou vám odteď plně k dispozici.
         </p>
 
-        <a href="{% url 'home' %}" class="btn-finish">
-            <i class="fas fa-paw me-2"></i> ZPĚT NA ÚVOD
-        </a>
+        <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
+            <a href="{% url 'home' %}" class="btn-finish-premium">
+                <i class="fas fa-home me-2"></i> NA HLAVNÍ STRANU
+            </a>
+            <a href="{% url 'profil' %}" class="btn px-4 py-3 fw-bold" style="border: 2px solid var(--border-tan); border-radius: 20px; color: var(--mid-brown);">
+                <i class="fas fa-user-circle me-2"></i> MŮJ PROFIL
+            </a>
+        </div>
+
+        <div class="mt-5 pt-4" style="border-top: 1px dashed var(--border-tan);">
+            <small class="text-muted italic">
+                Potvrzení o platbě a fakturu jsme vám právě odeslali na e-mail.
+            </small>
+        </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var duration = 3 * 1000;
+        var end = Date.now() + duration;
+
+        (function frame() {
+            confetti({
+                particleCount: 3,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: ['#c5a059', '#3e2723']
+            });
+            confetti({
+                particleCount: 3,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: ['#c5a059', '#3e2723']
+            });
+
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+    });
+</script>
+
 {% endblock %}

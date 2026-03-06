@@ -29,6 +29,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-1pv+(%pqb466r@7*-l
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
 ALLOWED_HOSTS = ['epes-8717.rostiapp.cz', 'www.epes.online', 'epes.online', '127.0.0.1', 'localhost']
 CSRF_TRUSTED_ORIGINS = ['https://epes-8717.rostiapp.cz', 'https://www.epes.online', 'https://epes.online']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -108,6 +109,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,  # Zvýšíme na 8 znaků pro lepší bezpečnost
+        }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -115,6 +119,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+    # Můžeš přidat i vlastní validátor (viz níže), pokud chceš vynutit čísla/velká písmena
 ]
 
 

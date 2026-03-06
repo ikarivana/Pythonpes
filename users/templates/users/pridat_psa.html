@@ -1,19 +1,58 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+      rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
-    :root { --t-gold: #c5a059; --t-brown: #3e2723; --t-bg: #fdfaf4; --t-card-bg: #ffffff; }
-    body { background-color: var(--t-bg); font-family: 'Plus Jakarta Sans', sans-serif; color: var(--t-brown); }
+    :root {
+        --t-gold: #c5a059;
+        --t-brown: #3e2723;
+        --t-bg: #fdfaf4;
+        --t-card-bg: #ffffff;
+    }
+
+    /* REŽIM KOČKA */
+    .is-kocka {
+        --t-gold: #9b86bd;   /* Lila fialová */
+        --t-brown: #2d1b4d;  /* Tmavě fialová */
+        --t-bg: #f8f7ff;     /* Lila nádech pozadí */
+    }
+
+    body { background-color: var(--t-bg); font-family: 'Plus Jakarta Sans', sans-serif; color: var(--t-brown); transition: 0.5s; }
     .form-container { max-width: 900px; margin: 40px auto; padding: 0 15px; }
-    .edit-card { position: relative; background: var(--t-card-bg); border-radius: 25px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid rgba(197, 160, 89, 0.1); overflow: hidden; }
+    .edit-card { position: relative; background: var(--t-card-bg); border-radius: 25px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid rgba(197, 160, 89, 0.1); overflow: hidden; transition: 0.3s; }
+
     .section-title { font-size: 1.1rem; font-weight: 800; color: var(--t-brown); margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-    .label-gold { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--t-gold); display: block; margin-bottom: 5px; }
+    .label-gold { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--t-gold); display: block; margin-bottom: 5px; transition: 0.3s; }
     .input-clean { width: 100%; border: 1px solid #eee; border-radius: 12px; padding: 12px 15px; font-size: 0.95rem; transition: 0.3s; background: #fff; }
+    .input-clean:focus { outline: none; border-color: var(--t-gold); }
+
     .btn-save-main { background: var(--t-brown); color: white; border: none; padding: 18px; border-radius: 20px; font-weight: 800; transition: 0.3s; cursor: pointer; border: 2px solid var(--t-gold); width: 100%; margin-top: 20px; }
+
+    /* Styl pro přepínač druhů */
+    .species-toggle { display: flex; gap: 20px; justify-content: center; margin-bottom: 20px; }
+    .species-option { cursor: pointer; text-align: center; opacity: 0.5; transition: 0.3s; }
+    .species-option.active { opacity: 1; transform: scale(1.1); }
+    .species-option i { font-size: 2.5rem; display: block; color: var(--t-gold); }
+    .species-option span { font-weight: 800; font-size: 0.8rem; text-transform: uppercase; color: var(--t-brown); }
 </style>
+
+<div class="edit-card text-center">
+    <h5 class="section-title">Koho registrujete?</h5>
+    <div class="species-toggle">
+        <div class="species-option active" id="opt-pes" onclick="setSpecies('pes')">
+            <i class="fas fa-dog"></i>
+            <span>Pejsek</span>
+        </div>
+        <div class="species-option" id="opt-kocka" onclick="setSpecies('kocka')">
+            <i class="fas fa-cat"></i>
+            <span>Kočička</span>
+        </div>
+    </div>
+    <input type="hidden" name="druh" id="id_druh" value="pes">
+</div>
 
 <div class="form-container">
     <div class="text-center mb-5">
@@ -26,144 +65,197 @@
 
         <div class="edit-card">
             <h5 class="section-title"><i class="fas fa-dog me-2"></i>Základní informace</h5>
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="label-gold">Jméno psa *</label>
-                    <input type="text" name="jmeno" class="input-clean" required>
-                </div>
-                <div class="col-md-6">
-                    <label class="label-gold">Rasa *</label>
-                    <input type="text" name="rasa" class="input-clean" required>
-                </div>
-                <div class="col-md-6">
-                    <label class="label-gold">Datum narozeni</label>
-                    <input type="date" name="datum_narozeni" class="input-clean">
-                </div>
-                <div class="col-md-6">
-                    <label class="label-gold">Číslo čipu</label>
-                    <input type="text" name="cip" class="input-clean">
-                </div>
+            <div class="col-md-6">
+                <label class="label-gold label-name">Jméno psa *</label>
+                <input type="text" name="jmeno" class="input-clean" required>
+            </div>
+            <div class="col-md-6">
+                <label class="label-gold label-breed">Rasa *</label>
+                <input type="text" name="rasa" class="input-clean" required>
+            </div>
+            <div class="col-md-6">
+                <label class="label-gold">Datum narozeni</label>
+                <input type="date" name="datum_narozeni" class="input-clean">
+            </div>
+            <div class="col-md-6">
+                <label class="label-gold d-flex justify-content-between">
+                    Číslo čipu
+                    <span style="font-size: 0.6rem; color: #0dcaf0; letter-spacing: 0.5px;">
+            <i class="fas fa-lightbulb"></i> DOPORUČENO
+        </span>
+                </label>
+                <input type="text" name="cip" class="input-clean" placeholder="Např. 15místný kód"
+                       style="border-left: 3px solid #0dcaf0;">
+                <small style="font-size: 0.65rem; color: #888; display: block; margin-top: 4px;">
+                    Pomůže nálezci nebo veterináři pejska rychleji identifikovat.
+                </small>
+            </div>
 
-                <div class="col-md-6">
-                    <label class="label-gold">Váha (kg)</label>
-                    <input type="number" name="vaha" class="input-clean" step="0.1">
-                </div>
+            <div class="col-md-6">
+                <label class="label-gold">Váha (kg)</label>
+                <input type="number" name="vaha" class="input-clean" step="0.1">
+            </div>
 
-                <div class="col-md-12">
-                    <label class="label-gold">Profilová fotografie</label>
-                    <input type="file" name="fotka" class="input-clean">
-                </div>
-                <div class="col-12">
-                    <label class="label-gold">O mně / Příběh</label>
-                    <textarea name="popis" class="input-clean" style="height: 100px; resize: none;"></textarea>
-                </div>
+            <div class="col-md-12">
+                <label class="label-gold">Profilová fotografie</label>
+                <input type="file" name="fotka" class="input-clean">
+            </div>
+            <div class="col-12">
+                <label class="label-gold">O mně / Příběh</label>
+                <textarea name="popis" class="input-clean" style="height: 100px; resize: none;"></textarea>
             </div>
         </div>
+</div>
 
-        <div class="edit-card">
-            <h5 class="section-title"><i class="fas fa-heartbeat me-2"></i>Zdravotní termíny a prevence</h5>
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="label-gold">Poslední očkování</label>
-                    <input type="date" name="posledni_ockovani" id="id_ocko_last" class="input-clean">
-                </div>
-                <div class="col-md-6">
-                    <label class="label-gold">Příští očkování</label>
-                    <input type="date" name="pristi_ockovani" id="id_ocko_next" class="input-clean">
-                </div>
-                <div class="col-md-6">
-                    <label class="label-gold">Poslední odčervení</label>
-                    <input type="date" name="posledni_odcerveni" id="id_odcerv_last" class="input-clean">
-                </div>
-                <div class="col-md-6">
-                    <label class="label-gold">Příští odčervení</label>
-                    <input type="date" name="pristi_odcerveni" id="id_odcerv_next" class="input-clean">
-                </div>
-                <div class="col-md-6">
-                     <label class="label-gold">Ochrana proti klíšťatům (Typ)</label>
-                     <input type="text" name="typ_ochrany_klistata" class="input-clean" placeholder="Obojek / Pipeta">
-                </div>
-                <div class="col-md-3">
-                     <label class="label-gold">Poslední aplikace</label>
-                     <input type="date" name="posledni_klistata" class="input-clean">
-                </div>
-                <div class="col-md-3">
-                     <label class="label-gold">Příští aplikace</label>
-                     <input type="date" name="pristi_klistata" class="input-clean">
-                </div>
-            </div>
+<div class="edit-card">
+    <h5 class="section-title"><i class="fas fa-heartbeat me-2"></i>Zdravotní termíny a prevence</h5>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="label-gold">Poslední očkování</label>
+            <input type="date" name="posledni_ockovani" id="id_ocko_last" class="input-clean">
         </div>
-
-        <div class="edit-card">
-            <h5 class="section-title"><i class="fas fa-certificate me-2"></i>Chovnost a původ</h5>
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="label-gold">Bonitace</label>
-                    <input type="text" name="bonitace" class="input-clean" placeholder="Kód bonitace">
-                </div>
-                <div class="col-md-6">
-                    <label class="label-gold">Zdravotní testy</label>
-                    <input type="text" name="zdravotni_testy" class="input-clean" placeholder="Locus, PRA, atd.">
-                </div>
-                <div class="col-md-6">
-                    <label class="label-gold">Otec (manuálně)</label>
-                    <input type="text" name="otec_manualni" class="input-clean">
-                </div>
-                <div class="col-md-6">
-                    <label class="label-gold">Matka (manuálně)</label>
-                    <input type="text" name="matka_manualni" class="input-clean">
-                </div>
-                <div class="col-md-6">
-                    <label class="label-gold">Chovná stanice</label>
-                    <input type="text" name="chovna_stanice" class="input-clean">
-                </div>
-                <div class="col-md-2">
-                    <label class="label-gold">RTG HD</label>
-                    <input type="text" name="rtg_hd" class="input-clean">
-                </div>
-                <div class="col-md-2">
-                    <label class="label-gold">RTG ED</label>
-                    <input type="text" name="rtg_ed" class="input-clean">
-                </div>
-                <div class="col-md-2">
-                    <label class="label-gold">RTG Páteř</label>
-                    <input type="text" name="rtg_pater" class="input-clean">
-                </div>
-            </div>
+        <div class="col-md-6">
+            <label class="label-gold">Příští očkování</label>
+            <input type="date" name="pristi_ockovani" id="id_ocko_next" class="input-clean">
         </div>
+        <div class="col-md-6">
+            <label class="label-gold">Poslední odčervení</label>
+            <input type="date" name="posledni_odcerveni" id="id_odcerv_last" class="input-clean">
+        </div>
+        <div class="col-md-6">
+            <label class="label-gold">Příští odčervení</label>
+            <input type="date" name="pristi_odcerveni" id="id_odcerv_next" class="input-clean">
+        </div>
+        <div class="col-md-6">
+            <label class="label-gold">Ochrana proti klíšťatům (Typ)</label>
+            <input type="text" name="typ_ochrany_klistata" class="input-clean" placeholder="Obojek / Pipeta">
+        </div>
+        <div class="col-md-3">
+            <label class="label-gold">Poslední aplikace</label>
+            <input type="date" name="posledni_klistata" class="input-clean">
+        </div>
+        <div class="col-md-3">
+            <label class="label-gold">Příští aplikace</label>
+            <input type="date" name="pristi_klistata" class="input-clean">
+        </div>
+    </div>
+</div>
 
-        <button type="submit" class="btn-save-main shadow mb-5">
-            <i class="fas fa-plus-circle me-2"></i> ZAREGISTROVAT PEJSKA
-        </button>
-    </form>
+<div class="edit-card">
+    <h5 class="section-title"><i class="fas fa-certificate me-2"></i>Chovnost a původ</h5>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="label-gold">Bonitace</label>
+            <input type="text" name="bonitace" class="input-clean" placeholder="Kód bonitace">
+        </div>
+        <div class="col-md-6">
+            <label class="label-gold">Zdravotní testy</label>
+            <input type="text" name="zdravotni_testy" class="input-clean" placeholder="Locus, PRA, atd.">
+        </div>
+        <div class="col-md-6">
+            <label class="label-gold">Otec (manuálně)</label>
+            <input type="text" name="otec_manualni" class="input-clean">
+        </div>
+        <div class="col-md-6">
+            <label class="label-gold">Matka (manuálně)</label>
+            <input type="text" name="matka_manualni" class="input-clean">
+        </div>
+        <div class="col-md-6">
+            <label class="label-gold">Chovná stanice</label>
+            <input type="text" name="chovna_stanice" class="input-clean">
+        </div>
+        <div class="col-md-2">
+            <label class="label-gold">RTG HD</label>
+            <input type="text" name="rtg_hd" class="input-clean">
+        </div>
+        <div class="col-md-2">
+            <label class="label-gold">RTG ED</label>
+            <input type="text" name="rtg_ed" class="input-clean">
+        </div>
+        <div class="col-md-2">
+            <label class="label-gold">RTG Páteř</label>
+            <input type="text" name="rtg_pater" class="input-clean">
+        </div>
+    </div>
+</div>
+
+<button type="submit" class="btn-save-main shadow mb-5">
+    <i class="fas fa-plus-circle me-2"></i> ZAREGISTROVAT PEJSKA
+</button>
+</form>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const ockoLast = document.getElementById('id_ocko_last');
-    const ockoNext = document.getElementById('id_ocko_next');
-    const odcervLast = document.getElementById('id_odcerv_last');
-    const odcervNext = document.getElementById('id_odcerv_next');
+    document.addEventListener('DOMContentLoaded', function() {
+        const ockoLast = document.getElementById('id_ocko_last');
+        const ockoNext = document.getElementById('id_ocko_next');
+        const odcervLast = document.getElementById('id_odcerv_last');
+        const odcervNext = document.getElementById('id_odcerv_next');
 
-    if(ockoLast) {
-        ockoLast.addEventListener('change', function() {
-            if (this.value) {
-                let date = new Date(this.value);
-                date.setFullYear(date.getFullYear() + 1);
-                ockoNext.value = date.toISOString().split('T')[0];
-            }
-        });
-    }
+        if(ockoLast) {
+            ockoLast.addEventListener('change', function() {
+                if (this.value) {
+                    let date = new Date(this.value);
+                    date.setFullYear(date.getFullYear() + 1);
+                    ockoNext.value = date.toISOString().split('T')[0];
+                }
+            });
+        }
 
-    if(odcervLast) {
-        odcervLast.addEventListener('change', function() {
-            if (this.value) {
-                let date = new Date(this.value);
-                date.setMonth(date.getMonth() + 3);
-                odcervNext.value = date.toISOString().split('T')[0];
-            }
-        });
+        if(odcervLast) {
+            odcervLast.addEventListener('change', function() {
+                if (this.value) {
+                    let date = new Date(this.value);
+                    date.setMonth(date.getMonth() + 3);
+                    odcervNext.value = date.toISOString().split('T')[0];
+                }
+            });
+        }
+    });
+
+    function setSpecies(druh) {
+        const idDruh = document.getElementById('id_druh');
+        const optKocka = document.getElementById('opt-kocka');
+        const optPes = document.getElementById('opt-pes');
+        const nadpis = document.querySelector('h2');
+        const tlacitko = document.querySelector('.btn-save-main');
+
+        // Labely pro dynamickou změnu textu
+        const labelName = document.querySelector('.label-name');
+        const labelBreed = document.querySelector('.label-breed');
+
+        // Najdeme karty (0: přepínač, 1: základní, 2: zdraví, 3: původ)
+        const vsechnyKarty = document.querySelectorAll('.edit-card');
+        const chovatelskaSekce = vsechnyKarty[3];
+
+        if (idDruh) idDruh.value = druh;
+
+        if (druh === 'kocka') {
+            document.body.classList.add('is-kocka');
+            optKocka.classList.add('active');
+            optPes.classList.remove('active');
+
+            if(nadpis) nadpis.innerText = 'Nový profil kočičky';
+            if(tlacitko) tlacitko.innerHTML = '<i class="fas fa-plus-circle me-2"></i> ZAREGISTROVAT KOČIČKU';
+            if(labelName) labelName.innerText = 'Jméno kočky *';
+            if(labelBreed) labelBreed.innerText = 'Plemeno kočky *';
+
+            // SCHOVAT PSÍ SPECIFIKA (RTG, Bonitace)
+            if(chovatelskaSekce) chovatelskaSekce.style.display = 'none';
+
+        } else {
+            document.body.classList.remove('is-kocka');
+            optPes.classList.add('active');
+            optKocka.classList.remove('active');
+
+            if(nadpis) nadpis.innerText = 'Nový profil pejska';
+            if(tlacitko) tlacitko.innerHTML = '<i class="fas fa-plus-circle me-2"></i> ZAREGISTROVAT PEJSKA';
+            if(labelName) labelName.innerText = 'Jméno psa *';
+            if(labelBreed) labelBreed.innerText = 'Rasa *';
+
+            // ZNOVU ZOBRAZIT PSÍ SPECIFIKA
+            if(chovatelskaSekce) chovatelskaSekce.style.display = 'block';
+        }
     }
-});
 </script>
 {% endblock %}

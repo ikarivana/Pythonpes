@@ -1,47 +1,53 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from .models import Inzerat, InzeratFoto
+from django.contrib import messages  # Opravený import
+from django.shortcuts import render, get_object_or_404, redirect
+from django.db.models import Case, When, BooleanField
+
 from .forms import InzeratForm
+from .models import Inzerat, InzeratFoto
 
 
-# HLAVNÍ PŘEHLED INZERÁTŮ
+# 1. HLAVNÍ PŘEHLED INZERÁTŮ
 def seznam_inzeratu(request):
-    """Zobrazení přehledu inzerátů seřazených podle Premium statusu."""
-    # 1. Získání filtrů z URL
+    """
+    Zobrazení přehledu inzerátů.
+    Prémioví uživatelé (ALFA) jsou vždy nahoře, následně podle data.
+    """
     kraj_filtr = request.GET.get('kraj')
-    typ_filtr = request.GET.get('typ')
     kategorie_filtr = request.GET.get('kategorie')
+    hledat = request.GET.get('q')
 
-    # 2. Základní QuerySet (optimalizovaný pro načtení profilů)
-    inzeraty_queryset = Inzerat.objects.all().select_related('autor__profil').order_by('-vytvoreno')
+    # QuerySet s anotací pro efektivní řazení v DB
+    inzeraty = Inzerat.objects.all().select_related('autor__profil', 'autor').annotate(
+        je_premium=Case(
+            When(autor__profil__is_premium=True, then=True),
+            default=False,
+            output_field=BooleanField(),
+        )
+    ).filter(aktivni=True)
 
-    # 3. Aplikace filtrů
+    # Filtrování
     if kraj_filtr:
-        inzeraty_queryset = inzeraty_queryset.filter(kraj=kraj_filtr)
-    if typ_filtr:
-        inzeraty_queryset = inzeraty_queryset.filter(pohlavi=typ_filtr)
+        inzeraty = inzeraty.filter(kraj=kraj_filtr)
     if kategorie_filtr:
-        inzeraty_queryset = inzeraty_queryset.filter(kategorie=kategorie_filtr)
+        inzeraty = inzeraty.filter(kategorie=kategorie_filtr)
+    if hledat:
+        inzeraty = inzeraty.filter(titulek__icontains=hledat) | inzeraty.filter(text__icontains=hledat)
 
-    # 4. SEŘAZENÍ (Python verze): Obejití chyby Unsupported lookup
-    # Seřadí seznam tak, aby ti, co mají profil.is_premium = True, byli nahoře.
-    inzeraty_list = sorted(
-        list(inzeraty_queryset),
-        key=lambda x: getattr(x.autor.profil, 'is_premium', False),
-        reverse=True
-    )
+    # Finální řazení: Premium první, pak nejnovější
+    inzeraty = inzeraty.order_by('-je_premium', '-vytvoreno')
 
     context = {
-        'inzeraty': inzeraty_list,
+        'inzeraty': inzeraty,
         'kraje': Inzerat.KRAJE_CHOICES,
-        'kategorie_list': Inzerat.KATEGORIE_CHOICES,
+        'kategorie_list': Inzerat.KATEGORIE_CHOICES,  # Sjednocený název pro šablonu
+        'aktivni_kraj': kraj_filtr,
+        'aktivni_kat': kategorie_filtr,
     }
-
     return render(request, 'inzerce/seznam_inzeratu.html', context)
 
 
-# DETAIL INZERÁTU
+# 2. DETAIL INZERÁTU
 def detail_inzeratu(request, pk):
     """Zobrazení detailu jednoho inzerátu s galerií."""
     inzerat = get_object_or_404(Inzerat, pk=pk)
@@ -54,16 +60,17 @@ def detail_inzeratu(request, pk):
     return render(request, 'inzerce/detail_inzeratu.html', context)
 
 
-# PŘIDÁNÍ INZERÁTU (S kontrolou limitu pro neplatiče)
+# 3. PŘIDÁNÍ INZERÁTU (S kontrolou limitu)
 @login_required
 def pridat_inzerat(request):
-    """Přidání inzerátu: Běžný uživatel max 1, ALFA člen neomezeně."""
+    """Přidání inzerátu: Běžný uživatel max 1 aktivní, ALFA člen neomezeně."""
 
-    # Kontrola limitu pro ne-premium uživatele
-    is_premium = getattr(request.user.profil, 'is_premium', False)
-    pocet_starych = Inzerat.objects.filter(autor=request.user).count()
+    # Bezpečné získání profilu a kontrola limitu
+    profil = getattr(request.user, 'profil', None)
+    is_premium = profil.is_premium if profil else False
+    pocet_aktivnich = Inzerat.objects.filter(autor=request.user, aktivni=True).count()
 
-    if not is_premium and pocet_starych >= 1:
+    if not is_premium and pocet_aktivnich >= 1:
         messages.warning(request,
                          "Jako běžný uživatel můžete mít pouze 1 aktivní inzerát. Pro neomezené vkládání aktivujte Členství ALFA.")
         return redirect('cenik')
@@ -75,12 +82,12 @@ def pridat_inzerat(request):
             novy_inzerat.autor = request.user
             novy_inzerat.save()
 
-            # Hromadné nahrání fotek do galerie
+            # Hromadné nahrání fotek do galerie (getlist je klíčový!)
             extra_fotky = request.FILES.getlist('galerie_fotky')
             for f in extra_fotky:
                 InzeratFoto.objects.create(inzerat=novy_inzerat, foto=f)
 
-            messages.success(request, "Inzerát byl úspěšně přidán.")
+            messages.success(request, "Inzerát byl úspěšně přidán do Bazaru.")
             return redirect('seznam_inzeratu')
     else:
         form = InzeratForm()
@@ -88,44 +95,47 @@ def pridat_inzerat(request):
     return render(request, 'inzerce/pridat_inzerat.html', {'form': form})
 
 
-# ÚPRAVA INZERÁTU
+# 4. ÚPRAVA INZERÁTU
 @login_required
 def upravit_inzerat(request, pk):
-    """Úprava existujícího inzerátu autorem nebo adminem."""
     inzerat = get_object_or_404(Inzerat, pk=pk)
 
+    # Bezpečnostní pojistka
     if inzerat.autor != request.user and not request.user.is_superuser:
-        messages.error(request, "Na tohle nemáte oprávnění!")
+        messages.error(request, "Na úpravu tohoto inzerátu nemáte oprávnění.")
         return redirect('seznam_inzeratu')
 
     if request.method == 'POST':
+        # Důležité: instance=inzerat říká Djangu, že upravujeme stávající záznam
         form = InzeratForm(request.POST, request.FILES, instance=inzerat)
         if form.is_valid():
-            form.save()
+            form.save() # Tady se uloží změny i hlavní obrázek
 
-            # Přidání dalších fotek při úpravě
+            # Přidání dalších fotek do galerie, pokud byly vybrány
             extra_fotky = request.FILES.getlist('galerie_fotky')
             for f in extra_fotky:
                 InzeratFoto.objects.create(inzerat=inzerat, foto=f)
 
-            messages.success(request, "Inzerát byl úspěšně upraven.")
-            return redirect('seznam_inzeratu')
+            messages.success(request, "Inzerát byl úspěšně aktualizován.")
+            return redirect('detail_inzeratu', pk=inzerat.pk)
     else:
         form = InzeratForm(instance=inzerat)
 
-    return render(request, 'inzerce/upravit_inzerat.html', {'form': form, 'inzerat': inzerat})
+    return render(request, 'inzerce/upravit_inzerat.html', {
+        'form': form,
+        'inzerat': inzerat
+    })
 
 
-# SMAZÁNÍ INZERÁTU
+# 5. SMAZÁNÍ INZERÁTU
 @login_required
 def smazat_inzerat(request, pk):
-    """Smazání inzerátu."""
     inzerat = get_object_or_404(Inzerat, pk=pk)
 
     if inzerat.autor == request.user or request.user.is_superuser:
         inzerat.delete()
-        messages.success(request, "Inzerát byl smazán.")
+        messages.success(request, "Inzerát byl úspěšně odstraněn.")
     else:
-        messages.error(request, "Nemáte oprávnění smazat tento inzerát.")
+        messages.error(request, "Nemáte oprávnění ke smazání tohoto inzerátu.")
 
     return redirect('seznam_inzeratu')

@@ -8,185 +8,181 @@
         --text-dark: #4a3728;
         --light-tan: #fdfaf5;
         --card-border: #eaddcf;
-        --alfa-gold: #c5a059;
+        --cat-purple: #6c5ce7;
     }
 
-    body { background-color: var(--light-tan); color: var(--text-dark); }
-    html { scroll-behavior: smooth; }
+    body { background-color: var(--light-tan); color: var(--text-dark); font-family: 'Plus Jakarta Sans', sans-serif; }
 
+    /* Vylepšení karet */
     .nav-card {
         background: white;
         border: 2px solid var(--card-border);
-        border-radius: 20px;
-        padding: 20px;
+        border-radius: 24px;
+        padding: 25px 15px;
         text-align: center;
         text-decoration: none;
         color: var(--text-dark);
         display: block;
-        transition: 0.3s;
+        transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         height: 100%;
     }
     .nav-card:hover {
-        background: #fff;
         border-color: var(--primary-brown);
-        transform: translateY(-5px);
+        transform: translateY(-8px);
         color: var(--primary-brown);
-        box-shadow: 0 10px 20px rgba(139, 94, 60, 0.1) !important;
+        box-shadow: 0 15px 30px rgba(139, 94, 60, 0.1) !important;
     }
 
     .section-header {
-        font-weight: bold;
+        font-weight: 800;
         color: var(--primary-brown);
-        margin-top: 40px;
-        margin-bottom: 20px;
-        border-left: 4px solid var(--primary-brown);
-        padding-left: 15px;
+        margin-top: 50px;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+    }
+    .section-header::after {
+        content: "";
+        flex: 1;
+        height: 2px;
+        background: var(--card-border);
+        margin-left: 20px;
+        border-radius: 2px;
     }
 
     .action-link-box {
         border: 2px solid var(--card-border);
-        border-radius: 15px;
+        border-radius: 20px;
         background: white;
         text-decoration: none;
         color: var(--text-dark);
         display: flex;
         align-items: center;
-        padding: 15px 20px;
+        padding: 20px;
         transition: 0.3s;
         height: 100%;
     }
     .action-link-box:hover {
-        background: #fff;
         border-color: var(--primary-brown);
-        transform: scale(1.02);
-        color: var(--primary-brown);
-        box-shadow: 0 5px 15px rgba(139, 94, 60, 0.05) !important;
+        background: #fff;
+        transform: scale(1.03);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important;
     }
 
-    .breed-item {
-        background: white;
-        padding: 12px;
-        border: 1px solid var(--card-border);
-        border-radius: 12px;
-        display: block;
-        text-align: center;
-        text-decoration: none;
-        color: var(--text-dark);
-        font-weight: 600;
-        transition: 0.2s;
-    }
-    .breed-item:hover { background: var(--light-tan); border-color: var(--primary-brown); }
-
-    /* --- NOVÉ STYLY PRO DROPDOWN --- */
+    /* Dropdown stylizace */
     .breed-dropdown {
         width: 100%;
-        padding: 15px;
+        padding: 18px 25px;
         border: 2px solid var(--card-border);
-        border-radius: 15px;
+        border-radius: 20px;
         background-color: white;
         color: var(--text-dark);
-        font-weight: 600;
+        font-weight: 700;
         font-size: 1.1rem;
         cursor: pointer;
-        appearance: none; /* Skryje defaultní šipku */
-        -webkit-appearance: none;
-        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b5e3c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b5e3c' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
         background-repeat: no-repeat;
-        background-position: right 1rem center;
-        background-size: 1.5em;
+        background-position: right 1.5rem center;
+        background-size: 1.2em;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.02);
     }
-    .breed-dropdown:focus { outline: none; border-color: var(--primary-brown); box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.1); }
 </style>
 
-<div class="container mt-4">
+<div class="container mt-5">
     <div class="text-center mb-5">
-        <h1 class="fw-bold" style="color: var(--primary-brown);">🐾 Sociální síť</h1>
+        <h1 class="fw-800 display-5" style="color: var(--primary-brown); letter-spacing: -1px;">🐾 Sociální síť</h1>
+        <p class="text-muted">Propojujeme majitele psů i koček</p>
     </div>
 
     <div class="row g-4 mb-5">
         <div class="col-md-3 col-6">
             <a href="{% url 'pridat_polozku' 'ostatni' %}" class="nav-card shadow-sm">
-                <span style="font-size: 1.5rem;">🐕</span>
-                <h6 class="fw-bold mt-2 mb-0">Přidat Plemeno</h6>
+                <div class="mb-2" style="font-size: 2rem;">🧬</div>
+                <h6 class="fw-bold mb-0">Nové Plemeno</h6>
             </a>
         </div>
         <div class="col-md-3 col-6">
             <a href="{% url 'pridat_polozku' 'vystavy' %}" class="nav-card shadow-sm">
-                <span style="font-size: 1.5rem;">🏆</span>
-                <h6 class="fw-bold mt-2 mb-0">Přidat Výstavu</h6>
-            </a>
-        </div>
-        <div class="col-md-3 col-6">
-            <a href="{% url 'pridat_polozku' 'lovecka' %}" class="nav-card shadow-sm">
-                <span style="font-size: 1.5rem;">🌿</span>
-                <h6 class="fw-bold mt-2 mb-0">Lovecká akce</h6>
+                <div class="mb-2" style="font-size: 2rem;">🏆</div>
+                <h6 class="fw-bold mb-0">Nová Výstava</h6>
             </a>
         </div>
         <div class="col-md-3 col-6">
             <a href="{% url 'zed_plemene' 'psi-hriste' %}" class="nav-card shadow-sm">
-                <span style="font-size: 1.5rem;">🎾</span>
-                <h6 class="fw-bold mt-2 mb-0">Psí hřiště</h6>
+                <div class="mb-2" style="font-size: 2rem;">🎾</div>
+                <h6 class="fw-bold mb-0">Hřiště & Parky</h6>
+            </a>
+        </div>
+        <div class="col-md-3 col-6">
+            <a href="{% url 'pridat_polozku' 'lovecka' %}" class="nav-card shadow-sm">
+                <div class="mb-2" style="font-size: 2rem;">🌿</div>
+                <h6 class="fw-bold mb-0">Akce v přírodě</h6>
             </a>
         </div>
     </div>
 
     <h4 class="section-header">Hlídání a venčení</h4>
-    <div class="row g-3 mb-5">
+    <div class="row g-4 mb-5">
         <div class="col-md-6">
             <a href="{% url 'zed_plemene' 'venceni' %}" class="action-link-box shadow-sm">
-                <span style="font-size: 2rem; margin-right: 15px;">🦮</span>
+                <span class="display-6 me-3">🦮</span>
                 <div>
-                    <h5 class="fw-bold mb-0">VENČENÍ</h5>
-                    <small class="text-muted">Domluvte si parťáka na venčení</small>
+                    <h5 class="fw-800 mb-0">VENČENÍ</h5>
+                    <small class="text-muted">Najděte parťáka na společnou procházku</small>
                 </div>
             </a>
         </div>
         <div class="col-md-6">
             <a href="{% url 'zed_plemene' 'hlidani' %}" class="action-link-box shadow-sm">
-                <span style="font-size: 2rem; margin-right: 15px;">🏠</span>
+                <span class="display-6 me-3">🐈‍⬛</span>
                 <div>
-                    <h5 class="fw-bold mb-0">HLÍDÁNÍ</h5>
-                    <small class="text-muted">Najděte spolehlivé hlídání</small>
+                    <h5 class="fw-800 mb-0">HLÍDÁNÍ</h5>
+                    <small class="text-muted">Spolehlivý dohled, když nejste doma</small>
                 </div>
             </a>
         </div>
     </div>
 
-    <h4 class="section-header">Aktuální zdi plemen</h4>
-    <div class="mb-4">
-        <select class="breed-dropdown" onchange="location = this.value;">
-            <option value="">-- Vyberte plemeno --</option>
+    <h4 class="section-header">Zdi plemen (Psi i Kočky)</h4>
+    <div class="mb-5">
+        <select class="breed-dropdown" onchange="if(this.value) location = this.value;">
+            <option value="">-- Vyberte plemeno nebo druh --</option>
             {% for p in vsechna_plemena %}
-                {# Kontrola speciálních slugů #}
-                {% if p.slug != 'psi-hriste' and p.slug != 'venceni' and p.slug != 'hlidani' %}
-                    <option value="{% url 'zed_plemene' p.slug %}">🐾 {{ p.nazev }}</option>
+                {% if p.slug not in 'psi-hriste venceni hlidani' %}
+                    <option value="{% url 'zed_plemene' p.slug %}">
+                        {% if 'kocka' in p.nazev.lower or 'kočka' in p.nazev.lower %}🐱{% else %}🐾{% endif %} {{ p.nazev }}
+                    </option>
                 {% endif %}
-            {% empty %}
-                <option value="">Zatím tu nejsou žádná plemena.</option>
             {% endfor %}
         </select>
     </div>
 
-    <h4 class="section-header">Probíhající Výstavy</h4>
-    <div class="row g-3 mb-4">
-        {% for p in plemena_vystavy %}
-            <div class="col-md-3 col-6">
-                <a href="{% url 'zed_plemene' p.slug %}" class="breed-item shadow-sm">🏆 {{ p.nazev }}</a>
+    <div class="row">
+        <div class="col-md-6">
+            <h4 class="section-header">🏆 Výstavy</h4>
+            <div class="row g-2">
+                {% for p in plemena_vystavy %}
+                    <div class="col-6">
+                        <a href="{% url 'zed_plemene' p.slug %}" class="breed-item shadow-sm">{{ p.nazev }}</a>
+                    </div>
+                {% empty %}
+                    <p class="text-muted ps-3 small">Žádné aktuální výstavy.</p>
+                {% endfor %}
             </div>
-        {% empty %}
-            <p class="text-muted ps-3">Žádné aktuální výstavy.</p>
-        {% endfor %}
-    </div>
-
-    <h4 class="section-header">Lovecké akce</h4>
-    <div class="row g-3 mb-5">
-        {% for p in plemena_lovecka %}
-            <div class="col-md-3 col-6">
-                <a href="{% url 'zed_plemene' p.slug %}" class="breed-item shadow-sm">🌿 {{ p.nazev }}</a>
+        </div>
+        <div class="col-md-6">
+            <h4 class="section-header">🌿 Příroda & Lov</h4>
+            <div class="row g-2">
+                {% for p in plemena_lovecka %}
+                    <div class="col-6">
+                        <a href="{% url 'zed_plemene' p.slug %}" class="breed-item shadow-sm">{{ p.nazev }}</a>
+                    </div>
+                {% empty %}
+                    <p class="text-muted ps-3 small">Žádné plánované akce.</p>
+                {% endfor %}
             </div>
-        {% empty %}
-            <p class="text-muted ps-3">Žádné plánované akce.</p>
-        {% endfor %}
+        </div>
     </div>
 </div>
 {% endblock %}

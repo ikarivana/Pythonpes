@@ -1,96 +1,88 @@
 {% extends 'home/base.html' %}
-{% block content %}
 
+{% block content %}
 <style>
     :root {
-        --primary-brown: #3e2723;
-        --accent-gold: #c5a059;
-        --light-gold: #fdfaf6;
-        --text-muted: #8d7d77;
+        --border-tan: #e2d1c3;
     }
 
-    .pricing-container { max-width: 1100px; padding: 40px 15px 80px; }
+    .pricing-container { padding: 40px 15px; }
 
     .card-plan {
-        border: none;
-        border-radius: 28px;
+        border-radius: 30px;
+        border: 1px solid var(--border-tan);
         transition: all 0.3s ease;
-        background: white;
         height: 100%;
-        display: flex;
-        flex-direction: column;
-        border: 1px solid rgba(197, 160, 89, 0.1);
-        position: relative;
+        background: white;
     }
 
-    .card-plan:hover { transform: translateY(-8px); box-shadow: 0 15px 35px rgba(62, 39, 35, 0.08) !important; }
-
     .card-featured {
-        border: 2px solid var(--accent-gold) !important;
-        background: var(--light-gold);
+        border: 2px solid var(--gold);
+        transform: scale(1.05);
+        position: relative;
     }
 
     .discount-tag {
         position: absolute;
         top: -15px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #28a745;
-        color: white;
-        padding: 6px 16px;
-        border-radius: 20px;
+        right: 25px;
+        background: var(--gold);
+        color: var(--dark-cocoa);
+        padding: 5px 15px;
+        border-radius: 50px;
         font-size: 0.75rem;
         font-weight: 800;
-        box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
     }
 
-    .price-large { font-size: 2.8rem; font-weight: 800; color: var(--primary-brown); }
+    .price-large { font-size: 2.5rem; font-weight: 800; color: var(--mid-brown); }
 
     .btn-alfa-gold {
-        background: var(--accent-gold);
-        color: white !important;
+        background: var(--gold);
+        color: var(--dark-cocoa) !important;
         border-radius: 14px;
         padding: 14px;
         font-weight: 800;
         text-decoration: none !important;
         transition: 0.3s;
     }
+    .btn-alfa-gold:hover { background: var(--mid-brown); color: white !important; }
 
     .btn-alfa-outline {
-        border: 2px solid var(--primary-brown);
-        color: var(--primary-brown) !important;
+        border: 2px solid var(--mid-brown);
+        color: var(--mid-brown) !important;
         border-radius: 14px;
         padding: 14px;
         font-weight: 800;
         text-decoration: none !important;
     }
+    .btn-alfa-outline:hover { background: var(--subtle-cream); }
 
     .feature-item { margin-bottom: 12px; font-size: 0.95rem; display: flex; align-items: center; gap: 12px; }
-    .feature-item i { width: 18px; font-size: 1rem; }
-    .text-gold { color: var(--accent-gold); }
+    .feature-item i { width: 18px; font-size: 1rem; color: var(--gold); }
+    .text-gold { color: var(--gold); }
 </style>
 
 <div class="container pricing-container">
     <div class="text-center mb-5">
-        <h2 class="fw-bold mb-3" style="font-size: 2.8rem; color: var(--primary-brown);">Vyberte si svůj plán</h2>
-        <p class="text-muted mx-auto" style="max-width: 600px;">Zajistěte svému psovi bezpečí a sobě profesionální nástroje pro správu chovu.</p>
+        <h2 class="fw-bold mb-3" style="font-size: 2.8rem; color: var(--mid-brown); font-family: 'Playfair Display', serif;">Vyberte si svůj plán</h2>
+        <p class="text-muted mx-auto" style="max-width: 600px;">Zajistěte svým parťákům bezpečí a sobě profesionální nástroje pro správu jejich zdraví a života.</p>
     </div>
 
-    <div class="row g-4 justify-content-center">
+    <div class="row g-5 justify-content-center align-items-stretch">
         <div class="col-lg-4 col-md-6">
             <div class="card card-plan shadow-sm p-4">
                 <div class="card-body d-flex flex-column p-0">
-                    <h4 class="fw-bold mb-1">🐾 Mazlíčkář</h4>
-                    <p class="text-muted small mb-4">Základní bezpečnost pro jednoho psa</p>
+                    <h4 class="fw-bold mb-1">🐾 Parťák</h4>
+                    <p class="text-muted small mb-4">Základní profil pro jedno zvíře</p>
                     <div class="mb-4">
                         <span class="price-large">Zdarma</span>
                     </div>
                     <div class="feature-list flex-grow-1">
-                        <div class="feature-item"><i class="fas fa-check text-success"></i> <strong>Maximálně 1 pes</strong></div>
-                        <div class="feature-item"><i class="fas fa-qrcode text-gold"></i> SOS Nouzový profil</div>
-                        <div class="feature-item"><i class="fas fa-image text-gold"></i> Limit 5 fotografií</div>
-                        <div class="feature-item"><i class="fas fa-video text-gold"></i> Limit 1 video</div>
-                        <div class="feature-item"><i class="fas fa-file-pdf text-muted"></i> Základní PDF shrnutí</div>
+                        <div class="feature-item"><i class="fas fa-check text-success"></i> <strong>Maximálně 1 zvíře</strong></div>
+                        <div class="feature-item"><i class="fas fa-qrcode"></i> SOS Nouzový profil</div>
+                        <div class="feature-item"><i class="fas fa-image"></i> Limit 5 fotografií</div>
+                        <div class="feature-item"><i class="fas fa-bell"></i> Základní připomínky</div>
+                        <div class="feature-item"><i class="fas fa-file-alt text-muted"></i> Základní přehled</div>
                     </div>
                     <a href="{% url 'seznam_psu' %}" class="btn-alfa-outline mt-4 text-center">
                         UŽÍVAT ZDARMA
@@ -102,21 +94,21 @@
         <div class="col-lg-4 col-md-6">
             <div class="card card-plan shadow-sm p-4">
                 <div class="card-body d-flex flex-column p-0">
-                    <h4 class="fw-bold mb-1">🏆 Chovatel</h4>
-                    <p class="text-muted small mb-4">Pro ty, co chtějí víc</p>
+                    <h4 class="fw-bold mb-1">🏆 Alfa Člen</h4>
+                    <p class="text-muted small mb-4">Pro majitele více zvířat</p>
                     <div class="mb-4">
                         <span class="price-large">99 Kč</span>
                         <span class="text-muted fw-normal">/ měsíc</span>
                     </div>
                     <div class="feature-list flex-grow-1">
-                        <div class="feature-item"><i class="fas fa-infinity text-gold"></i> <strong>Neomezený počet psů</strong></div>
-                        <div class="feature-item"><i class="fas fa-qrcode text-gold"></i> SOS Nouzový profil</div>
-                        <div class="feature-item"><i class="fas fa-images text-gold"></i> Neomezená galerie</div>
-                        <div class="feature-item"><i class="fas fa-video text-gold"></i> Neomezená videa</div>
-                        <div class="feature-item"><i class="fas fa-dna text-gold"></i> Kompletní chovatelské PDF</div>
+                        <div class="feature-item"><i class="fas fa-infinity"></i> <strong>Neomezená zvířata</strong></div>
+                        <div class="feature-item"><i class="fas fa-shield-cat"></i> SOS Profily pro všechny</div>
+                        <div class="feature-item"><i class="fas fa-images"></i> Neomezená galerie</div>
+                        <div class="feature-item"><i class="fas fa-video"></i> Neomezená videa</div>
+                        <div class="feature-item"><i class="fas fa-file-medical"></i> Kompletní zdravotní PDF</div>
                     </div>
-                    {% if user.profile.is_premium %}
-                        <button class="btn btn-success w-100 mt-4 py-3 fw-bold rounded-4" disabled>AKTIVNÍ</button>
+                    {% if user.profil.is_premium %}
+                        <button class="btn btn-success w-100 mt-4 py-3 fw-bold rounded-4" disabled>MÁTE AKTIVNÍ</button>
                     {% else %}
                         <a href="https://vaseshop.simpleshop.cz/objednavka/mesicni-id/" class="btn-alfa-outline mt-4 text-center">
                             AKTIVOVAT MĚSÍČNĚ
@@ -131,19 +123,19 @@
                 <span class="discount-tag">UŠETŘÍTE 198 Kč</span>
                 <div class="card-body d-flex flex-column p-0">
                     <h4 class="fw-bold mb-1">👑 Roční Profi</h4>
-                    <p class="text-muted small mb-4">Maximální výhoda a podpora</p>
+                    <p class="text-muted small mb-4">Nejlepší volba pro vaši smečku</p>
                     <div class="mb-4">
                         <span class="price-large">990 Kč</span>
                         <span class="text-muted fw-normal">/ rok</span>
                     </div>
                     <div class="feature-list flex-grow-1">
-                        <div class="feature-item"><i class="fas fa-crown text-gold"></i> <strong>Vše z plánu Chovatel</strong></div>
-                        <div class="feature-item"><i class="fas fa-star text-gold"></i> Prioritní podpora</div>
-                        <div class="feature-item"><i class="fas fa-gift text-gold"></i> Bonusy od partnerů</div>
-                        <div class="feature-item"><i class="fas fa-certificate text-gold"></i> Odznak ověřeného chovatele</div>
+                        <div class="feature-item"><i class="fas fa-crown"></i> <strong>Vše z plánu Alfa Člen</strong></div>
+                        <div class="feature-item"><i class="fas fa-star"></i> Přednostní podpora</div>
+                        <div class="feature-item"><i class="fas fa-gift"></i> Bonusy od partnerů</div>
+                        <div class="feature-item"><i class="fas fa-award"></i> Odznak ověřeného člena</div>
                     </div>
-                    {% if user.profile.is_premium %}
-                        <button class="btn btn-success w-100 mt-4 py-3 fw-bold rounded-4" disabled>AKTIVNÍ</button>
+                    {% if user.profil.is_premium %}
+                        <button class="btn btn-success w-100 mt-4 py-3 fw-bold rounded-4" disabled>MÁTE AKTIVNÍ</button>
                     {% else %}
                         <a href="https://vaseshop.simpleshop.cz/objednavka/rocni-id/" class="btn-alfa-gold mt-4 text-center">
                             AKTIVOVAT ROČNÍ
@@ -152,6 +144,10 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="text-center mt-5">
+        <p class="text-muted small">Podporou Premium členství pomáháte udržovat projekt epes.online a pomáhat ztraceným zvířatům. 🐾</p>
     </div>
 </div>
 

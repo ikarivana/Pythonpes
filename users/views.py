@@ -512,8 +512,6 @@ def pridat_uspech(request, pes_id):
     return redirect('detail_psa', pes_id=pes.id)
 
 
-# --- 5. SOCIÁLNÍ SÍŤ A OSTATNÍ ---
-
 # --- 1. SOCIÁLNÍ SÍŤ - SEZNAM ZDÍ (ŘAZENÍ) ---
 def seznam_zdi(request):
     # Načteme všechna plemena a seřadíme je podle názvu
@@ -529,19 +527,36 @@ def seznam_zdi(request):
 
 
 # --- 2. ZED PŘÍSPĚVKŮ (ŘAZENÍ OD NEJNOVĚJŠÍCH) ---
-@login_required
-def zed_plemene(request, slug):
-    # Načtení konkrétní zdi (Plemena)
-    plemeno = get_object_or_404(Plemeno, slug=slug)
+# --- 1. SOCIÁLNÍ SÍŤ - SEZNAM ZDÍ ---
+# ODSTRANĚNO @login_required: Aby mohl nahlédnout i neregistrovaný
+def seznam_zdi(request):
+    vsechna_plemena = Plemeno.objects.all().order_by('nazev')
+    context = {
+        'vsechna_plemena': vsechna_plemena.filter(kategorie='ostatni'),
+        'plemena_vystavy': vsechna_plemena.filter(kategorie='vystavy'),
+        'plemena_lovecka': vsechna_plemena.filter(kategorie='lovecka'),
+    }
+    return render(request, 'users/social_zed.html', context)
 
-    # DŮLEŽITÉ: Načteme příspěvky patřící k tomuto plemeni
-    # select_related a prefetch_related zrychlí načítání autora a komentářů
+
+# --- 2. ZED PŘÍSPĚVKŮ ---
+# ODSTRANĚNO @login_required: Číst může každý
+def zed_plemene(request, slug):
+    plemeno = get_object_or_404(Plemeno, slug=slug)
     prispevky = Prispevek.objects.filter(plemeno=plemeno) \
         .select_related('autor') \
         .prefetch_related('komentare__autor') \
         .order_by('-datum_pridani')
 
+    form = PrispevekForm()
+
+    # Logika pro POST (přidávání) zůstává chráněna
     if request.method == 'POST':
+        # Pokud není přihlášen, nepovolíme mu POST požadavek
+        if not request.user.is_authenticated:
+            messages.error(request, "Pro přidávání příspěvků se musíte přihlásit.")
+            return redirect('login')
+
         if 'btn_prispevek' in request.POST:
             form = PrispevekForm(request.POST, request.FILES)
             if form.is_valid():
@@ -552,7 +567,6 @@ def zed_plemene(request, slug):
                 messages.success(request, "Příspěvek byl publikován.")
                 return redirect('zed_plemene', slug=slug)
 
-        # Zpracování komentáře (používá related_name='komentare')
         elif 'btn_komentar' in request.POST:
             prispevek_id = request.POST.get('prispevek_id')
             prispevek = get_object_or_404(Prispevek, id=prispevek_id)
@@ -564,9 +578,6 @@ def zed_plemene(request, slug):
                     text=text
                 )
                 return redirect('zed_plemene', slug=slug)
-
-    else:
-        form = PrispevekForm()
 
     return render(request, 'users/zed.html', {
         'form': form,
@@ -697,16 +708,26 @@ def smazat_prispevek(request, pk):
     return render(request, 'users/smazat_prispevek_potvrzeni.html', {'prispevek': prispevek})
 
 
-# --- 6. LAJKY A KOMENTÁŘE ---
 @login_required
 def pridej_like(request, post_id):
     p = get_object_or_404(Prispevek, id=post_id)
     liked = False
-    if request.user in p.likes.all():
-        p.likes.remove(request.user)
+
+    # 1. Kontrola existence lajku v tabulce Like (pro Profil)
+    existujici_like = Like.objects.filter(uzivatel=request.user, prispevek=p).first()
+
+    if existujici_like:
+        # Pokud existuje, odebíráme (Un-like)
+        existujici_like.delete()
+        p.likes.remove(request.user)  # Synchronizace ManyToMany pole u příspěvku
+        liked = False
     else:
-        p.likes.add(request.user)
+        # Pokud neexistuje, vytváříme (Like)
+        Like.objects.get_or_create(uzivatel=request.user, prispevek=p)
+        p.likes.add(request.user)  # Synchronizace ManyToMany pole u příspěvku
         liked = True
+
+        # 2. Vytvoření notifikace pro autora (jen pokud si nelajkuje vlastní post)
         if p.autor != request.user:
             Notifikace.objects.create(
                 prijemce=p.autor,
@@ -715,13 +736,18 @@ def pridej_like(request, post_id):
                 prispevek=p
             )
 
-    # Pokud je požadavek z JavaScriptu (AJAX), vrať jen JSON
+    # 3. Odpověď pro AJAX (pro JavaScript na zdi - stránka se neobnoví)
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({
             'liked': liked,
             'count': p.likes.count()
         })
-    return redirect(f"{request.META.get('HTTP_REFERER', '/')}#post-{p.id}")
+
+    # 4. Klasický redirect pro případ, že JS nefunguje nebo klikáš z profilu
+    referer = request.META.get('HTTP_REFERER', '/')
+    base_url = referer.split('#')[0]
+
+    return redirect(f"{base_url}#post-{p.id}")
 
 
 @login_required
@@ -743,16 +769,17 @@ def register(request):
     if request.method == 'POST':
         form = ExtendedRegistrationForm(request.POST)
         if form.is_valid():
+            # save() v tvém forms.py už vytvoří uživatele i ProfilMajitele
             user = form.save()
-            # Automaticky vytvořit profil při registraci
-            ProfilMajitele.objects.get_or_create(uzivatel=user)
+
             login(request, user)
             messages.success(request, f"Vítej, {user.first_name}! Registrace proběhla úspěšně.")
-            return redirect('profil_uzivatele')  # Změň na název tvé URL pro profil
+
+            # OPRAVA: Směrujeme na 'name' z urls.py
+            return redirect('profil')
     else:
         form = ExtendedRegistrationForm()
     return render(request, 'users/register.html', {'form': form})
-
 
 # --- PROFIL ---
 @login_required
@@ -813,13 +840,14 @@ def smazat_profil(request):
 
 @login_required
 def seznam_notifikaci(request):
-    # Načtení notifikací pro uživatele
-    notifikace = Notifikace.objects.filter(prijemce=request.user)
+    # 1. Načtení notifikací seřazených od nejnovější (mínus před názvem pole)
+    # Používáme select_related, aby se ušetřily dotazy do DB pro odesilatele a příspěvek
+    notifikace = Notifikace.objects.filter(prijemce=request.user).select_related('odesilatel', 'prispevek').order_by('-datum_vytvoreni')
 
-    # Označení jako přečtené (všechny)
+    # 2. Označení nepřečtených jako přečtené (pouze těch, co jsou False)
+    # Je dobré to udělat PŘED renderováním, nebo hned po načtení
     notifikace.filter(precteno=False).update(precteno=True)
 
-    # Do kontextu předáváme 'nots' podle vaší šablony
     context = {
         'nots': notifikace,
     }
