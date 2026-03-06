@@ -34,24 +34,25 @@ class ProfilMajitele(models.Model):
 
 # --- MODEL PSA ---
 class Pes(models.Model):
-    # Volby pro druh zvířete
     DRUH_CHOICES = [
         ('pes', 'Pes'),
         ('kocka', 'Kočka'),
     ]
-    druh = models.CharField(
-        max_length=10,
-        choices=DRUH_CHOICES,
-        default='pes',
-        verbose_name="Druh zvířete"
-    )
+    druh = models.CharField(max_length=10, choices=DRUH_CHOICES, default='pes', verbose_name="Druh zvířete")
+    majitel = models.ForeignKey(ProfilMajitele, on_delete=models.CASCADE, related_name='psi')
+    jmeno = models.CharField(max_length=100, verbose_name="Jméno zvířete")
+    rasa = models.CharField(max_length=100, verbose_name="Plemeno / Rasa")
 
-    majitel = models.ForeignKey(ProfilMajitele, on_delete=models.CASCADE, related_name='psi')
-    jmeno = models.CharField(max_length=100)
-    rasa = models.CharField(max_length=100)
-    majitel = models.ForeignKey(ProfilMajitele, on_delete=models.CASCADE, related_name='psi')
-    jmeno = models.CharField(max_length=100)
-    rasa = models.CharField(max_length=100)
+    # --- KONTAKTY PRO NOUZI A DÁREČKY ---
+    # Povinné pro Nouzový profil (nálezce musí vědět, komu volat)
+    kontaktni_jmeno = models.CharField(max_length=100, verbose_name="Kontaktní osoba (jméno)")
+    kontaktni_telefon = models.CharField(max_length=20, verbose_name="Kontaktní telefon")
+    kontaktni_email = models.EmailField(verbose_name="Kontaktní e-mail")
+
+    # Nepovinné pro zasílání dárečků (blank=True dovolí pole nevyplnit)
+    adresa_pro_darky = models.TextField(blank=True, null=True, verbose_name="Adresa pro zasílání dárečků")
+    # ------------------------------------
+
     cip = models.CharField(max_length=50, blank=True, null=True, verbose_name="Číslo čipu")
     fotka = models.ImageField(upload_to='profily_psu/', blank=True, null=True)
     video = models.FileField(upload_to='videa_psu/', null=True, blank=True)

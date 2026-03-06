@@ -32,42 +32,47 @@ class PesForm(forms.ModelForm):
     class Meta:
         model = Pes
         fields = [
-            'druh',  # <--- PŘIDÁNO: Musíme vědět, co ukládáme
-            'jmeno', 'rasa', 'datum_narozeni', 'cip', 'vaha', 'fotka', 'video',
+            'druh', 'jmeno', 'rasa', 'datum_narozeni',
+            # --- NOVÁ POLE TADY ---
+            'kontaktni_jmeno', 'kontaktni_telefon', 'kontaktni_email', 'adresa_pro_darky',
+            # ----------------------
+            'cip', 'vaha', 'fotka', 'video',
             'posledni_ockovani', 'posledni_odcerveni', 'posledni_klistata', 'typ_ochrany_klistata',
             'rtg_hd', 'rtg_ed', 'rtg_pater', 'zdravotni_testy', 'genetika_dna', 'popis',
             'bonitace', 'otec_manualni', 'matka_manualni'
         ]
-        # ... widgets zůstávají stejné jako u tebe ...
         widgets = {
-            'druh': forms.HiddenInput(), # Schováme ho, protože ho ovládáme těmi ikonkami v HTML
+            'druh': forms.HiddenInput(),
             'datum_narozeni': forms.DateInput(attrs={'type': 'date'}),
             'posledni_ockovani': forms.DateInput(attrs={'type': 'date'}),
             'posledni_odcerveni': forms.DateInput(attrs={'type': 'date'}),
             'posledni_klistata': forms.DateInput(attrs={'type': 'date'}),
-            'typ_ochrany_klistata': forms.TextInput(attrs={'placeholder': 'Obojek / Pipeta'}),
+            # Styl pro nová pole
+            'kontaktni_jmeno': forms.TextInput(attrs={'placeholder': 'Kdo má zvednout telefon?'}),
+            'kontaktni_telefon': forms.TextInput(attrs={'placeholder': '+420 123 456 789'}),
+            'kontaktni_email': forms.EmailInput(attrs={'placeholder': 'vas@email.cz'}),
+            'adresa_pro_darky': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Kam poslat pamlsky?'}),
+            # ... zbytek tvých widgetů ...
             'popis': forms.Textarea(attrs={'rows': 3}),
-            'zdravotni_testy': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Např. Lokus S, DM...'}),
+            'zdravotni_testy': forms.Textarea(attrs={'rows': 2}),
             'fotka': forms.FileInput(attrs={'accept': 'image/*'}),
-            'vaha': forms.NumberInput(attrs={'step': '0.1', 'placeholder': 'Např. 12.5'}),
+            'vaha': forms.NumberInput(attrs={'step': '0.1'}),
         }
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
 
-        # 1. Dynamická úprava popisků pro kočky, pokud už editujeme existující záznam
-        if self.instance and self.instance.druh == 'kocka':
-            self.fields['jmeno'].label = "Jméno kočky"
-            self.fields['rasa'].label = "Plemeno"
-            # U kočky můžeme zrušit help_text o pejskovi u čipu
-            self.fields['cip'].help_text = "💡 Doporučujeme pro identifikaci."
-
-        # 2. Hromadné přidání CSS tříd
+        # Přidání CSS třídy pro všechna pole (včetně nových)
         for name, field in self.fields.items():
             field.widget.attrs.update({'class': 'form-control custom-brown-input'})
 
-        # 3. Premium logika (tady jsi to měl super, jen jsem přidal RTG Páteř do seznamu)
+        # Dynamické popisky pro kočky
+        if self.instance and self.instance.druh == 'kocka':
+            self.fields['jmeno'].label = "Jméno kočky"
+            self.fields['kontaktni_jmeno'].label = "Osoba zodpovědná za kočičku"
+
+        # Premium logika - zůstává stejná
         if self.request and not (self.request.user.is_staff or self.request.user.profil.is_premium):
             premium_pole = ['rtg_hd', 'rtg_ed', 'genetika_dna', 'zdravotni_testy', 'rtg_pater']
             for field_name in premium_pole:
@@ -224,4 +229,13 @@ class OckovaniForm(forms.ModelForm):
 class ProfilUpdateForm(forms.ModelForm):
     class Meta:
         model = ProfilMajitele
-        fields = ['telefon', 'ulice_cp', 'mesto', 'psc']
+        fields = ['telefon', 'ulice_cp', 'mesto', 'psc', 'pouzity_kod'] # Přidáno pouzity_kod
+        widgets = {
+            'pouzity_kod': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control-plaintext'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            if name != 'pouzity_kod':
+                field.widget.attrs.update({'class': 'form-control'})

@@ -21,8 +21,6 @@ class Inzerat(models.Model):
         ('kryti', 'Krytí / Chov'),
         ('potreby', 'Potřeby a vybavení'),
         ('krmivo', 'Krmivo a pamlsky'),
-        ('sluzby', 'Nabídka služeb (hlídání, venčení)'),
-        ('ztraty', 'Ztráty a nálezy'),
         ('ostatni', 'Ostatní'),
     ]
 
