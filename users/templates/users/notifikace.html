@@ -1,94 +1,158 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<div class="container mt-4" style="max-width: 800px;">
-    <h2 class="fw-bold mb-4" style="color: var(--primary-brown);">🔔 Tvoje novinky</h2>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <div class="list-group border-0">
+<div class="container mt-4 mb-5" style="max-width: 700px;">
+    <div class="d-flex align-items-center justify-content-between mb-4 px-2">
+        <h2 class="fw-bold m-0" style="color: var(--primary-brown); font-size: 1.5rem;">
+            <i class="fas fa-bell me-2" style="color: var(--gold-accent);"></i>Tvoje novinky
+        </h2>
+        {% if nots %}
+            <span class="badge rounded-pill bg-light text-muted border px-3 py-2" style="font-size: 0.75rem;">
+                {{ nots|length }} celkem
+            </span>
+        {% endif %}
+    </div>
+
+    <div class="list-group border-0 px-2">
         {% for n in nots %}
-            <div class="list-group-item d-flex align-items-center mb-3 border-0 shadow-sm rounded-4 {% if not n.precteno %}notification-unread{% else %}bg-white{% endif %}"
-                 style="padding: 20px; border: 1px solid var(--card-border) !important;">
+            <div class="notification-card d-flex align-items-center mb-3 {% if not n.precteno %}unread{% endif %}">
 
-                <div class="me-3 icon-circle">
-                    {% if n.typ == 'like' %}❤️{% elif n.typ == 'komentar' %}💬{% else %}🐾{% endif %}
+                <div class="icon-wrapper me-3">
+                    {% if n.typ == 'like' %}
+                        <i class="fas fa-heart text-danger"></i>
+                    {% elif n.typ == 'komentar' %}
+                        <i class="fas fa-comment text-primary"></i>
+                    {% else %}
+                        <i class="fas fa-paw text-warning"></i>
+                    {% endif %}
                 </div>
 
-                <div class="flex-grow-1">
-                    <p class="mb-0 text-dark">
-                        <strong style="color: var(--primary-brown);">@{{ n.odesilatel.username }}</strong>
+                <div class="flex-grow-1 min-width-0">
+                    <p class="mb-1 text-dark text-truncate-container">
+                        <strong class="username">@{{ n.odesilatel.username }}</strong>
+                        <span class="action-text">
+                            {% if n.typ == 'like' %}líbí se mu tvůj příspěvek{% elif n.typ == 'komentar' %}napsal komentář{% else %}reagoval na příspěvek{% endif %}
+                        </span>
 
-                        {% if n.typ == 'like' %}
-                            se líbí tvůj příspěvek
-                        {% elif n.typ == 'komentar' %}
-                            napsal komentář k tvému příspěvku
-                        {% else %}
-                            reagoval na tvůj příspěvek
-                        {% endif %}
-
-                        {# Dynamické určení sekce (Plemeno psa, kočky nebo obecná sekce) #}
-                        {% if n.prispevek.plemeno %}
-                            v sekci <strong style="color: var(--gold-accent);">{{ n.prispevek.plemeno.nazev }}</strong>.
-                        {% elif n.prispevek.sekce_slug %}
-                            v sekci <strong style="color: var(--gold-accent);">{{ n.prispevek.sekce_slug|capfirst }}</strong>.
-                        {% else %}
-                            na zdi.
-                        {% endif %}
+                        <span class="section-tag">
+                            {% if n.prispevek.plemeno %}
+                                <i class="fas fa-hashtag ms-1"></i>{{ n.prispevek.plemeno.nazev }}
+                            {% elif n.prispevek.sekce_slug %}
+                                <i class="fas fa-layer-group ms-1"></i>{{ n.prispevek.sekce_slug|capfirst }}
+                            {% endif %}
+                        </span>
                     </p>
-                    <small class="text-muted">{{ n.datum_vytvoreni|timesince }} zpět</small>
+                    <small class="time-stamp"><i class="far fa-clock me-1"></i>{{ n.datum_vytvoreni|timesince }} zpět</small>
                 </div>
 
                 {% if n.prispevek %}
-                    {# Oprava odkazu: Pokud není plemeno, směřujeme na obecnou zeď sekce #}
                     <a href="{% if n.prispevek.plemeno %}{% url 'zed_plemene' n.prispevek.plemeno.slug %}{% else %}{% url 'zed_sekce' n.prispevek.sekce_slug %}{% endif %}"
-                       class="btn-gold-sm shadow-sm">
-                       Zobrazit
+                       class="btn-view-sm ms-2">
+                       <i class="fas fa-chevron-right d-md-none"></i>
+                       <span class="d-none d-md-inline">Zobrazit</span>
                     </a>
                 {% endif %}
             </div>
         {% empty %}
-            <div class="text-center p-5 bg-white rounded-4 shadow-sm" style="border: 1px solid var(--card-border);">
-                <div style="font-size: 3rem; filter: sepia(1); opacity: 0.3;">📬</div>
-                <p class="text-muted mt-3 fw-bold">Zatím žádné nové novinky.</p>
+            <div class="text-center py-5 bg-white rounded-4 shadow-sm border">
+                <div class="empty-icon">📬</div>
+                <p class="text-muted mt-3 fw-bold mb-0">Zatím žádné nové novinky.</p>
+                <small class="text-muted">Až se něco šustne, najdeš to tady.</small>
             </div>
         {% endfor %}
     </div>
 </div>
 
 <style>
-    /* Zachování tvého stylu s drobným vylepšením pro interakci */
-    .btn-gold-sm {
-        background: var(--gold-accent);
-        color: white !important;
-        text-decoration: none;
-        padding: 8px 18px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        transition: 0.3s;
-        border: none;
-        display: inline-block;
-    }
-    .btn-gold-sm:hover {
-        background: var(--primary-brown);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    :root {
+        --primary-brown: #3e2723;
+        --gold-accent: #c5a059;
+        --card-bg: #ffffff;
+        --unread-bg: #fffbf4;
     }
 
-    .icon-circle {
-        width: 50px;
-        height: 50px;
-        background: #fff4e6; /* Světlejší krémová pro ikony */
-        border-radius: 50%;
+    /* Karta oznámení */
+    .notification-card {
+        background: var(--card-bg);
+        padding: 16px 20px;
+        border-radius: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        border: 1px solid rgba(0,0,0,0.05);
+        transition: transform 0.2s ease;
+    }
+
+    .notification-card:hover {
+        transform: scale(1.01);
+    }
+
+    .notification-card.unread {
+        background-color: var(--unread-bg);
+        border-left: 4px solid var(--gold-accent);
+    }
+
+    /* Ikona */
+    .icon-wrapper {
+        width: 45px;
+        height: 45px;
+        background: #f8f9fa;
+        border-radius: 15px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         flex-shrink: 0;
     }
 
-    .notification-unread {
-        background-color: #fffbf4 !important; /* Jemnější barva pro nepřečtené */
-        border-left: 4px solid var(--gold-accent) !important;
+    .unread .icon-wrapper {
+        background: white;
+        box-shadow: 0 2px 8px rgba(197, 160, 89, 0.2);
+    }
+
+    /* Texty */
+    .username { color: var(--primary-brown); font-weight: 700; }
+    .action-text { color: #555; font-size: 0.9rem; }
+    .section-tag {
+        color: var(--gold-accent);
+        font-weight: 600;
+        font-size: 0.85rem;
+        background: rgba(197, 160, 89, 0.1);
+        padding: 2px 8px;
+        border-radius: 6px;
+        white-space: nowrap;
+    }
+    .time-stamp { color: #aaa; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+
+    /* Tlačítko */
+    .btn-view-sm {
+        background: var(--gold-accent);
+        color: white !important;
+        text-decoration: none;
+        padding: 8px 15px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 800;
+        transition: 0.3s;
+        flex-shrink: 0;
+    }
+
+    .btn-view-sm:hover {
+        background: var(--primary-brown);
+        box-shadow: 0 4px 10px rgba(197, 160, 89, 0.3);
+    }
+
+    /* Prázdný stav */
+    .empty-icon { font-size: 3.5rem; opacity: 0.2; }
+
+    /* Responzivita pro mobilní telefony */
+    @media (max-width: 576px) {
+        .notification-card { padding: 12px 15px; }
+        .icon-wrapper { width: 38px; height: 38px; font-size: 0.9rem; }
+        .action-text { font-size: 0.85rem; }
+        .section-tag { font-size: 0.75rem; display: inline-block; margin-top: 4px; }
+        .btn-view-sm { padding: 8px 12px; border-radius: 10px; }
     }
 </style>
 {% endblock %}

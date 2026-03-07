@@ -2,6 +2,7 @@
 
 {% block content %}
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
     :root {
@@ -18,8 +19,8 @@
 
     .login-container {
         max-width: 450px;
-        margin: 80px auto;
-        padding: 0 20px;
+        margin: 60px auto; /* Sníženo pro lepší zobrazení na mobilu */
+        padding: 0 15px;
     }
 
     .login-card {
@@ -31,14 +32,14 @@
         overflow: hidden;
     }
 
-    /* Dekorační prvek v rohu */
+    /* Dekorační prvek v rohu - na mobilu zmenšen */
     .login-card::before {
         content: '🐾';
         position: absolute;
-        top: -10px;
-        right: -10px;
-        font-size: 5rem;
-        opacity: 0.03;
+        top: -5px;
+        right: -5px;
+        font-size: 4rem;
+        opacity: 0.04;
         transform: rotate(20deg);
     }
 
@@ -51,6 +52,10 @@
         border: none;
         transition: 0.3s;
         letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
     }
 
     .btn-login:hover {
@@ -64,6 +69,7 @@
         border: 1.5px solid var(--alfa-border);
         padding: 12px 15px;
         background-color: #fafafa;
+        font-size: 16px; /* Prevence automatického zoomu na iPhonech */
     }
 
     .form-control:focus {
@@ -76,6 +82,7 @@
         color: var(--alfa-brown);
         font-weight: 800;
         margin-bottom: 8px;
+        font-size: 1.75rem;
     }
 
     .badge-community {
@@ -88,6 +95,13 @@
         font-weight: 800;
         text-transform: uppercase;
         margin-bottom: 15px;
+    }
+
+    /* Responzivní úpravy */
+    @media (max-width: 576px) {
+        .login-container { margin: 30px auto; }
+        .login-card { padding: 30px 20px !important; border-radius: 25px; }
+        .login-header h2 { font-size: 1.5rem; }
     }
 </style>
 
@@ -103,16 +117,14 @@
             {% csrf_token %}
 
             {% if form.non_field_errors %}
-                <div class="alert alert-danger small py-2 rounded-3">
-                    {{ form.non_field_errors }}
+                <div class="alert alert-danger small py-2 rounded-3 text-center">
+                    <i class="fas fa-exclamation-circle me-1"></i> {{ form.non_field_errors|striptags }}
                 </div>
             {% endif %}
 
             <div class="mb-3">
                 <label class="form-label small fw-bold text-muted">Uživatelské jméno</label>
-                <div class="input-group">
-                    <input type="text" name="username" class="form-control" placeholder="Tvé jméno" required>
-                </div>
+                <input type="text" name="username" class="form-control" placeholder="Tvé jméno" required autofocus>
             </div>
 
             <div class="mb-3">
@@ -124,24 +136,27 @@
             </div>
 
             <div class="form-check mb-4">
-                <input class="form-check-input" type="checkbox" value="" id="rememberMe">
+                <input class="form-check-input" type="checkbox" name="remember_me" id="rememberMe" checked>
                 <label class="form-check-label small text-muted" for="rememberMe">
                     Pamatovat si mě
                 </label>
             </div>
 
             <button type="submit" class="btn btn-login w-100 shadow-sm">
-                VSTOUPIT DO DENÍKU
+                <i class="fas fa-sign-in-alt"></i> VSTOUPIT DO DENÍKU
             </button>
         </form>
 
-        <div class="text-center mt-5">
+        <div class="text-center mt-4">
             <p class="small text-muted mb-1">Ještě nemáte svůj ALFA profil?</p>
-            <a href="{% url 'register' %}" class="small fw-bold" style="color: var(--alfa-accent); text-decoration: none;">Vytvořit účet zdarma</a>
+            <a href="{% url 'register' %}" class="btn w-100 mt-2 py-2" style="border: 1.5px solid var(--alfa-border); border-radius: 12px; color: var(--alfa-accent); font-weight: 700; text-decoration: none; font-size: 0.85rem;">
+                VYTVOŘIT ÚČET ZDARMA
+            </a>
+            <p class="x-small text-muted mt-3" style="font-size: 0.7rem;">Máš promo kód? Uplatni ho v registraci pro ALFA výhody.</p>
         </div>
     </div>
 
-    <div class="text-center mt-4">
+    <div class="text-center mt-4 mb-5">
         <p class="small text-muted" style="opacity: 0.6;">&copy; 2026 EPES.ONLINE | Spolehlivá identita mazlíčků</p>
     </div>
 </div>

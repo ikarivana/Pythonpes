@@ -2,18 +2,31 @@
 
 {% block content %}
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
     :root {
         --sos-red: #d63031;
-        --sos-green: #27ae60;
+        --sos-green: #2ecc71;
         --species-color: {% if pes.druh == 'kocka' %}#5e478e{% else %}#5d4037{% endif %};
         --species-light: {% if pes.druh == 'kocka' %}#f3f0ff{% else %}#fdfaf5{% endif %};
     }
 
-    .sos-container { max-width: 900px; margin: 20px auto; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .sos-container { max-width: 800px; margin: 20px auto; font-family: 'Plus Jakarta Sans', sans-serif; }
 
-    /* Alarmující header při ztrátě */
+    /* Tlačítko Zpět */
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #8d7d77;
+        text-decoration: none;
+        font-weight: 700;
+        margin-bottom: 20px;
+        transition: 0.2s;
+    }
+    .btn-back:hover { color: var(--sos-red); }
+
     .sos-header {
         background: var(--sos-red);
         color: white;
@@ -22,178 +35,175 @@
         text-align: center;
         font-weight: 800;
         margin-bottom: 20px;
-        animation: pulse 2s infinite;
+        box-shadow: 0 4px 15px rgba(214, 48, 49, 0.2);
     }
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+
+    /* Karta s přepínačem */
+    .safe-toggle-card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        text-align: center;
+        border: 2px solid #edf2f7;
+        margin-bottom: 25px;
+        transition: 0.3s;
+    }
+    .safe-toggle-card.active { border-color: var(--sos-green); background: #fafff8; }
+
+    /* Stylový přepínač (Toggle Switch) */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 80px;
+        height: 44px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 34px;
+    }
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 36px; width: 36px;
+        left: 4px; bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    input:checked + .slider { background-color: var(--sos-green); }
+    input:checked + .slider:before { transform: translateX(36px); }
 
     .sos-card {
         background: white;
         border-radius: 25px;
         padding: 25px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        height: 100%;
     }
 
     .pet-photo {
-        width: 100%;
-        max-width: 280px;
-        aspect-ratio: 1/1;
+        width: 140px; height: 140px;
         object-fit: cover;
-        border-radius: 20px;
+        border-radius: 50%;
         border: 4px solid white;
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        margin-bottom: 15px;
     }
 
-    /* Velké tlačítko pro rychlé volání */
-    .btn-call-owner {
-        background: var(--sos-green);
+    /* Skrytý kontakt */
+    .contact-btn {
+        background: var(--species-color);
         color: white !important;
-        text-decoration: none;
+        width: 100%;
+        padding: 15px;
+        border-radius: 15px;
+        font-weight: 800;
+        border: none;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 12px;
-        padding: 18px;
-        border-radius: 18px;
-        font-weight: 800;
-        font-size: 1.3rem;
+        gap: 10px;
+        font-size: 1.1rem;
         transition: 0.3s;
-        border: none;
     }
-    .btn-call-owner:hover { transform: scale(1.02); background: #219150; }
+    .contact-btn:hover { opacity: 0.9; transform: translateY(-2px); }
 
-    .medical-box {
+    #revealed-phone { display: none; }
+
+    .medical-notice {
         background: #fff5f5;
-        border-left: 5px solid var(--sos-red);
-        padding: 18px;
         border-radius: 15px;
-    }
-
-    .info-label {
-        font-size: 0.7rem;
-        color: #636e72;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 4px;
-        display: block;
-    }
-
-    .form-input {
-        background: #f1f2f6;
-        border: 2px solid transparent;
-        border-radius: 12px;
-        padding: 12px;
-        width: 100%;
-        margin-bottom: 10px;
-    }
-    .form-input:focus { border-color: var(--species-color); outline: none; background: white; }
-
-    .species-tag {
-        display: inline-block;
-        padding: 4px 12px;
-        background: var(--species-light);
-        color: var(--species-color);
-        border-radius: 10px;
-        font-weight: 700;
-        font-size: 0.8rem;
-        margin-bottom: 10px;
+        padding: 15px;
+        border-left: 5px solid var(--sos-red);
     }
 </style>
 
 <div class="sos-container px-3">
+    <a href="{% url 'ztracena_zvirata' %}" class="btn-back">
+        <i class="fas fa-arrow-left"></i> Zpět na ztracená zvířata
+    </a>
+
     {% if pes.je_ztraceny %}
-    <div class="sos-header shadow">
-        <i class="fas fa-exclamation-triangle me-2"></i>
-        POZOR! {% if pes.druh == 'kocka' %}KOČIČKA{% else %}PEJSKEK{% endif %} JE ZTRACENÝ
+    <div class="sos-header">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        PROSÍM POMOZTE! {% if pes.druh == 'kocka' %}KOČIČKA{% else %}PEJSKEK{% endif %} SE HLEDÁ
     </div>
     {% endif %}
 
-    <div class="card border-0 mb-3 shadow-sm" style="background: #f0fff4; border-radius: 20px;">
-        <div class="card-body p-3">
-            <div class="form-check form-switch d-flex align-items-center">
-                <input class="form-check-input me-3" type="checkbox" id="safeCheck" style="width: 2.5em; height: 1.25em; cursor: pointer;">
-                <label class="form-check-label fw-bold text-success" for="safeCheck" style="font-size: 1rem; cursor: pointer;">
-                    {% if pes.druh == 'kocka' %}Kočička{% else %}Pejsek{% endif %} je u mě v bezpečí
-                </label>
-            </div>
-        </div>
+    <div class="safe-toggle-card shadow-sm" id="toggleCard">
+        <h4 class="fw-800 mb-2">Máte {% if pes.druh == 'kocka' %}kočičku{% else %}pejska{% endif %} u sebe?</h4>
+        <p class="text-muted small mb-4" id="toggleDesc">Zapněte, pokud je zvíře v bezpečí. Majiteli se ihned odešle vaše poloha a e-mail.</p>
+
+        <label class="switch">
+            <input type="checkbox" id="safeToggle">
+            <span class="slider"></span>
+        </label>
+
+        <div id="statusResult" class="mt-3 fw-bold" style="display: none;"></div>
     </div>
 
     <div class="row g-4">
-        <div class="col-md-5 text-center">
-            <div class="sos-card">
-                <div class="species-tag">
-                    <i class="fas {% if pes.druh == 'kocka' %}fa-cat{% else %}fa-dog{% endif %} me-1"></i>
-                    {% if pes.druh == 'kocka' %}KOČKA{% else %}PES{% endif %}
-                </div>
-
+        <div class="col-md-5">
+            <div class="sos-card text-center">
                 {% if pes.fotka %}
-                <img src="{{ pes.fotka.url }}" class="pet-photo mb-3">
-                {% else %}
-                <div class="pet-photo bg-light d-flex align-items-center justify-content-center mb-3 mx-auto">
-                    <i class="fas {% if pes.druh == 'kocka' %}fa-cat{% else %}fa-dog{% endif %} fa-4x text-muted"></i>
-                </div>
+                    <img src="{{ pes.fotka.url }}" class="pet-photo">
                 {% endif %}
-
-                <h1 class="fw-800 mb-0" style="color: var(--species-color);">{{ pes.jmeno }}</h1>
-                <p class="text-muted fw-600 mb-3">{{ pes.rasa|default:"Kříženec" }}</p>
+                <h2 class="fw-800 mb-0" style="color: var(--species-color);">{{ pes.jmeno }}</h2>
+                <p class="text-muted fw-600">{{ pes.rasa|default:"Kříženec" }}</p>
 
                 <div class="text-start mt-4">
-                    <span class="info-label">Číslo čipu</span>
-                    <div class="p-3 bg-light rounded-4 fw-bold mb-4 text-center" style="letter-spacing: 2px; font-size: 1.1rem;">
-                        {{ pes.cip|default:"NEZADÁNO" }}
+                    <span class="label-sm d-block text-muted fw-800 small text-uppercase">Číslo čipu</span>
+                    <div class="p-2 bg-light rounded-3 text-center fw-bold mb-4" style="letter-spacing: 1px;">
+                        {{ pes.cip|default:"Nenalezeno" }}
                     </div>
                 </div>
 
-                {% if pes.majitel.telefon %}
-                <a href="tel:{{ pes.majitel.telefon }}" class="btn-call-owner shadow">
-                    <i class="fas fa-phone-alt"></i> ZAVOLAT MAJITELI
-                </a>
-                {% endif %}
+                <div id="contactSection">
+                    <button class="contact-btn" onclick="showPhone()">
+                        <i class="fas fa-phone-alt"></i> KONTAKTOVAT MAJITELE
+                    </button>
+
+                    <div id="revealed-phone" class="mt-3 animate__animated animate__fadeIn">
+                        {% with tel=pes.kontaktni_telefon|default:pes.majitel.profil.telefon %}
+                        <a href="tel:{{ tel }}" class="contact-btn" style="background: var(--sos-green);">
+                            {{ tel }}
+                        </a>
+                        <p class="small text-muted mt-2">Majitel: <strong>{{ pes.kontaktni_jmeno|default:pes.majitel.get_full_name }}</strong></p>
+                        {% endwith %}
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="col-md-7">
-            <div class="sos-card mb-4">
-                <h5 class="fw-bold mb-3 text-danger"><i class="fas fa-heartbeat me-2"></i>Důležité info</h5>
-
-                <div class="medical-box mb-4">
-                    <span class="info-label text-danger">Alergie a zdravotní stav</span>
-                    <p class="mb-0 fw-bold" style="font-size: 1.05rem;">
-                        {{ pes.popis|default:"Majitel neuvedl žádné speciální potřeby nebo alergie." }}
-                    </p>
+            <div class="sos-card">
+                <h5 class="fw-800 mb-3"><i class="fas fa-notes-medical me-2" style="color: var(--sos-red);"></i> Zdraví a povaha</h5>
+                <div class="medical-notice mb-4">
+                    <p class="mb-0 fw-bold text-dark">{{ pes.popis|default:"Majitel nevyplnil žádné speciální varování." }}</p>
                 </div>
 
-                <div class="row text-center">
+                <div class="row text-center mb-4">
                     <div class="col-6 border-end">
-                        <span class="info-label">Věk</span>
-                        <p class="fw-bold mb-0">{{ pes.vek }}</p>
+                        <span class="d-block text-muted small fw-800">POHLAVÍ</span>
+                        <span class="fw-bold">{{ pes.pohlavi|default:"-" }}</span>
                     </div>
                     <div class="col-6">
-                        <span class="info-label">Očkování</span>
-                        <p class="fw-bold mb-0">{% if pes.posledni_ockovani %}Aktuální{% else %}Neuvedeno{% endif %}</p>
+                        <span class="d-block text-muted small fw-800">VĚK</span>
+                        <span class="fw-bold">{{ pes.vek }}</span>
                     </div>
                 </div>
-            </div>
 
-            <div class="sos-card">
-                <h5 class="fw-bold mb-3"><i class="fas fa-paper-plane me-2 text-primary"></i>Máte zvíře u sebe?</h5>
+                <h5 class="fw-800 mb-3">Zanechat zprávu</h5>
                 <form action="{% url 'odeslat_sos_email' pes.id %}" method="POST">
                     {% csrf_token %}
-                    <textarea name="zprava" class="form-input" rows="3"
-                              placeholder="Kde přesně se zvíře nachází? (např. v zahradě restaurace, u silnice...)" required></textarea>
-
-                    <div class="row g-2">
-                        <div class="col-sm-8">
-                            <input type="text" name="kontakt" class="form-input" placeholder="Váš telefon pro majitele">
-                        </div>
-                        <div class="col-sm-4">
-                            <button type="submit" class="btn btn-dark w-100 h-100 fw-bold py-2" style="border-radius: 12px;">
-                                ODESLAT
-                            </button>
-                        </div>
-                    </div>
+                    <textarea name="zprava" class="form-control rounded-4 bg-light border-0 mb-3" rows="3" placeholder="Napište majiteli vzkaz (např. kde přesně jste)..."></textarea>
+                    <button type="submit" class="btn btn-dark w-100 fw-bold py-3 rounded-4">ODESLAT VZKAZ</button>
                 </form>
             </div>
         </div>
@@ -201,35 +211,52 @@
 </div>
 
 <script>
-    // Automatické odeslání polohy po schválení uživatelem
-    window.onload = function() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                fetch("{% url 'odeslat_polohu' pes.id %}", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
-                    body: JSON.stringify({
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude,
-                        accuracy: position.coords.accuracy
-                    })
-                });
-            });
-        }
-    };
+    // Odhalení telefonu
+    function showPhone() {
+        document.querySelector('.contact-btn').style.display = 'none';
+        document.getElementById('revealed-phone').style.display = 'block';
+    }
 
-    // AJAX pro checkbox "V bezpečí"
-    document.getElementById('safeCheck').addEventListener('change', function() {
-        const isSafe = this.checked;
+    // Funkce přepínače
+    document.getElementById('safeToggle').addEventListener('change', function() {
+        const card = document.getElementById('toggleCard');
+        const status = document.getElementById('statusResult');
+
+        if(this.checked) {
+            card.classList.add('active');
+            status.style.display = 'block';
+            status.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Získávám polohu a informuji majitele...';
+            status.className = "mt-3 fw-bold text-primary";
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => sendData(pos.coords.latitude, pos.coords.longitude),
+                    () => sendData(null, null)
+                );
+            } else {
+                sendData(null, null);
+            }
+        } else {
+            card.classList.remove('active');
+            status.style.display = 'none';
+        }
+    });
+
+    function sendData(lat, lng) {
         fetch("{% url 'oznacit_v_bezpeci' pes.id %}", {
             method: "POST",
-            headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
-            body: JSON.stringify({ status: isSafe })
-        }).then(response => {
-            if(response.ok) {
-                alert("Majitel byl informován, že je zvíře v pořádku!");
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ lat: lat, lng: lng, status: true })
+        }).then(res => {
+            if(res.ok) {
+                const status = document.getElementById('statusResult');
+                status.innerHTML = '<i class="fas fa-check-circle me-2"></i> Majitel byl informován!';
+                status.className = "mt-3 fw-bold text-success";
             }
         });
-    });
+    }
 </script>
 {% endblock %}

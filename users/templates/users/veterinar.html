@@ -10,15 +10,16 @@
         --t-danger: #d63031;
         --t-success: #2d6a4f;
         --t-soft-gold: rgba(197, 160, 89, 0.1);
+        --cat-purple: #9b86bd;
     }
 
     body { background-color: #f9f4ef; font-family: 'Plus Jakarta Sans', sans-serif; }
 
-    /* --- LUXUSNÍ BANNER --- */
+    /* --- BANNER --- */
     .term-header {
         background: linear-gradient(135deg, #2d1b18 0%, #5d4037 100%);
-        border-radius: 40px;
-        padding: 50px;
+        border-radius: 35px;
+        padding: 40px;
         color: white;
         margin-bottom: 30px;
         box-shadow: 0 20px 40px rgba(62, 39, 35, 0.15);
@@ -28,126 +29,115 @@
     /* --- KARTY MAZLÍČKŮ --- */
     .dog-term-card {
         background: #ffffff;
-        border-radius: 30px;
+        border-radius: 25px;
         border: 1px solid var(--t-soft-gold);
-        transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transition: 0.3s;
         height: 100%;
+        overflow: hidden;
     }
-    .dog-term-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.05); }
 
     .dog-name-bar {
-        background: var(--t-soft-gold);
-        padding: 20px 25px;
-        border-radius: 30px 30px 0 0;
+        padding: 15px 20px;
         display: flex; justify-content: space-between; align-items: center;
+        border-bottom: 1px solid #f8f1e5;
     }
+    .bar-pes { background: var(--t-soft-gold); }
+    .bar-kocka { background: rgba(155, 134, 189, 0.1); }
 
     .health-badge-mini {
         background: #fff;
-        border: 2px solid #f8f1e5;
-        border-radius: 20px;
-        padding: 12px 5px;
+        border: 1px solid #eee;
+        border-radius: 18px;
+        padding: 10px 5px;
         text-align: center;
         transition: 0.2s;
     }
-    .health-badge-mini:hover { border-color: var(--t-gold); }
-    .health-badge-mini i { color: var(--t-gold); font-size: 1.1rem; margin-bottom: 6px; }
+    .health-badge-mini i { color: var(--t-gold); font-size: 1rem; margin-bottom: 4px; }
+    .term-expired { color: var(--t-danger) !important; font-weight: 800; }
 
     /* --- POHOTOVOSTNÍ DENÍK --- */
     .vet-report-section {
-        background: white; border-radius: 40px; border: 1px solid #eee;
-        padding: 40px; margin-top: 50px; box-shadow: 0 10px 50px rgba(0,0,0,0.03);
+        background: white; border-radius: 35px; border: 1px solid #eee;
+        padding: 30px; margin-top: 40px;
     }
 
     .incident-card {
-        background: #fff; border-radius: 25px; padding: 22px;
-        border-left: 8px solid var(--t-gold); margin-bottom: 20px;
-        display: flex; gap: 20px; align-items: center; position: relative;
+        background: #fff; border-radius: 20px; padding: 18px;
+        border-left: 6px solid var(--t-gold); margin-bottom: 15px;
+        display: flex; gap: 15px; align-items: center; position: relative;
         box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-        transition: 0.3s;
     }
-    .incident-card.urgent {
-        border-left-color: var(--t-danger);
-        background: #fffafa;
-        animation: pulse-danger 3s infinite;
-    }
+    .incident-card.urgent { border-left-color: var(--t-danger); background: #fffafa; }
 
-    @keyframes pulse-danger {
-        0% { box-shadow: 0 0 0 0 rgba(214, 48, 49, 0.1); }
-        50% { box-shadow: 0 0 0 10px rgba(214, 48, 49, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(214, 48, 49, 0); }
+    .qr-badge-sos {
+        min-width: 70px; height: 70px; border-radius: 12px;
+        padding: 4px; background: white; border: 1.5px solid #f0f0f0;
+        text-align: center;
     }
-
-    .qr-badge {
-        width: 75px; height: 75px; border-radius: 15px;
-        padding: 5px; background: white; border: 1px solid #eee;
-    }
+    .qr-badge-sos img { width: 100%; height: auto; border-radius: 8px; }
 
     .btn-lux-add {
-        background: var(--t-brown); color: white; border-radius: 18px;
-        padding: 14px 28px; font-weight: 800; border: none; transition: 0.3s;
+        background: var(--t-brown); color: white; border-radius: 15px;
+        padding: 12px 25px; font-weight: 800; border: 2px solid var(--t-gold); transition: 0.3s;
     }
-    .btn-lux-add:hover { background: var(--t-gold); transform: scale(1.02); color: white; }
+    .btn-lux-add:hover { background: var(--t-gold); color: white; }
 
-    .btn-outline-gold {
-        color: var(--t-brown); border: 2px solid var(--t-gold); font-weight: 700;
+    /* MOBILNÍ FIXY */
+    @media (max-width: 576px) {
+        .term-header { padding: 25px; border-radius: 25px; }
+        .term-header h1 { font-size: 1.8rem !important; }
+        .incident-card { flex-direction: column; align-items: flex-start; }
+        .qr-badge-sos { align-self: center; }
     }
 </style>
 
 <div class="container py-4">
-    <div class="term-header">
+    <div class="term-header text-center text-lg-start">
         <div class="row align-items-center">
             <div class="col-lg-8">
-                <h1 style="font-family: 'Playfair Display', serif; font-size: 2.8rem; font-weight: 800;" class="mb-2 text-white">Lékařský Deník 🩺</h1>
-                <p class="fs-5 text-white-50 mb-0">Rychlý přístup ke zdravotní historii pro veterináře a majitele.</p>
+                <h1 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 800;" class="mb-2 text-white">Lékařský Deník 🩺</h1>
+                <p class="text-white-50 mb-0">Zdravotní historie a termíny pro vaše parťáky.</p>
             </div>
-            <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
-                <div class="d-inline-flex align-items-center bg-white bg-opacity-10 px-4 py-3 rounded-pill border border-white border-opacity-20">
-                    <i class="fas fa-heartbeat text-gold me-3 fs-3" style="color: var(--t-gold);"></i>
-                    <div class="text-start">
-                        <span class="d-block fw-bold fs-4 leading-none text-white">{{ psi.count }}</span>
-                        <small class="text-uppercase text-white-50 fw-bold" style="font-size: 0.6rem;">Pacienti v péči</small>
-                    </div>
-                </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <span class="badge rounded-pill bg-white bg-opacity-10 p-3 border border-white border-opacity-25 fw-bold">
+                    <i class="fas fa-paw me-2 text-gold"></i>{{ psi.count }} Pacienti v péči
+                </span>
             </div>
         </div>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-3">
         {% for mazlicek in psi %}
-        <div class="col-xl-6">
+        <div class="col-md-6">
             <div class="dog-term-card shadow-sm">
-                <div class="dog-name-bar">
-                    <div class="d-flex align-items-center">
-                        <div class="me-3 bg-white rounded-circle p-2 text-center" style="width: 45px; height: 45px;">
-                            <i class="fas {% if mazlicek.druh == 'kocka' %}fa-cat{% else %}fa-dog{% endif %} text-muted"></i>
-                        </div>
-                        <h4 class="fw-bold m-0" style="color: var(--t-brown); font-family: 'Playfair Display', serif;">{{ mazlicek.jmeno }}</h4>
-                    </div>
-                    <a href="{% url 'detail_psa' mazlicek.id %}" class="btn btn-sm btn-outline-gold rounded-pill px-4">Otevřít profil</a>
+                <div class="dog-name-bar {% if mazlicek.druh == 'kocka' %}bar-kocka{% else %}bar-pes{% endif %}">
+                    <h5 class="fw-bold m-0" style="color: var(--t-brown);">
+                        {% if mazlicek.druh == 'kocka' %}🐱{% else %}🐶{% endif %} {{ mazlicek.jmeno }}
+                    </h5>
+                    <a href="{% url 'detail_psa' mazlicek.id %}" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold" style="font-size: 0.7rem;">DETAIL</a>
                 </div>
 
-                <div class="p-4">
-                    <div class="row g-3">
+                <div class="p-3">
+                    <div class="row g-2">
                         <div class="col-4">
                             <div class="health-badge-mini">
                                 <i class="fas fa-syringe"></i>
-                                <span class="d-block fw-bold text-dark fs-6">{{ mazlicek.pristi_ockovani|date:"d.m."|default:"--" }}</span>
-                                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.55rem;">💉 Očkování</small>
+                                <span class="d-block fw-bold small text-dark">{{ mazlicek.pristi_ockovani|date:"d.m."|default:"--" }}</span>
+                                <small class="text-muted text-uppercase fw-800" style="font-size: 0.5rem;">Očkování</small>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="health-badge-mini">
                                 <i class="fas fa-tablets"></i>
-                                <span class="d-block fw-bold text-dark fs-6">{{ mazlicek.pristi_odcerveni|date:"d.m."|default:"--" }}</span>
-                                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.55rem;">💊 Odčervení</small>
+                                <span class="d-block fw-bold small text-dark">{{ mazlicek.pristi_odcerveni|date:"d.m."|default:"--" }}</span>
+                                <small class="text-muted text-uppercase fw-800" style="font-size: 0.5rem;">Odčervení</small>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="health-badge-mini">
                                 <i class="fas fa-bug"></i>
-                                <span class="d-block fw-bold text-dark fs-6">{{ mazlicek.pristi_klistata|date:"d.m."|default:"--" }}</span>
-                                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.55rem;">🐜 Paraziti</small>
+                                <span class="d-block fw-bold small text-dark">{{ mazlicek.pristi_klistata|date:"d.m."|default:"--" }}</span>
+                                <small class="text-muted text-uppercase fw-800" style="font-size: 0.5rem;">Klíšťata</small>
                             </div>
                         </div>
                     </div>
@@ -157,49 +147,50 @@
         {% endfor %}
     </div>
 
-    <div class="vet-report-section">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+    <div class="vet-report-section shadow-sm">
+        <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="fw-800 mb-1" style="color: var(--t-brown); font-family: 'Playfair Display', serif;">🚨 Pohotovostní reporty</h2>
-                <p class="text-muted mb-0">Chronologický přehled zdravotních komplikací.</p>
+                <h3 class="fw-800 mb-0" style="color: var(--t-brown); font-family: 'Playfair Display', serif;">🚨 Historie záznamů</h3>
+                <small class="text-muted">Chronologický přehled zdraví</small>
             </div>
             <button class="btn btn-lux-add shadow-sm" data-bs-toggle="modal" data-bs-target="#newIncidentModal">
-                <i class="fas fa-plus-circle me-2"></i>Nový záznam
+                <i class="fas fa-plus-circle me-1"></i> PŘIDAT
             </button>
         </div>
 
-        <div class="row">
+        <div class="row g-3">
             {% for zaznam in posledni_zaznamy %}
             <div class="col-lg-6">
-                <div class="incident-card {% if zaznam.typ == 'urgentni' %}urgent shadow-sm{% endif %}">
+                <div class="incident-card {% if zaznam.typ == 'urgentni' %}urgent{% endif %}">
 
-                    <div class="action-icons" style="position: absolute; top: 15px; right: 20px;">
-                        <a href="{% url 'upravit_zaznam' zaznam.pk %}" class="text-muted me-2"><i class="fas fa-edit"></i></a>
-                        <form action="{% url 'smazat_zaznam' zaznam.pk %}" method="POST" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="border-0 bg-transparent text-danger p-0" onclick="return confirm('Smazat tento záznam?')"><i class="fas fa-trash-alt"></i></button>
-                        </form>
-                    </div>
-
-                    <div class="qr-badge shadow-sm d-flex flex-column align-items-center justify-content-center">
+                    <div class="qr-badge-sos shadow-sm">
                         {% if zaznam.pes.qr_kod %}
-                            <img src="{{ zaznam.pes.qr_kod.url }}" class="img-fluid rounded">
+                            <img src="{{ zaznam.pes.qr_kod.url }}" alt="QR">
                         {% else %}
-                            <i class="fas fa-qrcode text-muted opacity-25 fs-2"></i>
+                            <i class="fas fa-qrcode text-muted opacity-25 mt-2"></i>
                         {% endif %}
-                        <span class="fw-bold mt-1" style="font-size: 0.45rem; color: var(--t-gold);">SOS DATA</span>
+                        <div class="fw-bold" style="font-size: 0.45rem; color: var(--t-gold);">SOS DATA</div>
                     </div>
 
                     <div class="flex-grow-1">
-                        <div class="d-flex align-items-center mb-1">
-                            <span class="badge {% if zaznam.typ == 'urgentni' %}bg-danger{% else %}bg-secondary{% endif %} me-2" style="font-size: 0.6rem;">{{ zaznam.get_typ_display }}</span>
-                            <small class="fw-bold text-brown">{{ zaznam.datum_vytvoreni|date:"d. m. Y | H:i" }}</small>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <span class="badge {% if zaznam.typ == 'urgentni' %}bg-danger{% else %}bg-secondary{% endif %} mb-1" style="font-size: 0.6rem;">{{ zaznam.get_typ_display }}</span>
+                                <h6 class="fw-bold mb-1" style="color: var(--t-brown);">{{ zaznam.titulek }}</h6>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'upravit_zaznam' zaznam.pk %}" class="text-muted small"><i class="fas fa-edit"></i></a>
+                                <form action="{% url 'smazat_zaznam' zaznam.pk %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit" class="border-0 bg-transparent text-danger p-0 small" onclick="return confirm('Smazat?')"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </div>
                         </div>
-                        <h6 class="fw-bold mb-1 fs-5" style="color: var(--t-brown);">{{ zaznam.titulek }}</h6>
-                        <p class="small text-muted mb-0 line-clamp-2">{{ zaznam.popis|default:"Bez popisu..." }}</p>
-                        <div class="mt-2">
-                            <span class="badge rounded-pill bg-light text-dark border py-1 px-2" style="font-size: 0.7rem;">
-                                <i class="fas fa-paw me-1 text-gold"></i> {{ zaznam.pes.jmeno }}
+                        <p class="small text-muted mb-1">{{ zaznam.popis|truncatechars:80 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="small fw-bold text-brown"><i class="fas fa-calendar-day me-1"></i>{{ zaznam.datum_vytvoreni|date:"d. m. Y" }}</span>
+                            <span class="badge rounded-pill bg-light text-dark border px-2 py-1" style="font-size: 0.65rem;">
+                                {{ zaznam.pes.jmeno }}
                             </span>
                         </div>
                     </div>
@@ -207,9 +198,8 @@
             </div>
             {% empty %}
             <div class="col-12 text-center py-5">
-                <div class="opacity-25 mb-3"><i class="fas fa-notes-medical fs-1"></i></div>
-                <h5 class="text-muted">Deník je zatím prázdný.</h5>
-                <p class="small text-muted">Zde se budou zobrazovat lékařské zprávy vašich mazlíčků.</p>
+                <i class="fas fa-notes-medical fs-1 text-muted opacity-25"></i>
+                <p class="text-muted mt-2">Zatím žádné lékařské zprávy.</p>
             </div>
             {% endfor %}
         </div>
@@ -218,44 +208,42 @@
 
 <div class="modal fade" id="newIncidentModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0" style="border-radius: 35px; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.2);">
-            <div class="p-5">
-                <div class="d-flex justify-content-between align-items-start mb-4">
-                    <h3 class="fw-800" style="color: var(--t-brown);">Zdravotní záznam</h3>
+        <div class="modal-content border-0" style="border-radius: 30px;">
+            <div class="p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-800 m-0">Nový lékařský záznam</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
                 <form method="POST" action="{% url 'veterinar' %}">
                     {% csrf_token %}
-                    <div class="mb-4">
-                        <label class="form-label small fw-bold text-muted text-uppercase letter-spacing-1">Pacient</label>
+                    <div class="mb-3">
+                        <label class="label-gold small fw-bold">VYBERTE MAZLÍČKA</label>
                         <select name="pes_id" class="form-select border-0 bg-light p-3 rounded-4" required>
                             {% for mazlicek in psi %}
                             <option value="{{ mazlicek.id }}">{% if mazlicek.druh == 'kocka' %}🐱{% else %}🐶{% endif %} {{ mazlicek.jmeno }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <label class="form-label small fw-bold text-muted text-uppercase">Typ události</label>
-                            <div class="d-flex gap-2">
-                                <input type="radio" class="btn-check" name="typ" id="typ1" value="zaznam" checked>
-                                <label class="btn btn-outline-secondary flex-grow-1 rounded-4 py-3" for="typ1">📝 Běžný</label>
+                    <div class="mb-3">
+                        <label class="label-gold small fw-bold">TYP ZPRÁVY</label>
+                        <div class="d-flex gap-2">
+                            <input type="radio" class="btn-check" name="typ" id="typ1" value="zaznam" checked>
+                            <label class="btn btn-outline-secondary flex-grow-1 rounded-4 py-3" for="typ1">📝 Kontrola</label>
 
-                                <input type="radio" class="btn-check" name="typ" id="typ2" value="urgentni">
-                                <label class="btn btn-outline-danger flex-grow-1 rounded-4 py-3" for="typ2">🚨 Urgentní</label>
-                            </div>
+                            <input type="radio" class="btn-check" name="typ" id="typ2" value="urgentni">
+                            <label class="btn btn-outline-danger flex-grow-1 rounded-4 py-3" for="typ2">🚨 URGENTNÍ</label>
                         </div>
                     </div>
-                    <div class="mb-4">
-                        <label class="form-label small fw-bold text-muted text-uppercase">O co jde? (Stručně)</label>
-                        <input type="text" name="titulek" class="form-control border-0 bg-light p-3 rounded-4" placeholder="např. Silné kulhání na levou přední" required>
+                    <div class="mb-3">
+                        <label class="label-gold small fw-bold">PŘEDMĚT / TITULEK</label>
+                        <input type="text" name="titulek" class="form-control border-0 bg-light p-3 rounded-4" placeholder="např. Očkování vzteklina" required>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Detailní popis příznaků</label>
-                        <textarea name="popis" class="form-control border-0 bg-light p-3 rounded-4" rows="4" placeholder="Kdy to začalo, teplota, chování..."></textarea>
+                        <label class="label-gold small fw-bold">PODROBNOSTI</label>
+                        <textarea name="popis" class="form-control border-0 bg-light p-3 rounded-4" rows="3" placeholder="Příznaky, léky, doporučení..."></textarea>
                     </div>
-                    <button type="submit" class="btn btn-lux-add w-100 py-3 shadow-sm mt-2">ULOŽIT DO HISTORIE</button>
+                    <button type="submit" class="btn btn-lux-add w-100 py-3">ULOŽIT DO HISTORIE</button>
                 </form>
             </div>
         </div>

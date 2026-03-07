@@ -14,9 +14,10 @@ class CzechClearableFileInput(forms.ClearableFileInput):
     input_text = 'Změnit'
 
 
-# --- 1. FORMULÁŘ PRO PSA ---
+# --- 1. FORMULÁŘ PRO PSA (OPRAVENÁ VERZE) ---
+
 class PesForm(forms.ModelForm):
-    # DKK/DLK necháme, ale v šabloně je budeme schovávat, pokud půjde o kočku
+    # Definice RTG výběru pro pole, která v modelu existují
     RTG_CHOICES = [
         ('', '--- nevybráno ---'),
         ('A', 'A - Negativní (0/0)'),
@@ -26,110 +27,87 @@ class PesForm(forms.ModelForm):
         ('E', 'E - Těžká dysplazie (4/4)'),
     ]
 
-    rtg_hd = forms.ChoiceField(choices=RTG_CHOICES, required=False, label="DKK (HD) - Kyčle")
-    rtg_ed = forms.ChoiceField(choices=RTG_CHOICES, required=False, label="DLK (ED) - Lokty")
-
     class Meta:
         model = Pes
-        fields = [
-            'druh', 'jmeno', 'rasa', 'datum_narozeni',
-            # --- NOVÁ POLE TADY ---
-            'kontaktni_jmeno', 'kontaktni_telefon', 'kontaktni_email', 'adresa_pro_darky',
-            # ----------------------
-            'cip', 'vaha', 'fotka', 'video',
-            'posledni_ockovani', 'posledni_odcerveni', 'posledni_klistata', 'typ_ochrany_klistata',
-            'rtg_hd', 'rtg_ed', 'rtg_pater', 'zdravotni_testy', 'genetika_dna', 'popis',
-            'bonitace', 'otec_manualni', 'matka_manualni'
-        ]
+        # NATRVALO: Django si samo vytáhne z modelu jen to, co tam reálně existuje.
+        # Tím pádem už nikdy neuvidíš chybu "Unknown field".
+        exclude = ['majitel', 'qr_kod', 'vytvoreno']
+
         widgets = {
-            'druh': forms.HiddenInput(),
             'datum_narozeni': forms.DateInput(attrs={'type': 'date'}),
             'posledni_ockovani': forms.DateInput(attrs={'type': 'date'}),
             'posledni_odcerveni': forms.DateInput(attrs={'type': 'date'}),
             'posledni_klistata': forms.DateInput(attrs={'type': 'date'}),
-            # Styl pro nová pole
             'kontaktni_jmeno': forms.TextInput(attrs={'placeholder': 'Kdo má zvednout telefon?'}),
             'kontaktni_telefon': forms.TextInput(attrs={'placeholder': '+420 123 456 789'}),
             'kontaktni_email': forms.EmailInput(attrs={'placeholder': 'vas@email.cz'}),
             'adresa_pro_darky': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Kam poslat pamlsky?'}),
-            # ... zbytek tvých widgetů ...
-            'popis': forms.Textarea(attrs={'rows': 3}),
-            'zdravotni_testy': forms.Textarea(attrs={'rows': 2}),
+            'bonitace': forms.Textarea(attrs={'rows': 3}),
             'fotka': forms.FileInput(attrs={'accept': 'image/*'}),
             'vaha': forms.NumberInput(attrs={'step': '0.1'}),
         }
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
-        super().__init__(*args, **kwargs)
+        super(PesForm, self).__init__(*args, **kwargs)
 
-        # Přidání CSS třídy pro všechna pole (včetně nových)
-        for name, field in self.fields.items():
+        # Seznam polí, která chceme sledovat pro RTG výběr (pokud v modelu jsou)
+        for rtg_field in ['rtg_hd', 'rtg_ed']:
+            if rtg_field in self.fields:
+                self.fields[rtg_field] = forms.ChoiceField(choices=self.RTG_CHOICES, required=False)
+
+        # Dynamická smyčka pro nastavení vzhledu a Premium logiky
+        for field_name, field in self.fields.items():
+            field.required = False
             field.widget.attrs.update({'class': 'form-control custom-brown-input'})
 
-        # Dynamické popisky pro kočky
-        if self.instance and self.instance.druh == 'kocka':
-            self.fields['jmeno'].label = "Jméno kočky"
-            self.fields['kontaktni_jmeno'].label = "Osoba zodpovědná za kočičku"
+            # Speciální popisky pro kočky
+            if self.instance and hasattr(self.instance, 'druh') and self.instance.druh == 'kocka':
+                if field_name == 'jmeno': field.label = "Jméno kočky"
+                if field_name == 'kontaktni_jmeno': field.label = "Osoba zodpovědná za kočičku"
 
-        # Premium logika - zůstává stejná
-        if self.request and not (self.request.user.is_staff or self.request.user.profil.is_premium):
-            premium_pole = ['rtg_hd', 'rtg_ed', 'genetika_dna', 'zdravotni_testy', 'rtg_pater']
-            for field_name in premium_pole:
-                if field_name in self.fields:
-                    self.fields[field_name].disabled = True
-                    self.fields[field_name].help_text = "🔒 Pouze pro ALFA pány"
+            # Premium logika: zamknutí polí pro ne-premium uživatele
+            alfa_seznam = ['rtg_hd', 'rtg_ed', 'rtg_pater', 'bonitace', 'chovna_stanice']
+            if field_name in alfa_seznam:
+                field.help_text = "🔒 Pouze pro ALFA pány"
+                if self.request and not (self.request.user.is_staff or self.request.user.profil.is_premium):
+                    field.disabled = True
+
+        if 'jmeno' in self.fields:
+            self.fields['jmeno'].required = True
 
 
 # --- 2. FORMULÁŘE PRO UŽIVATELE ---
 
 class ExtendedRegistrationForm(UserCreationForm):
-    """Formulář pro registraci s rozšířenými poli o profil, adresu a promo kód"""
-
-    # POVINNÁ POLE
     first_name = forms.CharField(required=True, label="Jméno")
     last_name = forms.CharField(required=True, label="Příjmení")
     email = forms.EmailField(required=True, label="E-mail")
     telefon = forms.CharField(required=True, label="Telefon")
-
-    # NEPOVINNÁ POLE (ADRESA)
     ulice_cp = forms.CharField(required=False, label="Ulice a č.p.")
     mesto = forms.CharField(required=False, label="Město")
     psc = forms.CharField(required=False, label="PSČ")
-
-    promo_kod = forms.CharField(
-        required=False,
-        label="Promo kód (volitelné)",
-        widget=forms.TextInput(attrs={'placeholder': 'Máš kód? Např. UTULEK'})
-    )
+    promo_kod = forms.CharField(required=False, label="Promo kód",
+                                widget=forms.TextInput(attrs={'placeholder': 'Máš kód?'}))
 
     class Meta(UserCreationForm.Meta):
         model = User
-        # Seřadíme pole tak, aby v šabloně dávala smysl
         fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Přidání CSS třídy pro Bootstrap
         for name, field in self.fields.items():
             field.widget.attrs.update({'class': 'form-control'})
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        # Uložíme jméno a příjmení do User modelu
         user.first_name = self.cleaned_data.get('first_name')
         user.last_name = self.cleaned_data.get('last_name')
         user.email = self.cleaned_data.get('email')
-
         if commit:
             user.save()
-
-            # Logika pro výpočet Premia z kódu
             kod_text = self.cleaned_data.get('promo_kod', '').strip()
-            is_premium = False
-            premium_do = None
-            final_kod = None
-
+            is_premium, premium_do, final_kod = False, None, None
             if kod_text:
                 try:
                     pkod = PromoKod.objects.get(kod__iexact=kod_text, je_aktivni=True)
@@ -139,7 +117,6 @@ class ExtendedRegistrationForm(UserCreationForm):
                 except PromoKod.DoesNotExist:
                     final_kod = f"NEPLATNÝ: {kod_text}"
 
-            # Vytvoříme nebo aktualizujeme profil s daty
             ProfilMajitele.objects.update_or_create(
                 uzivatel=user,
                 defaults={
@@ -156,7 +133,6 @@ class ExtendedRegistrationForm(UserCreationForm):
 
 
 class UserUpdateForm(forms.ModelForm):
-    """Formulář pro aktualizaci profilu v nastavení"""
     email = forms.EmailField(required=True)
     telefon = forms.CharField(required=False)
     ulice_cp = forms.CharField(required=False, label="Ulice a č.p.")
@@ -169,13 +145,11 @@ class UserUpdateForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Naplnění profilových polí daty z modelu ProfilMajitele
         if self.instance and hasattr(self.instance, 'profil'):
             self.fields['telefon'].initial = self.instance.profil.telefon
             self.fields['ulice_cp'].initial = self.instance.profil.ulice_cp
             self.fields['mesto'].initial = self.instance.profil.mesto
             self.fields['psc'].initial = self.instance.profil.psc
-
         for name, field in self.fields.items():
             field.widget.attrs.update({'class': 'form-control'})
 
@@ -183,7 +157,6 @@ class UserUpdateForm(forms.ModelForm):
         user = super().save(commit=False)
         if commit:
             user.save()
-            # Uložení změn do modelu profilu
             profil = user.profil
             profil.telefon = self.cleaned_data.get('telefon')
             profil.ulice_cp = self.cleaned_data.get('ulice_cp')
@@ -192,27 +165,18 @@ class UserUpdateForm(forms.ModelForm):
             profil.save()
         return user
 
-# --- 3. OSTATNÍ FORMULÁŘE (Sociální síť a zdraví) ---
+
+# --- 3. OSTATNÍ FORMULÁŘE ---
 
 class PrispevekForm(forms.ModelForm):
     class Meta:
         model = Prispevek
         fields = ['text', 'obrazek', 'video']
         widgets = {
-            'text': forms.Textarea(attrs={
-                'placeholder': 'Co je nového?',
-                'class': 'form-control' # aby vypadal hezky
-            }),
-            # PŘIDEJ TYTO ŘÁDKY:
+            'text': forms.Textarea(attrs={'placeholder': 'Co je nového?', 'class': 'form-control'}),
             'obrazek': forms.FileInput(attrs={'id': 'id_obrazek', 'accept': 'image/*'}),
             'video': forms.FileInput(attrs={'id': 'id_video', 'accept': 'video/*'}),
         }
-
-
-class PlemenoForm(forms.ModelForm):
-    class Meta:
-        model = Plemeno
-        fields = ['nazev', 'ikona', 'kategorie']  # PŘIDÁNO: ikona a kategorie z našeho modelu!
 
 
 class OckovaniForm(forms.ModelForm):
@@ -226,10 +190,11 @@ class OckovaniForm(forms.ModelForm):
             'poznamka': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }
 
+
 class ProfilUpdateForm(forms.ModelForm):
     class Meta:
         model = ProfilMajitele
-        fields = ['telefon', 'ulice_cp', 'mesto', 'psc', 'pouzity_kod'] # Přidáno pouzity_kod
+        fields = ['telefon', 'ulice_cp', 'mesto', 'psc', 'pouzity_kod']
         widgets = {
             'pouzity_kod': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control-plaintext'}),
         }
@@ -239,3 +204,9 @@ class ProfilUpdateForm(forms.ModelForm):
         for name, field in self.fields.items():
             if name != 'pouzity_kod':
                 field.widget.attrs.update({'class': 'form-control'})
+
+
+class PlemenoForm(forms.ModelForm):
+    class Meta:
+        model = Plemeno
+        fields = ['nazev', 'ikona', 'kategorie']

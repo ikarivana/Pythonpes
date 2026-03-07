@@ -1,4 +1,8 @@
 from datetime import timedelta, date
+
+from django.contrib.auth.decorators import login_required
+from django.core.checks import messages
+from django.shortcuts import get_object_or_404, redirect
 from django.utils.text import slugify
 import qrcode
 from io import BytesIO
@@ -34,55 +38,41 @@ class ProfilMajitele(models.Model):
 
 # --- MODEL PSA ---
 class Pes(models.Model):
-    DRUH_CHOICES = [
-        ('pes', 'Pes'),
-        ('kocka', 'Kočka'),
-    ]
-    druh = models.CharField(max_length=10, choices=DRUH_CHOICES, default='pes', verbose_name="Druh zvířete")
+    DRUH_CHOICES = [('pes', 'Pes'), ('kocka', 'Kočka')]
+    druh = models.CharField(max_length=10, choices=DRUH_CHOICES, default='pes')
     majitel = models.ForeignKey(ProfilMajitele, on_delete=models.CASCADE, related_name='psi')
-    jmeno = models.CharField(max_length=100, verbose_name="Jméno zvířete")
-    rasa = models.CharField(max_length=100, verbose_name="Plemeno / Rasa")
+    jmeno = models.CharField(max_length=100)
+    rasa = models.CharField(max_length=100)
 
-    # --- KONTAKTY PRO NOUZI A DÁREČKY ---
-    # Povinné pro Nouzový profil (nálezce musí vědět, komu volat)
-    kontaktni_jmeno = models.CharField(max_length=100, verbose_name="Kontaktní osoba (jméno)")
-    kontaktni_telefon = models.CharField(max_length=20, verbose_name="Kontaktní telefon")
-    kontaktni_email = models.EmailField(verbose_name="Kontaktní e-mail")
+    # SOS Kontakty
+    kontaktni_jmeno = models.CharField(max_length=100)
+    kontaktni_telefon = models.CharField(max_length=20)
+    kontaktni_email = models.EmailField()
+    adresa_pro_darky = models.TextField(blank=True, null=True)
 
-    # Nepovinné pro zasílání dárečků (blank=True dovolí pole nevyplnit)
-    adresa_pro_darky = models.TextField(blank=True, null=True, verbose_name="Adresa pro zasílání dárečků")
-    # ------------------------------------
-
-    cip = models.CharField(max_length=50, blank=True, null=True, verbose_name="Číslo čipu")
+    # Základní info
+    cip = models.CharField(max_length=50, blank=True, null=True)
     fotka = models.ImageField(upload_to='profily_psu/', blank=True, null=True)
-    video = models.FileField(upload_to='videa_psu/', null=True, blank=True)
-    popis = models.TextField(blank=True, null=True)
-    vaha = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, verbose_name="Váha (kg)")
-    otec_manualni = models.CharField(max_length=200, blank=True, null=True, verbose_name="Otec (jméno)")
-    matka_manualni = models.CharField(max_length=200, blank=True, null=True, verbose_name="Matka (jméno)")
-    datum_narozeni = models.DateField(null=True, blank=True, verbose_name="Datum narození")
-    genetika_dna = models.TextField(blank=True, null=True)
-    zdravotni_testy = models.TextField(blank=True, null=True, verbose_name="Zdravotní testy")
-    bonitace = models.TextField(blank=True, null=True, verbose_name="Bonitace")
+    vaha = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    datum_narozeni = models.DateField(null=True, blank=True)
+
+    # Rodokmen a RTG
+    otec_manualni = models.CharField(max_length=200, blank=True, null=True)
+    matka_manualni = models.CharField(max_length=200, blank=True, null=True)
+    chovna_stanice = models.CharField(max_length=200, blank=True, null=True)
+    rtg_hd = models.CharField(max_length=50, blank=True, null=True)
+    rtg_ed = models.CharField(max_length=50, blank=True, null=True)
     rtg_pater = models.CharField(max_length=100, blank=True, null=True)
-    typ_ochrany_klistata = models.CharField(max_length=100, blank=True, null=True)
+    bonitace = models.TextField(blank=True, null=True)  # Ponechána jen jedna
+
+    # QR a SOS stav
     qr_kod = models.ImageField(upload_to='qr_kody/', blank=True, null=True)
     je_ztraceny = models.BooleanField(default=False)
-    oblast_ztraty = models.CharField(max_length=255, verbose_name="Kde se pejsek ztratil?", null=True, blank=True)
 
-    # Chovatelské údaje
-    cislo_zapisu = models.CharField(max_length=100, blank=True, null=True)
-    rtg_hd = models.CharField(max_length=50, blank=True, null=True)  # DKK
-    rtg_ed = models.CharField(max_length=50, blank=True, null=True)  # DLK
-    bonitace = models.TextField(blank=True, null=True)
-    rodokmen = models.TextField(blank=True, null=True)
-    chovna_stanice = models.CharField(max_length=200, blank=True, null=True)
-
-    # Zdravotní prevence
+    # Aktuální prevence (to, co vidíme na kartě zdraví)
     posledni_ockovani = models.DateField(null=True, blank=True)
     posledni_odcerveni = models.DateField(null=True, blank=True)
     posledni_klistata = models.DateField(null=True, blank=True)
-
     # --- PŘIDANÉ METODY PRO ŠABLONU ---
     @property
     def vek(self):
@@ -194,7 +184,6 @@ class Ockovani(models.Model):
 
 # --- GALERIE FOTEK ---
 class GalerieFotka(models.Model):
-    # on_delete=models.CASCADE zajistí, že při smazání psa zmizí i jeho galerie
     pes = models.ForeignKey(Pes, on_delete=models.CASCADE, related_name='galerie_fotky')
     obrazek = models.ImageField(upload_to='galerie_psu/')
     vytvoreno = models.DateTimeField(auto_now_add=True)

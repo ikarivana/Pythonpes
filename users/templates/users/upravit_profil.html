@@ -9,22 +9,24 @@
         --accent-gold: #c5a059;
         --soft-beige: #fdfaf7;
         --text-muted: #8d6e63;
+        --sos-red: #d63031;
     }
 
     .edit-wrapper {
         display: flex; justify-content: center; align-items: center;
-        min-height: 85vh; background-color: var(--soft-beige); padding: 50px 20px;
+        min-height: 85vh; background-color: var(--soft-beige); padding: 30px 15px;
         font-family: 'Plus Jakarta Sans', sans-serif;
     }
     .edit-card {
-        background: white; width: 100%; max-width: 650px;
-        padding: 45px; border-radius: 30px;
+        background: white; width: 100%; max-width: 700px;
+        padding: 40px; border-radius: 30px;
         box-shadow: 0 20px 40px rgba(93, 64, 55, 0.08); border: 1px solid #efebe9;
     }
     .edit-card h2 {
         color: var(--primary-brown); font-weight: 800; text-align: center;
-        margin-bottom: 35px; font-family: 'Playfair Display', serif;
+        margin-bottom: 10px; font-family: 'Playfair Display', serif;
     }
+    .subtitle { text-align: center; color: var(--text-muted); margin-bottom: 35px; font-size: 0.9rem; }
 
     .form-section-title {
         color: var(--accent-gold); font-weight: 800; font-size: 0.85rem;
@@ -35,137 +37,154 @@
     .form-section-title::after {
         content: ""; flex: 1; height: 1px; background: #eee;
     }
+    .section-sos { color: var(--sos-red); }
+    .section-sos::after { background: rgba(214, 48, 49, 0.2); }
 
-    .form-group { margin-bottom: 20px; position: relative; }
+    .form-group { margin-bottom: 20px; }
 
     .edit-card label {
         font-weight: 700; color: var(--text-muted); margin-left: 2px;
         display: block; margin-bottom: 8px; font-size: 0.85rem;
     }
 
-    /* Cílení na všechny typy inputů generovaných Djangem */
     .edit-card input, .edit-card select, .edit-card textarea {
-        width: 100%; padding: 14px 20px; border: 2px solid #f1ece9;
-        border-radius: 15px; background: #fafafa; transition: all 0.3s ease;
+        width: 100%; padding: 12px 18px; border: 2px solid #f1ece9;
+        border-radius: 15px; background: #fafafa; transition: 0.3s;
         color: var(--primary-brown); font-weight: 500;
     }
 
     .edit-card input:focus {
         border-color: var(--accent-gold); background: white; outline: none;
-        box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.15);
+        box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.1);
     }
 
-    /* Styling pro chyby ve formuláři */
-    .errorlist {
-        list-style: none; color: #dc3545; padding: 0; font-size: 0.8rem; margin-top: 5px;
-    }
-    .is-invalid { border-color: #dc3545 !important; }
+    /* Styling pro chyby */
+    .errorlist { list-style: none; color: var(--sos-red); padding: 0; font-size: 0.75rem; margin-top: 5px; font-weight: 600; }
+    .is-invalid { border-color: var(--sos-red) !important; background: #fff8f8 !important; }
 
     .btn-save {
-        background: var(--primary-brown); color: white; border: none; width: 100%;
-        padding: 18px; border-radius: 16px; font-size: 1.1rem; font-weight: 800;
-        cursor: pointer; transition: 0.3s; margin-top: 30px;
+        background: var(--primary-brown); color: white; border: 2px solid var(--accent-gold); width: 100%;
+        padding: 16px; border-radius: 18px; font-size: 1.1rem; font-weight: 800;
+        cursor: pointer; transition: 0.3s; margin-top: 20px;
         text-transform: uppercase; letter-spacing: 1px;
     }
-    .btn-save:hover { background: #452f29; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(69, 47, 41, 0.2); }
+    .btn-save:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(93, 64, 55, 0.2); }
 
     .btn-back {
-        display: block; text-align: center; margin-top: 25px;
-        color: #a1887f; text-decoration: none; font-weight: 600; font-size: 0.95rem;
-        transition: 0.2s;
+        display: block; text-align: center; margin-top: 20px;
+        color: #a1887f; text-decoration: none; font-weight: 700; font-size: 0.9rem;
     }
-    .btn-back:hover { color: var(--primary-brown); }
 
-    @media (max-width: 576px) {
-        .edit-card { padding: 30px 20px; border-radius: 20px; }
+    /* Mobilní zobrazení */
+    @media (max-width: 768px) {
+        .edit-card { padding: 25px 20px; border-radius: 25px; }
+        .edit-card h2 { font-size: 1.6rem; }
     }
 </style>
 
 <div class="edit-wrapper">
     <div class="edit-card">
-        <h2>Upravit můj profil</h2>
+        <h2>Můj profil</h2>
+        <p class="subtitle">Upravte své údaje pro doručování dárků a SOS kontakty</p>
 
         <form method="post">
             {% csrf_token %}
 
-            {% if form.non_field_errors %}
-                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
-            {% endif %}
-
             <div class="form-section-title">
-                <i class="fas fa-user-circle"></i> Osobní údaje
+                <i class="fas fa-user-circle"></i> Základní údaje
             </div>
 
-            <div class="row">
-                <div class="col-md-6 form-group">
-                    <label for="{{ form.first_name.id_for_label }}">Jméno</label>
-                    {{ form.first_name }}
-                    {{ form.first_name.errors }}
+            <div class="row g-3">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label>Jméno</label>
+                        {{ form.first_name }}
+                        {{ form.first_name.errors }}
+                    </div>
                 </div>
-                <div class="col-md-6 form-group">
-                    <label for="{{ form.last_name.id_for_label }}">Příjmení</label>
-                    {{ form.last_name }}
-                    {{ form.last_name.errors }}
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label>Příjmení</label>
+                        {{ form.last_name }}
+                        {{ form.last_name.errors }}
+                    </div>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="{{ form.username.id_for_label }}">Uživatelské jméno</label>
+                <label>Uživatelské jméno</label>
                 {{ form.username }}
                 {{ form.username.errors }}
             </div>
 
-            <div class="row">
-                <div class="col-md-7 form-group">
-                    <label for="{{ form.email.id_for_label }}">E-mail</label>
-                    {{ form.email }}
-                    {{ form.email.errors }}
+            <div class="form-section-title section-sos">
+                <i class="fas fa-phone-alt"></i> SOS Kontakt pro nálezce
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-7">
+                    <div class="form-group">
+                        <label>E-mail pro oznámení</label>
+                        {{ form.email }}
+                        {{ form.email.errors }}
+                    </div>
                 </div>
-                <div class="col-md-5 form-group">
-                    <label for="{{ form.telefon.id_for_label }}">Telefon</label>
-                    {{ form.telefon }}
-                    {{ form.telefon.errors }}
+                <div class="col-md-5">
+                    <div class="form-group">
+                        <label>Hlavní telefon</label>
+                        {{ form.telefon }}
+                        {{ form.telefon.errors }}
+                    </div>
                 </div>
             </div>
 
             <div class="form-section-title">
-                <i class="fas fa-map-marker-alt"></i> Adresa pro dárky a známky
+                <i class="fas fa-map-marker-alt"></i> Adresa pro doručování
             </div>
 
             <div class="form-group">
-                <label for="{{ form.ulice_cp.id_for_label }}">Ulice a č.p.</label>
+                <label>Ulice a č.p.</label>
                 {{ form.ulice_cp }}
                 {{ form.ulice_cp.errors }}
             </div>
 
-            <div class="row">
-                <div class="col-md-8 form-group">
-                    <label for="{{ form.mesto.id_for_label }}">Město</label>
-                    {{ form.mesto }}
-                    {{ form.mesto.errors }}
+            <div class="row g-3">
+                <div class="col-8">
+                    <div class="form-group">
+                        <label>Město</label>
+                        {{ form.mesto }}
+                        {{ form.mesto.errors }}
+                    </div>
                 </div>
-                <div class="col-md-4 form-group">
-                    <label for="{{ form.psc.id_for_label }}">PSČ</label>
-                    {{ form.psc }}
-                    {{ form.psc.errors }}
+                <div class="col-4">
+                    <div class="form-group">
+                        <label>PSČ</label>
+                        {{ form.psc }}
+                        {{ form.psc.errors }}
+                    </div>
                 </div>
             </div>
 
-            <button type="submit" class="btn-save shadow-sm">
-                <i class="fas fa-check-circle me-2"></i> Uložit změny
+            <button type="submit" class="btn-save">
+                <i class="fas fa-save me-2"></i> Uložit profil
             </button>
-            <a href="{% url 'profil_uzivatele' %}" class="btn-back">Zrušit a vrátit se</a>
+
+            <a href="{% url 'profil_uzivatele' %}" class="btn-back">
+                <i class="fas fa-times me-1"></i> Zrušit změny
+            </a>
         </form>
     </div>
 </div>
 
 <script>
-    // Bonus: Automatické přidání Bootstrap třídy pro validaci, pokud Django vrátí chybu
+    // Automatické přidání třídy pro chyby
     document.addEventListener('DOMContentLoaded', function() {
-        const errors = document.querySelectorAll('.errorlist');
-        errors.forEach(error => {
-            const input = error.parentElement.querySelector('input');
-            if (input) input.classList.add('is-invalid');
+        document.querySelectorAll('.errorlist').forEach(error => {
+            const container = error.closest('.form-group');
+            if (container) {
+                const input = container.querySelector('input, select, textarea');
+                if (input) input.classList.add('is-invalid');
+            }
         });
     });
 </script>
