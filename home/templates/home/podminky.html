@@ -26,7 +26,12 @@
     .legal-section {
         margin-bottom: 40px;
         padding-left: 20px;
-        border-left: 3px solid #fdfaf6;
+        border-left: 3px solid var(--bg-page);
+        transition: 0.3s;
+    }
+
+    .legal-section:hover {
+        border-left-color: var(--gold);
     }
 
     .legal-section h4 {
@@ -39,14 +44,15 @@
         line-height: 1.8;
         color: #5d4037;
         font-size: 0.95rem;
-        text-align: justify;
     }
 
+    /* Boxy pro zdůraznění */
     .warning-box {
-        background-color: #fff9f0;
+        background-color: var(--bg-page);
         border: 1px dashed var(--gold) !important;
         border-radius: 20px;
         padding: 20px;
+        font-size: 0.9rem;
     }
 
     .danger-box {
@@ -56,18 +62,26 @@
         border-radius: 0 15px 15px 0;
     }
 
+    .plan-box {
+        background: #fdfaf7;
+        border-radius: 20px;
+        padding: 20px;
+        border: 1px solid var(--border-tan);
+    }
+
     .btn-confirm {
-        background: var(--mid-brown);
+        background: var(--gold);
         color: white !important;
         border: none;
         border-radius: 12px;
         padding: 12px 30px;
         font-weight: 700;
         transition: 0.3s;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
     .btn-confirm:hover {
-        background: var(--dark-cocoa);
+        background: var(--mid-brown);
         transform: translateY(-2px);
     }
 </style>
@@ -82,64 +96,77 @@
             <section class="legal-section">
                 <h4>1. Úvodní ustanovení</h4>
                 <p>
-                    Tyto Všeobecné obchodní podmínky (dále jen „VOP“) upravují vzájemná práva a povinnosti mezi Provozovatelem, kterým je
-                    <strong class="text-dark">{{ kontaktni_info.jmeno }}</strong>, IČO: {{ kontaktni_info.ico }}, se sídlem {{ kontaktni_info.adresa }} (dále jen „Provozovatel“),
+                    Tyto Všeobecné obchodní podmínky (dále jen „VOP“) upravují vztahy mezi Provozovatelem, kterým je
+                    <strong class="text-dark">{{ kontaktni_info.jmeno|default:"Ivana Elšíková" }}</strong>, IČO: {{ kontaktni_info.ico|default:"Doplnit IČO" }}, (dále jen „Provozovatel“),
                     a uživateli portálu <strong>EPES.ONLINE</strong>.
                 </p>
-                <p>
-                    Užíváním portálu nebo registrací Uživatel vyjadřuje svůj bezvýhradný souhlas s těmito podmínkami.
-                </p>
             </section>
 
             <section class="legal-section">
-                <h4>2. Charakter služeb a nouzový profil</h4>
-                <p>
-                    Portál nabízí digitální správu dat o zvířecích parťácích (psu, kočkách a dalších), komunitní funkce a <strong>SOS nouzový profil zvířete (QR identita)</strong>.
-                </p>
+                <h4>2. Modely členství a rozsah služeb</h4>
+                <p>Portál poskytuje služby ve dvou základních režimech:</p>
 
-                <div class="warning-box my-4">
-                    <p class="mb-0 small">
-                        <strong>⚠️ Právní upozornění:</strong> Portál <strong>není oficiálním registrem zvířat</strong> ve smyslu platných zákonů ČR.
-                        Vložení dat do portálu slouží pro soukromé účely a jako nouzový informační systém. Tato registrace
-                        <strong>nenahrazuje zákonnou povinnost čipování</strong> a evidenci zvířete v oficiálních registrech obcí či státu.
-                    </p>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="plan-box h-100">
+                            <h6 class="fw-bold"><i class="fas fa-paw me-2 text-muted"></i>Plán Parťák (Zdarma)</h6>
+                            <ul class="small ps-3 mb-0">
+                                <li>Správa profilu pro 1 zvíře.</li>
+                                <li>Základní SOS nouzový profil.</li>
+                                <li>Omezený úložný prostor pro média.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="plan-box h-100" style="border-color: var(--gold);">
+                            <h6 class="fw-bold" style="color: var(--mid-brown);"><i class="fas fa-crown me-2" style="color: var(--gold);"></i>Plán Alfa (Premium)</h6>
+                            <ul class="small ps-3 mb-0">
+                                <li>Neomezený počet zvířecích profilů.</li>
+                                <li>Rozšířené SOS funkce a neomezená galerie.</li>
+                                <li>Generování zdravotních karet v PDF.</li>
+                                <li>Přednostní podpora a bonusy od partnerů.</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </section>
 
             <section class="legal-section">
-                <h4>3. Inzerce, Bazar a Hlídání</h4>
-                <p>
-                    Portál slouží výhradně jako technická platforma pro propojení uživatelů. Provozovatel není účastníkem obchodních vztahů mezi uživateli.
-                </p>
-                <div class="danger-box my-4">
+                <h4>3. Nouzový profil a odpovědnost</h4>
+                <div class="warning-box mb-4">
                     <p class="mb-0">
-                        <strong>Vyloučení odpovědnosti:</strong> Provozovatel neodpovídá za správnost inzerátů, zdravotní stav nabízených zvířat ani kvalitu poskytovaných služeb (např. hlídání). Všechny vztahy vznikají přímo mezi uživateli.
+                        <strong>⚠️ Důležité:</strong> SOS nouzový profil a QR identita na <strong>epes.online</strong> je doplňkový informační systém.
+                        Vložení dat do portálu <strong>nenahrazuje zákonnou povinnost čipování zvířat</strong> ani evidenci v oficiálních státních či obecních registrech ČR.
+                        Provozovatel neodpovídá za technickou nedostupnost systému v kritické situaci způsobenou třetími stranami (výpadek internetu apod.).
                     </p>
                 </div>
-                <p>Uživatel se zavazuje jednat v souladu se zákonem na ochranu zvířat proti týrání.</p>
             </section>
 
             <section class="legal-section">
-                <h4>4. Platební podmínky a Premium</h4>
+                <h4>4. Platební podmínky a digitální obsah</h4>
                 <p>
-                    Cena za služby Premium (ALFA členství) je uvedena v ceníku. Vzhledem k tomu, že se jedná o digitální obsah poskytovaný okamžitě,
-                    Uživatel aktivací služby souhlasí se započetím plnění a bere na vědomí, že tím ztrácí právo na odstoupení od smlouvy ve 14denní lhůtě.
+                    Platba za Premium (Alfa) členství probíhá jednorázově (roční) nebo opakovaně (měsíční) prostřednictvím platební brány.
                 </p>
+                <div class="danger-box mb-4">
+                    <p class="mb-0 small">
+                        <strong>Odstoupení od smlouvy:</strong> Vzhledem k tomu, že aktivací Premium účtu je Uživateli okamžitě zpřístupněn digitální obsah (funkce systému),
+                        Uživatel výslovně souhlasí s tím, že mu plnění bude poskytnuto před uplynutím lhůty pro odstoupení od smlouvy a bere na vědomí,
+                        že tím <strong>zaniká jeho právo na odstoupení od smlouvy ve 14denní lhůtě</strong> bez udání důvodu.
+                    </p>
+                </div>
             </section>
 
             <section class="legal-section">
-                <h4>5. Ochrana údajů</h4>
+                <h4>5. Komunitní bazar a Hlídání</h4>
                 <p>
-                    Informace o tom, jak nakládáme s vašimi daty, naleznete v našich
-                    <a href="{% url 'gdpr' %}" class="fw-bold" style="color: var(--gold);">Zásadách ochrany osobních údajů</a>,
-                    které jsou nedílnou součástí těchto VOP.
+                    Provozovatel pouze zprostředkovává prostor pro inzerci. Neodpovídá za kvalitu služeb, zdravotní stav inzerovaných zvířat ani průběh obchodních transakcí mezi uživateli. Jakákoliv ujednání o hlídání či prodeji jsou výhradně mezi Uživateli.
                 </p>
             </section>
 
             <div class="d-flex justify-content-center mt-5">
-                <div class="text-center p-4" style="max-width: 500px; background: #fdfaf7; border-radius: 25px; border: 1px solid var(--border-tan);">
+                <div class="text-center p-4" style="max-width: 500px; background: var(--bg-page); border-radius: 25px; border: 1px solid var(--border-tan);">
                     <p class="mb-4" style="color: var(--mid-brown); font-weight: 600;">
-                        Přečtením a potvrzením pomáháte udržovat epes.online bezpečným místem pro všechny páníčky.
+                        Děkujeme, že pomáháte tvořit bezpečný a férový svět pro naše zvířecí parťáky.
                     </p>
 
                     <div class="d-flex justify-content-center gap-3">
@@ -147,7 +174,7 @@
                             ROZUMÍM A POTVRZUJI
                         </button>
                         <a href="{% url 'home' %}" class="btn px-4 py-2" style="color: var(--mid-brown); font-weight: 700; text-decoration: none;">
-                            DOMŮ
+                            ZPĚT
                         </a>
                     </div>
                 </div>

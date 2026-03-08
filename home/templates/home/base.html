@@ -20,76 +20,93 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
-    <style>
-        :root {
-            --dark-cocoa: #2d1b19;
-            --mid-brown: #3e2723;
-            --gold: #c5a059;
-            --bg-page: #f9f4ef;
-            --sos-red: #e35d6a;
-        }
+<style>
+    :root {
+        /* VÝCHOZÍ BARVY (PSI / MIX) */
+        --dark-cocoa: #2d1b19;
+        --mid-brown: #3e2723;
+        --gold: #c5a059;
+        --bg-page: #f9f4ef;
+        --sos-red: #e35d6a;
+        --transition: 0.3s ease;
+    }
 
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-page); margin: 0; overflow-x: hidden; }
-        #wrapper { display: flex; min-height: 100vh; position: relative; }
-
-        /* --- SIDEBAR --- */
-        #sidebar-wrapper {
-            width: 280px; min-width: 280px;
-            background: linear-gradient(180deg, var(--dark-cocoa) 0%, var(--mid-brown) 100%);
-            color: white; display: flex; flex-direction: column;
-            position: sticky; top: 0; height: 100vh;
-            border-right: 2px solid var(--gold); z-index: 3000;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .sidebar-header { padding: 40px 20px; text-align: center; }
-        .sidebar-logo { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: white; text-decoration: none; font-weight: 800; }
-        .sidebar-logo span { color: var(--gold); }
-
-        .nav-list { padding: 10px 15px; flex-grow: 1; overflow-y: auto; }
-        .sidebar-label { padding: 15px 15px 5px; font-size: 0.65rem; text-transform: uppercase; color: rgba(255,255,255,0.3); letter-spacing: 2px; font-weight: 800; }
-
-        .nav-link-custom {
-            display: flex; align-items: center; padding: 12px 18px;
-            color: rgba(255,255,255,0.6) !important; text-decoration: none;
-            border-radius: 12px; margin-bottom: 5px;
-            transition: all 0.2s ease;
-        }
-        .nav-link-custom i { width: 25px; margin-right: 15px; color: var(--gold); }
-        .nav-link-custom:hover { background: rgba(255,255,255,0.08); color: white !important; transform: translateX(5px); }
-        .nav-link-sos { color: var(--sos-red) !important; font-weight: 800; }
-        .nav-link-sos i { color: var(--sos-red) !important; }
-
-        /* --- USER SECTION --- */
-        .user-section { padding: 20px; background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.05); }
-        .user-pill { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 12px 15px; border-radius: 15px; }
-        .user-name { font-weight: 700; font-size: 0.9rem; display: block; line-height: 1.2; }
-        .user-role { font-size: 0.65rem; color: var(--gold); text-transform: uppercase; font-weight: 800; }
-        .logout-btn { background: none; border: none; color: rgba(255,255,255,0.2); transition: 0.3s; }
-        .logout-btn:hover { color: #ff6b6b; }
-
-        #page-content-wrapper { flex-grow: 1; padding: 40px; width: 100%; }
-
-        /* --- MOBILE --- */
-        #mobile-header {
-            display: none; background: var(--dark-cocoa); padding: 10px 20px;
-            color: white; border-bottom: 2px solid var(--gold);
-            position: sticky; top: 0; z-index: 2500;
-            justify-content: space-between; align-items: center;
-        }
-
-        @media (max-width: 991px) {
-            #mobile-header { display: flex; }
-            #sidebar-wrapper { position: fixed; left: 0; transform: translateX(-100%); height: 100%; }
-            #sidebar-wrapper.active { transform: translateX(0); box-shadow: 15px 0 30px rgba(0,0,0,0.5); }
-            #page-content-wrapper { padding: 20px 15px; }
-            .menu-overlay {
-                display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(0,0,0,0.4); z-index: 2900; backdrop-filter: blur(2px);
+    /* --- BEZPEČNÉ DYNAMICKÉ TÉMA --- */
+    {% if user.is_authenticated and user.profil %}
+        {# Jednoduchá logika: Pokud má uživatel jen kočku, přepneme barvy #}
+        {% if user.profil.psi.count == 1 and user.profil.psi.first.druh == 'kocka' %}
+            :root {
+                --dark-cocoa: #1a112d;
+                --mid-brown: #2d1b4d;
+                --gold: #9b86bd;
+                --bg-page: #f8f7ff;
             }
-            .menu-overlay.active { display: block; }
+        {% endif %}
+    {% endif %}
+
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-page); margin: 0; }
+    #wrapper { display: flex; min-height: 100vh; position: relative; }
+
+    /* --- SIDEBAR --- */
+    #sidebar-wrapper {
+        width: 280px; min-width: 280px;
+        background: linear-gradient(180deg, var(--dark-cocoa) 0%, var(--mid-brown) 100%);
+        color: white; display: flex; flex-direction: column;
+        position: sticky; top: 0; height: 100vh;
+        border-right: 2px solid var(--gold); z-index: 3000;
+        transition: all var(--transition);
+    }
+
+    .sidebar-header { padding: 40px 20px; text-align: center; }
+    .sidebar-logo { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: white; text-decoration: none; font-weight: 800; }
+    .sidebar-logo span { color: var(--gold); }
+
+    .nav-list { padding: 10px 15px; flex-grow: 1; overflow-y: auto; }
+    .sidebar-label { padding: 15px 15px 5px; font-size: 0.65rem; text-transform: uppercase; color: rgba(255,255,255,0.3); letter-spacing: 2px; font-weight: 800; }
+
+    .nav-link-custom {
+        display: flex; align-items: center; padding: 12px 18px;
+        color: rgba(255,255,255,0.6) !important; text-decoration: none;
+        border-radius: 12px; margin-bottom: 5px; transition: 0.2s;
+    }
+    .nav-link-custom i { width: 25px; margin-right: 15px; color: var(--gold); }
+    .nav-link-custom:hover { background: rgba(255,255,255,0.08); color: white !important; transform: translateX(5px); }
+    .nav-link-sos { color: var(--sos-red) !important; font-weight: 800; }
+    .nav-link-sos i { color: var(--sos-red) !important; }
+
+    /* --- USER SECTION --- */
+    .user-section { padding: 20px; background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.05); }
+    .user-pill {
+        display: flex; align-items: center; justify-content: space-between;
+        background: rgba(255,255,255,0.05); padding: 12px 15px;
+        border-radius: 15px; border: 1px solid rgba(255,255,255,0.05);
+    }
+    .user-name { font-weight: 700; font-size: 0.9rem; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+    .user-role { font-size: 0.65rem; color: var(--gold); text-transform: uppercase; font-weight: 800; display: block; }
+    .logout-btn { background: none; border: none; color: rgba(255,255,255,0.2); padding: 5px; cursor: pointer; }
+
+    #page-content-wrapper { flex-grow: 1; padding: 40px; width: 100%; }
+
+    /* --- MOBILE --- */
+    #mobile-header {
+        display: none; background: var(--dark-cocoa); padding: 10px 20px;
+        color: white; border-bottom: 2px solid var(--gold);
+        position: sticky; top: 0; z-index: 2500;
+        justify-content: space-between; align-items: center;
+    }
+
+    @media (max-width: 991px) {
+        #mobile-header { display: flex; }
+        #sidebar-wrapper { position: fixed; left: 0; transform: translateX(-100%); height: 100%; }
+        #sidebar-wrapper.active { transform: translateX(0); }
+        #page-content-wrapper { padding: 20px 15px; }
+        .menu-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); z-index: 2900; backdrop-filter: blur(2px);
         }
-    </style>
+        .menu-overlay.active { display: block; }
+    }
+</style>
 </head>
 <body>
 
@@ -106,7 +123,7 @@
 <div id="wrapper">
     <nav id="sidebar-wrapper">
         <div class="sidebar-header">
-            <a href="{% url 'home' %}" class="sidebar-logo">epes.online 🐾</a>
+            <a href="{% url 'home' %}" class="sidebar-logo">epes.online <span>🐾</span></a>
         </div>
 
         <div class="nav-list">
@@ -132,7 +149,7 @@
             </a>
 
             <div class="sidebar-label">Služby a Bazar</div>
-            <a href="{% url 'seznam_inzeratu' %}" class="nav-link-custom"><i class="fas fa-shopping-basket"></i> Psí & Kočičí bazar</a>
+            <a href="{% url 'seznam_inzeratu' %}" class="nav-link-custom"><i class="fas fa-shopping-basket"></i> Bazar</a>
             <a href="{% url 'mapa_sluzeb' %}" class="nav-link-custom"><i class="fas fa-map-marked-alt"></i> Mapa služeb</a>
 
             <div class="sidebar-label">Komunita</div>
@@ -143,8 +160,15 @@
         <div class="user-section">
             {% if user.is_authenticated %}
             <div class="user-pill mb-3">
-                <div class="d-flex align-items: center;">
-                    <div style="color: var(--gold);"><i class="fas fa-shield-dog"></i></div>
+                <div class="d-flex align-items-center">
+                    <div style="color: var(--gold);">
+                        {# Bezpečná logika pro ikonu #}
+                        {% if user.profil.psi.first and user.profil.psi.first.druh == 'kocka' and user.profil.psi.count == 1 %}
+                            <i class="fas fa-cat"></i>
+                        {% else %}
+                            <i class="fas fa-shield-dog"></i>
+                        {% endif %}
+                    </div>
                     <div class="ms-2">
                         <span class="user-name">{{ user.username }}</span>
                         <span class="user-role">{% if user.profil.is_premium %}👑 ALFA ČLEN{% else %}Páníček{% endif %}</span>
@@ -157,7 +181,7 @@
             </div>
             {% if not user.profil.is_premium %}
             <div class="d-grid mb-3">
-                <a href="{% url 'cenik' %}" class="btn btn-sm fw-bold" style="background: var(--gold); color: var(--dark-cocoa); border-radius: 10px; font-size: 0.75rem;">
+                <a href="{% url 'cenik' %}" class="btn btn-sm fw-bold shadow-sm" style="background: var(--gold); color: white; border-radius: 10px; font-size: 0.75rem;">
                     👑 AKTIVOVAT PREMIUM
                 </a>
             </div>
@@ -165,14 +189,13 @@
             {% else %}
             <div class="d-grid gap-2 mb-3">
                 <a href="{% url 'login' %}" class="btn btn-sm text-white border-white-50">Přihlásit se</a>
-                <a href="{% url 'register' %}" class="btn btn-sm fw-bold" style="background: var(--gold); color: var(--dark-cocoa);">Registrace</a>
+                <a href="{% url 'register' %}" class="btn btn-sm fw-bold shadow-sm" style="background: var(--gold); color: white;">Registrace</a>
             </div>
             {% endif %}
 
             <div class="d-flex justify-content-center gap-3 pt-2" style="border-top: 1px solid rgba(255,255,255,0.05);">
                 <a href="{% url 'podminky' %}" style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">Podmínky</a>
                 <a href="{% url 'gdpr' %}" style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">GDPR</a>
-                <a href="{% url 'cookies' %}" style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">Cookies</a>
             </div>
         </div>
     </nav>
@@ -180,7 +203,7 @@
     <div id="page-content-wrapper">
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -198,22 +221,8 @@
         const overlay = document.getElementById('sidebarOverlay');
         sidebar.classList.toggle('active');
         overlay.classList.toggle('active');
-
-        if (sidebar.classList.contains('active')) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'auto';
-        }
+        document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : 'auto';
     }
-
-    // Zavření menu po kliknutí na odkaz (pro mobily)
-    document.querySelectorAll('.nav-link-custom').forEach(link => {
-        link.addEventListener('click', () => {
-            document.getElementById('sidebar-wrapper').classList.remove('active');
-            document.getElementById('sidebarOverlay').classList.remove('active');
-            document.body.style.overflow = 'auto';
-        });
-    });
 </script>
 
 </body>

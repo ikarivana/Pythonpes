@@ -73,6 +73,7 @@ class Pes(models.Model):
     posledni_ockovani = models.DateField(null=True, blank=True)
     posledni_odcerveni = models.DateField(null=True, blank=True)
     posledni_klistata = models.DateField(null=True, blank=True)
+
     # --- PŘIDANÉ METODY PRO ŠABLONU ---
     @property
     def vek(self):
@@ -108,7 +109,17 @@ class Pes(models.Model):
 
     @property
     def pristi_ockovani(self):
-        """Vypočítá datum za 1 rok od posledního očkování"""
+        """
+        Vrátí buď konkrétní naplánované datum z historie očkování,
+        nebo automaticky 1 rok od posledního očkování.
+        """
+        # 1. Zkusíme najít nejbližší budoucí termín z historie (pro štěňata)
+        planovane = self.vsechna_ockovani.filter(datum_pristi_navstevy__gt=date.today()).order_by(
+            'datum_pristi_navstevy').first()
+        if planovane:
+            return planovane.datum_pristi_navstevy
+
+        # 2. Pokud není plán, použijeme tvou logiku + 1 rok
         if self.posledni_ockovani:
             return self.posledni_ockovani + timedelta(days=365)
         return None
@@ -135,21 +146,20 @@ class Pes(models.Model):
         return None
 
     # Stav
-    je_ztraceny = models.BooleanField(default=False)
     vytvoreno = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.jmeno
 
     def save(self, *args, **kwargs):
-        # Pokud pes ještě nemá ID (vytváří se nový), musíme ho nejdřív uložit
+        # 1. První uložení pro získání ID (pokud je nový)
         is_new = self.pk is None
         super().save(*args, **kwargs)
 
-        # 2. Generujeme QR kód pouze pokud ještě neexistuje
+        # 2. Generujeme QR kód pouze pokud pole qr_kod ZEJE PRÁZDNOTOU
         if not self.qr_kod:
             try:
-                # Sjednoť URL s urls.py (buď /pes/ nebo /users/pes/)
+                # URL odkazuje na detail psa (napořád stejné díky ID)
                 qr_url = f"https://epes.online/pes/{self.id}/"
 
                 qr = qrcode.QRCode(version=1, box_size=10, border=5)
@@ -162,13 +172,14 @@ class Pes(models.Model):
                 canvas.seek(0)
 
                 fname = f'qr_pes_{self.id}.png'
+                # save=False je důležité, abychom nezavolali save() znovu
                 self.qr_kod.save(fname, File(canvas), save=False)
 
-                # Uložíme pouze pole qr_kod, abychom nezacyklili save()
-                super().save(update_fields=['qr_kod'])
+                # 3. Uložíme pouze pole qr_kod pomocí update_fields
+                # Tím zabráníme nekonečné smyčce
+                super(Pes, self).save(update_fields=['qr_kod'])
             except Exception as e:
                 print(f"Chyba při generování QR: {e}")
-
 
 class Ockovani(models.Model):
     pes = models.ForeignKey(Pes, on_delete=models.CASCADE, related_name='vsechna_ockovani')

@@ -1,12 +1,15 @@
-{% extends 'base.html' %}
+{% extends 'home/base.html' %}
 {% block content %}
 
 <style>
     :root {
-        --primary-brown: #5d4037;
+        --primary-brown: #3e2723;
         --accent-gold: #c5a059;
-        --soft-bg: #f8f9fa;
+        --soft-bg: #fdfaf4;
         --sos-red: #dc3545;
+        --success-green: #28a745;
+        --kocka-purple: #9b86bd;
+        --kocka-bg: #f8f7ff;
     }
 
     .dashboard-container { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -14,62 +17,77 @@
     /* --- Karty mazlíčků --- */
     .card-zdravi {
         border: none;
-        border-radius: 20px;
-        transition: all 0.3s ease;
+        border-radius: 25px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         background: white;
-        border-left: 6px solid #28a745;
-        overflow: hidden;
+        border-left: 8px solid var(--accent-gold);
+        position: relative;
+    }
+
+    /* Barva pro kočky */
+    .card-zdravi.is-kocka-card {
+        border-left-color: var(--kocka-purple);
     }
 
     .card-zdravi:hover {
         transform: translateY(-5px);
-        box-shadow: 0 15px 30px rgba(93, 64, 55, 0.1);
+        box-shadow: 0 15px 35px rgba(62, 39, 35, 0.1);
     }
 
-    .card-urgent { border-left-color: var(--sos-red) !important; }
+    /* Urgentní stav (blikající okraj) */
+    .card-urgent {
+        border-left-color: var(--sos-red) !important;
+        background-color: #fffcfc;
+    }
 
-    /* --- Notifikace --- */
-    @keyframes pulse-red {
-        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
-        70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
-        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    /* --- Notifikace a Animace --- */
+    @keyframes pulse-sos {
+        0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
     }
 
     .urgent-blink {
-        animation: pulse-red 2s infinite;
+        animation: pulse-sos 2s infinite;
         background: linear-gradient(45deg, var(--sos-red), #ff4b5c);
         color: white;
-        border-radius: 15px;
-        border: none;
-    }
-
-    /* --- Statistiky --- */
-    .stat-card {
         border-radius: 20px;
         border: none;
-        border-bottom: 4px solid var(--accent-gold);
-        transition: 0.3s;
     }
 
-    .stat-value { font-size: 1.4rem; font-weight: 800; color: var(--primary-brown); }
-    .stat-label { font-size: 0.65rem; font-weight: 700; color: #aaa; text-transform: uppercase; }
+    /* --- Statistiky a popisky --- */
+    .stat-box {
+        background: #f8f9fa;
+        border-radius: 18px;
+        padding: 12px 5px;
+        transition: 0.3s;
+    }
+    .stat-value { font-size: 1.1rem; font-weight: 800; color: var(--primary-brown); display: block; }
+    .stat-label { font-size: 0.65rem; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    .btn-manage {
-        border-radius: 12px;
-        font-weight: 700;
+    .text-urgent { color: var(--sos-red) !important; font-weight: 800; }
+    .text-purple { color: var(--kocka-purple) !important; }
+
+    .btn-action {
+        border-radius: 15px;
+        font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        padding: 12px;
+        border: none;
+        transition: 0.3s;
     }
 </style>
 
 <div class="container mt-4 dashboard-container">
+    {# HORNÍ NOTIFIKACE #}
     {% if nots %}
     <div class="row mb-4">
         <div class="col-12">
             <div class="card urgent-blink p-3 shadow-sm d-flex flex-row justify-content-between align-items-center">
-                <span class="fw-bold"><i class="fas fa-bell me-2"></i> Máte nové upozornění!</span>
-                <a href="{% url 'seznam_notifikaci' %}" class="btn btn-light btn-sm fw-bold px-3">Zobrazit</a>
+                <span class="fw-bold"><i class="fas fa-bell me-2"></i> Máte novou zprávu od nálezce!</span>
+                <a href="{% url 'seznam_notifikaci' %}" class="btn btn-light btn-sm fw-800 rounded-pill px-4">Zobrazit</a>
             </div>
         </div>
     </div>
@@ -77,107 +95,150 @@
 
     <div class="row">
         <div class="col-lg-8">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="fw-bold text-brown mb-0"><i class="fas fa-heartbeat me-2"></i>Zdraví smečky</h4>
-                <a href="{% url 'pridat_psa' %}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
-                    <i class="fas fa-plus me-1"></i> Přidat
-                </a>
+            <div class="d-flex justify-content-between align-items-end mb-4">
+                <div>
+                    <h3 class="fw-800 mb-1" style="color: var(--primary-brown);">Moji parťáci</h3>
+                    <p class="text-muted small mb-0">Přehled zdraví a SOS profilů</p>
+                </div>
+
+                {% if not profil.is_premium %}
+                    <a href="{% url 'cenik' %}" class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-bold shadow-sm">
+                        <i class="fas fa-crown me-1"></i> Upgrade na ALFA
+                    </a>
+                {% else %}
+                    <a href="{% url 'pridat_psa' %}" class="btn btn-sm btn-brown rounded-pill px-3 fw-bold text-white" style="background: var(--primary-brown);">
+                        <i class="fas fa-plus me-1"></i> Přidat dalšího
+                    </a>
+                {% endif %}
             </div>
 
             {% for mazlicek in psi %}
-            <div class="card mb-4 shadow-sm card-zdravi {% if mazlicek.pristi_klistata <= dnes_plus_3 %}card-urgent{% endif %}">
+            <div class="card mb-4 shadow-sm card-zdravi
+                {% if mazlicek.druh == 'kocka' %}is-kocka-card{% endif %}
+                {% if mazlicek.pristi_ockovani <= dnes_plus_3 or mazlicek.pristi_odcerveni <= dnes_plus_3 %}card-urgent{% endif %}">
+
                 <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
                         <div class="d-flex align-items-center">
-                            <div class="bg-light rounded-circle p-2 me-3 text-center" style="width: 45px; height: 45px;">
-                                <i class="fas {% if mazlicek.druh == 'kocka' %}fa-cat{% else %}fa-dog{% endif %} text-muted"></i>
+                            <div class="position-relative">
+                                {% if mazlicek.fotka %}
+                                    <img src="{{ mazlicek.fotka.url }}" class="rounded-circle shadow-sm"
+                                         style="width: 65px; height: 65px; object-fit: cover; border: 3px solid white;">
+                                {% else %}
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+                                         style="width: 65px; height: 65px; background: {% if mazlicek.druh == 'kocka' %}var(--kocka-bg){% else %}#fdfaf4{% endif %}; border: 1px solid #eee;">
+                                        <i class="fas {% if mazlicek.druh == 'kocka' %}fa-cat text-purple{% else %}fa-dog text-brown{% endif %} fa-lg"></i>
+                                    </div>
+                                {% endif %}
+                                <span class="position-absolute bottom-0 end-0 bg-white rounded-circle p-1 shadow-sm" style="transform: translate(20%, 20%);">
+                                    <i class="fas {% if mazlicek.druh == 'kocka' %}fa-cat text-purple{% else %}fa-dog text-brown{% endif %}" style="font-size: 0.6rem;"></i>
+                                </span>
                             </div>
-                            <h5 class="fw-bold mb-0">{{ mazlicek.jmeno }}</h5>
+
+                            <div class="ms-3">
+                                <h4 class="fw-800 mb-0" style="color: var(--primary-brown);">{{ mazlicek.jmeno }}</h4>
+                                <span class="text-muted small fw-600">{{ mazlicek.rasa|default:"Kříženec" }}</span>
+                            </div>
                         </div>
-                        <span class="badge rounded-pill {% if mazlicek.is_premium %}bg-warning text-dark{% else %}bg-light text-muted{% endif %} px-3 py-2">
-                            {% if mazlicek.is_premium %}<i class="fas fa-crown me-1"></i>Premium{% else %}Basic{% endif %}
-                        </span>
+
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
+                                <li><a class="dropdown-item small" href="{% url 'upravit_psa' mazlicek.id %}"><i class="fas fa-edit me-2"></i>Upravit údaje</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item small text-danger" href="#"><i class="fas fa-trash me-2"></i>Odstranit</a></li>
+                            </ul>
+                        </div>
                     </div>
 
-                    <div class="row text-center">
-                        <div class="col-4 border-end">
-                            <span class="stat-label d-block">💉 Očkování</span>
-                            <span class="stat-value">
-                                {% if mazlicek.ockovani_set.first %}
-                                    {{ mazlicek.ockovani_set.first.datum_pristi_navstevy|date:"d. m." }}
-                                {% else %}
-                                    <span class="text-muted small opacity-50">--</span>
-                                {% endif %}
-                            </span>
-                        </div>
-
-                        <div class="col-4 border-end">
-                            <span class="stat-label d-block">💊 Odčervení</span>
-                            <span class="stat-value">
-                                {{ mazlicek.pristi_odcerveni|date:"d. m."|default:"--" }}
-                            </span>
-                        </div>
-
+                    <div class="row g-3 text-center mb-4">
                         <div class="col-4">
-                            <span class="stat-label d-block">{% if mazlicek.druh == 'kocka' %}🐟 Paraziti{% else %}🐜 Klíšťata{% endif %}</span>
-                            <span class="stat-value">
-                                {% if mazlicek.pristi_klistata %}
-                                    {% if mazlicek.pristi_klistata <= dnes_plus_3 %}
-                                        <strong class="text-danger">⚠️ {{ mazlicek.pristi_klistata|timeuntil }}</strong>
-                                    {% else %}
-                                        {{ mazlicek.pristi_klistata|date:"d. m." }}
-                                    {% endif %}
-                                {% else %}
-                                    <span class="text-muted small opacity-50">--</span>
-                                {% endif %}
-                            </span>
+                            <div class="stat-box">
+                                <span class="stat-label">💉 Očkování</span>
+                                <span class="stat-value {% if mazlicek.pristi_ockovani <= dnes_plus_3 %}text-urgent{% endif %}">
+                                    {{ mazlicek.pristi_ockovani|date:"d.m."|default:"--" }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-box">
+                                <span class="stat-label">💊 Odčervení</span>
+                                <span class="stat-value {% if mazlicek.pristi_odcerveni <= dnes_plus_3 %}text-urgent{% endif %}">
+                                    {{ mazlicek.pristi_odcerveni|date:"d.m."|default:"--" }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-box">
+                                <span class="stat-label">
+                                    {% if not profil.is_premium %}<i class="fas fa-lock me-1 opacity-50" style="font-size: 0.6rem;"></i>{% endif %}
+                                    Chov
+                                </span>
+                                <span class="stat-value">
+                                    {% if profil.is_premium %}<i class="fas fa-check-circle text-success"></i>{% else %}<span class="opacity-25">--</span>{% endif %}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
-                    <a href="{% url 'detail_psa' mazlicek.id %}" class="btn btn-outline-primary btn-manage w-100 mt-4">
-                        Otevřít zdravotní deník
+                    <a href="{% url 'detail_psa' mazlicek.id %}" class="btn btn-action w-100 shadow-sm"
+                       style="background: {% if mazlicek.druh == 'kocka' %}var(--kocka-purple){% else %}var(--primary-brown){% endif %}; color: white;">
+                        OTEVŘÍT ZDRAVOTNÍ DENÍK <i class="fas fa-arrow-right ms-2"></i>
                     </a>
                 </div>
             </div>
             {% empty %}
-            <div class="text-center py-5 bg-white rounded-4 shadow-sm">
-                <p class="text-muted mb-3">Zatím zde nemáte žádné mazlíčky.</p>
-                <a href="{% url 'pridat_psa' %}" class="btn btn-brown px-4">Přidejte prvního!</a>
+            <div class="text-center py-5 bg-white rounded-5 shadow-sm border">
+                <i class="fas fa-paw fa-3x mb-3 opacity-10"></i>
+                <p class="text-muted fw-bold">Zatím zde nemáte žádné parťáky.</p>
+                <a href="{% url 'pridat_psa' %}" class="btn btn-brown rounded-pill px-4">Zaregistrovat prvního</a>
             </div>
             {% endfor %}
         </div>
 
         <div class="col-lg-4">
-            <h4 class="fw-bold text-brown mb-3"><i class="fas fa-users me-2"></i>Komunita</h4>
+            <h5 class="fw-800 mb-3" style="color: var(--primary-brown);">Rychlé akce</h5>
             <div class="list-group shadow-sm mb-5 rounded-4 overflow-hidden border-0">
-                <a href="{% url 'seznam_zdi' %}" class="list-group-item list-group-item-action py-3 border-0 border-bottom">
-                    <i class="fas fa-stream me-3 text-muted"></i> Zeď plemen
+                <a href="{% url 'seznam_hledanych_psu' %}" class="list-group-item list-group-item-action py-3 border-0 border-bottom d-flex align-items-center bg-white" style="color: var(--sos-red);">
+                    <i class="fas fa-search-location me-3 fa-lg"></i>
+                    <div>
+                        <span class="d-block fw-800">Pátrání v okolí</span>
+                        <small class="text-muted">Někdo potřebuje vaši pomoc</small>
+                    </div>
                 </a>
-                <a href="{% url 'seznam_hledanych_psu' %}" class="list-group-item list-group-item-action py-3 border-0 border-bottom text-danger">
-                    <i class="fas fa-search-location me-3"></i> SOS: Pátrání
-                </a>
-                <a href="{% url 'profil_uzivatele' %}" class="list-group-item list-group-item-action py-3 border-0">
-                    <i class="fas fa-user-cog me-3 text-muted"></i> Můj profil
+                <a href="{% url 'seznam_zdi' %}" class="list-group-item list-group-item-action py-3 border-0 border-bottom d-flex align-items-center bg-white">
+                    <i class="fas fa-comments me-3 text-muted fa-lg"></i>
+                    <div>
+                        <span class="d-block fw-800">Zeď plemen</span>
+                        <small class="text-muted">Novinky od ostatních chovatelů</small>
+                    </div>
                 </a>
             </div>
 
-            <h4 class="fw-bold text-brown mb-3"><i class="fas fa-chart-line me-2"></i>Aktivita</h4>
+            <h5 class="fw-800 mb-3" style="color: var(--primary-brown);">Vaše aktivita</h5>
             <div class="row g-3 text-center">
                 <div class="col-6">
-                    <div class="card stat-card shadow-sm p-3">
-                        <i class="fas fa-camera mb-2 text-muted opacity-50"></i>
-                        <div class="stat-value">{{ pocet_fotek }}</div>
-                        <div class="stat-label">Fotky</div>
+                    <div class="card border-0 shadow-sm p-3 rounded-4 bg-white" style="border-bottom: 4px solid var(--accent-gold) !important;">
+                        <span class="stat-label">Fotky</span>
+                        <span class="stat-value">{{ pocet_fotek }}</span>
                     </div>
                 </div>
                 <div class="col-6">
-                    <div class="card stat-card shadow-sm p-3" style="border-bottom-color: var(--primary-brown);">
-                        <i class="fas fa-video mb-2 text-muted opacity-50"></i>
-                        <div class="stat-value">{{ pocet_videi }}</div>
-                        <div class="stat-label">Videa</div>
+                    <div class="card border-0 shadow-sm p-3 rounded-4 bg-white" style="border-bottom: 4px solid var(--primary-brown) !important;">
+                        <span class="stat-label">Videa</span>
+                        <span class="stat-value">{{ pocet_videi }}</span>
                     </div>
                 </div>
             </div>
+
+            {% if not profil.is_premium %}
+            <div class="card mt-4 border-0 shadow-sm rounded-4 p-4 text-center" style="background: linear-gradient(135deg, #fffcf6, #fff);">
+                <i class="fas fa-crown text-warning fa-2x mb-2"></i>
+                <h6 class="fw-800">Staňte se ALFA členem</h6>
+                <p class="extra-small text-muted mb-3">Získejte rodokmeny, chovné údaje a neomezené místo pro fotky.</p>
+                <a href="{% url 'cenik' %}" class="btn btn-sm btn-brown text-white w-100 rounded-pill fw-800">VÍCE INFORMACÍ</a>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

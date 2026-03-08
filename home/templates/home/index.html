@@ -2,33 +2,41 @@
 
 {% block content %}
 <style>
-    /* Hlavní kontejner */
     .home-container {
         max-width: 1000px;
         margin: 0 auto;
         padding: 15px;
     }
 
-    /* Hero sekce s pozdravem */
-    .hero-alfa {
-        padding: 20px 0;
-        margin-bottom: 20px;
-    }
+    /* Hero a status */
+    .hero-alfa { padding: 20px 0; margin-bottom: 20px; }
     .hero-alfa h2 {
         font-family: 'Playfair Display', serif;
         font-size: 2.2rem;
-        color: #2d1b19;
+        color: var(--dark-cocoa);
         margin-bottom: 5px;
     }
 
-    /* SOS SEKCE STYLY */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: white;
+        padding: 6px 14px;
+        border-radius: 50px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        color: var(--gold);
+        font-weight: 700;
+        font-size: 0.8rem;
+    }
+
+    /* SOS sekce */
     .sos-section {
         background: #fff5f5;
-        border: 2px solid #e35d6a;
+        border: 2px solid var(--sos-red);
         border-radius: 25px;
         padding: 20px;
         margin-bottom: 35px;
-        box-shadow: 0 10px 20px rgba(227, 93, 106, 0.1);
     }
     .sos-card {
         background: white;
@@ -38,172 +46,95 @@
         align-items: center;
         text-decoration: none !important;
         color: inherit;
-        transition: 0.3s;
         border: 1px solid rgba(227, 93, 106, 0.1);
     }
-    .sos-card:hover {
-        transform: scale(1.02);
-        box-shadow: 0 5px 15px rgba(227, 93, 106, 0.15);
-    }
-    .sos-img {
-        width: 65px;
-        height: 65px;
-        border-radius: 12px;
-        object-fit: cover;
-    }
+    .sos-img { width: 65px; height: 65px; border-radius: 12px; object-fit: cover; }
     .sos-badge {
-        background: #e35d6a;
+        background: var(--sos-red);
         color: white;
         font-size: 0.6rem;
         font-weight: 900;
         padding: 2px 8px;
         border-radius: 50px;
         text-transform: uppercase;
-        display: inline-block;
         margin-bottom: 4px;
+        display: inline-block;
     }
 
-    /* STATUS BADGE */
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: white;
-        padding: 6px 14px;
-        border-radius: 50px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        color: #c5a059;
-        font-weight: 700;
-        font-size: 0.8rem;
-    }
-
-    /* PREMIUM BANNER */
-    .premium-banner {
-        background: white;
-        border-radius: 20px;
-        padding: 15px 25px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 35px;
-        border: 1px solid rgba(197, 160, 89, 0.25);
-        box-shadow: 0 10px 25px rgba(62, 39, 35, 0.05);
-        transition: transform 0.3s ease;
-    }
-    .premium-banner:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 15px 30px rgba(197, 160, 89, 0.12);
-    }
-    .premium-content {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-    .premium-icon {
-        font-size: 1.5rem;
-        background: #fffdf5;
-        width: 45px;
-        height: 45px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 12px;
-    }
-    .premium-text h5 { margin: 0; font-weight: 800; color: #3e2723; font-size: 1rem; }
-    .premium-text p { margin: 0; font-size: 0.8rem; color: #8d7d77; }
-
-    .btn-alfa-slim {
-        background: #c5a059;
-        color: white !important;
-        font-weight: 700;
-        font-size: 0.8rem;
-        padding: 8px 18px;
-        border-radius: 10px;
-        text-decoration: none !important;
-        transition: 0.3s;
-    }
-    .btn-alfa-slim:hover { background: #3e2723; transform: scale(1.05); }
-
-    /* HLAVNÍ KARTY */
+    /* Hlavní karty */
     .main-card {
         background: #ffffff;
         border-radius: 25px;
         padding: 35px 20px;
         text-align: center;
         text-decoration: none !important;
-        color: #3e2723;
+        color: var(--mid-brown);
         display: flex;
         flex-direction: column;
         height: 100%;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         box-shadow: 0 15px 35px rgba(62, 39, 35, 0.1);
         border: 1px solid rgba(197, 160, 89, 0.1);
+        transition: 0.3s;
     }
-    .main-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 25px 50px rgba(62, 39, 35, 0.18);
-        border-color: #c5a059;
-    }
+    .main-card:hover { transform: translateY(-10px); border-color: var(--gold); }
     .icon-circle {
         width: 60px; height: 60px;
-        background: #fdfaf6;
+        background: var(--bg-page);
         border-radius: 50%;
         display: flex; align-items: center; justify-content: center;
         margin: 0 auto 15px;
         font-size: 1.8rem;
     }
 
-    /* Dlaždice komunity */
-    .sub-card {
-        background: white;
-        border-radius: 15px;
-        padding: 15px;
-        text-align: center;
-        text-decoration: none !important;
-        color: #5d4037;
-        font-weight: 600;
-        display: block;
-        transition: 0.3s;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.04);
-    }
-    .sub-card:hover { transform: translateY(-3px); background: #3e2723; color: white !important; }
-
-    /* Příspěvky na zdi */
+    /* Zeď */
     .post-card {
         background: white;
         border-radius: 18px;
         padding: 20px;
         margin-bottom: 15px;
         box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        border-left: 4px solid transparent;
         transition: 0.3s;
     }
+    .post-card:hover { border-left-color: var(--gold); transform: translateX(5px); }
 
-    /* Nadpisy sekcí */
     .section-label { display: flex; align-items: center; gap: 15px; margin: 45px 0 20px 0; }
-    .section-label h4 { font-weight: 800; color: #3e2723; margin: 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
-    .section-label .line { flex-grow: 1; height: 1.5px; background: rgba(197, 160, 89, 0.2); }
+    .section-label h4 { font-weight: 800; color: var(--mid-brown); margin: 0; font-size: 0.9rem; text-transform: uppercase; }
+    .section-label .line { flex-grow: 1; height: 1.5px; background: var(--gold); opacity: 0.2; }
 
-    @media (max-width: 768px) {
-        .premium-banner { flex-direction: column; text-align: center; gap: 15px; }
-        .main-card { padding: 30px 15px; }
+    /* Sub-karty komunity */
+    .sub-card {
+        background: white;
+        border-radius: 15px;
+        padding: 15px;
+        text-align: center;
+        text-decoration: none !important;
+        color: var(--mid-brown);
+        font-weight: 600;
+        display: block;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.04);
+        transition: 0.3s;
     }
+    .sub-card:hover { background: var(--mid-brown); color: white !important; }
 </style>
 
 <div class="home-container">
+    {# HERO SEKCE #}
     <div class="hero-alfa">
         <h2>Ahoj, {{ user.username }}! 🐾</h2>
         <div class="status-badge">
-            {% if user.profil.is_premium %}
-                <i class="fas fa-crown" style="color: gold !important;"></i> TVŮJ ALFA PROFIL JE AKTIVNÍ
+            {% if user.profil and user.profil.is_premium %}
+                <i class="fas fa-crown" style="color: #FFD700 !important;"></i> TVŮJ ALFA PROFIL JE AKTIVNÍ
             {% else %}
                 <i class="fas fa-heart"></i> MILOVNÍK ZVÍŘAT
             {% endif %}
         </div>
     </div>
 
+    {# SOS SEKCE #}
     {% if ztraceni_psi %}
     <div class="sos-section">
-        <h4 class="fw-bold mb-3" style="color: #b33939; font-size: 1rem;">
+        <h4 class="fw-bold mb-3" style="color: var(--sos-red); font-size: 1rem;">
             <i class="fas fa-bullhorn me-2"></i> AKTUÁLNĚ HLEDÁME
         </h4>
         <div class="row g-3">
@@ -211,17 +142,15 @@
             <div class="col-md-6 col-lg-4">
                 <a href="{% url 'nouzovy_profil_psa' pes_id=hledany.id %}" class="sos-card">
                     {% if hledany.fotka %}
-                        <img src="{{ hledany.fotka.url }}" class="sos-img">
+                        <img src="{{ hledany.fotka.url }}" class="sos-img" alt="{{ hledany.jmeno }}">
                     {% else %}
                         <div class="sos-img bg-light d-flex align-items-center justify-content-center">
                             <i class="fas fa-paw text-muted"></i>
                         </div>
                     {% endif %}
                     <div class="ms-3">
-                        <span class="sos-badge">
-                            {% if hledany.druh == 'kocka' %}🐈 ZTRACENÁ KOČKA{% else %}🐕 ZTRACENÝ PES{% endif %}
-                        </span>
-                        <h6 class="fw-bold m-0" style="color: #2d1b19;">{{ hledany.jmeno }}</h6>
+                        <span class="sos-badge">{% if hledany.druh == 'kocka' %}🐈 KOČKA{% else %}🐕 PES{% endif %}</span>
+                        <h6 class="fw-bold m-0" style="color: var(--dark-cocoa);">{{ hledany.jmeno }}</h6>
                         <small class="text-muted d-block" style="font-size: 0.7rem;">{{ hledany.rasa }}</small>
                     </div>
                 </a>
@@ -231,43 +160,32 @@
     </div>
     {% endif %}
 
-    {% if not user.profil.is_premium %}
-    <div class="premium-banner">
-        <div class="premium-content">
-            <div class="premium-icon">👑</div>
-            <div class="premium-text">
-                <h5>Chcete korunku u jména?</h5>
-                <p>Získejte status ALFA a podpořte náš zvířecí svět.</p>
-            </div>
-        </div>
-        <a href="{% url 'cenik' %}" class="btn-alfa-slim">ZÍSKAT STATUS</a>
-    </div>
-    {% endif %}
-
+    {# HLAVNÍ ROZCESTNÍK #}
     <div class="row g-4">
         <div class="col-md-4">
             <a href="{% url 'seznam_inzeratu' %}" class="main-card">
                 <div class="icon-circle">📦</div>
                 <h5 class="fw-bold mb-1">Zvířecí Bazar</h5>
-                <p class="text-muted small mb-0">Nakupujte a prodávejte věci pro své parťáky</p>
+                <p class="text-muted small mb-0">Nakupujte a prodávejte věci</p>
             </a>
         </div>
         <div class="col-md-4">
             <a href="{% url 'mapa_sluzeb' %}" class="main-card">
                 <div class="icon-circle">📍</div>
                 <h5 class="fw-bold mb-1">Mapa služeb</h5>
-                <p class="text-muted small mb-0">Veteriny, salóny a pet-friendly místa</p>
+                <p class="text-muted small mb-0">Veteriny a pet-friendly místa</p>
             </a>
         </div>
         <div class="col-md-4">
-            <a href="{% url 'profil' %}" class="main-card">
+            <a href="{% url 'seznam_psu' %}" class="main-card">
                 <div class="icon-circle">📑</div>
                 <h5 class="fw-bold mb-1">Deník zvířete</h5>
-                <p class="text-muted small mb-0">Zdravotní záznamy, očkování a QR profil</p>
+                <p class="text-muted small mb-0">Zdravotní záznamy a QR profil</p>
             </a>
         </div>
     </div>
 
+    {# KOMUNITA #}
     <div class="section-label">
         <h4>Komunita a zdi</h4>
         <div class="line"></div>
@@ -279,29 +197,35 @@
         <div class="col-6 col-md-3"><a href="{% url 'seznam_zdi' %}" class="sub-card">🐾 Všechny rasy</a></div>
     </div>
 
+    {# ZEĎ PŘÍSPĚVKŮ #}
     <div class="section-label">
         <h4>Aktuálně na zdi</h4>
         <div class="line"></div>
     </div>
 
-    {% for prispevek in posledni_prispevky %}
-        {% if prispevek.plemeno.slug %}
-            <a href="{% url 'zed_plemene' prispevek.plemeno.slug %}#post-{{ prispevek.id }}" class="post-card d-block text-decoration-none">
-        {% else %}
-            <a href="{% url 'seznam_zdi' %}" class="post-card d-block text-decoration-none">
-        {% endif %}
-            <div class="d-flex align-items-center mb-2">
-                <div class="bg-light rounded-circle p-2 me-2" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-user text-muted small"></i>
+    <div class="posts-wrapper">
+        {% for prispevek in posledni_prispevky %}
+            {% if prispevek.plemeno and prispevek.plemeno.slug %}
+                {% url 'zed_plemene' prispevek.plemeno.slug as post_url %}
+            {% else %}
+                {% url 'seznam_zdi' as post_url %}
+            {% endif %}
+
+            <a href="{{ post_url }}{% if prispevek.plemeno %}#post-{{ prispevek.id }}{% endif %}" class="post-card d-block text-decoration-none">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="bg-light rounded-circle p-2 me-2" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-user text-muted small"></i>
+                    </div>
+                    <span class="fw-bold small text-dark">{{ prispevek.autor.username }}</span>
+                    <span class="text-muted mx-2">•</span>
+                    <small class="text-muted">{{ prispevek.datum_pridani|timesince }} zpět</small>
                 </div>
-                <span class="fw-bold small text-dark">{{ prispevek.autor.username }}</span>
-                <span class="text-muted mx-2">•</span>
-                <small class="text-muted">{{ prispevek.datum_pridani|timesince }} zpět</small>
-            </div>
-            <p class="mb-0 text-secondary small">{{ prispevek.text }}</p>
-        </a>
-    {% empty %}
-        <div class="text-center py-4 text-muted small">Na zdi je zatím ticho... 🐾</div>
-    {% endfor %}
-</div>
+                <p class="mb-0 text-secondary small">{{ prispevek.text }}</p>
+            </a>
+        {% empty %}
+            <div class="text-center py-4 text-muted small">Na zdi je zatím ticho... 🐾</div>
+        {% endfor %}
+    </div> {# ZDE CHYBĚLO UZAVŘENÍ posts-wrapper #}
+
+</div> {# Konec home-container #}
 {% endblock %}

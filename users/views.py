@@ -4,7 +4,7 @@ import io
 from datetime import timedelta, timezone
 
 import qrcode
-from PIL import Image
+from PIL import Image, ImageOps
 from django.contrib.admin.views.decorators import staff_member_required
 from pillow_heif import register_heif_opener
 
@@ -73,7 +73,18 @@ def seznam_psu(request):
 def dashboard(request):
     profil = request.user.profil
     psi = Pes.objects.filter(majitel=profil)
-    # Načteme nepřečtené notifikace (sociální i zdravotní)
+
+    # --- LOGIKA LIMITŮ PRO ŠABLONU ---
+    pocet_psu = psi.filter(druh='pes').count()
+    pocet_kocek = psi.filter(druh='kocka').count()
+
+    # --- STATISTIKY (pro pravý sloupec dashboardu) ---
+    # Sečteme fotky a videa pro všechna zvířata daného uživatele
+    from .models import GalerieFotka, GalerieVideo  # Importuj své modely galerií
+    pocet_fotek = GalerieFotka.objects.filter(pes__majitel=profil).count()
+    pocet_videi = GalerieVideo.objects.filter(pes__majitel=profil).count()
+
+    # Načteme nepřečtené notifikace
     nots = request.user.prijate_notifikace.filter(precteno=False).order_by('-datum_vytvoreni')
     dnes_plus_3 = timezone.now().date() + timedelta(days=3)
 
@@ -82,6 +93,10 @@ def dashboard(request):
         'nots': nots,
         'profil': profil,
         'dnes_plus_3': dnes_plus_3,
+        'pocet_psu': pocet_psu,
+        'pocet_kocek': pocet_kocek,
+        'pocet_fotek': pocet_fotek,
+        'pocet_videi': pocet_videi,
     })
 
 
@@ -89,31 +104,39 @@ def dashboard(request):
 def pridat_psa(request):
     profil = get_object_or_404(ProfilMajitele, uzivatel=request.user)
 
-    # 1. Kontrola limitu pro neplatiče
-    if not profil.is_premium and not request.user.is_staff and profil.psi.count() >= 1:
-        messages.warning(request, "Ve verzi zdarma můžete mít pouze jednoho pejska.")
-        return redirect('seznam_psu')
+    # Načteme počty pro kontrolu limitů
+    pocet_psu = profil.psi.filter(druh='pes').count()
+    pocet_kocek = profil.psi.filter(druh='kocka').count()
 
     if request.method == 'POST':
         form = PesForm(request.POST, request.FILES, request=request)
         if form.is_valid():
+            # 1. KONTROLA LIMITŮ PŘED ULOŽENÍM
+            if not profil.is_premium and not request.user.is_staff:
+                novy_druh = form.cleaned_data.get('druh')
+
+                if novy_druh == 'pes' and pocet_psu >= 1:
+                    messages.warning(request, "Ve verzi Free můžete mít pouze jednoho pejska.")
+                    return redirect('profil_uzivatele')
+
+                if novy_druh == 'kocka' and pocet_kocek >= 1:
+                    messages.warning(request, "Ve verzi Free můžete mít pouze jednu kočičku.")
+                    return redirect('profil_uzivatele')
+
             try:
                 pes = form.save(commit=False)
                 pes.majitel = profil
 
-                # Zpracování fotky
                 if 'fotka' in request.FILES:
                     pes.fotka = zpracuj_foto(request.FILES['fotka'])
 
-                # Automatické vyplnění prázdných polí (aby formulář prošel)
-                # PŘIDAL JSEM SEM I TYP OCHRANY PRO KLÍŠŤATA
                 for pole in ['otec_manualni', 'matka_manualni', 'zdravotni_testy', 'bonitace', 'typ_ochrany_klistata']:
                     if hasattr(pes, pole) and not getattr(pes, pole):
                         setattr(pes, pole, "Nezadáno")
 
                 pes.save()
 
-                # Generování QR (zůstává stejné)
+                # QR Generování
                 url_psa = f"https://epes.online/users/pes/{pes.id}/"
                 qr = qrcode.QRCode(version=1, box_size=10, border=5)
                 qr.add_data(url_psa)
@@ -124,92 +147,106 @@ def pridat_psa(request):
                 filename = f'qr_{pes.id}_{slugify(pes.jmeno)}.png'
                 pes.qr_kod.save(filename, ContentFile(buffer.getvalue()), save=True)
 
-                messages.success(request, f"Pejsek {pes.jmeno} byl úspěšně přidán!")
+                messages.success(request, f"{pes.jmeno} byl/a úspěšně přidán/a!")
                 return redirect('seznam_psu')
 
             except Exception as e:
-                messages.error(request, f"Kritická chyba při ukládání: {e}")
-                print(f"DEBUG EXCEPTION: {e}")
+                messages.error(request, f"Kritická chyba: {e}")
         else:
-            # TADY JE TA DŮLEŽITÁ ČÁST: Pokud formulář není validní, vypíše to chyby do konzole
+            # Tento blok patří k "if form.is_valid():"
             print(f"CHYBY FORMULÁŘE: {form.errors}")
-            messages.error(request, "Formulář obsahuje chyby. Zkontrolujte vyplněná pole.")
+            messages.error(request, "Formulář obsahuje chyby.")
+
     else:
+        # 2. PREVENTIVNÍ KONTROLA PŘI VSTUPU (GET)
+        if not profil.is_premium and not request.user.is_staff:
+            if pocet_psu >= 1 and pocet_kocek >= 1:
+                messages.info(request, "Dosáhli jste limitu Free verze (1 pes + 1 kočka).")
+                return redirect('profil_uzivatele')
+
         form = PesForm(request=request)
 
     return render(request, 'users/pridat_psa.html', {'form': form})
 
-
 @login_required
 def upravit_psa(request, pk):
-    # Získání psa a kontrola majitele
     pes = get_object_or_404(Pes, pk=pk, majitel=request.user.profil)
 
     if request.method == 'POST':
-        try:
-            # --- ZÁKLADNÍ ÚDAJE ---
-            pes.jmeno = request.POST.get('jmeno')
-            pes.rasa = request.POST.get('rasa')
-            pes.cip = request.POST.get('cip')
+        form = PesForm(request.POST, request.FILES, instance=pes, request=request)
 
-            # Bezpečné uložení váhy
-            vaha_raw = request.POST.get('vaha')
-            if vaha_raw:
-                pes.vaha = vaha_raw.replace(',', '.')
-            else:
-                pes.vaha = None
+        if form.is_valid():
+            try:
+                pes = form.save(commit=False)
 
-            pes.datum_narozeni = request.POST.get('datum_narozeni') or None
+                posledni_odcerveni = request.POST.get('posledni_odcerveni')
+                posledni_klistata = request.POST.get('posledni_klistata')
+                zdravotni_poznamky = request.POST.get('zdravotni_poznamky')
 
-            # --- ZDRAVOTNÍ PREVENCE ---
-            pes.posledni_ockovani = request.POST.get('posledni_ockovani') or None
-            pes.posledni_odcerveni = request.POST.get('posledni_odcerveni') or None
-            pes.posledni_klistata = request.POST.get('posledni_klistata') or None
+                # Uložíme do modelu, pokud jsou vyplněny (jinak zůstane původní nebo None)
+                pes.posledni_odcerveni = posledni_odcerveni if posledni_odcerveni else None
+                pes.posledni_klistata = posledni_klistata if posledni_klistata else None
+                if zdravotni_poznamky:
+                    pes.zdravotni_poznamky = zdravotni_poznamky
 
-            # --- CHOVNÉ ÚDAJE ---
-            pes.rtg_hd = request.POST.get('rtg_hd') or "Nezadáno"
-            pes.rtg_ed = request.POST.get('rtg_ed') or "Nezadáno"
-            pes.rtg_pater = request.POST.get('rtg_pater') or "Nezadáno"
-            pes.otec_manualni = request.POST.get('otec_manualni') or "Nezadáno"
-            pes.matka_manualni = request.POST.get('matka_manualni') or "Nezadáno"
+                # OPRAVA: Název checkboxu musí sedět s HTML
+                if request.POST.get('regenerovat_qr_checkbox') == 'on' or not pes.qr_kod:
+                    try:
+                        url_psa = f"https://epes.online/users/pes/{pes.id}/"
 
-            # --- FOTKA (Bezpečná verze) ---
-            if 'fotka' in request.FILES:
-                # Pokud máte funkci zpracuj_foto v jiném souboru, importujte ji!
-                # Pokud ne, uložte fotku přímo:
-                pes.fotka = request.FILES['fotka']
+                        qr_gen = qrcode.QRCode(version=1, box_size=10, border=5)
+                        qr_gen.add_data(url_psa)
+                        qr_gen.make(fit=True)
 
-            # --- QR KÓD ---
-            if request.POST.get('regenerovat_qr') == 'on' or not pes.qr_kod:
-                try:
-                    url_psa = f"https://epes.online/users/pes/{pes.id}/"
-                    qr_gen = qrcode.QRCode(version=1, box_size=10, border=5)
-                    qr_gen.add_data(url_psa)
-                    qr_gen.make(fit=True)
+                        img_qr = qr_gen.make_image(fill_color="black", back_color="white")
+                        buffer = io.BytesIO()
+                        img_qr.save(buffer, format='PNG')
 
-                    img_qr = qr_gen.make_image(fill_color="black", back_color="white")
-                    buffer = io.BytesIO()
-                    img_qr.save(buffer, format='PNG')
+                        filename = f'qr_{pes.id}_{slugify(pes.jmeno)}.png'
 
-                    filename = f'qr_{pes.id}_{slugify(pes.jmeno)}.png'
-                    # Smazání starého kódu před uložením nového
-                    if pes.qr_kod:
-                        pes.qr_kod.delete(save=False)
-                    pes.qr_kod.save(filename, ContentFile(buffer.getvalue()), save=False)
-                except Exception as qr_err:
-                    print(f"Chyba QR kódu: {qr_err}")
-                    # Nechceme, aby chyba QR kódu zastavila uložení celého psa
+                        if pes.qr_kod:
+                            pes.qr_kod.delete(save=False)
 
-            pes.save()
-            messages.success(request, f"Profil {pes.jmeno} byl úspěšně uložen.")
-            return redirect('seznam_psu')
+                        pes.qr_kod.save(filename, ContentFile(buffer.getvalue()), save=False)
+                    except Exception as qr_err:
+                        print(f"Chyba QR: {qr_err}")
 
-        except Exception as e:
-            # KLÍČOVÉ PRO LADĚNÍ: Tady uvidíte chybu v terminálu!
-            print(f"!!! CHYBA PŘI UKLÁDÁNÍ: {e}")
-            messages.error(request, f"Došlo k chybě: {e}")
+                pes.save()
+                messages.success(request, f"Profil {pes.jmeno} byl uložen.")
 
-    return render(request, 'users/upravit_psa.html', {'pes': pes})
+                # Směrování na detail_psa s parametrem pes_id (podle tvého urls.py)
+                return redirect('detail_psa', pes_id=pes.id)
+
+            except Exception as e:
+                messages.error(request, f"Chyba: {e}")
+        else:
+            messages.error(request, "Opravte chyby ve formuláři.")
+    else:
+        form = PesForm(instance=pes, request=request)
+
+    return render(request, 'users/upravit_psa.html', {'form': form, 'pes': pes})
+
+@login_required
+def detail_psa(request, pes_id):
+    pes = get_object_or_404(Pes, id=pes_id)
+    profil, _ = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
+
+    # --- INTELIGENTNÍ VÝHYBKA ---
+    if pes.majitel.uzivatel != request.user:
+        return render(request, 'users/nouzovy_profil.html', {
+            'pes': pes,
+            'profil': profil,
+            'nouzovy_rezim': pes.je_ztraceny,
+        })
+
+    # --- TADY JE TA OPRAVA (POUŽIJ RENDER) ---
+    return render(request, 'users/detail_psa.html', {
+        'pes': pes,
+        'profil': profil,
+        'uspechy': pes.uspechy.all(),
+        'galeriefotky': GalerieFotka.objects.filter(pes=pes),
+        'galerievidea': GalerieVideo.objects.filter(pes=pes),
+    })
 
 @login_required
 def smazat_psa(request, pk):
@@ -228,91 +265,87 @@ def smazat_psa(request, pk):
 # --- 2. MULTIMÉDIA (Galerie - Nahrávání a mazání) ---
 @login_required
 def pridat_foto(request, pes_id):
+    pes = get_object_or_404(Pes, id=pes_id, majitel__uzivatel=request.user)
+
     if request.method == 'POST':
-        pes = get_object_or_404(Pes, id=pes_id, majitel__uzivatel=request.user)
-        profil = request.user.profil  # Předpokládám, že zde máte is_premium
+        file = request.FILES.get('obrazek')
+        if file:
+            filename = file.name.lower()
 
-        # --- LOGIKA LIMITŮ PRO FOTKY ---
-        if not profil.is_premium and not request.user.is_staff:
-            if pes.galerie_fotky.count() >= 5:
-                messages.warning(request,
-                                 "V bezplatné verzi můžete mít pouze 5 fotek. Přejděte na Premium pro neomezenou galerii.")
-                return redirect('detail_psa', pes_id=pes.id)
+            try:
+                # Otevřeme obrázek (Pillow díky register_heif_opener zvládne i HEIC)
+                image = Image.open(file)
 
-        foto = request.FILES.get('obrazek')
-        if foto:
-            GalerieFotka.objects.create(pes=pes, obrazek=foto)
-            messages.success(request, "Fotka byla úspěšně přidána.")
+                # --- OPRAVA ROTACE (EXIF) ---
+                # Toto zajistí, že fotka nebude na bok, pokud ji tak iPhone vyfotil
+                image = ImageOps.exif_transpose(image)
+
+                # Pokud je to HEIC nebo chceme vynutit JPG pro všechno (doporučeno)
+                if filename.endswith('.heic') or filename.endswith('.heif') or True:
+                    # Převedeme na RGB (nutné pro JPG)
+                    if image.mode in ("RGBA", "P"):
+                        image = image.convert('RGB')
+                    else:
+                        image = image.convert('RGB')
+
+                    # Uložíme do paměti jako JPG
+                    buffer = io.BytesIO()
+                    image.save(buffer, format="JPEG", quality=85, optimize=True)
+
+                    # Vytvoříme nový název souboru
+                    new_filename = filename.rsplit('.', 1)[0] + ".jpg"
+                    file = ContentFile(buffer.getvalue(), name=new_filename)
+
+                # Uložení do databáze
+                GalerieFotka.objects.create(pes=pes, obrazek=file)
+                messages.success(request, "Fotka byla úspěšně nahrána.")
+
+            except Exception as e:
+                messages.error(request, f"Chyba při zpracování obrázku: {e}")
 
     return redirect('detail_psa', pes_id=pes_id)
 
 
 @login_required
 def smazat_foto(request, pk):
-    # Přidána kontrola, aby se předešlo NoReverseMatch
+    # Najdeme fotku a ověříme majitele
     foto = get_object_or_404(GalerieFotka, id=pk, pes__majitel=request.user.profil)
     pes_id = foto.pes.id
     foto.delete()
     messages.success(request, "Fotka byla úspěšně smazána.")
-    # Vracíme se zpět do editoru, ne na detail (který může zlobit v URL)
-    return redirect('upravit_psa', pk=pes_id)
+    # VRACÍME SE NA DETAIL - parametr musí být pes_id (podle tvého urls.py)
+    return redirect('detail_psa', pes_id=pes_id)
 
 
 @login_required
 def pridat_video(request, pes_id):
+    pes = get_object_or_404(Pes, id=pes_id, majitel__uzivatel=request.user)
     if request.method == 'POST':
-        pes = get_object_or_404(Pes, id=pes_id, majitel__uzivatel=request.user)
         profil = request.user.profil
 
-        # --- LOGIKA LIMITŮ PRO VIDEA ---
+        # Kontrola limitů
         if not profil.is_premium and not request.user.is_staff:
-            if pes.galerie_videa.count() >= 1:
+            # Oprava: Používáme správný název vztahu (galerievidea nebo galerie_videa)
+            if GalerieVideo.objects.filter(pes=pes).count() >= 1:
                 messages.warning(request, "V bezplatné verzi můžete mít pouze 1 video. Přejděte na Premium.")
-                return redirect('detail_psa', pes_id=pes.id)
+                return redirect('detail_psa', pes_id=pes.id) # Zde opraveno z pk na pes_id
 
-        vid = request.FILES.get('video') # Název musí sedět s name="video" v HTML
+        vid = request.FILES.get('video')
         if vid:
             GalerieVideo.objects.create(pes=pes, video_soubor=vid)
             messages.success(request, "Video bylo úspěšně nahráno.")
         else:
-            messages.error(request, "Chyba: Soubor nebyl přijat. Zkontrolujte velikost videa.")
+            messages.error(request, "Chyba: Soubor nebyl přijat.")
 
     return redirect('detail_psa', pes_id=pes_id)
 
 @login_required
 def smazat_video(request, pk):
-    video = get_object_or_404(GalerieVideo, id=pk, pes__majitel=request.user.profil)
+    video = get_object_or_404(GalerieVideo, id=pk, pes__majitel__uzivatel=request.user)
     p_id = video.pes.id
     video.delete()
     messages.success(request, "Video smazáno.")
-    # Sjednoceno na 'pk', aby to odpovídalo vašim URL patternům
-    return redirect('upravit_psa', pk=p_id)
-
-
-@login_required
-def detail_psa(request, pes_id):
-    pes = get_object_or_404(Pes, id=pes_id)
-    profil, _ = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
-
-    # --- INTELIGENTNÍ VÝHYBKA ---
-    if pes.majitel.uzivatel != request.user:
-        return render(request, 'users/nouzovy_profil.html', {
-            'pes': pes,
-            'profil': profil,
-            'nouzovy_rezim': pes.je_ztraceny,
-        })
-
-    # --- PLNÝ DENÍK PRO MAJITELE ---
-    return render(request, 'users/detail_psa.html', {
-        'pes': pes,
-        'profil': profil,
-        'uspechy': pes.uspechy.all(),
-        #'ockovani': pes.vsechna_ockovani.all(),
-        'fotky': pes.galerie_fotky.all() if hasattr(pes, 'galerie_fotky') else [],
-        'videa': pes.galerie_videa.all() if hasattr(pes, 'galerie_videa') else [],
-
-    })
-
+    return redirect('detail_psa', pes_id=p_id)
 
 def nouzovy_profil_psa(request, pes_id):
     # Tady by měla být logika pro zobrazení nouzového profilu

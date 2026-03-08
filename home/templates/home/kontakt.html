@@ -3,149 +3,184 @@
 {% block content %}
 <style>
     :root {
-        --subtle-cream: #f9f5f0;
-        --border-tan: #e2d1c3;
-        --deep-hazel: #8d6e63;
+        --border-tan: rgba(197, 160, 89, 0.2);
     }
 
-    /* Hlavní box s informacemi - neumorfní stínování */
+    /* Hlavní box - neumorfní stínování s adaptivní barvou */
     .contact-info-card {
-        background: linear-gradient(145deg, #ffffff, #f3ede6);
-        border-radius: 25px;
+        background: white;
+        border-radius: 30px;
         border: 1px solid var(--border-tan);
         padding: 40px;
-        box-shadow: 10px 10px 20px #e0d5cb, -5px -5px 15px #ffffff;
+        box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Dekorativní prvek na pozadí karty */
+    .contact-info-card::after {
+        content: '🐾';
+        position: absolute;
+        bottom: -20px;
+        right: -10px;
+        font-size: 8rem;
+        opacity: 0.03;
+        color: var(--gold);
     }
 
     .icon-box-styled {
-        background: white;
-        color: var(--mid-brown);
-        width: 50px;
-        height: 50px;
+        background: var(--bg-page);
+        color: var(--gold);
+        width: 55px;
+        height: 55px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 15px;
-        box-shadow: 4px 4px 10px rgba(0,0,0,0.08);
-        font-size: 1.2rem;
+        border-radius: 18px;
+        box-shadow: 4px 4px 12px rgba(0,0,0,0.05);
+        font-size: 1.3rem;
+        transition: 0.3s ease;
+    }
+
+    .contact-info-card:hover .icon-box-styled {
+        transform: scale(1.1) rotate(-5deg);
+        background: var(--gold);
+        color: white;
     }
 
     /* Formulářová pole */
     input, textarea, select {
-        border: 1.5px solid var(--border-tan) !important;
-        background-color: #fff !important;
-        border-radius: 15px !important;
-        padding: 14px !important;
-        box-shadow: inset 2px 2px 5px rgba(0,0,0,0.02) !important;
+        border: 2px solid var(--bg-page) !important;
+        background-color: var(--bg-page) !important;
+        border-radius: 16px !important;
+        padding: 14px 20px !important;
+        transition: 0.3s !important;
         width: 100%;
     }
 
     input:focus, textarea:focus {
         border-color: var(--gold) !important;
-        box-shadow: 0 0 10px rgba(197, 160, 89, 0.15) !important;
+        background-color: #fff !important;
+        box-shadow: 0 8px 20px rgba(197, 160, 89, 0.1) !important;
         outline: none !important;
     }
 
-    /* Tlačítko */
+    /* Tlačítko s adaptivním stínem */
     .btn-shadow-gold {
         background: var(--gold) !important;
-        color: var(--dark-cocoa) !important;
+        color: white !important;
         border: none;
-        border-radius: 50px;
-        padding: 15px 35px;
+        border-radius: 18px;
+        padding: 16px 35px;
         font-weight: 800;
-        letter-spacing: 1px;
-        box-shadow: 0 8px 20px rgba(197, 160, 89, 0.3);
-        transition: 0.3s;
-        text-decoration: none;
-        display: inline-block;
+        letter-spacing: 0.5px;
+        box-shadow: 0 10px 25px rgba(197, 160, 89, 0.25);
+        transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .btn-shadow-gold:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 25px rgba(197, 160, 89, 0.4);
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(197, 160, 89, 0.35);
         background-color: var(--mid-brown) !important;
-        color: white !important;
     }
 
     .contact-title {
-        color: var(--mid-brown);
+        color: var(--dark-cocoa);
         font-family: 'Playfair Display', serif;
         font-weight: 800;
-        text-shadow: 1px 1px 0px white;
+        letter-spacing: -1px;
+    }
+
+    .contact-label {
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--mid-brown);
+        margin-bottom: 8px;
+        display: block;
     }
 </style>
 
-<div class="container-fluid py-3">
+<div class="container py-4">
     <div class="row g-5 align-items-stretch">
         <div class="col-lg-5">
             <div class="contact-info-card h-100">
-                <h2 class="contact-title mb-2">Kontakt <i class="fas fa-paw ms-2" style="color: var(--gold);"></i></h2>
+                <h2 class="contact-title mb-3">Kontaktujte nás</h2>
 
-                <p class="mb-4" style="color: var(--deep-hazel); font-style: italic; font-weight: 500;">
-                    Potřebujete poradit s registrací, Premium členstvím nebo máte nápad na vylepšení našeho zvířecího světa? Jsme tu pro vás.
+                <p class="mb-5 text-muted" style="line-height: 1.6;">
+                    Potřebujete poradit s registrací, Premium členstvím nebo máte nápad na vylepšení <strong>epes.online</strong>? Jsme jedno velké ucho!
                 </p>
 
-                <div class="mb-5">
-                    <h5 class="fw-bold mb-1" style="color: var(--mid-brown);">Ivana Elšíková</h5>
-                    <p class="text-muted mb-0">Sokolská 29, Hvozdná 763 10</p>
-                    <p class="text-muted fw-bold small">IČO: 23834838</p>
-                    <div class="mt-3" style="width: 50px; height: 3px; border-bottom: 3px solid var(--gold);"></div>
+                <div class="space-y-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="icon-box-styled me-3">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div>
+                            <span class="contact-label">Napište nám</span>
+                            <a href="mailto:{{ kontaktni_info.email|default:'elivdruhy@gmail.com' }}" class="text-dark fw-bold text-decoration-none fs-5">
+                                {{ kontaktni_info.email|default:'elivdruhy@gmail.com' }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="icon-box-styled me-3">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div>
+                            <span class="contact-label">Kde nás najdete</span>
+                            <span class="fw-bold d-block text-dark">{{ kontaktni_info.jmeno|default:'Ivana Elšíková' }}</span>
+                            <small class="text-muted">{{ kontaktni_info.adresa|default:'Sokolská 29, Hvozdná' }}</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="icon-box-styled me-3">
+                            <i class="fas fa-hashtag"></i>
+                        </div>
+                        <div>
+                            <span class="contact-label">Komunita</span>
+                            <span class="fw-bold text-dark">Sledujte naši smečku</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="d-flex align-items-center mb-4 p-2 rounded-4">
-                    <div class="icon-box-styled me-3">
-                        <i class="fas fa-envelope-open-text"></i>
-                    </div>
-                    <div>
-                        <small class="d-block text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Napište nám</small>
-                        <a href="mailto:elivdruhy@gmail.com" class="text-dark fw-bold text-decoration-none fs-5">elivdruhy@gmail.com</a>
-                    </div>
-                </div>
-
-                <div class="d-flex align-items-center mb-4 p-2 rounded-4">
-                    <div class="icon-box-styled me-3">
-                        <i class="fas fa-comment-dots"></i>
-                    </div>
-                    <div>
-                        <small class="d-block text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Sociální sítě</small>
-                        <span class="fw-bold fs-5 text-dark">Sledujte naši smečku</span>
-                    </div>
-                </div>
-
-                <div class="mt-5 p-3 rounded-4" style="background: rgba(255,255,255,0.5); border: 1px dashed var(--border-tan);">
+                <div class="mt-5 p-4 rounded-4" style="background: var(--bg-page); border: 2px dashed var(--border-tan);">
                     <p class="small text-muted mb-0 italic text-center">
-                        <i class="fas fa-history me-1" style="color: var(--gold);"></i> Odpovídáme obvykle do druhého dne.
+                        <i class="fas fa-clock me-2" style="color: var(--gold);"></i>
+                        Odpovídáme obvykle do 24 hodin.
                     </p>
                 </div>
             </div>
         </div>
 
         <div class="col-lg-7">
-            <div class="px-3 py-2">
+            <div class="ps-lg-4 py-2">
                 {% if success %}
-                    <div class="text-center py-5">
-                        <div class="icon-box-styled mx-auto mb-4" style="width: 100px; height: 100px; font-size: 3rem; color: var(--gold);">
+                    <div class="text-center py-5 h-100 d-flex flex-column justify-content-center align-items-center">
+                        <div class="icon-box-styled mb-4" style="width: 120px; height: 120px; font-size: 3.5rem;">
                             <i class="fas fa-paper-plane"></i>
                         </div>
-                        <h2 class="fw-bold">Zpráva odeslána!</h2>
-                        <p class="text-muted fs-5">Váš vzkaz je na cestě k nám. Brzy se ozveme zpět!</p>
-                        <a href="{% url 'kontakt' %}" class="btn btn-shadow-gold mt-3">POSLAT DALŠÍ ZPRÁVU</a>
+                        <h2 class="contact-title">Zpráva odeslána!</h2>
+                        <p class="text-muted fs-5 mb-4">Děkujeme za váš vzkaz. Brzy se vám ozveme zpět.</p>
+                        <a href="{% url 'kontakt' %}" class="btn-shadow-gold">POSLAT DALŠÍ ZPRÁVU</a>
                     </div>
                 {% else %}
-                    <h3 class="contact-title mb-4">Napište nám zprávu</h3>
-                    <form method="post" class="mt-4">
+                    <h3 class="contact-title mb-4">Pošlete nám vzkaz</h3>
+                    <form method="post" class="mt-2">
                         {% csrf_token %}
                         {% for field in form %}
                             <div class="mb-4">
-                                <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 1px;">{{ field.label }}</label>
+                                <label class="contact-label">{{ field.label }}</label>
                                 {{ field }}
                                 {% if field.errors %}
-                                    <div class="text-danger small mt-1">{{ field.errors }}</div>
+                                    <div class="text-danger extra-small mt-1">{{ field.errors }}</div>
                                 {% endif %}
                             </div>
                         {% endfor %}
-                        <button type="submit" class="btn btn-shadow-gold w-100 py-3 mt-3">
+                        <button type="submit" class="btn btn-shadow-gold w-100 py-3 mt-2">
                             ODESLAT ZPRÁVU <i class="fas fa-paper-plane ms-2"></i>
                         </button>
                     </form>

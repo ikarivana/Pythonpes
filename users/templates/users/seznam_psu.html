@@ -7,7 +7,7 @@
         --accent-gold: #c5a059;
         --light-gold: #fdfaf5;
         --border-color: #e2d1c3;
-        --cat-purple: #6c5ce7;
+        --cat-purple: #9b87f5;
         --sos-red: #d63031;
     }
 
@@ -18,13 +18,14 @@
         background: white;
         position: relative;
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        border: 2px solid transparent;
+        border: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
     }
 
-    /* Styl pro ZTRACENÉ zvíře */
-    .pet-card.is-lost {
-        border-color: var(--sos-red) !important;
-        box-shadow: 0 0 20px rgba(214, 48, 49, 0.2) !important;
+    .pet-card.is-cat {
+        background: linear-gradient(180deg, #ffffff 0%, #f4f0ff 100%) !important;
+        border: 1px solid #dcd3ff !important;
     }
 
     .pet-card:hover {
@@ -32,49 +33,7 @@
         box-shadow: 0 20px 40px rgba(93, 64, 55, 0.12);
     }
 
-    /* Přepínač (Toggle Switch) */
-    .sos-switch-container {
-        background: #f8f9fa;
-        padding: 10px 15px;
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-top: 15px;
-    }
-
-    .switch {
-        position: relative;
-        display: inline-block;
-        width: 45px;
-        height: 24px;
-    }
-
-    .switch input { opacity: 0; width: 0; height: 0; }
-
-    .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background-color: #ccc;
-        transition: .4s;
-        border-radius: 34px;
-    }
-
-    .slider:before {
-        position: absolute;
-        content: "";
-        height: 18px; width: 18px;
-        left: 3px; bottom: 3px;
-        background-color: white;
-        transition: .4s;
-        border-radius: 50%;
-    }
-
-    input:checked + .slider { background-color: var(--sos-red); }
-    input:checked + .slider:before { transform: translateX(21px); }
-
-    /* Ostatní styly */
+    /* Odznáček druhu */
     .badge-species {
         position: absolute;
         top: 20px;
@@ -85,63 +44,62 @@
         font-weight: 800;
         font-size: 0.7rem;
         text-transform: uppercase;
+        color: white;
     }
-    .badge-dog { background: rgba(93, 64, 55, 0.8); color: white; }
-    .badge-cat { background: rgba(108, 92, 231, 0.8); color: white; }
+    .badge-dog { background: var(--accent-gold); }
+    .badge-cat { background: var(--cat-purple); }
 
-    .dog-card-img { width: 100%; height: 220px; object-fit: cover; }
-
-    .health-box {
-        background-color: var(--light-gold);
-        border-radius: 20px;
-        padding: 12px;
-        font-size: 0.85rem;
+    /* QR kód wrapper */
+    .qr-wrapper {
+        padding: 10px;
+        border: 2px dashed var(--border-color);
+        border-radius: 15px;
+        background: white;
+        display: inline-block;
+        transition: 0.3s;
     }
 
+    /* Tlačítka - OPRAVA ZBĚLÁNÍ */
     .btn-action {
         border-radius: 15px;
-        padding: 10px;
+        padding: 12px;
         font-weight: 800;
         text-transform: uppercase;
         border: none;
         font-size: 0.85rem;
+        transition: 0.3s;
+        text-decoration: none !important;
+        display: block;
     }
-    .btn-dog { background-color: var(--accent-gold); color: white; }
-    .btn-cat { background-color: var(--cat-purple); color: white; }
 
-    .lost-label {
-        color: var(--sos-red);
-        font-weight: 800;
-        font-size: 0.75rem;
-        text-transform: uppercase;
+    /* Pes barvy */
+    .btn-dog { background-color: var(--primary-brown) !important; color: white !important; }
+    .btn-dog:hover {
+        background-color: #3e2723 !important;
+        color: white !important;
+        box-shadow: 0 5px 15px rgba(93, 64, 55, 0.3);
     }
+
+    /* Kočka barvy */
+    .btn-cat { background-color: var(--cat-purple) !important; color: white !important; }
+    .btn-cat:hover {
+        background-color: #7c69d4 !important;
+        color: white !important;
+        box-shadow: 0 5px 15px rgba(155, 135, 245, 0.3);
+    }
+
+    .placeholder-icon { color: #adb5bd; opacity: 0.7; }
 </style>
 
-<div class="container mt-5 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-5">
-        <div>
-            <h2 class="fw-bold text-brown mb-1">🐾 Moji mazlíčci</h2>
-            <p class="text-muted small">Správa vašich parťáků a SOS statusu</p>
-        </div>
-
-        <div class="dropdown">
-            <button class="btn btn-dark px-4 shadow-sm fw-bold dropdown-toggle" type="button" data-bs-toggle="dropdown" style="border-radius: 15px;">
-                <i class="fas fa-plus-circle me-2"></i>Přidat...
-            </button>
-            <ul class="dropdown-menu border-0 shadow" style="border-radius: 15px;">
-                <li><a class="dropdown-item py-2" href="{% url 'pridat_psa' %}?druh=pes">🐶 Pejska</a></li>
-                <li><a class="dropdown-item py-2" href="{% url 'pridat_psa' %}?druh=kocka">🐱 Kočičku</a></li>
-            </ul>
-        </div>
-    </div>
-
+<div class="container py-5">
     <div class="row g-4">
         {% for mazlicek in psi %}
         <div class="col-md-6 col-lg-4">
-            <div id="card-{{ mazlicek.pk }}" class="card pet-card shadow-sm border-0 h-100 {% if mazlicek.je_ztraceny %}is-lost{% endif %}">
+            <div id="card-{{ mazlicek.pk }}"
+                 class="card pet-card shadow-sm h-100 {% if mazlicek.je_ztraceny %}is-lost{% endif %} {% if mazlicek.druh == 'kocka' %}is-cat{% endif %}">
 
                 <div class="badge-species {% if mazlicek.druh == 'kocka' %}badge-cat{% else %}badge-dog{% endif %}">
-                    {% if mazlicek.druh == 'kocka' %}🐱 Kočka{% else %}🐶 Pes{% endif %}
+                    {% if mazlicek.druh == 'kocka' %}<i class="fas fa-cat me-1"></i> Kočka{% else %}<i class="fas fa-dog me-1"></i> Pes{% endif %}
                 </div>
 
                 <div class="position-absolute top-0 end-0 p-3" style="z-index: 10;">
@@ -157,96 +115,46 @@
                     </div>
                 </div>
 
-                <div style="background-color: #f8f5f0;">
+                <div class="text-center pt-5">
                     {% if mazlicek.fotka %}
-                        <img src="{{ mazlicek.fotka.url }}" class="dog-card-img" alt="{{ mazlicek.jmeno }}">
+                        <img src="{{ mazlicek.fotka.url }}" class="rounded-circle shadow-sm" style="width: 120px; height: 120px; object-fit: cover; border: 4px solid white;">
                     {% else %}
-                        <div class="d-flex align-items-center justify-content-center text-muted" style="height: 220px; font-size: 4rem;">
-                            {% if mazlicek.druh == 'kocka' %}🐱{% else %}🐕{% endif %}
+                        <div class="d-flex align-items-center justify-content-center bg-light rounded-circle mx-auto shadow-sm" style="width: 120px; height: 120px;">
+                            <i class="fas {% if mazlicek.druh == 'kocka' %}fa-cat{% else %}fa-dog{% endif %} fa-3x placeholder-icon"></i>
                         </div>
                     {% endif %}
                 </div>
 
-                <div class="card-body p-4 d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <h3 class="fw-bold mb-0">
-                            <a href="{% url 'detail_psa' mazlicek.pk %}" class="text-decoration-none text-dark">
-                                {{ mazlicek.jmeno }}
-                            </a>
-                        </h3>
-                        <span class="badge rounded-pill bg-light text-muted border px-2 py-1 small">{{ mazlicek.vek }} let</span>
-                    </div>
-                    <p class="text-muted mb-3 small">{{ mazlicek.rasa }}</p>
+                <div class="card-body p-4 text-center d-flex flex-column">
+                    <h3 class="fw-bold mb-1">
+                        <a href="{% url 'detail_psa' mazlicek.pk %}" class="text-decoration-none text-dark" style="font-family: 'Playfair Display', serif;">
+                            {{ mazlicek.jmeno }}
+                        </a>
+                    </h3>
+                    <p class="text-muted mb-3 small">{{ mazlicek.rasa|default:"Kříženec" }}</p>
 
-                    <div class="sos-switch-container mb-3 shadow-sm border">
-                        <span class="lost-label">
-                            <i class="fas fa-bullhorn me-1"></i> Hlásit ztrátu
-                        </span>
-                        <label class="switch">
-                            <input type="checkbox"
-                                   class="sos-toggle"
-                                   data-pet-id="{{ mazlicek.pk }}"
-                                   {% if mazlicek.je_ztraceny %}checked{% endif %}>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-
-                    <div class="health-box mb-3">
-                        <div class="d-flex justify-content-between mb-1">
-                            <span><i class="fas fa-syringe me-2 text-muted"></i>Očkování:</span>
-                            <span class="fw-bold">{{ mazlicek.pristi_ockovani|date:"d.m.Y"|default:"--" }}</span>
+                    <div class="mb-4">
+                        <div class="qr-wrapper shadow-sm">
+                            {% if mazlicek.qr_kod %}
+                                <img src="{{ mazlicek.qr_kod.url }}" alt="QR kód" style="width: 80px; height: 80px; object-fit: contain;">
+                            {% else %}
+                                <div style="width: 80px; height: 80px;" class="d-flex flex-column align-items-center justify-content-center text-muted">
+                                    <i class="fas fa-qrcode fa-2x opacity-25"></i>
+                                    <span style="font-size: 0.6rem;">NENÍ</span>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
 
                     <div class="mt-auto">
-                        <a href="{% url 'detail_psa' mazlicek.pk %}" class="btn btn-action w-100 shadow-sm {% if mazlicek.druh == 'kocka' %}btn-cat{% else %}btn-dog{% endif %}">
-                            Otevřít profil
+                        <a href="{% url 'detail_psa' mazlicek.pk %}" class="btn-action w-100 shadow-sm {% if mazlicek.druh == 'kocka' %}btn-cat{% else %}btn-dog{% endif %}">
+                            OTEVŘÍT DENÍK
                         </a>
                     </div>
                 </div>
             </div>
         </div>
-        {% empty %}
-        <div class="col-12 text-center py-5">
-            <h4>Zatím tu nemáte žádné mazlíčky.</h4>
-            <a href="{% url 'pridat_psa' %}" class="btn btn-dark px-5 py-3 fw-bold mt-3" style="border-radius: 20px;">PŘIDAT PRVNÍHO</a>
-        </div>
         {% endfor %}
     </div>
 </div>
-
-<script>
-    // AJAX pro přepínání stavu ztráty
-    document.querySelectorAll('.sos-toggle').forEach(toggle => {
-        toggle.addEventListener('change', function() {
-            const petId = this.dataset.petId;
-            const isLost = this.checked;
-            const card = document.getElementById(`card-${petId}`);
-
-            // Vizuální změna karty ihned
-            if(isLost) {
-                card.classList.add('is-lost');
-            } else {
-                card.classList.remove('is-lost');
-            }
-
-            // Odeslání do databáze (změň URL podle svého view)
-            fetch(`/ajax/zmenit-status-ztraty/${petId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({ 'je_ztraceny': isLost })
-            })
-            .then(response => {
-                if(!response.ok) {
-                    alert('Chyba při ukládání stavu. Zkuste to prosím znovu.');
-                    this.checked = !isLost; // Vrátit zpět při chybě
-                    card.classList.toggle('is-lost');
-                }
-            });
-        });
-    });
-</script>
 {% endblock %}

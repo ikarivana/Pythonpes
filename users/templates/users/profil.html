@@ -1,7 +1,8 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
@@ -11,13 +12,12 @@
         --soft-bg: #fdfaf5;
         --card-bg: #ffffff;
         --border-color: #e2d1c3;
-        --cat-purple: #5e478e;
+        --cat-purple: #9b87f5;
     }
 
     body { background-color: var(--soft-bg) !important; font-family: 'Inter', sans-serif; color: #333; }
     h2, h4, h5, .font-serif { font-family: 'Playfair Display', serif; color: var(--primary-brown); }
 
-    /* Hlavní karta profilu */
     .profile-header-container {
         border-radius: 30px !important;
         border: 1px solid var(--border-color) !important;
@@ -25,48 +25,52 @@
         background: white;
     }
 
-    .status-badge {
-        padding: 6px 16px; border-radius: 50px; font-size: 0.75rem; font-weight: 700;
-        text-transform: uppercase; letter-spacing: 0.5px;
-    }
     .bg-gold { background: linear-gradient(45deg, #d4af37, #b8860b); box-shadow: 0 4px 10px rgba(197, 160, 89, 0.3); }
 
-    /* Karty mazlíčků */
     .pet-profile-card {
         background: white; border-radius: 25px; border: 1px solid var(--border-color);
-        transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); overflow: hidden; height: 100%;
-        position: relative;
+        transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); overflow: hidden;
+        position: relative; display: flex; flex-direction: column;
     }
     .pet-profile-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(93, 64, 55, 0.1); }
 
-    .qr-box {
-        background: var(--soft-bg); border: 1px dashed var(--accent-gold);
-        border-radius: 15px; padding: 12px; display: inline-block; margin: 15px 0;
+    .pet-profile-card.is-cat {
+        background: linear-gradient(180deg, #ffffff 0%, #f4f0ff 100%) !important;
+        border: 1px solid #dcd3ff !important;
     }
-
-    .btn-brown { background: var(--primary-brown); color: white; border-radius: 12px; transition: 0.3s; border: none; font-weight: 700; }
-    .btn-brown:hover { background: #452f29; transform: scale(1.02); color: white; }
-
-    .btn-outline-gold { border: 2px solid var(--accent-gold); color: var(--accent-gold); font-weight: 700; border-radius: 12px; transition: 0.3s; }
-    .btn-outline-gold:hover { background: var(--accent-gold); color: white; transform: translateY(-2px); }
+    .is-cat .species-icon { background: var(--cat-purple) !important; color: white !important; border-color: #dcd3ff !important; }
+    .is-cat .qr-box { border-color: var(--cat-purple) !important; }
+    .is-cat .btn-brown { background: var(--cat-purple) !important; }
 
     .species-icon {
         position: absolute; top: 15px; left: 15px; width: 35px; height: 35px;
         background: var(--soft-bg); border-radius: 10px; display: flex;
         align-items: center; justify-content: center; color: var(--accent-gold);
-        font-size: 1rem; border: 1px solid var(--border-color);
+        font-size: 1rem; border: 1px solid var(--border-color); z-index: 2;
     }
+
+    .qr-box {
+        background: white; border: 2px dashed var(--accent-gold);
+        border-radius: 15px; padding: 10px; display: inline-block; margin: 15px auto;
+        width: fit-content;
+    }
+
+    .btn-brown { background: var(--primary-brown); color: white; border-radius: 12px; transition: 0.3s; border: none; font-weight: 700; }
+    .btn-brown:hover { opacity: 0.9; transform: scale(1.02); color: white; }
+
+    .btn-outline-gold { border: 2px solid var(--accent-gold); color: var(--accent-gold); font-weight: 700; border-radius: 12px; transition: 0.3s; }
+    .btn-outline-gold:hover { background: var(--accent-gold); color: white; }
 </style>
 
 <div class="container py-5">
-    <div class="profile-header-container p-4 p-md-5 mb-5">
+    <div class="profile-header-container p-4 p-md-5 mb-5 shadow-sm">
         <div class="row align-items-center text-center text-md-start">
             <div class="col-md-auto mb-3 mb-md-0">
                 {% if profil.fotka %}
                 <img src="{{ profil.fotka.url }}" alt="Profil" class="rounded-circle border shadow-sm"
                      style="width: 130px; height: 130px; object-fit: cover;">
                 {% else %}
-                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center border mx-auto"
+                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center border mx-auto shadow-sm"
                      style="width: 130px; height: 130px;">
                     <i class="fas fa-user text-muted fa-3x"></i>
                 </div>
@@ -75,7 +79,9 @@
 
             <div class="col-md ms-md-4">
                 <div class="d-flex align-items-center justify-content-center justify-content-md-start flex-wrap gap-3 mb-3">
-                    <h2 class="fw-bold mb-0">{{ request.user.first_name|default:request.user.username }} {{ request.user.last_name }}</h2>
+                    <h2 class="fw-bold mb-0">
+                        {{ request.user.first_name|default:request.user.username }} {{ request.user.last_name }}
+                    </h2>
                     {% if profil.is_premium %}
                     <span class="badge rounded-pill bg-gold text-white px-3 py-2">
                         <i class="fas fa-crown me-1"></i> ALFA ČLEN
@@ -85,19 +91,20 @@
 
                 <div class="row g-3">
                     <div class="col-sm-6 text-muted">
-                        <i class="fas fa-envelope me-2 text-accent"></i>{{ request.user.email }}
+                        <i class="fas fa-envelope me-2" style="color: var(--accent-gold);"></i>{{ request.user.email }}
                     </div>
                     <div class="col-sm-6 text-muted">
-                        <i class="fas fa-phone me-2 text-accent"></i>{{ profil.telefon|default:"Telefon nezadán" }}
+                        <i class="fas fa-phone me-2" style="color: var(--accent-gold);"></i>{{ profil.telefon|default:"Telefon nezadán" }}
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-auto mt-4 mt-md-0 d-flex flex-column gap-2">
-                <button class="btn btn-brown px-4 py-2" data-bs-toggle="modal" data-bs-target="#editProfilModal">
+            <div class="col-md-auto mt-4 mt-md-0 d-flex flex-column gap-2 text-center text-md-end">
+                <button class="btn btn-brown px-4 py-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#editProfilModal">
                     <i class="fas fa-user-edit me-2"></i>UPRAVIT PROFIL
                 </button>
-                <a href="/users/profil/smazat/" class="btn btn-sm text-danger opacity-75" onclick="return confirm('Opravdu chcete smazat svůj profil?')">Smazat účet</a>
+                <a href="/users/profil/smazat/" class="btn btn-sm text-danger opacity-75 mt-1"
+                   onclick="return confirm('Opravdu chcete smazat svůj profil?')">Smazat účet</a>
             </div>
         </div>
     </div>
@@ -105,21 +112,32 @@
     <div class="row g-4">
         <div class="col-lg-8">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4 class="mb-0 fw-bold">Moji parťáci</h4>
-                <a href="{% url 'pridat_psa' %}" class="btn btn-outline-gold px-4 py-2 shadow-sm">
+                <div>
+                    <h4 class="mb-0 fw-bold">Moji parťáci</h4>
+                    {% if not profil.is_premium %}
+                    <small class="text-muted">Verze Free: {{ profil.psi.all.count }}/2 mazlíčci</small>
+                    {% endif %}
+                </div>
+
+                {% if not profil.is_premium and profil.psi.all.count >= 2 %}
+                <a href="{% url 'cenik' %}" class="btn btn-warning px-4 py-2 shadow-sm fw-bold rounded-pill text-dark">
+                    <i class="fas fa-crown me-2"></i>AKTIVOVAT PREMIUM
+                </a>
+                {% else %}
+                <a href="{% url 'pridat_psa' %}" class="btn btn-outline-gold px-4 py-2 shadow-sm bg-white">
                     <i class="fas fa-plus me-2"></i>PŘIDAT MAZLÍČKA
                 </a>
+                {% endif %}
             </div>
 
             <div class="row g-4">
                 {% for pes in profil.psi.all %}
                 <div class="col-md-6">
-                    <div class="pet-profile-card p-4 text-center">
-                        <div class="species-icon">
+                    <div class="pet-profile-card p-4 text-center shadow-sm h-100 {% if pes.druh == 'kocka' %}is-cat{% endif %}">
+                        <div class="species-icon shadow-sm">
                             <i class="fas {% if pes.druh == 'kocka' %}fa-cat{% else %}fa-dog{% endif %}"></i>
                         </div>
-
-                        <div class="d-flex justify-content-end gap-2 mb-2">
+                        <div class="d-flex justify-content-end gap-2 mb-2" style="z-index: 2; position: relative;">
                             <a href="{% url 'upravit_psa' pes.id %}" class="btn btn-sm text-muted"><i class="fas fa-cog"></i></a>
                             <form action="{% url 'smazat_psa' pes.id %}" method="POST" class="d-inline">
                                 {% csrf_token %}
@@ -128,68 +146,72 @@
                                 </button>
                             </form>
                         </div>
-
                         {% if pes.fotka %}
-                        <img src="{{ pes.fotka.url }}" class="rounded-circle border shadow-sm mb-3"
-                             style="width: 110px; height: 110px; object-fit: cover;">
+                        <img src="{{ pes.fotka.url }}" class="rounded-circle border shadow-sm mb-3 mx-auto" style="width: 110px; height: 110px; object-fit: cover; border: 4px solid white !important;">
                         {% else %}
-                        <div class="rounded-circle bg-light border mx-auto mb-3 d-flex align-items-center justify-content-center"
-                             style="width: 110px; height: 110px;">
+                        <div class="rounded-circle bg-light border mx-auto mb-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 110px; height: 110px;">
                             <i class="fas {% if pes.druh == 'kocka' %}fa-cat{% else %}fa-paw{% endif %} text-muted fa-2x"></i>
                         </div>
                         {% endif %}
-
                         <h5 class="fw-bold mb-1">{{ pes.jmeno }}</h5>
-                        <p class="text-muted small mb-3">{{ pes.rasa|default:"Kříženec" }}</p>
-
+                        <p class="text-muted small mb-2">{{ pes.rasa|default:"Kříženec" }}</p>
                         <div class="qr-box shadow-sm mb-4">
                             {% if pes.qr_kod %}
-                            <img src="{{ pes.qr_kod.url }}" style="width: 80px; height: 80px;" alt="QR kód">
+                            <img src="{{ pes.qr_kod.url }}" style="width: 80px; height: 80px; object-fit: contain;" alt="QR kód">
                             {% else %}
-                            <div style="width: 80px; height: 80px;" class="d-flex align-items-center justify-content-center text-muted small">Bez QR</div>
+                            <div style="width: 80px; height: 80px;" class="d-flex align-items-center justify-content-center text-muted small flex-column">
+                                <i class="fas fa-qrcode fa-2x mb-1 opacity-25"></i>
+                                <span>Bez QR</span>
+                            </div>
                             {% endif %}
                         </div>
-
-                        <a href="{% url 'detail_psa' pes.id %}" class="btn btn-brown w-100 py-2" style="background: var(--accent-gold);">
-                            OTEVŘÍT DENÍK
-                        </a>
+                        <div class="mt-auto">
+                            <a href="{% url 'detail_psa' pes.id %}" class="btn btn-brown w-100 py-2 shadow-sm fw-bold">OTEVŘÍT DENÍK</a>
+                        </div>
                     </div>
                 </div>
                 {% empty %}
-                <div class="col-12 text-center py-5 bg-white rounded-5 border-dashed border-2" style="border: 2px dashed var(--border-color);">
-                    <p class="text-muted mb-3">Zatím tu nemáte žádného parťáka.</p>
-                    <a href="{% url 'pridat_psa' %}" class="btn btn-brown px-4">Přidat prvního mazlíčka</a>
+                <div class="col-12 text-center py-5 bg-white rounded-5 border-dashed" style="border: 2px dashed var(--border-color);">
+                    <p class="text-muted">Zatím tu nemáte žádné parťáky.</p>
                 </div>
                 {% endfor %}
             </div>
         </div>
 
         <div class="col-lg-4">
-            <div class="row g-3 mb-4">
-                <div class="col-6">
-                    <div class="p-3 bg-white border rounded-4 text-center shadow-sm">
-                        <div class="h3 fw-bold mb-0 text-brown">{{ libi_se_mi.count|default:"0" }}</div>
-                        <small class="text-muted fw-bold" style="font-size: 0.65rem;">LAJKŮ</small>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="p-3 bg-white border rounded-4 text-center shadow-sm">
-                        <div class="h3 fw-bold mb-0 text-brown">{{ komentare.count|default:"0" }}</div>
-                        <small class="text-muted fw-bold" style="font-size: 0.65rem;">KOMENTŮ</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="p-4 rounded-4 bg-white border shadow-sm">
+            <div class="p-4 rounded-4 bg-white border shadow-sm sticky-top" style="top: 20px; z-index: 1;">
                 <h6 class="fw-bold mb-3 text-center">Status účtu</h6>
+
                 {% if profil.is_premium %}
                 <div class="p-3 rounded-3 mb-3 bg-light border-start border-4 border-success">
                     <small class="d-block text-muted text-uppercase" style="font-size: 0.6rem;">Aktivní ALFA členství</small>
-                    <span class="fw-bold text-success">Navždy</span>
+                    <span class="fw-bold text-success"><i class="fas fa-check-circle me-1"></i> Navždy</span>
                 </div>
+                <p class="small text-muted mb-0">Využíváte všechny funkce Alfa Smečky bez omezení.</p>
                 {% else %}
-                <p class="small text-muted mb-4">Získejte neomezený počet profilů, zdravotní data a další výhody.</p>
-                <a href="{% url 'cenik' %}" class="btn btn-brown w-100 py-2" style="background: var(--accent-gold);">AKTIVOVAT PREMIUM</a>
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="text-muted fw-bold" style="font-size: 0.7rem;">KAPACITA SMEČKY</span>
+                        <span class="fw-bold text-brown" style="font-size: 0.7rem;">{{ profil.psi.all.count }} / 2</span>
+                    </div>
+                    <div class="progress shadow-sm" style="height: 10px; border-radius: 10px; background-color: #f0f0f0;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated"
+                             role="progressbar"
+                             style="width: {% if profil.psi.all.count == 0 %}5%{% elif profil.psi.all.count == 1 %}50%{% else %}100%{% endif %};
+                             background-color: {% if profil.psi.all.count >= 2 %}var(--alfa-danger, #dc3545){% else %}var(--accent-gold){% endif %}; transition: 1s;">
+                        </div>
+                    </div>
+                    {% if profil.psi.all.count >= 2 %}
+                    <small class="text-danger fw-bold d-block mt-2 text-center" style="font-size: 0.65rem;">
+                        <i class="fas fa-exclamation-triangle me-1"></i> Dosáhli jste limitu Free verze
+                    </small>
+                    {% endif %}
+                </div>
+                <p class="small text-muted mb-3 text-center">Získejte neomezený počet profilů, zdravotní kartu a galerii.</p>
+                <a href="{% url 'cenik' %}" class="btn btn-brown w-100 py-3 shadow-sm fw-bold border-0"
+                   style="background: linear-gradient(45deg, #c5a059, #b8860b) !important; border-radius: 15px;">
+                    <i class="fas fa-crown me-2"></i> AKTIVOVAT PREMIUM
+                </a>
                 {% endif %}
             </div>
         </div>

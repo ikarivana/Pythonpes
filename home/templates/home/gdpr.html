@@ -11,7 +11,7 @@
         padding: 40px;
         border-radius: 30px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-        border: 1px solid var(--border-tan);
+        border: 1px solid rgba(197, 160, 89, 0.2);
     }
 
     .legal-header {
@@ -25,14 +25,21 @@
 
     .legal-section {
         margin-bottom: 40px;
-        padding-left: 20px;
+        padding: 20px; /* Přidán vnitřní padding pro lepší hover efekt */
         border-left: 3px solid #fdfaf6;
-        transition: 0.3s;
+        border-radius: 0 15px 15px 0;
+        transition: all 0.3s ease;
     }
 
     .legal-section:hover {
         border-left-color: var(--gold);
-        background: #fffdfa;
+        background: rgba(197, 160, 89, 0.03); /* Dynamické pozadí při najetí */
+        transform: translateX(5px);
+    }
+
+    /* Adaptace pozadí hoveru pro kočičí lila téma */
+    :root[style*="--gold: #9b87f5"] .legal-section:hover {
+        background: rgba(155, 135, 245, 0.03);
     }
 
     .legal-section h4 {
@@ -41,7 +48,13 @@
         margin-bottom: 15px;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
+    }
+
+    .legal-section h4 i {
+        color: var(--gold); /* Ikony v barvě tématu */
+        width: 25px;
+        text-align: center;
     }
 
     .legal-text {
@@ -51,20 +64,52 @@
     }
 
     .legal-list {
-        padding-left: 20px;
+        padding-left: 25px;
         list-style-type: none;
     }
 
     .legal-list li {
-        margin-bottom: 10px;
+        margin-bottom: 12px;
         position: relative;
     }
 
     .legal-list li::before {
         content: "🐾";
         position: absolute;
-        left: -25px;
-        font-size: 0.8rem;
+        left: -30px;
+        font-size: 0.85rem;
+        /* Tady tlapka zůstává tlapkou, je to univerzální symbol projektu */
+    }
+
+    .btn-legal-outline {
+        color: var(--mid-brown);
+        border: 2px solid var(--mid-brown);
+        border-radius: 14px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.9rem;
+        transition: 0.3s;
+    }
+
+    .btn-legal-outline:hover {
+        background: var(--mid-brown);
+        color: white;
+    }
+
+    .btn-legal-primary {
+        background: var(--gold);
+        color: white !important;
+        border-radius: 14px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.9rem;
+        transition: 0.3s;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .btn-legal-primary:hover {
+        background: var(--dark-cocoa);
+        transform: translateY(-2px);
     }
 </style>
 
@@ -81,13 +126,13 @@
                 <h4><i class="fas fa-user-tie"></i> 1. Správce osobních údajů</h4>
                 <p>
                     Správcem osobních údajů v rámci projektu <strong>epes.online</strong> je:<br>
-                    <strong class="text-dark">{{ kontaktni_info.jmeno }}</strong><br>
-                    IČO: {{ kontaktni_info.ico }}<br>
-                    Sídlo: {{ kontaktni_info.adresa }}
+                    <strong class="text-dark">{{ kontaktni_info.jmeno|default:"Provozovatel portálu" }}</strong><br>
+                    IČO: {{ kontaktni_info.ico|default:"Doplnit IČO" }}<br>
+                    Sídlo: {{ kontaktni_info.adresa|default:"Doplnit adresu" }}
                 </p>
                 <p>
                     V případě dotazů nás můžete kontaktovat na:
-                    <a href="mailto:{{ kontaktni_info.email }}" class="fw-bold" style="color: var(--gold);">{{ kontaktni_info.email }}</a>
+                    <a href="mailto:{{ kontaktni_info.email }}" class="fw-bold" style="color: var(--gold); text-decoration: none;">{{ kontaktni_info.email|default:"info@epes.online" }}</a>
                 </p>
             </section>
 
@@ -96,44 +141,42 @@
                 <p>Vaše údaje a údaje o vašich zvířecích parťácích zpracováváme za účelem:</p>
                 <ul class="legal-list">
                     <li><strong>Plnění smlouvy:</strong> Správa vašeho uživatelského účtu, SOS profilů zvířat a doručování prémiových služeb.</li>
-                    <li><strong>Bezpečnost:</strong> Ochrana portálu a jeho uživatelů před zneužitím.</li>
-                    <li><strong>Komunikace:</strong> Propojení uživatelů v rámci komunitních zdí, bazaru a hlídání.</li>
-                    <li><strong>Zákonné povinnosti:</strong> Zejména v oblasti účetnictví u placeného členství ALFA.</li>
+                    <li><strong>Bezpečnost:</strong> Ochrana portálu a jeho uživatelů před zneužitím a kybernetickými útoky.</li>
+                    <li><strong>Komunita:</strong> Propojení uživatelů v rámci komunitních zdí, bazaru a mapy služeb.</li>
+                    <li><strong>Zákonné povinnosti:</strong> Evidence plateb u placeného členství ALFA dle platné legislativy.</li>
                 </ul>
             </section>
 
             <section class="legal-section">
                 <h4><i class="fas fa-shield-alt"></i> 3. Vaše práva (GDPR)</h4>
-                <p>Jako uživatel máte plnou kontrolu nad svými daty. Máte právo na:</p>
+                <p>Jako uživatel máte plnou kontrolu nad svými daty dle nařízení GDPR:</p>
                 <ul class="legal-list">
-                    <li>Přístup k údajům a jejich opravu.</li>
+                    <li><strong>Právo na přístup:</strong> Přehled o tom, jaká data o vás evidujeme.</li>
+                    <li><strong>Právo na opravu:</strong> Okamžitá změna chybných údajů ve vašem profilu.</li>
                     <li><strong>Právo na výmaz:</strong> Možnost smazat svůj profil i profily zvířat ("právo být zapomenut").</li>
-                    <li>Omezení zpracování nebo vznesení námitky proti zpracování.</li>
-                    <li>Přenositelnost údajů.</li>
+                    <li><strong>Přenositelnost:</strong> Možnost exportu vašich dat v PDF či jiném formátu.</li>
                 </ul>
             </section>
 
             <section class="legal-section">
                 <h4><i class="fas fa-lock"></i> 4. Zabezpečení dat</h4>
                 <p>
-                    Data našich uživatelů jsou šifrována a uložena na zabezpečených serverech. Citlivé údaje z nouzových profilů (SOS) jsou veřejně přístupné pouze v případě, že je zvíře označeno jako "ztracené", nebo po naskenování vašeho unikátního QR kódu nálezcem.
+                    Data našich uživatelů jsou šifrována (SSL protokol) a uložena na zabezpečených serverech v rámci EU. Citlivé údaje z nouzových profilů (SOS) jsou veřejně přístupné pouze po naskenování unikátního QR kódu nálezcem nebo v případě, že zvíře aktivně označíte v systému jako "ztracené".
                 </p>
             </section>
 
             <div class="d-flex flex-column flex-md-row justify-content-center align-items-center mt-5 gap-3">
-                <a href="{% url 'podminky' %}" class="btn px-4 py-2"
-                   style="color: var(--mid-brown); border: 2px solid var(--mid-brown); border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.9rem;">
+                <a href="{% url 'podminky' %}" class="btn px-4 py-2 btn-legal-outline">
                     <i class="fas fa-file-contract me-2"></i>OBCHODNÍ PODMÍNKY (VOP)
                 </a>
-                <a href="{% url 'home' %}" class="btn px-4 py-2"
-                   style="background: var(--gold); color: var(--dark-cocoa); border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.9rem;">
-                    <i class="fas fa-home me-2"></i>ZPĚT NA ÚVOD
+                <a href="{% url 'home' %}" class="btn px-4 py-3 btn-legal-primary">
+                    <i class="fas fa-home me-2"></i>ZPĚT NA HLAVNÍ STRANU
                 </a>
             </div>
         </div>
     </div>
 
-    <p class="text-center mt-4 text-muted small">
+    <p class="text-center mt-4 text-muted small pb-5">
         Tento dokument je pravidelně revidován, aby odpovídal aktuální legislativě EU (GDPR).
     </p>
 </div>

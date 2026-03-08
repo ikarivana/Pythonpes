@@ -5,9 +5,10 @@
     .cookie-card {
         border-radius: 35px;
         border: 1px solid rgba(197, 160, 89, 0.2);
-        background-color: #fffdfa;
+        background-color: white; /* Čistě bílá pro lepší čitelnost */
         max-width: 800px;
-        box-shadow: 0 15px 35px rgba(62, 39, 35, 0.05);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease;
     }
 
     .cookie-title {
@@ -25,9 +26,16 @@
     }
 
     .cookie-section {
-        background: rgba(197, 160, 89, 0.05);
+        /* Používáme barvu ze systému s nízkým průhledem pro pozadí */
+        background: rgba(197, 160, 89, 0.07);
         border-left: 5px solid var(--gold);
         border-radius: 15px;
+        transition: background 0.3s ease;
+    }
+
+    /* Pokud je aktivní lila téma, upravíme nádech pozadí sekce */
+    :root[style*="--gold: #9b87f5"] .cookie-section {
+        background: rgba(155, 135, 245, 0.07);
     }
 
     .btn-cookie-primary {
@@ -35,11 +43,13 @@
         color: white !important;
         border: none;
         transition: 0.3s;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
 
     .btn-cookie-primary:hover {
         background: var(--mid-brown);
         transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
     }
 
     .btn-cookie-outline {
@@ -50,13 +60,19 @@
     }
 
     .btn-cookie-outline:hover {
-        background: rgba(62, 39, 35, 0.05);
+        background: var(--dark-cocoa);
+        color: white !important;
         transform: translateY(-2px);
+    }
+
+    .cookie-icon-box {
+        color: var(--gold);
+        font-size: 1.5rem;
     }
 </style>
 
 <div class="container py-5">
-    <div class="card cookie-card p-4 p-md-5 mx-auto">
+    <div class="card cookie-card p-4 p-md-5 mx-auto border-0 shadow-lg">
 
         <div class="text-center mb-4">
             <span class="display-4">🍪</span>
@@ -64,15 +80,15 @@
             <div class="cookie-accent-line"></div>
         </div>
 
-        <p class="text-muted text-center small">Poslední aktualizace: 2026</p>
+        <p class="text-muted text-center small">Aktualizováno pro rok 2026</p>
 
         <div class="row mt-5">
             <div class="col-md-12">
                 <section class="mb-4 p-4 cookie-section">
                     <h4 style="color: var(--dark-cocoa); font-weight: 700;">
-                        <i class="fas fa-user-shield me-2"></i>Vaše volba
+                        <i class="fas fa-user-shield me-2" style="color: var(--gold);"></i>Vaše volba
                     </h4>
-                    <p class="mb-0 text-muted">
+                    <p class="mb-0 text-muted" style="line-height: 1.6;">
                         Respektujeme vaše soukromí. Portál <strong>epes.online</strong> je navržen tak, aby chránil vaše data i soukromí vašich zvířecích parťáků. Pokud si nepřejete ukládání volitelných cookies, můžete je odmítnout. Web bude i nadále fungovat v základním režimu (přihlášení, správa zvířat a zabezpečení).
                     </p>
                 </section>
@@ -81,18 +97,18 @@
                     <h4 style="color: var(--dark-cocoa); font-weight: 700;" class="mb-4">Jaké cookies používáme?</h4>
 
                     <div class="d-flex align-items-start mb-4">
-                        <div class="me-3 mt-1"><i class="fas fa-check-circle text-success fs-4"></i></div>
+                        <div class="me-3 mt-1 cookie-icon-box"><i class="fas fa-check-circle"></i></div>
                         <div>
                             <h6 class="fw-bold mb-1 text-dark">Nezbytné cookies</h6>
-                            <p class="small text-muted mb-0">Nutné pro fungování přihlášení, zabezpečení proti útokům a správu vaší relace. Bez nich byste se nemohli bezpečně přihlásit ke svému profilu a spravovat své pejsky a kočky.</p>
+                            <p class="small text-muted mb-0">Nutné pro fungování přihlášení, zabezpečení proti útokům a správu vaší relace. Bez nich byste se nemohli bezpečně přihlásit ke svému profilu.</p>
                         </div>
                     </div>
 
                     <div class="d-flex align-items-start mb-4">
-                        <div class="me-3 mt-1"><i class="fas fa-chart-line text-info fs-4"></i></div>
+                        <div class="me-3 mt-1 cookie-icon-box"><i class="fas fa-chart-line"></i></div>
                         <div>
                             <h6 class="fw-bold mb-1 text-dark">Funkční a analytické cookies</h6>
-                            <p class="small text-muted mb-0">Pomáhají nám pamatovat si vaše nastavení a anonymně měřit, které části našeho světa jsou pro páníčky nejužitečnější, abychom je mohli dále vylepšovat.</p>
+                            <p class="small text-muted mb-0">Pomáhají nám anonymně měřit, které části našeho světa jsou pro páníčky nejužitečnější, abychom je mohli dále vylepšovat pro vaše pohodlí.</p>
                         </div>
                     </div>
                 </section>
@@ -100,7 +116,7 @@
         </div>
 
         <div class="mt-5 d-flex flex-column flex-md-row justify-content-center gap-3">
-            <a href="{% url 'home' %}" class="btn btn-lg px-5 py-3 rounded-pill shadow-sm fw-bold btn-cookie-primary">
+            <a href="{% url 'home' %}" class="btn btn-lg px-5 py-3 rounded-pill fw-bold btn-cookie-primary">
                 <i class="fas fa-check me-2"></i>Přijmout vše
             </a>
 
@@ -109,8 +125,8 @@
             </a>
         </div>
 
-        <p class="text-center mt-4 extra-small text-muted" style="font-size: 0.75rem;">
-            Při odmítnutí budou aktivní pouze technické cookies nezbytné pro zabezpečený provoz webu podle standardů GDPR.
+        <p class="text-center mt-4 text-muted" style="font-size: 0.75rem;">
+            <i class="fas fa-info-circle me-1"></i> Při odmítnutí budou aktivní pouze technické cookies nezbytné pro zabezpečený provoz webu podle standardů GDPR.
         </p>
     </div>
 </div>
