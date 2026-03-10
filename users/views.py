@@ -6,6 +6,7 @@ from datetime import timedelta, timezone
 import qrcode
 from PIL import Image, ImageOps
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.sites import requests
 from pillow_heif import register_heif_opener
 
 from django.conf import settings
@@ -168,57 +169,60 @@ def pridat_psa(request):
 
     return render(request, 'users/pridat_psa.html', {'form': form})
 
+
 @login_required
 def upravit_psa(request, pk):
     pes = get_object_or_404(Pes, pk=pk, majitel=request.user.profil)
 
     if request.method == 'POST':
         form = PesForm(request.POST, request.FILES, instance=pes, request=request)
-
         if form.is_valid():
             try:
                 pes = form.save(commit=False)
+                # VYNUCENÉ ULOŽENÍ TĚCHTO POLÍ
+                pes.adresa_pro_darky = request.POST.get('adresa')  # Vezme hodnotu z políčka name="adresa"
+                pes.popis = request.POST.get('popis')  # Vezme hodnotu z políčka name="popis"
 
-                posledni_odcerveni = request.POST.get('posledni_odcerveni')
-                posledni_klistata = request.POST.get('posledni_klistata')
-                zdravotni_poznamky = request.POST.get('zdravotni_poznamky')
+                # Ostatní pole, která jsme řešili...
+                pes.foto_rotace = request.POST.get('foto_rotace', 0)
+                pes.poznamky_ockovani = request.POST.get('poznamky_ockovani')
 
-                # Uložíme do modelu, pokud jsou vyplněny (jinak zůstane původní nebo None)
-                pes.posledni_odcerveni = posledni_odcerveni if posledni_odcerveni else None
-                pes.posledni_klistata = posledni_klistata if posledni_klistata else None
-                if zdravotni_poznamky:
-                    pes.zdravotni_poznamky = zdravotni_poznamky
+                # Nové pole pro štěňata
+                pes.poznamky_ockovani = request.POST.get('poznamky_ockovani')
 
-                # OPRAVA: Název checkboxu musí sedět s HTML
-                if request.POST.get('regenerovat_qr_checkbox') == 'on' or not pes.qr_kod:
-                    try:
-                        url_psa = f"https://epes.online/users/pes/{pes.id}/"
+                # Ošetření prázdných datumů
+                pes.posledni_ockovani = request.POST.get('posledni_ockovani') or None
+                pes.posledni_odcerveni = request.POST.get('posledni_odcerveni') or None
+                pes.posledni_klistata = request.POST.get('posledni_klistata') or None
 
-                        qr_gen = qrcode.QRCode(version=1, box_size=10, border=5)
-                        qr_gen.add_data(url_psa)
-                        qr_gen.make(fit=True)
+                # Chovné údaje pro Premium
+                if request.user.profil.is_premium:
+                    pes.rtg_hd = request.POST.get('rtg_hd')
+                    pes.rtg_ed = request.POST.get('rtg_ed')
+                    pes.rtg_pater = request.POST.get('rtg_pater')
+                    pes.bonitace = request.POST.get('bonitace')
 
-                        img_qr = qr_gen.make_image(fill_color="black", back_color="white")
-                        buffer = io.BytesIO()
-                        img_qr.save(buffer, format='PNG')
+                # 2. LOGIKA PRO REGENERACI QR KÓDU
+                if request.POST.get('regenerovat_qr'):
+                    if pes.qr_kod:
+                        pes.qr_kod.delete(save=False)
 
-                        filename = f'qr_{pes.id}_{slugify(pes.jmeno)}.png'
+                    url_psa = f"https://epes.online/users/pes/{pes.id}/"
+                    qr_gen = qrcode.QRCode(version=1, box_size=10, border=5)
+                    qr_gen.add_data(url_psa)
+                    qr_gen.make(fit=True)
+                    img_qr = qr_gen.make_image(fill_color="black", back_color="white")
 
-                        if pes.qr_kod:
-                            pes.qr_kod.delete(save=False)
-
-                        pes.qr_kod.save(filename, ContentFile(buffer.getvalue()), save=False)
-                    except Exception as qr_err:
-                        print(f"Chyba QR: {qr_err}")
+                    buffer = io.BytesIO()
+                    img_qr.save(buffer, format='PNG')
+                    pes.qr_kod.save(f'qr_{pes.id}.png', ContentFile(buffer.getvalue()), save=False)
+                    messages.warning(request, "QR kód byl přegenerován. Stará známka již nebude fungovat.")
 
                 pes.save()
-                messages.success(request, f"Profil {pes.jmeno} byl uložen.")
-
-                # Směrování na detail_psa s parametrem pes_id (podle tvého urls.py)
+                messages.success(request, "Uloženo!")
                 return redirect('detail_psa', pes_id=pes.id)
-
             except Exception as e:
-                messages.error(request, f"Chyba: {e}")
+                messages.error(request, f"Chyba při ukládání: {e}")
         else:
             messages.error(request, "Opravte chyby ve formuláři.")
     else:
@@ -395,13 +399,40 @@ def odeslat_sos_email(request, pes_id):
     return redirect('nouzovy_profil_psa', pes_id=pes_id)
 
 
-@login_required
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Pes, ProfilMajitele
+
+
 def prepnout_ztratu(request, pes_id):
-    pes = get_object_or_404(Pes, pk=pes_id, majitel=request.user.profil)
+    # OPRAVA 1: V modelu ProfilMajitele se pole jmenuje 'uzivatel'
+    profil = get_object_or_404(ProfilMajitele, uzivatel=request.user)
+
+    # OPRAVA 2: Psa hledáme podle objektu profilu, aby seděly typy dat
+    pes = get_object_or_404(Pes, id=pes_id, majitel=profil)
+
+    # Samotné přepnutí stavu
     pes.je_ztraceny = not pes.je_ztraceny
+
+    if pes.je_ztraceny:
+        # Pokud přišla data z formuláře (při hlášení ztráty)
+        if request.method == 'POST':
+            lat = request.POST.get('lat')
+            lon = request.POST.get('lon')
+            if lat and lon:
+                try:
+                    pes.lat = float(lat)
+                    pes.lon = float(lon)
+                except (ValueError, TypeError):
+                    pass
+    else:
+        # Pokud byl nalezen, vymažeme souřadnice, aby zmizel z mapy
+        pes.lat = None
+        pes.lon = None
+
     pes.save()
 
-    return redirect('detail_psa', pes_id=pes_id)
+    # Přesměrování zpět na detail psa
+    return redirect('detail_psa', pes_id=pes.id)
 
 
 @csrf_exempt
@@ -566,21 +597,7 @@ def pridat_uspech(request, pes_id):
     return redirect('detail_psa', pes_id=pes.id)
 
 
-# --- 1. SOCIÁLNÍ SÍŤ - SEZNAM ZDÍ (ŘAZENÍ) ---
-def seznam_zdi(request):
-    # Načteme všechna plemena a seřadíme je podle názvu
-    vsechna_plemena = Plemeno.objects.all().order_by('nazev')
 
-    context = {
-        # Filtrujeme plemena podle kategorie pro zobrazení v sekcích
-        'vsechna_plemena': vsechna_plemena.filter(kategorie='ostatni'),
-        'plemena_vystavy': vsechna_plemena.filter(kategorie='vystavy'),
-        'plemena_lovecka': vsechna_plemena.filter(kategorie='lovecka'),
-    }
-    return render(request, 'users/social_zed.html', context)
-
-
-# --- 2. ZED PŘÍSPĚVKŮ (ŘAZENÍ OD NEJNOVĚJŠÍCH) ---
 # --- 1. SOCIÁLNÍ SÍŤ - SEZNAM ZDÍ ---
 # ODSTRANĚNO @login_required: Aby mohl nahlédnout i neregistrovaný
 def seznam_zdi(request):

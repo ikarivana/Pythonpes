@@ -3,6 +3,7 @@ from datetime import timedelta, date
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.db.models import Q
+from django.urls import reverse
 from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -78,36 +79,37 @@ def simpleshop_webhook(request):
         return HttpResponse(f"Error: {str(e)}", status=500)
 
 
-# --- 3. MAPA SLUŽEB ---
 def mapa_sluzeb(request):
-    # Pročištění starých nebezpečí (neprovádět při každém requestu v ostrém provozu, raději cron)
-    Sluzba.objects.filter(typ='nebezpeci', vytvoreno__lt=timezone.now() - timedelta(days=7)).delete()
-
-    # Zobrazíme schválené služby a čerstvá nebezpečí
-    limit_vystrahy = timezone.now() - timedelta(days=3)
-    sluzby_queryset = Sluzba.objects.filter(
-        (Q(schvaleno=True) | Q(typ='nebezpeci')) &
-        Q(vytvoreno__gte=limit_vystrahy)
-    ).exclude(typ='nebezpeci', potvrzeni_minus__gte=3)
-
+    # 1. Načtení služeb (to už tam máš)
+    # Schválené služby vytáhneme bez těch tří teček
+    sluzby_queryset = Sluzba.objects.filter(schvaleno=True)
     sluzby_data = []
-    for s in sluzby_queryset:
-        sluzby_data.append({
-            'id': s.id,
-            'nazev': s.nazev,
-            'typ': s.get_typ_display(),
-            'lat': s.lat,
-            'lon': s.lon,
-            'adresa': s.adresa,
-            'popis': s.popis,
-            'color': s.get_marker_color() if hasattr(s, 'get_marker_color') else '#c5a059',
-        })
+
+    # ... kód pro přidání služeb do sluzby_data ...
+
+    # 2. OPRAVA: Musíme definovat 'ztraceni_psi'
+    from users.models import Pes  # Nezapomeň na import modelu Pes
+    ztraceni_psi = Pes.objects.filter(je_ztraceny=True)
+
+    # 3. Teď už cyklus nebude házet chybu
+    for p in ztraceni_psi:
+        if p.lat and p.lon:
+            sluzby_data.append({
+                'id': p.id,
+                'nazev': f"🚨 HLEDÁ SE: {p.jmeno}",
+                'typ': "ZTRACENÝ MAZLÍČEK",
+                'typ_slug': 'ztrata',
+                'lat': float(p.lat),
+                'lon': float(p.lon),
+                'adresa': getattr(p, 'posledni_vyskyt', "Poloha neupřesněna"),
+                'url': reverse('nouzovy_profil_psa', args=[p.id]),
+                'is_ztrata': True
+            })
 
     return render(request, 'home/mapa_sluzeb.html', {
         'sluzby_json': json.dumps(sluzby_data),
         'je_prihlasen': request.user.is_authenticated
     })
-
 
 @login_required
 def pridat_sluzbu(request):

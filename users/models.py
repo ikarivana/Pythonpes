@@ -1,15 +1,11 @@
-from datetime import timedelta, date
-
-from django.contrib.auth.decorators import login_required
-from django.core.checks import messages
-from django.shortcuts import get_object_or_404, redirect
-from django.utils.text import slugify
-import qrcode
+from datetime import timedelta, date, datetime
 from io import BytesIO
+
+import qrcode
 from django.core.files import File
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.template.defaultfilters import slugify
 
 
 class PromoKod(models.Model):
@@ -35,6 +31,19 @@ class ProfilMajitele(models.Model):
     # NOVÉ POLE PRO STATISTIKY
     pouzity_kod = models.CharField(max_length=50, blank=True, null=True, verbose_name="Použitý promo kód")
 
+    @property
+    def is_cat_person(self):
+        """Bezpečná kontrola pro barvy v base.html"""
+        try:
+            # Spočítáme zvířata přes related_name='psi'
+            pocet = self.psi.count()
+            if pocet == 1:
+                prvni = self.psi.first()
+                return prvni and prvni.druh == 'kocka'
+            return False
+        except:
+            return False
+
 
 # --- MODEL PSA ---
 class Pes(models.Model):
@@ -49,10 +58,13 @@ class Pes(models.Model):
     kontaktni_telefon = models.CharField(max_length=20)
     kontaktni_email = models.EmailField()
     adresa_pro_darky = models.TextField(blank=True, null=True)
+    lat = models.FloatField(blank=True, null=True, verbose_name="Zeměpisná šířka")
+    lon = models.FloatField(blank=True, null=True, verbose_name="Zeměpisná délka")
 
     # Základní info
     cip = models.CharField(max_length=50, blank=True, null=True)
     fotka = models.ImageField(upload_to='profily_psu/', blank=True, null=True)
+    foto_rotace = models.IntegerField(default=0)  # Ukládá úhly 0, 90, 180, 270
     vaha = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     datum_narozeni = models.DateField(null=True, blank=True)
 
@@ -63,7 +75,7 @@ class Pes(models.Model):
     rtg_hd = models.CharField(max_length=50, blank=True, null=True)
     rtg_ed = models.CharField(max_length=50, blank=True, null=True)
     rtg_pater = models.CharField(max_length=100, blank=True, null=True)
-    bonitace = models.TextField(blank=True, null=True)  # Ponechána jen jedna
+    bonitace = models.TextField(blank=True, null=True)
 
     # QR a SOS stav
     qr_kod = models.ImageField(upload_to='qr_kody/', blank=True, null=True)
@@ -126,15 +138,15 @@ class Pes(models.Model):
 
     @property
     def pristi_odcerveni(self):
-        """
-        Psi obvykle po 6 měsících (182 dní).
-        U koček se doporučuje po 3 měsících (92 dní), pokud jsou venkovní.
-        """
-        dny = 92 if self.druh == 'kocka' else 182
         if self.posledni_odcerveni:
-            return self.posledni_odcerveni + timedelta(days=dny)
+            try:
+                # Kočka 92 dní, pes 182 dní
+                dny = 92 if self.druh == 'kocka' else 182
+                # Musí zde být posledni_odcerveni!
+                return self.posledni_odcerveni + timedelta(days=dny)
+            except Exception:
+                return None
         return None
-
     @property
     def pristi_klistata(self):
         """

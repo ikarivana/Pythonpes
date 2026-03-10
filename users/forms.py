@@ -15,9 +15,8 @@ class CzechClearableFileInput(forms.ClearableFileInput):
 
 
 # --- 1. FORMULÁŘ PRO PSA (OPRAVENÁ VERZE) ---
-
 class PesForm(forms.ModelForm):
-    # Definice RTG výběru pro pole, která v modelu existují
+    # Definice RTG výběru pro pole
     RTG_CHOICES = [
         ('', '--- nevybráno ---'),
         ('A', 'A - Negativní (0/0)'),
@@ -29,52 +28,65 @@ class PesForm(forms.ModelForm):
 
     class Meta:
         model = Pes
-        # NATRVALO: Django si samo vytáhne z modelu jen to, co tam reálně existuje.
-        # Tím pádem už nikdy neuvidíš chybu "Unknown field".
-        exclude = ['majitel', 'qr_kod', 'vytvoreno']
+        # Vyloučíme pole, která spravujeme ručně ve views
+        exclude = ['majitel', 'qr_kod', 'vytvoreno', 'foto_pozice', 'foto_rotace', 'adresa_pro_darky',
+                   'poznamky_ockovani']
 
         widgets = {
-            'datum_narozeni': forms.DateInput(attrs={'type': 'date'}),
-            'posledni_ockovani': forms.DateInput(attrs={'type': 'date'}),
-            'posledni_odcerveni': forms.DateInput(attrs={'type': 'date'}),
-            'posledni_klistata': forms.DateInput(attrs={'type': 'date'}),
-            'kontaktni_jmeno': forms.TextInput(attrs={'placeholder': 'Kdo má zvednout telefon?'}),
-            'kontaktni_telefon': forms.TextInput(attrs={'placeholder': '+420 123 456 789'}),
-            'kontaktni_email': forms.EmailInput(attrs={'placeholder': 'vas@email.cz'}),
-            'adresa_pro_darky': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Kam poslat pamlsky?'}),
-            'bonitace': forms.Textarea(attrs={'rows': 3}),
-            'fotka': forms.FileInput(attrs={'accept': 'image/*'}),
-            'vaha': forms.NumberInput(attrs={'step': '0.1'}),
+            'jmeno': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Jméno parťáka'}),
+            'rasa': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Např. Border kolie'}),
+            # V modelu máš rasa, ne plemeno
+            'datum_narozeni': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'cip': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Číslo mikročipu'}),
+            'vaha': forms.NumberInput(attrs={'step': '0.1', 'class': 'form-control'}),
+
+            # Zdravotní sekce
+            'posledni_ockovani': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'posledni_odcerveni': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'posledni_klistata': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+
+            # SOS sekce
+            'kontaktni_telefon': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+420...'}),
+            'popis': forms.Textarea(attrs={'rows': 2, 'class': 'form-control', 'placeholder': 'Vzkaz pro nálezce...'}),
+
+            # Chovné (Premium)
+            'bonitace': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+            'vystavy': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(PesForm, self).__init__(*args, **kwargs)
 
-        # Seznam polí, která chceme sledovat pro RTG výběr (pokud v modelu jsou)
+        # Nastavení RTG výběrů (pokud existují v modelu)
         for rtg_field in ['rtg_hd', 'rtg_ed']:
             if rtg_field in self.fields:
-                self.fields[rtg_field] = forms.ChoiceField(choices=self.RTG_CHOICES, required=False)
+                self.fields[rtg_field] = forms.ChoiceField(
+                    choices=self.RTG_CHOICES,
+                    required=False,
+                    widget=forms.Select(attrs={'class': 'form-control'})
+                )
 
-        # Dynamická smyčka pro nastavení vzhledu a Premium logiky
+        # Dynamické popisky a Premium logika
         for field_name, field in self.fields.items():
-            field.required = False
-            field.widget.attrs.update({'class': 'form-control custom-brown-input'})
+            # Premium pole k zamknutí
+            premium_fields = ['rtg_hd', 'rtg_ed', 'rtg_pater', 'bonitace', 'vystavy', 'chovna_stanice']
 
-            # Speciální popisky pro kočky
-            if self.instance and hasattr(self.instance, 'druh') and self.instance.druh == 'kocka':
-                if field_name == 'jmeno': field.label = "Jméno kočky"
-                if field_name == 'kontaktni_jmeno': field.label = "Osoba zodpovědná za kočičku"
-
-            # Premium logika: zamknutí polí pro ne-premium uživatele
-            alfa_seznam = ['rtg_hd', 'rtg_ed', 'rtg_pater', 'bonitace', 'chovna_stanice']
-            if field_name in alfa_seznam:
-                field.help_text = "🔒 Pouze pro ALFA pány"
+            if field_name in premium_fields:
                 if self.request and not (self.request.user.is_staff or self.request.user.profil.is_premium):
                     field.disabled = True
+                    field.help_text = "🔒 Funkce pro Premium členy"
 
-        if 'jmeno' in self.fields:
-            self.fields['jmeno'].required = True
+            # Úprava popisků podle druhu (Pes vs Kočka)
+            if self.instance and self.instance.druh == 'kocka':
+                if field_name == 'jmeno': field.label = "Jméno kočky"
+                if field_name == 'bonitace': field.label = "Uchovnění kočky"
+            else:
+                if field_name == 'jmeno': field.label = "Jméno psa"
+
+        # Povinná pole
+        if 'jmeno' in self.fields: self.fields['jmeno'].required = True
+        if 'kontaktni_telefon' in self.fields: self.fields['kontaktni_telefon'].required = True
 
 
 # --- 2. FORMULÁŘE PRO UŽIVATELE ---
