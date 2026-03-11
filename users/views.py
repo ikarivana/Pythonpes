@@ -879,12 +879,11 @@ def upravit_profil(request):
         user_form = UserUpdateForm(request.POST, instance=request.user)
         profil_form = ProfilUpdateForm(request.POST, request.FILES, instance=profil)
 
-        # TADY OPRAVENO: is_valid()
         if user_form.is_valid() and profil_form.is_valid():
             user_form.save()
             profil_form.save()
             messages.success(request, "Profil byl úspěšně upraven.")
-            return redirect('profil') # Název podle tvého urls.py
+            return redirect('profil')  # <--- ZKONTROLUJ, že v urls.py máš name='profil'
     else:
         user_form = UserUpdateForm(instance=request.user)
         profil_form = ProfilUpdateForm(instance=profil)
@@ -894,7 +893,6 @@ def upravit_profil(request):
         'profil_form': profil_form,
         'profil': profil,
     }
-    # DOPORUČENÍ: Použij jinou šablonu pro editaci!
     return render(request, 'users/upravit_profil.html', context)
 
 # --- SMAZAT PROFIL ---

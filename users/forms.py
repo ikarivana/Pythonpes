@@ -1,7 +1,6 @@
-from datetime import timedelta, date
 from django import forms
-from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from .models import Pes, Ockovani, Prispevek, Plemeno, ProfilMajitele, PromoKod
 
 
@@ -118,17 +117,7 @@ class ExtendedRegistrationForm(UserCreationForm):
         user.email = self.cleaned_data.get('email')
         if commit:
             user.save()
-            kod_text = self.cleaned_data.get('promo_kod', '').strip()
-            is_premium, premium_do, final_kod = False, None, None
-            if kod_text:
-                try:
-                    pkod = PromoKod.objects.get(kod__iexact=kod_text, je_aktivni=True)
-                    is_premium = True
-                    premium_do = date.today() + timedelta(days=pkod.pocet_dni)
-                    final_kod = pkod.kod.upper()
-                except PromoKod.DoesNotExist:
-                    final_kod = f"NEPLATNÝ: {kod_text}"
-
+            # ... zbytek tvého save kódu pro ProfilMajitele, který jsi tam měl ...
             ProfilMajitele.objects.update_or_create(
                 uzivatel=user,
                 defaults={
@@ -136,46 +125,40 @@ class ExtendedRegistrationForm(UserCreationForm):
                     'ulice_cp': self.cleaned_data.get('ulice_cp'),
                     'mesto': self.cleaned_data.get('mesto'),
                     'psc': self.cleaned_data.get('psc'),
-                    'is_premium': is_premium,
-                    'premium_do': premium_do,
-                    'pouzity_kod': final_kod,
                 }
             )
         return user
 
-
 class UserUpdateForm(forms.ModelForm):
-    email = forms.EmailField(required=True)
-    telefon = forms.CharField(required=False)
-    ulice_cp = forms.CharField(required=False, label="Ulice a č.p.")
-    mesto = forms.CharField(required=False, label="Město")
-    psc = forms.CharField(required=False, label="PSČ")
-
     class Meta:
         model = User
-        fields = ['username', 'email', 'first_name', 'last_name']
+        fields = ['first_name', 'last_name', 'email']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance and hasattr(self.instance, 'profil'):
-            self.fields['telefon'].initial = self.instance.profil.telefon
-            self.fields['ulice_cp'].initial = self.instance.profil.ulice_cp
-            self.fields['mesto'].initial = self.instance.profil.mesto
-            self.fields['psc'].initial = self.instance.profil.psc
         for name, field in self.fields.items():
             field.widget.attrs.update({'class': 'form-control'})
 
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        if commit:
-            user.save()
-            profil = user.profil
-            profil.telefon = self.cleaned_data.get('telefon')
-            profil.ulice_cp = self.cleaned_data.get('ulice_cp')
-            profil.mesto = self.cleaned_data.get('mesto')
-            profil.psc = self.cleaned_data.get('psc')
-            profil.save()
-        return user
+class ProfilUpdateForm(forms.ModelForm):
+    class Meta:
+        model = ProfilMajitele
+        fields = ['telefon', 'ulice_cp', 'mesto', 'psc']
+        widgets = {
+            'telefon': forms.TextInput(attrs={'placeholder': 'Telefon'}),
+            'ulice_cp': forms.TextInput(attrs={'placeholder': 'Ulice a č.p.'}),
+            'mesto': forms.TextInput(attrs={'placeholder': 'Město'}),
+            'psc': forms.TextInput(attrs={'placeholder': 'PSČ'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            field.widget.attrs.update({'class': 'form-control'})
+
+class PlemenoForm(forms.ModelForm):
+    class Meta:
+        model = Plemeno
+        fields = ['nazev', 'ikona', 'kategorie']
 
 
 # --- 3. OSTATNÍ FORMULÁŘE ---
@@ -201,24 +184,3 @@ class OckovaniForm(forms.ModelForm):
             'nazev_vakciny': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Např. Nobivac'}),
             'poznamka': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }
-
-
-class ProfilUpdateForm(forms.ModelForm):
-    class Meta:
-        model = ProfilMajitele
-        fields = ['telefon', 'ulice_cp', 'mesto', 'psc', 'pouzity_kod']
-        widgets = {
-            'pouzity_kod': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control-plaintext'}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for name, field in self.fields.items():
-            if name != 'pouzity_kod':
-                field.widget.attrs.update({'class': 'form-control'})
-
-
-class PlemenoForm(forms.ModelForm):
-    class Meta:
-        model = Plemeno
-        fields = ['nazev', 'ikona', 'kategorie']

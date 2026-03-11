@@ -4,36 +4,33 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
-    /* 1. DYNAMICKÉ PROMĚNNÉ PRO BARVY */
     :root {
         --dog-primary: #5d4037;
         --dog-accent: #c5a059;
         --cat-primary: #4b3f72;
         --cat-accent: #9b87f5;
 
-        /* Výchozí barvy (budou se měnit přes JS) */
+        /* Detekce tématu podle tvé property is_cat_person */
+        {% if user.profil.is_cat_person %}
+        --current-primary: var(--cat-primary);
+        --current-accent: var(--cat-accent);
+        {% else %}
         --current-primary: var(--dog-primary);
         --current-accent: var(--dog-accent);
+        {% endif %}
+
         --input-border: #f3e5f5;
     }
 
-    /* Třída pro přepnutí na kočičí téma */
-    .theme-cat {
-        --current-primary: var(--cat-primary);
-        --current-accent: var(--cat-accent);
-    }
-
-    /* 2. HLAVNÍ WRAPPER */
     .edit-wrapper {
         display: flex; justify-content: center; align-items: flex-start;
-        min-height: 90vh; background-color: #fdfaf7; padding: 20px 15px;
+        min-height: 90vh; background-color: #fdfaf7; padding: 40px 15px;
         font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
-    /* 3. KARTA FORMULÁŘE */
     .edit-card {
         background: white; width: 100%; max-width: 650px;
-        padding: 30px; border-radius: 24px;
+        padding: 40px; border-radius: 24px;
         box-shadow: 0 15px 35px rgba(141, 110, 99, 0.1);
         border: 1px solid #efebe9;
     }
@@ -41,34 +38,32 @@
     .edit-card h2 {
         color: var(--current-primary); font-weight: 800; text-align: center;
         margin-bottom: 5px; font-family: 'Playfair Display', serif;
-        font-size: 1.8rem; transition: 0.3s;
+        font-size: 2rem;
     }
 
-    .subtitle { text-align: center; color: #8d6e63; margin-bottom: 30px; font-size: 0.85rem; }
+    .subtitle { text-align: center; color: #8d6e63; margin-bottom: 30px; font-size: 0.9rem; }
 
-    /* 4. NADPISY SEKCÍ */
     .form-section-title {
         color: var(--current-accent); font-weight: 800; font-size: 0.75rem;
-        text-transform: uppercase; margin: 25px 0 15px;
+        text-transform: uppercase; margin: 30px 0 15px;
         display: flex; align-items: center; gap: 10px;
-        letter-spacing: 1px; transition: 0.3s;
+        letter-spacing: 1px;
     }
     .form-section-title::after { content: ""; flex: 1; height: 1px; background: #f1ece9; }
 
-    /* 5. STYLOVÁNÍ POLÍ */
     .edit-card label {
         font-weight: 700; color: #8d6e63; display: block;
-        margin-bottom: 6px; font-size: 0.75rem; text-transform: uppercase;
+        margin-bottom: 8px; font-size: 0.75rem; text-transform: uppercase;
     }
 
-    /* Cílíme na Django widgety (inputy) */
+    /* Django inputy */
     .edit-card input {
         width: 100% !important; padding: 12px 16px !important;
         border: 2px solid var(--input-border) !important;
         border-radius: 12px !important; background: #fafafa !important;
         transition: 0.3s !important; color: var(--current-primary) !important;
         font-weight: 600 !important; font-size: 1rem !important;
-        box-sizing: border-box;
+        box-sizing: border-box; margin-bottom: 15px;
     }
 
     .edit-card input:focus {
@@ -76,131 +71,75 @@
         outline: none !important; box-shadow: 0 0 0 4px rgba(155, 135, 245, 0.1) !important;
     }
 
-    /* 6. PŘEPÍNAČE (DOG/CAT) */
-    .type-toggle-container { display: flex; gap: 10px; margin-bottom: 10px; }
-    .type-radio-btn { flex: 1; position: relative; }
-    .type-radio-btn input { position: absolute; opacity: 0; width: 0; height: 0; }
-
-    .type-label {
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-        padding: 12px; border: 2px solid var(--input-border); border-radius: 15px;
-        cursor: pointer; transition: 0.3s; font-weight: 700; color: #bcaaa4;
-    }
-
-    #type_dog:checked + .type-label { border-color: var(--dog-primary); color: var(--dog-primary); background: #fdfaf7; }
-    #type_cat:checked + .type-label { border-color: var(--cat-accent); color: var(--cat-accent); background: #f8f7ff; }
-
-    /* 7. TLAČÍTKO */
     .btn-save {
         background: var(--current-primary); color: white; border: none; width: 100%;
-        padding: 16px; border-radius: 15px; font-size: 1rem; font-weight: 800;
+        padding: 18px; border-radius: 15px; font-size: 1rem; font-weight: 800;
         cursor: pointer; transition: 0.3s; margin-top: 25px;
         text-transform: uppercase; letter-spacing: 1px;
     }
     .btn-save:hover { filter: brightness(1.1); transform: translateY(-2px); }
 
-    /* 8. MOBILNÍ OPTIMALIZACE */
     @media (max-width: 576px) {
-        .edit-wrapper { padding: 10px; }
-        .edit-card { padding: 20px; border-radius: 20px; }
-        .row.g-3 > div { width: 100%; } /* Na mobilu vše pod sebou */
-        .address-row .col-8, .address-row .col-4 { width: 100%; } /* PSČ pod Město */
+        .edit-card { padding: 25px; }
     }
 </style>
 
-<div class="edit-wrapper" id="page-wrapper">
+<div class="edit-wrapper">
     <div class="edit-card">
         <h2>Můj profil</h2>
-        <p class="subtitle">Upravte své údaje a zaměření</p>
+        <p class="subtitle">Upravte své osobní a kontaktní údaje</p>
 
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
-            <div class="form-section-title"><i class="fas fa-paw"></i> Jsem páníček pro</div>
-            <div class="type-toggle-container">
-                <div class="type-radio-btn">
-                    <input type="radio" name="je_kockar" id="type_dog" value="false" {% if not user.profil.je_kockar %}checked{% endif %}>
-                    <label for="type_dog" class="type-label">
-                        <i class="fas fa-dog mb-1"></i> Pejska
-                    </label>
-                </div>
-                <div class="type-radio-btn">
-                    <input type="radio" name="je_kockar" id="type_cat" value="true" {% if user.profil.je_kockar %}checked{% endif %}>
-                    <label for="type_cat" class="type-label">
-                        <i class="fas fa-cat mb-1"></i> Kočku
-                    </label>
-                </div>
-            </div>
-
             <div class="form-section-title"><i class="fas fa-user-circle"></i> Osobní údaje</div>
-            <div class="row g-3">
+            <div class="row">
                 <div class="col-sm-6">
                     <label>Jméno</label>
-                    {{ form.first_name }}
+                    {{ user_form.first_name }}
                 </div>
                 <div class="col-sm-6">
                     <label>Příjmení</label>
-                    {{ form.last_name }}
+                    {{ user_form.last_name }}
                 </div>
             </div>
 
             <div class="form-section-title"><i class="fas fa-phone-alt"></i> Kontakt</div>
-            <div class="row g-3">
+            <div class="row">
                 <div class="col-sm-7">
                     <label>E-mail</label>
-                    {{ form.email }}
+                    {{ user_form.email }}
                 </div>
                 <div class="col-sm-5">
                     <label>Telefon</label>
-                    {{ form.telefon }}
+                    {{ profil_form.telefon }}
                 </div>
             </div>
 
             <div class="form-section-title"><i class="fas fa-map-marker-alt"></i> Adresa pro dárky</div>
-            <div class="form-group mb-3">
+            <div class="form-group">
                 <label>Ulice a č.p.</label>
-                {{ form.ulice_cp }}
+                {{ profil_form.ulice_cp }}
             </div>
-            <div class="row g-3 address-row">
+            <div class="row">
                 <div class="col-sm-8">
                     <label>Město</label>
-                    {{ form.mesto }}
+                    {{ profil_form.mesto }}
                 </div>
                 <div class="col-sm-4">
                     <label>PSČ</label>
-                    {{ form.psc }}
+                    {{ profil_form.psc }}
                 </div>
             </div>
 
             <button type="submit" class="btn-save shadow-sm">
-                ULOŽIT PROFIL
+                ULOŽIT ZMĚNY
             </button>
 
-            <a href="{% url 'profil_uzivatele' %}" class="text-decoration-none d-block text-center mt-3 text-muted small fw-bold">
-                <i class="fas fa-times me-1"></i> ZRUŠIT ZMĚNY
+            <a href="{% url 'profil' %}" class="text-decoration-none d-block text-center mt-3 text-muted small fw-bold">
+                <i class="fas fa-times me-1"></i> ZRUŠIT A VRÁTIT SE
             </a>
         </form>
     </div>
 </div>
-
-<script>
-    // JS pro okamžitou změnu barev při kliknutí
-    const wrapper = document.getElementById('page-wrapper');
-    const dogRadio = document.getElementById('type_dog');
-    const catRadio = document.getElementById('type_cat');
-
-    function updateTheme() {
-        if (catRadio.checked) {
-            wrapper.classList.add('theme-cat');
-        } else {
-            wrapper.classList.remove('theme-cat');
-        }
-    }
-
-    dogRadio.addEventListener('change', updateTheme);
-    catRadio.addEventListener('change', updateTheme);
-
-    // Spustit hned po načtení
-    updateTheme();
-</script>
 {% endblock %}
