@@ -879,25 +879,23 @@ def upravit_profil(request):
         user_form = UserUpdateForm(request.POST, instance=request.user)
         profil_form = ProfilUpdateForm(request.POST, request.FILES, instance=profil)
 
-        if user_form.is_white() and profil_form.is_valid():
+        # TADY OPRAVENO: is_valid()
+        if user_form.is_valid() and profil_form.is_valid():
             user_form.save()
             profil_form.save()
             messages.success(request, "Profil byl úspěšně upraven.")
-            return redirect('profil_uzivatele')
+            return redirect('profil') # Název podle tvého urls.py
     else:
         user_form = UserUpdateForm(instance=request.user)
         profil_form = ProfilUpdateForm(instance=profil)
 
-    # Statistiky potřebujeme i zde, pokud se zobrazují ve stejné šabloně
     context = {
         'user_form': user_form,
         'profil_form': profil_form,
         'profil': profil,
-        'libi_se_mi': Like.objects.filter(uzivatel=request.user),
-        'komentare': Komentar.objects.filter(autor=request.user),
     }
-    return render(request, 'users/profil.html', context)
-
+    # DOPORUČENÍ: Použij jinou šablonu pro editaci!
+    return render(request, 'users/upravit_profil.html', context)
 
 # --- SMAZAT PROFIL ---
 @login_required

@@ -18,7 +18,8 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+          rel="stylesheet">
 
     <style>
         :root {
@@ -124,17 +125,18 @@
             <a href="{% url 'home' %}" class="nav-link-custom"><i class="fas fa-home"></i> Domů</a>
 
             {% if user.is_authenticated %}
-                <a href="{% url 'seznam_psu' %}" class="nav-link-custom"><i class="fas fa-paw"></i> Moje zvířata</a>
-                <a href="{% url 'profil' %}" class="nav-link-custom"><i class="fas fa-user-circle"></i> Můj profil</a>
-                <a href="{% url 'seznam_notifikaci' %}" class="nav-link-custom">
-                    <div class="position-relative">
-                        <i class="fas fa-bell"></i>
-                        {% if pocet_notifikaci > 0 %}
-                        <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle" style="font-size: 0.5rem;">{{ pocet_notifikaci }}</span>
-                        {% endif %}
-                    </div>
-                    <span class="ms-2">Notifikace</span>
-                </a>
+            <a href="{% url 'seznam_psu' %}" class="nav-link-custom"><i class="fas fa-paw"></i> Moje zvířata</a>
+            <a href="{% url 'profil' %}" class="nav-link-custom"><i class="fas fa-user-circle"></i> Můj profil</a>
+            <a href="{% url 'seznam_notifikaci' %}" class="nav-link-custom">
+                <div class="position-relative">
+                    <i class="fas fa-bell"></i>
+                    {% if pocet_notifikaci > 0 %}
+                    <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle"
+                          style="font-size: 0.5rem;">{{ pocet_notifikaci }}</span>
+                    {% endif %}
+                </div>
+                <span class="ms-2">Notifikace</span>
+            </a>
             {% endif %}
 
             <div class="sidebar-label">Záchranná síť</div>
@@ -144,6 +146,9 @@
 
             <div class="sidebar-label">Služby a Komunita</div>
             <a href="{% url 'mapa_sluzeb' %}" class="nav-link-custom"><i class="fas fa-map-marked-alt"></i> Mapa služeb</a>
+            <a href="{% url 'seznam_inzeratu' %}" class="nav-link-custom">
+                <i class="fas fa-shopping-basket"></i> Inzerce / Bazar
+            </a>
             <a href="{% url 'seznam_zdi' %}" class="nav-link-custom"><i class="fas fa-users"></i> Zdi plemen</a>
             <a href="{% url 'cenik' %}" class="nav-link-custom">
                 <i class="fas fa-crown" style="color: var(--gold);"></i> Premium / Ceník
@@ -153,58 +158,64 @@
 
         <div class="user-section">
             {% if user.is_authenticated %}
-                <div class="user-pill mb-3">
-                    <div class="d-flex align-items-center">
-                        <div style="color: var(--gold);">
-                            {% if user.profil.is_cat_person %}
-                                <i class="fas fa-cat"></i>
-                            {% else %}
-                                <i class="fas fa-shield-dog"></i>
-                            {% endif %}
-                        </div>
-                        <div class="ms-2">
-                            <span class="user-name">{{ user.username }}</span>
-                            <span class="user-role">
+            <div class="user-pill mb-3">
+                <div class="d-flex align-items-center">
+                    <div style="color: var(--gold);">
+                        {% if user.profil.is_cat_person %}
+                        <i class="fas fa-cat"></i>
+                        {% else %}
+                        <i class="fas fa-shield-dog"></i>
+                        {% endif %}
+                    </div>
+                    <div class="ms-2">
+                        <span class="user-name">{{ user.username }}</span>
+                        <span class="user-role">
                                 {% if user.profil.is_premium %}👑 ALFA ČLEN{% else %}Páníček{% endif %}
                             </span>
-                        </div>
                     </div>
-                    <form action="{% url 'logout' %}" method="post" class="m-0">
-                        {% csrf_token %}
-                        <button type="submit" class="logout-btn"><i class="fas fa-power-off"></i></button>
-                    </form>
                 </div>
+                <form action="{% url 'logout' %}" method="post" class="m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn"><i class="fas fa-power-off"></i></button>
+                </form>
+            </div>
 
-                {% if not user.profil.is_premium %}
-                <div class="d-grid mb-3">
-                    <a href="{% url 'cenik' %}" class="btn btn-sm fw-bold shadow-sm" style="background: var(--gold); color: white; border-radius: 10px; font-size: 0.75rem;">
-                        👑 AKTIVOVAT PREMIUM
-                    </a>
-                </div>
-                {% endif %}
+            {% if not user.profil.is_premium %}
+            <div class="d-grid mb-3">
+                <a href="{% url 'cenik' %}" class="btn btn-sm fw-bold shadow-sm"
+                   style="background: var(--gold); color: white; border-radius: 10px; font-size: 0.75rem;">
+                    👑 AKTIVOVAT PREMIUM
+                </a>
+            </div>
+            {% endif %}
             {% else %}
-                <div class="d-grid gap-2 mb-3">
-                    <a href="{% url 'login' %}" class="btn btn-sm text-white border-white-50">Přihlásit se</a>
-                    <a href="{% url 'register' %}" class="btn btn-sm fw-bold shadow-sm" style="background: var(--gold); color: white;">Registrace</a>
-                </div>
+            <div class="d-grid gap-2 mb-3">
+                <a href="{% url 'login' %}" class="btn btn-sm text-white border-white-50">Přihlásit se</a>
+                <a href="{% url 'register' %}" class="btn btn-sm fw-bold shadow-sm"
+                   style="background: var(--gold); color: white;">Registrace</a>
+            </div>
             {% endif %}
 
             <div class="d-flex justify-content-center gap-3 pt-2" style="border-top: 1px solid rgba(255,255,255,0.05);">
-                <a href="{% url 'podminky' %}" style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">Podmínky</a>
-                <a href="{% url 'cookies' %}" style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">Cookies</a>
-                <a href="{% url 'gdpr' %}" style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">GDPR</a>
+                <a href="{% url 'podminky' %}"
+                   style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">Podmínky</a>
+                <a href="{% url 'cookies' %}"
+                   style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">Cookies</a>
+                <a href="{% url 'gdpr' %}"
+                   style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">GDPR</a>
             </div>
         </div>
     </nav>
 
     <div id="page-content-wrapper">
         {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm"
+             role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
         {% endif %}
 
         {% block content %}{% endblock %}

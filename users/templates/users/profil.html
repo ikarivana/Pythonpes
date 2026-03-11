@@ -1,245 +1,209 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap"
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"
       rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
     :root {
-        --primary-brown: #5d4037;
-        --accent-gold: #c5a059;
-        --soft-bg: #fdfaf5;
-        --card-bg: #ffffff;
-        --border-color: #e2d1c3;
-        --cat-purple: #9b87f5;
+        --p-brown: #5d4037;
+        --p-gold: #c5a059;
+        --p-bg: #fdfaf7;
     }
+    body { background-color: var(--p-bg) !important; font-family: 'Plus Jakarta Sans', sans-serif; }
 
-    body { background-color: var(--soft-bg) !important; font-family: 'Inter', sans-serif; color: #333; }
-    h2, h4, h5, .font-serif { font-family: 'Playfair Display', serif; color: var(--primary-brown); }
-
-    .profile-header-container {
-        border-radius: 30px !important;
-        border: 1px solid var(--border-color) !important;
-        box-shadow: 0 15px 40px rgba(93, 64, 55, 0.06) !important;
+    .profile-main-card {
         background: white;
+        border-radius: 24px;
+        border: 1px solid #efebe9;
+        box-shadow: 0 10px 30px rgba(93, 64, 55, 0.05);
+        padding: 30px;
+        margin-bottom: 30px;
     }
 
-    .bg-gold { background: linear-gradient(45deg, #d4af37, #b8860b); box-shadow: 0 4px 10px rgba(197, 160, 89, 0.3); }
-
-    .pet-profile-card {
-        background: white; border-radius: 25px; border: 1px solid var(--border-color);
-        transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); overflow: hidden;
-        position: relative; display: flex; flex-direction: column;
+    .pet-card {
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        border: 1px solid #efebe9;
+        transition: 0.3s ease;
     }
-    .pet-profile-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(93, 64, 55, 0.1); }
-
-    .pet-profile-card.is-cat {
-        background: linear-gradient(180deg, #ffffff 0%, #f4f0ff 100%) !important;
-        border: 1px solid #dcd3ff !important;
-    }
-    .is-cat .species-icon { background: var(--cat-purple) !important; color: white !important; border-color: #dcd3ff !important; }
-    .is-cat .qr-box { border-color: var(--cat-purple) !important; }
-    .is-cat .btn-brown { background: var(--cat-purple) !important; }
-
-    .species-icon {
-        position: absolute; top: 15px; left: 15px; width: 35px; height: 35px;
-        background: var(--soft-bg); border-radius: 10px; display: flex;
-        align-items: center; justify-content: center; color: var(--accent-gold);
-        font-size: 1rem; border: 1px solid var(--border-color); z-index: 2;
+    .pet-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(93, 64, 55, 0.1);
     }
 
-    .qr-box {
-        background: white; border: 2px dashed var(--accent-gold);
-        border-radius: 15px; padding: 10px; display: inline-block; margin: 15px auto;
-        width: fit-content;
+    .back-nav {
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none !important;
+        color: var(--p-brown);
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+        transition: 0.3s;
+    }
+    .back-nav:hover { color: var(--p-gold); transform: translateX(-5px); }
+
+    .profile-avatar, .pet-avatar {
+        width: 110px; height: 110px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid white;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
     }
 
-    .btn-brown { background: var(--primary-brown); color: white; border-radius: 12px; transition: 0.3s; border: none; font-weight: 700; }
-    .btn-brown:hover { opacity: 0.9; transform: scale(1.02); color: white; }
+    .pet-avatar-small {
+        width: 60px; height: 60px;
+        object-fit: cover;
+        border-radius: 15px;
+    }
 
-    .btn-outline-gold { border: 2px solid var(--accent-gold); color: var(--accent-gold); font-weight: 700; border-radius: 12px; transition: 0.3s; }
-    .btn-outline-gold:hover { background: var(--accent-gold); color: white; }
+    .info-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #bcaaa4; font-weight: 700; margin-bottom: 2px; }
+    .info-value { color: var(--p-brown); font-weight: 600; margin-bottom: 12px; }
+
+    .btn-edit-main {
+        background: var(--p-brown) !important;
+        color: white !important;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 700;
+        text-decoration: none !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: 0.3s;
+        border: none;
+    }
+    .btn-edit-main:hover { background: var(--p-gold) !important; transform: translateY(-2px); }
+
+    .btn-add-pet {
+        border: 2px solid var(--p-gold);
+        color: var(--p-gold);
+        border-radius: 12px;
+        padding: 8px 20px;
+        font-weight: 700;
+        text-decoration: none !important;
+        transition: 0.3s;
+    }
+    .btn-add-pet:hover { background: var(--p-gold); color: white; }
+
+    .empty-pet-slot {
+        border: 2px dashed #e0d7d3;
+        border-radius: 20px;
+        padding: 40px;
+        text-align: center;
+        color: #a1887f;
+        background: rgba(255,255,255,0.5);
+    }
 </style>
 
-<div class="container py-5">
-    <div class="profile-header-container p-4 p-md-5 mb-5 shadow-sm">
-        <div class="row align-items-center text-center text-md-start">
-            <div class="col-md-auto mb-3 mb-md-0">
-                {% if profil.fotka %}
-                <img src="{{ profil.fotka.url }}" alt="Profil" class="rounded-circle border shadow-sm"
-                     style="width: 130px; height: 130px; object-fit: cover;">
+<div class="container py-4">
+    <a href="/" class="back-nav">
+        <i class="fas fa-arrow-left me-2"></i> Zpět na domů
+    </a>
+
+    <div class="profile-main-card">
+        <div class="row align-items-center">
+            <div class="col-md-auto text-center mb-3 mb-md-0">
+                {% if user.profil.fotka %}
+                <img src="{{ user.profil.fotka.url }}" class="profile-avatar">
                 {% else %}
-                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center border mx-auto shadow-sm"
-                     style="width: 130px; height: 130px;">
-                    <i class="fas fa-user text-muted fa-3x"></i>
+                <div class="profile-avatar bg-light d-flex align-items-center justify-content-center mx-auto">
+                    <i class="fas fa-user text-muted fa-2x"></i>
                 </div>
                 {% endif %}
             </div>
 
-            <div class="col-md ms-md-4">
-                <div class="d-flex align-items-center justify-content-center justify-content-md-start flex-wrap gap-3 mb-3">
-                    <h2 class="fw-bold mb-0">
-                        {{ request.user.first_name|default:request.user.username }} {{ request.user.last_name }}
-                    </h2>
-                    {% if profil.is_premium %}
-                    <span class="badge rounded-pill bg-gold text-white px-3 py-2">
-                        <i class="fas fa-crown me-1"></i> ALFA ČLEN
-                    </span>
-                    {% endif %}
-                </div>
+            <div class="col-md ms-md-3">
+                <h2 class="fw-bold mb-4" style="font-family: 'Playfair Display', serif; color: var(--p-brown);">
+                    {{ user.first_name }} {{ user.last_name }}
+                </h2>
 
-                <div class="row g-3">
-                    <div class="col-sm-6 text-muted">
-                        <i class="fas fa-envelope me-2" style="color: var(--accent-gold);"></i>{{ request.user.email }}
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="info-label">Emailová adresa</div>
+                        <div class="info-value">{{ user.email }}</div>
                     </div>
-                    <div class="col-sm-6 text-muted">
-                        <i class="fas fa-phone me-2" style="color: var(--accent-gold);"></i>{{ profil.telefon|default:"Telefon nezadán" }}
+                    <div class="col-sm-6">
+                        <div class="info-label">Telefonní kontakt</div>
+                        <div class="info-value">
+                            {% if user.profil.telefon %}{{ user.profil.telefon }}{% else %}Nenadáno{% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-auto mt-4 mt-md-0 d-flex flex-column gap-2 text-center text-md-end">
-                <button class="btn btn-brown px-4 py-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#editProfilModal">
-                    <i class="fas fa-user-edit me-2"></i>UPRAVIT PROFIL
-                </button>
-                <a href="/users/profil/smazat/" class="btn btn-sm text-danger opacity-75 mt-1"
-                   onclick="return confirm('Opravdu chcete smazat svůj profil?')">Smazat účet</a>
+            <div class="col-md-auto text-center text-md-end mt-3 mt-md-0">
+                <a href="{% url 'upravit_profil' %}" class="btn-edit-main shadow-sm">
+                    <i class="fas fa-pen me-2"></i> UPRAVIT PROFIL
+                </a>
+                <div class="mt-2">
+                    <a href="{% url 'smazat_profil' %}" class="text-danger small text-decoration-none opacity-50"
+                       onclick="return confirm('Opravdu smazat účet?')">Smazat účet</a>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="row g-4">
+    <div class="row">
         <div class="col-lg-8">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 class="mb-0 fw-bold">Moji parťáci</h4>
-                    {% if not profil.is_premium %}
-                    <small class="text-muted">Verze Free: {{ profil.psi.all.count }}/2 mazlíčci</small>
-                    {% endif %}
-                </div>
-
-                {% if not profil.is_premium and profil.psi.all.count >= 2 %}
-                <a href="{% url 'cenik' %}" class="btn btn-warning px-4 py-2 shadow-sm fw-bold rounded-pill text-dark">
-                    <i class="fas fa-crown me-2"></i>AKTIVOVAT PREMIUM
+                <h4 class="fw-bold m-0" style="color: var(--p-brown);">Moji parťáci</h4>
+                <a href="{% url 'pridat_psa' %}" class="btn-add-pet">
+                    <i class="fas fa-plus me-1"></i> Přidat
                 </a>
-                {% else %}
-                <a href="{% url 'pridat_psa' %}" class="btn btn-outline-gold px-4 py-2 shadow-sm bg-white">
-                    <i class="fas fa-plus me-2"></i>PŘIDAT MAZLÍČKA
-                </a>
-                {% endif %}
             </div>
 
-            <div class="row g-4">
-                {% for pes in profil.psi.all %}
+            <div class="row g-3">
+                {% for pes in user.profil.psi.all %}
                 <div class="col-md-6">
-                    <div class="pet-profile-card p-4 text-center shadow-sm h-100 {% if pes.druh == 'kocka' %}is-cat{% endif %}">
-                        <div class="species-icon shadow-sm">
-                            <i class="fas {% if pes.druh == 'kocka' %}fa-cat{% else %}fa-dog{% endif %}"></i>
-                        </div>
-                        <div class="d-flex justify-content-end gap-2 mb-2" style="z-index: 2; position: relative;">
-                            <a href="{% url 'upravit_psa' pes.id %}" class="btn btn-sm text-muted"><i class="fas fa-cog"></i></a>
-                            <form action="{% url 'smazat_psa' pes.id %}" method="POST" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm text-danger border-0 bg-transparent" onclick="return confirm('Opravdu smazat?')">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </form>
-                        </div>
-                        {% if pes.fotka %}
-                        <img src="{{ pes.fotka.url }}" class="rounded-circle border shadow-sm mb-3 mx-auto" style="width: 110px; height: 110px; object-fit: cover; border: 4px solid white !important;">
-                        {% else %}
-                        <div class="rounded-circle bg-light border mx-auto mb-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 110px; height: 110px;">
-                            <i class="fas {% if pes.druh == 'kocka' %}fa-cat{% else %}fa-paw{% endif %} text-muted fa-2x"></i>
-                        </div>
-                        {% endif %}
-                        <h5 class="fw-bold mb-1">{{ pes.jmeno }}</h5>
-                        <p class="text-muted small mb-2">{{ pes.rasa|default:"Kříženec" }}</p>
-                        <div class="qr-box shadow-sm mb-4">
-                            {% if pes.qr_kod %}
-                            <img src="{{ pes.qr_kod.url }}" style="width: 80px; height: 80px; object-fit: contain;" alt="QR kód">
+                    <div class="pet-card shadow-sm">
+                        <div class="d-flex align-items-center">
+                            {% if pes.fotka %}
+                            <img src="{{ pes.fotka.url }}" class="pet-avatar-small me-3">
                             {% else %}
-                            <div style="width: 80px; height: 80px;" class="d-flex align-items-center justify-content-center text-muted small flex-column">
-                                <i class="fas fa-qrcode fa-2x mb-1 opacity-25"></i>
-                                <span>Bez QR</span>
+                            <div class="pet-avatar-small bg-light d-flex align-items-center justify-content-center me-3">
+                                <i class="fas fa-dog text-muted"></i>
                             </div>
                             {% endif %}
-                        </div>
-                        <div class="mt-auto">
-                            <a href="{% url 'detail_psa' pes.id %}" class="btn btn-brown w-100 py-2 shadow-sm fw-bold">OTEVŘÍT DENÍK</a>
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-0" style="color: var(--p-brown);">{{ pes.jmeno }}</h6>
+                                <p class="small text-muted mb-0">{{ pes.plemeno|default:"Pes" }}</p>
+                            </div>
+                            <a href="{% url 'upravit_psa' pes.id %}" class="text-muted">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
                 {% empty %}
-                <div class="col-12 text-center py-5 bg-white rounded-5 border-dashed" style="border: 2px dashed var(--border-color);">
-                    <p class="text-muted">Zatím tu nemáte žádné parťáky.</p>
+                <div class="col-12">
+                    <div class="empty-pet-slot">
+                        <i class="fas fa-paw fa-2x mb-2 opacity-20"></i>
+                        <p class="mb-0">Zatím jste nepřidali žádného mazlíčka.</p>
+                    </div>
                 </div>
                 {% endfor %}
             </div>
         </div>
 
-        <div class="col-lg-4">
-            <div class="p-4 rounded-4 bg-white border shadow-sm sticky-top" style="top: 20px; z-index: 1;">
-                <h6 class="fw-bold mb-3 text-center">Status účtu</h6>
-
-                {% if profil.is_premium %}
-                <div class="p-3 rounded-3 mb-3 bg-light border-start border-4 border-success">
-                    <small class="d-block text-muted text-uppercase" style="font-size: 0.6rem;">Aktivní ALFA členství</small>
-                    <span class="fw-bold text-success"><i class="fas fa-check-circle me-1"></i> Navždy</span>
+        <div class="col-lg-4 mt-4 mt-lg-0">
+            <div class="profile-main-card p-4">
+                <h6 class="fw-bold mb-3 text-center">Stav tvé smečky</h6>
+                <div class="progress mb-2" style="height: 10px; border-radius: 10px;">
+                    <div class="progress-bar"
+                         style="width: {% if user.profil.psi.all.count == 1 %}50%{% elif user.profil.psi.all.count >= 2 %}100%{% else %}5%{% endif %}; background: var(--p-gold);"></div>
                 </div>
-                <p class="small text-muted mb-0">Využíváte všechny funkce Alfa Smečky bez omezení.</p>
-                {% else %}
-                <div class="mb-4">
-                    <div class="d-flex justify-content-between small mb-1">
-                        <span class="text-muted fw-bold" style="font-size: 0.7rem;">KAPACITA SMEČKY</span>
-                        <span class="fw-bold text-brown" style="font-size: 0.7rem;">{{ profil.psi.all.count }} / 2</span>
-                    </div>
-                    <div class="progress shadow-sm" style="height: 10px; border-radius: 10px; background-color: #f0f0f0;">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated"
-                             role="progressbar"
-                             style="width: {% if profil.psi.all.count == 0 %}5%{% elif profil.psi.all.count == 1 %}50%{% else %}100%{% endif %};
-                             background-color: {% if profil.psi.all.count >= 2 %}var(--alfa-danger, #dc3545){% else %}var(--accent-gold){% endif %}; transition: 1s;">
-                        </div>
-                    </div>
-                    {% if profil.psi.all.count >= 2 %}
-                    <small class="text-danger fw-bold d-block mt-2 text-center" style="font-size: 0.65rem;">
-                        <i class="fas fa-exclamation-triangle me-1"></i> Dosáhli jste limitu Free verze
-                    </small>
-                    {% endif %}
+                <div class="d-flex justify-content-between small fw-bold text-muted">
+                    <span>Kapacita</span>
+                    <span>{{ user.profil.psi.all.count }} / 2</span>
                 </div>
-                <p class="small text-muted mb-3 text-center">Získejte neomezený počet profilů, zdravotní kartu a galerii.</p>
-                <a href="{% url 'cenik' %}" class="btn btn-brown w-100 py-3 shadow-sm fw-bold border-0"
-                   style="background: linear-gradient(45deg, #c5a059, #b8860b) !important; border-radius: 15px;">
+                <hr>
+                <a href="{% url 'cenik' %}" class="btn w-100 py-3 fw-bold shadow-sm"
+                   style="background: linear-gradient(45deg, #c5a059, #b8860b); color: white; border-radius: 15px; border: none;">
                     <i class="fas fa-crown me-2"></i> AKTIVOVAT PREMIUM
                 </a>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="editProfilModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 30px; overflow: hidden;">
-            <div class="modal-header border-0 pb-0">
-                <h3 class="fw-bold font-serif mb-0 mt-3 ms-2">👤 Úprava profilu</h3>
-                <button type="button" class="btn-close me-2" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4">
-                <form action="{% url 'upravit_profil' %}" method="POST">
-                    {% csrf_token %}
-                    <div class="row g-2">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label small fw-bold text-muted">JMÉNO</label>
-                            <input type="text" name="first_name" class="form-control bg-light border-0" value="{{ request.user.first_name }}">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label small fw-bold text-muted">PŘÍJMENÍ</label>
-                            <input type="text" name="last_name" class="form-control bg-light border-0" value="{{ request.user.last_name }}">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-brown w-100 py-3 fw-bold mt-3 shadow">ULOŽIT ZMĚNY</button>
-                </form>
             </div>
         </div>
     </div>

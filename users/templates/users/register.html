@@ -2,69 +2,101 @@
 
 {% block content %}
 <style>
-    .reg-wrapper { display: flex; justify-content: center; align-items: center; min-height: 80vh; background-color: #fdfaf7; padding: 20px; }
-    .reg-card { background: white; width: 100%; max-width: 480px; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(141, 110, 99, 0.1); border: 1px solid #efebe9; }
-    .reg-card h2 { color: #5d4037; font-weight: 800; text-align: center; margin-bottom: 10px; font-family: 'Playfair Display', serif; }
-    .reg-subtitle { text-align: center; color: #a1887f; font-size: 0.9rem; margin-bottom: 30px; }
-    .helptext, .form-text { display: none !important; }
-    .form-group { margin-bottom: 15px; }
-    .reg-card label { font-weight: 600; color: #8d6e63; display: block; margin-bottom: 5px; font-size: 0.85rem; text-transform: uppercase; }
-    .reg-card input:not([type="checkbox"]) { width: 100%; padding: 12px 18px; border: 2px solid #f3e5f5; border-radius: 12px; background: #fafafa; transition: 0.3s; }
-    .reg-card input:focus { border-color: #c5a059; background: white; outline: none; box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.1); }
-    .address-divider { margin: 25px 0 15px; padding: 15px; border-radius: 12px; background: #fff9f0; border: 1px dashed #c5a059; display: flex; align-items: center; gap: 12px; }
-    .btn-modern { background: #8d6e63; color: white; border: none; width: 100%; padding: 16px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.3s; }
-    .btn-modern:hover { background: #6d4c41; transform: translateY(-2px); }
-    .errorlist { color: #d32f2f; list-style: none; padding: 0; font-size: 0.75rem; }
-.reg-wrapper { display: flex; justify-content: center; align-items: center; min-height: 80vh; background-color: #fdfaf7; padding: 20px; }
-    .reg-card { background: white; width: 100%; max-width: 480px; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(141, 110, 99, 0.1); border: 1px solid #efebe9; }
-    .reg-card h2 { color: #5d4037; font-weight: 800; text-align: center; margin-bottom: 10px; font-family: 'Playfair Display', serif; }
-    .reg-subtitle { text-align: center; color: #a1887f; font-size: 0.9rem; margin-bottom: 30px; }
-    .helptext, .form-text { display: none !important; }
+    /* Responzivní kontejner */
+    .reg-wrapper {
+        display: flex; justify-content: center; align-items: center;
+        min-height: 100vh; background-color: #fdfaf7; padding: 20px;
+    }
+
+    .reg-card {
+        background: white; width: 100%; max-width: 550px; /* Trochu širší pro PC */
+        padding: 40px; border-radius: 30px;
+        box-shadow: 0 15px 35px rgba(141, 110, 99, 0.1);
+        border: 1px solid #efebe9;
+    }
+
+    /* Přepínač Pes/Kočka */
+    .person-type-toggle {
+        display: flex; gap: 10px; margin-bottom: 25px;
+    }
+    .type-option {
+        flex: 1; text-align: center; padding: 15px; border-radius: 15px;
+        border: 2px solid #f3e5f5; cursor: pointer; transition: 0.3s;
+        font-weight: 700; color: #8d6e63;
+    }
+    .type-option i { font-size: 1.5rem; display: block; margin-bottom: 5px; }
+
+    /* Aktivní stavy přepínače */
+    #type-dog.active { border-color: #c5a059; background: #fff9f0; color: #5d4037; }
+    #type-cat.active { border-color: #9b87f5; background: #f8f7ff; color: #4b3f72; }
+
+    /* Responzivita pro mobilní telefony */
+    @media (max-width: 576px) {
+        .reg-card { padding: 25px 20px; border-radius: 20px; }
+        .reg-card h2 { font-size: 1.8rem; }
+        .address-grid { grid-template-columns: 1fr !important; } /* Adresa pod sebou */
+    }
+
+    /* Mřížka pro adresu na PC */
+    .address-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; }
+
+    /* Ostatní styly z tvého původního kódu */
     .form-group { margin-bottom: 18px; position: relative; }
     .reg-card label { font-weight: 600; color: #8d6e63; display: block; margin-bottom: 5px; font-size: 0.85rem; text-transform: uppercase; }
-
     .reg-card input:not([type="checkbox"]) {
         width: 100%; padding: 12px 18px; border: 2px solid #f3e5f5; border-radius: 12px;
         background: #fafafa; transition: 0.3s; box-sizing: border-box;
     }
     .reg-card input:focus { border-color: #c5a059; background: white; outline: none; box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.1); }
 
-    .address-divider { margin: 25px 0 15px; padding: 15px; border-radius: 12px; background: #fff9f0; border: 1px dashed #c5a059; display: flex; align-items: center; gap: 12px; }
-    .btn-modern { background: #8d6e63; color: white; border: none; width: 100%; padding: 16px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-    .btn-modern:hover { background: #6d4c41; transform: translateY(-2px); }
-    .errorlist { color: #d32f2f; list-style: none; padding: 5px 0 0 0; font-size: 0.75rem; font-weight: 600; }
+    .address-divider {
+        margin: 25px 0 15px; padding: 15px; border-radius: 12px;
+        background: #fff9f0; border: 1px dashed #c5a059;
+        display: flex; align-items: center; gap: 12px;
+    }
 
-    /* NOVÉ STYLY PRO HESLO */
+    .btn-modern {
+        background: #8d6e63; color: white; border: none; width: 100%;
+        padding: 16px; border-radius: 12px; font-size: 1.1rem;
+        font-weight: 700; cursor: pointer; transition: 0.3s;
+    }
+
     .password-container { position: relative; }
     .toggle-password {
         position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
-        background: none; border: none; color: #c5a059; cursor: pointer;
-        z-index: 10; padding: 5px; transition: 0.2s;
+        background: none; border: none; color: #c5a059; cursor: pointer; z-index: 10;
     }
-    .toggle-password:hover { color: #8d6e63; }
-
-    /* Indikátor síly hesla */
-    .strength-meter { height: 4px; width: 100%; background: #eee; margin-top: 8px; border-radius: 2px; overflow: hidden; display: none; }
-    .strength-bar { height: 100%; width: 0; transition: 0.4s; }
 </style>
 
 <div class="reg-wrapper">
     <div class="reg-card">
-        <h2>Nová tlapka 🐾</h2>
-        <p class="reg-subtitle">Založte si profil a získejte dárky pro pejska.</p>
+        <h2 id="reg-title">Nová tlapka 🐾</h2>
+        <p class="reg-subtitle" id="reg-subtitle">Založte si profil a získejte dárky pro mazlíčka.</p>
+
+        <label class="text-center d-block mb-2">Jsem páníček pro:</label>
+        <div class="person-type-toggle">
+            <div class="type-option active" id="type-dog" onclick="setPersonType('pes')">
+                <i class="fas fa-dog"></i> Pejska
+            </div>
+            <div class="type-option" id="type-cat" onclick="setPersonType('kocka')">
+                <i class="fas fa-cat"></i> Kočku
+            </div>
+        </div>
 
         <form method="post" id="regForm">
             {% csrf_token %}
 
+            <input type="hidden" name="is_cat_person" id="is_cat_person" value="false">
+
             {% for field in form %}
                 {% if field.name != 'promo_kod' %}
 
-                    {# PŘEDĚL PRO ADRESU #}
+                    {# ADRESA - sekce dárků #}
                     {% if field.name == 'ulice_cp' %}
-                    <div class="address-divider">
+                    <div class="address-divider" id="gift-divider">
                         <i class="fas fa-gift" style="color: #e67e22; font-size: 1.5rem;"></i>
                         <div>
-                            <span style="font-weight: 800; color: #5d4037; display:block;">Dárky pro pejska?</span>
+                            <span style="font-weight: 800; color: #5d4037; display:block;" id="gift-title">Dárky pro pejska?</span>
                             <small style="color: #8d6e63; font-size: 0.75rem;">Nepovinné – pro zasílání odměn a známek.</small>
                         </div>
                     </div>
@@ -72,104 +104,47 @@
 
                     <div class="form-group">
                         <label>{{ field.label }} {% if field.field.required %}<span style="color:red">*</span>{% endif %}</label>
-
-                        {% if "password" in field.name or "heslo" in field.name %}
-                            <div class="password-container">
-                                {{ field }}
-                                <button type="button" class="toggle-password" tabindex="-1">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                            {% if field.name == 'password' or field.name == 'heslo1' %}
-                            <div class="strength-meter" id="meter-container">
-                                <div id="strength-bar" class="strength-bar"></div>
-                            </div>
-                            <small id="strength-text" style="font-size: 0.7rem; color: #a1887f;"></small>
-                            {% endif %}
-                        {% else %}
+                        <div class="password-container">
                             {{ field }}
-                        {% endif %}
-
-                        {% if field.errors %}
-                            <ul class="errorlist">{% for error in field.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-                        {% endif %}
+                            {% if "password" in field.name or "heslo" in field.name %}
+                                <button type="button" class="toggle-password"><i class="fas fa-eye"></i></button>
+                            {% endif %}
+                        </div>
+                        {% if field.errors %}<ul class="errorlist">{% for error in field.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
                     </div>
                 {% endif %}
             {% endfor %}
 
-            {# SOUHLAS #}
-            <div style="margin: 20px 0; text-align: center;">
-                <input type="checkbox" id="souhlas_podminky" name="souhlas_podminky" required>
-                <label for="souhlas_podminky" style="display:inline; text-transform: none; font-size: 0.85rem;">
-                    Souhlasím s <a href="{% url 'podminky' %}" target="_blank" style="color:#c5a059; font-weight: 700;">podmínkami</a>
-                </label>
-            </div>
-
-            {# PROMO KÓD #}
-            <div class="form-group">
-                <label><i class="fas fa-ticket-alt"></i> Máš promo kód?</label>
-                {{ form.promo_kod }}
-            </div>
-
-            <button type="submit" class="btn-modern">Vytvořit účet</button>
+            <button type="submit" class="btn-modern shadow-sm">Vytvořit účet</button>
         </form>
     </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // 1. Logika pro schování/ukázání hesla
-    const toggleBtns = document.querySelectorAll('.toggle-password');
-    toggleBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const input = this.parentElement.querySelector('input');
-            const icon = this.querySelector('i');
+function setPersonType(type) {
+    const isCat = type === 'kocka';
+    document.getElementById('is_cat_person').value = isCat;
 
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.replace('fa-eye', 'fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.replace('fa-eye-slash', 'fa-eye');
-            }
-        });
-    });
+    // Vizuální přepnutí
+    document.getElementById('type-dog').classList.toggle('active', !isCat);
+    document.getElementById('type-cat').classList.toggle('active', isCat);
 
-    // 2. Jednoduchý indikátor síly hesla
-    const passwordInput = document.querySelector('input[name="password"]') || document.querySelector('input[name="heslo1"]');
-    const strengthBar = document.getElementById('strength-bar');
-    const meterContainer = document.getElementById('meter-container');
-    const strengthText = document.getElementById('strength-text');
+    // Změna textů
+    const title = document.getElementById('reg-title');
+    const subtitle = document.getElementById('reg-subtitle');
+    const giftTitle = document.getElementById('gift-title');
 
-    if (passwordInput) {
-        passwordInput.addEventListener('input', function() {
-            const val = this.value;
-            let strength = 0;
-            if (val.length > 0) meterContainer.style.display = 'block';
-            else meterContainer.style.display = 'none';
-
-            if (val.length >= 8) strength += 25;
-            if (val.match(/[A-Z]/)) strength += 25;
-            if (val.match(/[0-9]/)) strength += 25;
-            if (val.match(/[^A-Za-z0-9]/)) strength += 25;
-
-            strengthBar.style.width = strength + '%';
-
-            if (strength <= 25) {
-                strengthBar.style.backgroundColor = '#ff4d4d';
-                strengthText.innerText = 'Slabé heslo';
-            } else if (strength <= 50) {
-                strengthBar.style.backgroundColor = '#ffa64d';
-                strengthText.innerText = 'Střední heslo';
-            } else if (strength <= 75) {
-                strengthBar.style.backgroundColor = '#94ff4d';
-                strengthText.innerText = 'Dobré heslo';
-            } else {
-                strengthBar.style.backgroundColor = '#2eb82e';
-                strengthText.innerText = 'Velmi silné heslo! 🐾';
-            }
-        });
+    if (isCat) {
+        title.innerHTML = 'Kočičí tlapka 🐾';
+        subtitle.innerText = 'Založte si profil a získejte dárky pro kočičku.';
+        giftTitle.innerText = 'Dárky pro kočičku?';
+        document.querySelector('.btn-modern').style.background = '#9b87f5';
+    } else {
+        title.innerHTML = 'Nová tlapka 🐾';
+        subtitle.innerText = 'Založte si profil a získejte dárky pro pejska.';
+        giftTitle.innerText = 'Dárky pro pejska?';
+        document.querySelector('.btn-modern').style.background = '#8d6e63';
     }
-});
+}
 </script>
 {% endblock %}
