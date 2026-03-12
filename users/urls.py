@@ -20,6 +20,7 @@ urlpatterns = [
     path('pes/<int:pes_id>/odeslat-email/', views.odeslat_sos_email, name='odeslat_sos_email'),
     path('pes/<int:pes_id>/prepnout-ztratu/', views.prepnout_ztratu, name='prepnout_ztratu'),
     path('hledani-psi/', views.seznam_hledanych_psu, name='seznam_hledanych'),
+    path('pes/<int:pes_id>/historie/', views.zdravotni_historie, name='zdravotni_historie'),
 
     # --- ZDRAVOTNÍ ZÁZNAMY ---
     path('zaznam/upravit/<int:pk>/', views.upravit_zaznam, name='upravit_zaznam'),

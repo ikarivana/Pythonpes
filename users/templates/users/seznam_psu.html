@@ -5,43 +5,67 @@
     :root {
         --primary-brown: #5d4037;
         --accent-gold: #c5a059;
-        --light-gold: #fdfaf5;
-        --border-color: #e2d1c3;
-        --cat-purple: #9b87f5;
-        --sos-red: #d63031;
+        --p-bg: #fdfaf7;
+        --cat-purple: #b39ddb;
+        --cat-bg: #f8f4ff;
+        --dog-bg: #fffcf5;
     }
 
-    /* ... tvoje existující styly ... */
+    body { background-color: var(--p-bg) !important; }
 
-    /* Styl pro prázdný stav */
-    .empty-state-card {
+    .pet-card {
+        border-radius: 24px;
+        border: 1px solid #efebe9;
+        transition: all 0.3s ease;
+        overflow: hidden;
         background: white;
-        border-radius: 40px;
-        border: 2px dashed var(--border-color);
-        padding: 60px 20px;
-        transition: 0.3s;
+        position: relative; /* Důležité pro badge */
     }
 
-    .btn-add-choice {
-        border-radius: 20px;
-        padding: 20px;
+    .pet-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(93, 64, 55, 0.1) !important;
+    }
+
+    .badge-species {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        padding: 5px 12px;
+        border-radius: 10px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        z-index: 5;
+    }
+    .badge-dog { background: var(--dog-bg); color: var(--accent-gold); border: 1px solid var(--accent-gold); }
+    .badge-cat { background: var(--cat-bg); color: var(--cat-purple); border: 1px solid var(--cat-purple); }
+
+    .qr-wrapper {
+        background: white;
+        padding: 10px;
+        border-radius: 15px;
+        display: inline-block;
+        border: 1px solid #f3efec;
+    }
+
+    .btn-action {
+        border-radius: 15px;
+        padding: 12px;
+        font-weight: 700;
         text-decoration: none !important;
+        display: block;
         transition: 0.3s;
-        border: 2px solid transparent;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
+        border: none;
     }
+    .btn-dog { background: var(--accent-gold); color: white !important; }
+    .btn-cat { background: var(--cat-purple); color: white !important; }
 
-    .btn-add-dog { background: #fdfaf5; color: var(--primary-brown); border-color: var(--accent-gold); }
-    .btn-add-dog:hover { background: #f5efe6; transform: translateY(-5px); }
-
-    .btn-add-cat { background: #f8f7ff; color: #4b3f72; border-color: var(--cat-purple); }
-    .btn-add-cat:hover { background: #f0edff; transform: translateY(-5px); }
-
-    .choice-icon { font-size: 3rem; margin-bottom: 10px; }
+    .btn-light-custom {
+        background: rgba(255,255,255,0.8);
+        backdrop-filter: blur(4px);
+        border: 1px solid #efebe9;
+    }
 </style>
 
 <div class="container py-5">
@@ -49,17 +73,18 @@
         {% if psi %}
             {% for mazlicek in psi %}
             <div class="col-md-6 col-lg-4">
-                <div id="card-{{ mazlicek.pk }}" class="card pet-card shadow-sm h-100 {% if mazlicek.druh == 'kocka' %}is-cat{% endif %}">
+                <div class="card pet-card shadow-sm h-100">
+
                     <div class="badge-species {% if mazlicek.druh == 'kocka' %}badge-cat{% else %}badge-dog{% endif %}">
                         {% if mazlicek.druh == 'kocka' %}<i class="fas fa-cat me-1"></i> Kočka{% else %}<i class="fas fa-dog me-1"></i> Pes{% endif %}
                     </div>
 
                     <div class="position-absolute top-0 end-0 p-3" style="z-index: 10;">
                         <div class="dropdown">
-                            <button class="btn btn-light btn-sm shadow-sm rounded-circle" type="button" data-bs-toggle="dropdown" style="width: 35px; height: 35px; opacity: 0.9;">
-                                <i class="fas fa-ellipsis-h"></i>
+                            <button class="btn btn-light-custom btn-sm rounded-circle shadow-sm" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h text-muted"></i>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius: 15px;">
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-2" style="border-radius: 15px;">
                                 <li><a class="dropdown-item py-2" href="{% url 'upravit_psa' mazlicek.pk %}"><i class="fas fa-edit me-2 text-warning"></i> Upravit</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item py-2 text-danger" href="{% url 'smazat_psa' mazlicek.pk %}" onclick="return confirm('Opravdu smazat?')"><i class="fas fa-trash-alt me-2"></i> Smazat</a></li>
@@ -68,11 +93,11 @@
                     </div>
 
                     <div class="text-center pt-5">
-                        {% if mazlicek.fotka %}
-                            <img src="{{ mazlicek.fotka.url }}" class="rounded-circle shadow-sm" style="width: 120px; height: 120px; object-fit: cover; border: 4px solid white;">
+                        {% if mazlicek.fotka and mazlicek.fotka.url %}
+                            <img src="{{ mazlicek.fotka.url }}" class="rounded-circle shadow-sm" style="width: 130px; height: 130px; object-fit: cover; border: 5px solid white;">
                         {% else %}
-                            <div class="d-flex align-items-center justify-content-center bg-light rounded-circle mx-auto shadow-sm" style="width: 120px; height: 120px;">
-                                <i class="fas {% if mazlicek.druh == 'kocka' %}fa-cat{% else %}fa-dog{% endif %} fa-3x placeholder-icon"></i>
+                            <div class="d-flex align-items-center justify-content-center bg-light rounded-circle mx-auto shadow-sm" style="width: 130px; height: 130px; border: 5px solid white;">
+                                <i class="fas {% if mazlicek.druh == 'kocka' %}fa-cat{% else %}fa-dog{% endif %} fa-3x text-muted opacity-50"></i>
                             </div>
                         {% endif %}
                     </div>
@@ -83,16 +108,15 @@
                                 {{ mazlicek.jmeno }}
                             </a>
                         </h3>
-                        <p class="text-muted mb-3 small">{{ mazlicek.rasa|default:"Kříženec" }}</p>
+                        <p class="text-muted mb-4 small">{{ mazlicek.plemeno|default:mazlicek.rasa|default:"Kříženec" }}</p>
 
                         <div class="mb-4">
                             <div class="qr-wrapper shadow-sm">
-                                {% if mazlicek.qr_kod %}
-                                    <img src="{{ mazlicek.qr_kod.url }}" alt="QR kód" style="width: 80px; height: 80px; object-fit: contain;">
+                                {% if mazlicek.qr_kod and mazlicek.qr_kod.url %}
+                                    <img src="{{ mazlicek.qr_kod.url }}" alt="QR kód" style="width: 85px; height: 85px; object-fit: contain;">
                                 {% else %}
-                                    <div style="width: 80px; height: 80px;" class="d-flex flex-column align-items-center justify-content-center text-muted">
+                                    <div style="width: 85px; height: 85px;" class="d-flex align-items-center justify-content-center text-muted">
                                         <i class="fas fa-qrcode fa-2x opacity-25"></i>
-                                        <span style="font-size: 0.6rem;">NENÍ</span>
                                     </div>
                                 {% endif %}
                             </div>
@@ -109,20 +133,20 @@
             {% endfor %}
         {% else %}
             <div class="col-12 text-center py-5">
-                <div class="empty-state-card shadow-sm mx-auto" style="max-width: 800px;">
+                <div class="empty-state-card shadow-sm mx-auto" style="max-width: 800px; background: white; border-radius: 40px; padding: 60px 20px;">
                     <h2 class="fw-bold mb-2" style="font-family: 'Playfair Display', serif; color: var(--primary-brown);">Vaše smečka je zatím prázdná</h2>
-                    <p class="text-muted mb-5">Začněte tím, že přidáte svého prvního parťáka. Koho u vás doma najdeme?</p>
+                    <p class="text-muted mb-5">Začněte tím, že přidáte svého prvního parťáka.</p>
 
                     <div class="row justify-content-center g-4">
                         <div class="col-6 col-sm-4">
-                            <a href="{% url 'pridat_psa' %}" class="btn-add-choice btn-add-dog shadow-sm">
-                                <i class="fas fa-dog choice-icon"></i>
+                            <a href="{% url 'pridat_psa' %}" class="btn-add-choice btn-add-dog shadow-sm" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; padding: 20px; border-radius: 20px; border: 1px solid var(--accent-gold); background: var(--dog-bg); color: var(--accent-gold);">
+                                <i class="fas fa-dog fa-2x mb-2"></i>
                                 <span class="fw-bold">Nový pes</span>
                             </a>
                         </div>
                         <div class="col-6 col-sm-4">
-                            <a href="{% url 'pridat_psa' %}" class="btn-add-choice btn-add-cat shadow-sm">
-                                <i class="fas fa-cat choice-icon"></i>
+                            <a href="{% url 'pridat_psa' %}" class="btn-add-choice btn-add-cat shadow-sm" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; padding: 20px; border-radius: 20px; border: 1px solid var(--cat-purple); background: var(--cat-bg); color: var(--cat-purple);">
+                                <i class="fas fa-cat fa-2x mb-2"></i>
                                 <span class="fw-bold">Nová kočka</span>
                             </a>
                         </div>
