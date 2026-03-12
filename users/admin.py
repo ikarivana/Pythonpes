@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from . import models
+from .models import ZdravotniZaznam
 
 
 # --- INLINES ---
@@ -113,12 +114,11 @@ class NotifikaceAdmin(admin.ModelAdmin):
     search_fields = ('prijemce__username',)
 
 
-@admin.register(models.ZdravotniZaznam)
+@admin.register(ZdravotniZaznam)
 class ZdravotniZaznamAdmin(admin.ModelAdmin):
-    # OPRAVA: Pole 'typ' v modelu ZdravotniZaznam NEMÁŠ. Odstraněno z list_display a list_filter.
-    list_display = ('pes', 'titulek', 'datum_vytvoreni')
-    list_filter = ('datum_vytvoreni',)
-    search_fields = ('titulek', 'popis', 'pes__jmeno')
+    list_display = ('pes', 'typ', 'datum', 'titulek')
+    list_filter = ('typ', 'datum')
+    search_fields = ('pes__jmeno', 'titulek', 'poznamka')
 
 
 @admin.register(models.PromoKod)

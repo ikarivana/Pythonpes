@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Pes, Ockovani, Prispevek, Plemeno, ProfilMajitele, PromoKod
+from .models import Pes, Ockovani, Prispevek, Plemeno, ProfilMajitele, PromoKod, Vystava, Vrh
 
 
 # --- POMOCNÉ TŘÍDY ---
@@ -183,4 +183,25 @@ class OckovaniForm(forms.ModelForm):
             'datum_pristi_navstevy': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'nazev_vakciny': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Např. Nobivac'}),
             'poznamka': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }
+
+
+class VystavaForm(forms.ModelForm):
+    class Meta:
+        model = Vystava
+        fields = ['datum', 'nazev', 'misto', 'oceneni', 'rozhodci']
+        widgets = {
+            'datum': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'nazev': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Název výstavy'}),
+            'oceneni': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'V1, CAC, CACIB...'}),
+        }
+
+class VrhForm(forms.ModelForm):
+    class Meta:
+        model = Vrh
+        fields = ['datum_narozeni', 'oznaceni_vrhu', 'pocet_psu', 'pocet_fen', 'druhy_rodic', 'poznamka']
+        widgets = {
+            'datum_narozeni': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'oznaceni_vrhu': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Např. Vrh A'}),
+            'poznamka': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }

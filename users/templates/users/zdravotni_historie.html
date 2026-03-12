@@ -1,48 +1,131 @@
 {% extends 'home/base.html' %}
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-book-medical text-danger"></i> Zdravotní deník: {{ pes.jmeno }}</h2>
-        <a href="{% url 'detail_psa' pes.id %}" class="btn btn-outline-secondary">Zpět na profil</a>
-    </div>
+<style>
+    /* Zlatohnědé tlačítko pro psa */
+    .btn-zaznam-pes {
+        background-color: #B8860B !important;
+        border-color: #B8860B !important;
+        color: white !important;
+    }
+    /* Lila tlačítko pro kočku */
+    .btn-zaznam-kocka {
+        background-color: #C8A2C8 !important;
+        border-color: #C8A2C8 !important;
+        color: white !important;
+    }
+    /* TVÉ BARVY: Zlatohnědá pro psy a Lila pro kočky */
+    .color-pes { color: #B8860B !important; }
+    .bg-pes { background-color: #B8860B !important; }
+    .border-pes { border-color: #B8860B !important; }
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-0">
-                    <table class="table table-hover mb-0">
-                        <thead class="bg-light">
-                            <tr>
-                                <th>Datum</th>
-                                <th>Typ záznamu</th>
-                                <th>Detail / Hodnota</th>
-                                <th>Poznámka</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for zaznam in historie %}
-                            <tr>
-                                <td class="fw-bold">{{ zaznam.datum|date:"d. m. Y" }}</td>
-                                <td>
-                                    {% if zaznam.typ == 'ockovani' %}
-                                        <span class="badge bg-primary">Očkování</span>
-                                    {% elif zaznam.typ == 'vaha' %}
-                                        <span class="badge bg-success">Vážení</span>
-                                    {% else %}
-                                        <span class="badge bg-info">Odčervení</span>
-                                    {% endif %}
-                                </td>
-                                <td>{{ zaznam.hodnota }}</td>
-                                <td class="text-muted small">{{ zaznam.poznamka|default:"" }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center py-5 text-muted">Zatím zde nejsou žádné záznamy.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+    .color-kocka { color: #C8A2C8 !important; }
+    .bg-kocka { background-color: #C8A2C8 !important; }
+    .border-kocka { border-color: #C8A2C8 !important; }
+
+    /* Styly pro časovou osu */
+    .timeline-dot {
+        width: 14px; height: 14px; left: -31px; top: 12px;
+        border: 3px solid #fff; z-index: 2;
+    }
+    @media (max-width: 576px) {
+        .timeline-dot { left: -23px; width: 12px; height: 12px; }
+    }
+</style>
+
+<div class="container py-3 py-md-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold mb-0" style="font-size: clamp(1.3rem, 5vw, 2rem);">
+                    {% if pes.druh == 'pes' %}
+                    <i class="fas fa-dog color-pes me-2"></i>
+                    {% else %}
+                    <i class="fas fa-cat color-kocka me-2"></i>
+                    {% endif %}
+                    Deník: {{ pes.jmeno }}
+                </h2>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'pridat_zaznam' pes.id %}"
+                       class="btn btn-sm rounded-pill px-2 px-md-3 shadow-sm fw-bold
+       {% if pes.druh == 'pes' %}btn-zaznam-pes{% else %}btn-zaznam-kocka{% endif %}">
+                        <i class="fas fa-plus"></i>
+                        <span class="d-none d-sm-inline">NOVÝ ZÁPIS</span>
+                    </a>
+
+                    <a href="{% url 'detail_psa' pes.id %}" class="btn btn-sm btn-outline-secondary rounded-pill">
+                        Zpět
+                    </a>
                 </div>
+            </div>
+
+            <div class="position-relative ps-3 ps-sm-4 border-start border-3"
+                 style="border-color: #f0f0f0 !important; margin-left: 10px;">
+
+                {% for zaznam in zaznamy %}
+                <div class="mb-4 position-relative">
+
+                    <div class="position-absolute rounded-circle shadow-sm timeline-dot
+                        {% if zaznam.typ == 'vaha' %}bg-primary
+                        {% elif zaznam.typ == 'ockovani' %}bg-danger
+                        {% elif zaznam.typ == 'odcerveni' %}bg-info
+                        {% elif zaznam.typ == 'paraziti' %}bg-warning
+                        {% else %}bg-secondary{% endif %}">
+                    </div>
+
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                        <div class="card-body p-3 p-md-4">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <small class="text-muted fw-bold d-block">{{ zaznam.datum|date:"d. m. Y" }}</small>
+                                    <h5 class="fw-bold mb-0 mt-1">
+                                        {% if zaznam.typ == 'ockovani' %}<i class="fas fa-syring text-danger me-2"></i>
+                                        {% elif zaznam.typ == 'odcerveni' %}<i class="fas fa-pills text-info me-2"></i>
+                                        {% elif zaznam.typ == 'vaha' %}<i class="fas fa-weight text-primary me-2"></i>
+                                        {% elif zaznam.typ == 'paraziti' %}<i class="fas fa-bug text-warning me-2"></i>
+                                        {% else %}<i class="fas fa-stethoscope text-secondary me-2"></i>{% endif %}
+
+                                        {{ zaznam.titulek }}
+                                    </h5>
+                                </div>
+                                <span class="badge bg-light text-dark border px-2 py-1 small fw-normal">
+                                    {{ zaznam.get_typ_display }}
+                                </span>
+                            </div>
+
+                            {% if zaznam.poznamka %}
+                            <div class="mt-3 p-3 bg-light rounded-3 border-start border-4
+                                {% if zaznam.typ == 'ockovani' %}border-danger
+                                {% elif zaznam.typ == 'vaha' %}border-primary
+                                {% elif zaznam.typ == 'odcerveni' %}border-info
+                                {% else %}border-secondary{% endif %}">
+                                <p class="small mb-1 text-muted fw-bold">Zápis / Podané léky:</p>
+                                <p class="mb-0 text-dark" style="font-style: italic; font-size: 0.95rem;">"{{
+                                    zaznam.poznamka }}"</p>
+                            </div>
+                            {% endif %}
+
+                            <div class="mt-3 d-flex justify-content-end gap-3 border-top pt-2">
+                                <a href="{% url 'upravit_zaznam' zaznam.id %}"
+                                   class="text-muted small text-decoration-none hover-opacity">
+                                    <i class="fas fa-edit me-1"></i> Upravit
+                                </a>
+                                <a href="{% url 'smazat_zaznam' zaznam.id %}"
+                                   class="text-danger small text-decoration-none hover-opacity"
+                                   onclick="return confirm('Opravdu chcete tento záznam smazat?')">
+                                    <i class="fas fa-trash me-1"></i> Smazat
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+                    <i class="fas fa-notes-medical fa-3x mb-3 opacity-25"></i>
+                    <p class="text-muted mb-0">Deník je zatím prázdný. Přidejte první záznam!</p>
+                </div>
+                {% endfor %}
+
             </div>
         </div>
     </div>

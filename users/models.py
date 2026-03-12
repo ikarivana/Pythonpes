@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
 
 
+
 class PromoKod(models.Model):
     kod = models.CharField(max_length=50, unique=True, verbose_name="Promo kód")
     pocet_dni = models.IntegerField(default=30, verbose_name="Počet dní premia")
@@ -17,35 +18,19 @@ class PromoKod(models.Model):
     def __str__(self):
         return f"{self.kod} ({self.pocet_dni} dní)"
 
-
 class ProfilMajitele(models.Model):
     uzivatel = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profil')
-    telefon = models.CharField(max_length=20, blank=True)
+    is_premium = models.BooleanField(default=False)
+    premium_do = models.DateField(null=True, blank=True, verbose_name="Premium platné do")
     ulice_cp = models.CharField(max_length=255, blank=True, verbose_name="Ulice a č.p.")
     mesto = models.CharField(max_length=100, blank=True, verbose_name="Město")
     psc = models.CharField(max_length=10, blank=True, verbose_name="PSČ")
+    telefon = models.CharField(max_length=20, blank=True)
 
-    is_premium = models.BooleanField(default=False)
-    premium_do = models.DateField(null=True, blank=True)
+    def __str__(self):
+        return f"Profil: {self.uzivatel.username}"
 
-    # NOVÉ POLE PRO STATISTIKY
-    pouzity_kod = models.CharField(max_length=50, blank=True, null=True, verbose_name="Použitý promo kód")
-
-    @property
-    def is_cat_person(self):
-        """Bezpečná kontrola pro barvy v base.html"""
-        try:
-            # Spočítáme zvířata přes related_name='psi'
-            pocet = self.psi.count()
-            if pocet == 1:
-                prvni = self.psi.first()
-                return prvni and prvni.druh == 'kocka'
-            return False
-        except:
-            return False
-
-
-# --- MODEL PSA ---
+# --- 1. MODEL PSA ---
 class Pes(models.Model):
     DRUH_CHOICES = [('pes', 'Pes'), ('kocka', 'Kočka')]
     druh = models.CharField(max_length=10, choices=DRUH_CHOICES, default='pes')
@@ -64,7 +49,7 @@ class Pes(models.Model):
     # Základní info
     cip = models.CharField(max_length=50, blank=True, null=True)
     fotka = models.ImageField(upload_to='profily_psu/', blank=True, null=True)
-    foto_rotace = models.IntegerField(default=0)  # Ukládá úhly 0, 90, 180, 270
+    foto_rotace = models.IntegerField(default=0)
     vaha = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     datum_narozeni = models.DateField(null=True, blank=True)
 
@@ -81,118 +66,66 @@ class Pes(models.Model):
     qr_kod = models.ImageField(upload_to='qr_kody/', blank=True, null=True)
     je_ztraceny = models.BooleanField(default=False)
 
-    # Aktuální prevence (to, co vidíme na kartě zdraví)
+    # Aktuální prevence
     posledni_ockovani = models.DateField(null=True, blank=True)
     posledni_odcerveni = models.DateField(null=True, blank=True)
     posledni_klistata = models.DateField(null=True, blank=True)
-
-    # --- PŘIDANÉ METODY PRO ŠABLONU ---
-    @property
-    def vek(self):
-        if not self.datum_narozeni:
-            return "Nezadáno"
-
-        today = date.today()
-        # Rozdíl v letech
-        years = today.year - self.datum_narozeni.year - (
-                (today.month, today.day) < (self.datum_narozeni.month, self.datum_narozeni.day)
-        )
-
-        if years >= 1:
-            if years == 1:
-                return f"{years} rok"
-            elif 1 < years < 5:
-                return f"{years} roky"
-            else:
-                return f"{years} let"
-        else:
-            # Výpočet měsíců
-            months = (today.year - self.datum_narozeni.year) * 12 + today.month - self.datum_narozeni.month
-            if today.day < self.datum_narozeni.day:
-                months -= 1
-            months = max(0, months)
-
-            if months == 1:
-                return f"{months} měsíc"
-            elif 1 < months < 5:
-                return f"{months} měsíce"
-            else:
-                return f"{months} měsíců"
-
-    @property
-    def pristi_ockovani(self):
-        """
-        Vrátí buď konkrétní naplánované datum z historie očkování,
-        nebo automaticky 1 rok od posledního očkování.
-        """
-        # 1. Zkusíme najít nejbližší budoucí termín z historie (pro štěňata)
-        planovane = self.vsechna_ockovani.filter(datum_pristi_navstevy__gt=date.today()).order_by(
-            'datum_pristi_navstevy').first()
-        if planovane:
-            return planovane.datum_pristi_navstevy
-
-        # 2. Pokud není plán, použijeme tvou logiku + 1 rok
-        if self.posledni_ockovani:
-            return self.posledni_ockovani + timedelta(days=365)
-        return None
-
-    @property
-    def pristi_odcerveni(self):
-        if self.posledni_odcerveni:
-            try:
-                # Kočka 92 dní, pes 182 dní
-                dny = 92 if self.druh == 'kocka' else 182
-                # Musí zde být posledni_odcerveni!
-                return self.posledni_odcerveni + timedelta(days=dny)
-            except Exception:
-                return None
-        return None
-    @property
-    def pristi_klistata(self):
-        """
-        Vypočítá datum od poslední ochrany.
-        Většina spot-onů/tablet trvá 1-3 měsíce (90 dní).
-        """
-        if self.posledni_klistata:
-            return self.posledni_klistata + timedelta(days=90)
-        return None
-
-    # Stav
     vytvoreno = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.jmeno
 
-    def save(self, *args, **kwargs):
-        # 1. První uložení pro získání ID (pokud je nový)
-        is_new = self.pk is None
-        super().save(*args, **kwargs)
+    @property
+    def vek(self):
+        if not self.datum_narozeni: return "Nezadáno"
+        today = date.today()
+        years = today.year - self.datum_narozeni.year - ((today.month, today.day) < (self.datum_narozeni.month, self.datum_narozeni.day))
+        return f"{years} let"
 
-        # 2. Generujeme QR kód pouze pokud pole qr_kod ZEJE PRÁZDNOTOU
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
         if not self.qr_kod:
             try:
-                # URL odkazuje na detail psa (napořád stejné díky ID)
                 qr_url = f"https://epes.online/pes/{self.id}/"
-
                 qr = qrcode.QRCode(version=1, box_size=10, border=5)
                 qr.add_data(qr_url)
                 qr.make(fit=True)
-
                 img = qr.make_image(fill_color="black", back_color="white")
                 canvas = BytesIO()
                 img.save(canvas, format='PNG')
                 canvas.seek(0)
-
-                fname = f'qr_pes_{self.id}.png'
-                # save=False je důležité, abychom nezavolali save() znovu
-                self.qr_kod.save(fname, File(canvas), save=False)
-
-                # 3. Uložíme pouze pole qr_kod pomocí update_fields
-                # Tím zabráníme nekonečné smyčce
+                self.qr_kod.save(f'qr_pes_{self.id}.png', File(canvas), save=False)
                 super(Pes, self).save(update_fields=['qr_kod'])
-            except Exception as e:
-                print(f"Chyba při generování QR: {e}")
+            except:
+                pass
 
+# --- 2. MODEL PRO VÝSTAVY ---
+class Vystava(models.Model):
+    pes = models.ForeignKey(Pes, on_delete=models.CASCADE, related_name='vystavy_seznam')
+    datum = models.DateField()
+    nazev = models.CharField(max_length=200, verbose_name="Název výstavy")
+    misto = models.CharField(max_length=200, blank=True)
+    oceneni = models.CharField(max_length=200, help_text="Např. V1, CAC, BOB")
+    rozhodci = models.CharField(max_length=150, blank=True)
+
+    class Meta:
+        ordering = ['-datum']
+
+# --- 3. MODEL PRO VRHY ---
+class Vrh(models.Model):
+    # Opraveno: rOdič, ne rOdec :)
+    rodic = models.ForeignKey(Pes, on_delete=models.CASCADE, related_name='potomci')
+    datum_narozeni = models.DateField()
+    oznaceni_vrhu = models.CharField(max_length=50, help_text="Např. Vrh A")
+    pocet_psu = models.PositiveIntegerField(default=0)
+    pocet_fen = models.PositiveIntegerField(default=0)
+    druhy_rodic = models.CharField(max_length=200, help_text="Jméno partnera/partnerky")
+    poznamka = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['-datum_narozeni']
+
+# --- 4. MODEL OČKOVÁNÍ (Ten ti chyběl a admin ho hledal!) ---
 class Ockovani(models.Model):
     pes = models.ForeignKey(Pes, on_delete=models.CASCADE, related_name='vsechna_ockovani')
     datum_ockovani = models.DateField()
@@ -200,10 +133,8 @@ class Ockovani(models.Model):
     poznamka = models.TextField(blank=True)
     datum_pristi_navstevy = models.DateField(null=True, blank=True)
 
-
     def __str__(self):
         return f"{self.nazev_vakciny} - {self.pes.jmeno}"
-
 
 # --- GALERIE FOTEK ---
 class GalerieFotka(models.Model):
@@ -232,14 +163,6 @@ class Uspech(models.Model):
     nazev = models.CharField(max_length=200)
     typ = models.CharField(max_length=100, blank=True)  # např. Výstava, Zkouška
     datum = models.DateField(null=True, blank=True)
-
-
-class ZdravotniZaznam(models.Model):
-    pes = models.ForeignKey(Pes, on_delete=models.CASCADE, related_name='zaznamy_zdravi')
-    titulek = models.CharField(max_length=200)
-    popis = models.TextField()
-    datum_vytvoreni = models.DateTimeField(auto_now_add=True)
-
 
 # --- SOCIÁLNÍ SÍŤ ---
 class Plemeno(models.Model):
@@ -310,3 +233,47 @@ class Like(models.Model):
     class Meta:
         # Zajistí, že uživatel může dát jeden lajk příspěvku jen jednou
         unique_together = ('uzivatel', 'prispevek')
+
+
+class ZdravotniZaznam(models.Model):
+    TYP_CHOICES = [
+        ('ockovani', 'Očkování'),
+        ('odcerveni', 'Odčervení'),
+        ('vaha', 'Vážení'),
+        ('paraziti', 'Klíšťata / Blechy'),
+        ('kontrola', 'Lékařská kontrola'),
+    ]
+    pes = models.ForeignKey(Pes, on_delete=models.CASCADE, related_name='denik')
+    datum = models.DateField()
+    typ = models.CharField(max_length=20, choices=TYP_CHOICES)
+    titulek = models.CharField(max_length=200, help_text="Např. název tablety nebo vakcíny")
+    poznamka = models.TextField(blank=True, null=True, help_text="Zde dopíšeš léky nebo průběh kontroly")
+
+    class Meta:
+        ordering = ['-datum']
+
+    def __str__(self):
+        return f"{self.get_typ_display()} - {self.pes.jmeno} ({self.datum})"
+
+    def save(self, *args, **kwargs):
+        # Nejdřív uložíme samotný záznam
+        super().save(*args, **kwargs)
+
+        # Potom aktualizujeme hlavní kartu zvířete (Pes/Kočka)
+        if self.typ == 'ockovani':
+            self.pes.posledni_ockovani = self.datum
+        elif self.typ == 'odcerveni':
+            self.pes.posledni_odcerveni = self.datum
+        elif self.typ == 'paraziti':
+            self.pes.posledni_klistata = self.datum
+        elif self.typ == 'vaha':
+            try:
+                # Pokud do titulku napíšeš "25.5", převede se to na číslo pro hlavní váhu
+                import decimal
+                self.pes.vaha = decimal.Decimal(str(self.titulek).replace(',', '.'))
+            except:
+                pass
+
+        # Uložíme změny u psa
+        self.pes.save(update_fields=['posledni_ockovani', 'posledni_odcerveni', 'posledni_klistata', 'vaha'])
+

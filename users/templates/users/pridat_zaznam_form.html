@@ -1,0 +1,81 @@
+{% extends 'home/base.html' %}
+{% block content %}
+<style>
+    /* Zlatohnědá pro psy */
+    .btn-pes { background-color: #B8860B !important; border-color: #B8860B !important; color: white !important; }
+    .btn-pes:hover { background-color: #A0760A !important; }
+
+    /* Lila pro kočky */
+    .btn-kocka { background-color: #C8A2C8 !important; border-color: #C8A2C8 !important; color: white !important; }
+    .btn-kocka:hover { background-color: #B892B8 !important; }
+
+    /* Vylepšení pro mobilní vstupy */
+    .form-control, .form-select {
+        border-radius: 12px;
+        padding: 0.75rem;
+        border: 1px solid #dee2e6;
+    }
+</style>
+
+<div class="container py-4 px-3 px-sm-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow rounded-4 border-0 p-3 p-sm-4">
+                <h3 class="fw-bold mb-4 text-center" style="font-size: clamp(1.2rem, 5vw, 1.8rem);">
+                    Nový záznam:
+                    {% if pes.druh == 'pes' %}
+                        <i class="fas fa-dog me-2" style="color: #B8860B;"></i>
+                    {% else %}
+                        <i class="fas fa-cat me-2" style="color: #C8A2C8;"></i>
+                    {% endif %}
+                    {{ pes.jmeno }}
+                </h3>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Typ události</label>
+                        <select name="typ" class="form-select" required>
+                            <option value="ockovani">Očkování</option>
+                            <option value="odcerveni" selected>Odčervení</option>
+                            <option value="vaha">Vážení (v kg)</option>
+                            <option value="paraziti">Klíšťata / Blechy</option>
+                            <option value="kontrola">Lékařská kontrola</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Název přípravku / Hodnota</label>
+                        <input type="text" name="titulek" class="form-control" placeholder="Např. Milprazon nebo 12.5" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Datum</label>
+                        <input type="date" name="datum" class="form-control" value="{{ today|date:'Y-m-d' }}" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Poznámka / Zpráva z kontroly</label>
+                        <textarea name="poznamka" class="form-control" rows="4" placeholder="Zde dopiš podrobnosti o kontrole nebo lécích..."></textarea>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit"
+                                class="btn rounded-pill w-100 py-3 fw-bold shadow-sm
+                                {% if pes.druh == 'pes' %}btn-pes{% else %}btn-kocka{% endif %}">
+                            ULOŽIT DO DENÍKU
+                        </button>
+                        <div class="text-center mt-3">
+                            <a href="{% url 'zdravotni_historie' pes.id %}"
+                               class="btn btn-sm btn-link text-muted text-decoration-none">
+                                <i class="fas fa-times me-1"></i> Zrušit
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

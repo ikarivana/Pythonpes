@@ -32,14 +32,16 @@
         }
 
         /* --- DYNAMICKÉ TÉMA PRO KOČKAŘE --- */
-        {% if user.is_authenticated and user.profil.is_cat_person %}
-            :root {
-                --dark-cocoa: #1a112d;
-                --mid-brown: #2d1b4d;
-                --gold: #9b86bd;
-                --bg-page: #f8f7ff;
-            }
-        {% endif %}
+        {% if user.is_authenticated %}
+    {% if user.profil.is_cat_person %}
+        :root {
+            --dark-cocoa: #1a112d;
+            --mid-brown: #2d1b4d;
+            --gold: #9b86bd;
+            --bg-page: #f8f7ff;
+        }
+    {% endif %}
+{% endif %}
 
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-page); margin: 0; }
         #wrapper { display: flex; min-height: 100vh; position: relative; }
@@ -198,10 +200,15 @@
 
             <div class="d-flex justify-content-center gap-3 pt-2" style="border-top: 1px solid rgba(255,255,255,0.05);">
                 <a href="{% url 'podminky' %}"
+                   onclick="if(window.innerWidth < 992) toggleMenu();"
                    style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">Podmínky</a>
+
                 <a href="{% url 'cookies' %}"
+                   onclick="if(window.innerWidth < 992) toggleMenu();"
                    style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">Cookies</a>
+
                 <a href="{% url 'gdpr' %}"
+                   onclick="if(window.innerWidth < 992) toggleMenu();"
                    style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">GDPR</a>
             </div>
         </div>

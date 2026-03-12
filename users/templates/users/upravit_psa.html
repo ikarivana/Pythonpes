@@ -1,7 +1,8 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+      rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
@@ -75,12 +76,13 @@
             <div class="photo-edit-wrapper">
                 <div class="photo-preview-container">
                     {% if pes.fotka %}
-                        <img src="{{ pes.fotka.url }}" id="preview" class="photo-preview" style="transform: rotate({{ pes.foto_rotace }}deg);">
+                    <img src="{{ pes.fotka.url }}" id="preview" class="photo-preview"
+                         style="transform: rotate({{ pes.foto_rotace }}deg);">
                     {% else %}
-                        <div id="no-photo" class="h-100 d-flex align-items-center justify-content-center">
-                            <i class="fas {% if pes.druh == 'kocka' %}fa-cat{% else %}fa-dog{% endif %} fa-4x text-muted opacity-25"></i>
-                        </div>
-                        <img id="preview" class="photo-preview d-none">
+                    <div id="no-photo" class="h-100 d-flex align-items-center justify-content-center">
+                        <i class="fas {% if pes.druh == 'kocka' %}fa-cat{% else %}fa-dog{% endif %} fa-4x text-muted opacity-25"></i>
+                    </div>
+                    <img id="preview" class="photo-preview d-none">
                     {% endif %}
                 </div>
                 <button type="button" class="rotate-btn" onclick="rotateImage()" title="Otočit fotku o 90°">
@@ -120,13 +122,16 @@
                 </div>
                 <div class="col-md-4">
                     <label class="label-gold">Datum narození</label>
-                    <input type="date" name="datum_narozeni" class="input-clean" value="{{ pes.datum_narozeni|date:'Y-m-d' }}">
+                    <input type="date" name="datum_narozeni" class="input-clean"
+                           value="{{ pes.datum_narozeni|date:'Y-m-d' }}">
                 </div>
                 <div class="col-md-4">
                     <label class="label-gold">Identifikační čip</label>
-                    <input type="text" name="cip" class="input-clean" value="{{ pes.cip|default:'' }}" placeholder="Kód mikročipu">
+                    <input type="text" name="cip" class="input-clean" value="{{ pes.cip|default:'' }}"
+                           placeholder="Kód mikročipu">
                     <small class="text-muted d-block mt-1" style="font-size: 0.65rem; line-height: 1.2;">
-                        <i class="fas fa-info-circle text-primary"></i> Čip není nutný pro profil, ale **doporučujeme jej uvést** pro rychlejší identifikaci v útulku.
+                        <i class="fas fa-info-circle text-primary"></i> Čip není nutný pro profil, ale **doporučujeme
+                        jej uvést** pro rychlejší identifikaci v útulku.
                     </small>
                 </div>
             </div>
@@ -137,20 +142,25 @@
             <div class="row g-3">
                 <div class="col-md-4">
                     <label class="label-gold">Vaše jméno (SOS Kontakt) *</label>
-                    <input type="text" name="kontaktni_jmeno" class="input-clean" value="{{ pes.kontaktni_jmeno|default:'' }}" required>
+                    <input type="text" name="kontaktni_jmeno" class="input-clean"
+                           value="{{ pes.kontaktni_jmeno|default:'' }}" required>
                 </div>
                 <div class="col-md-4">
                     <label class="label-gold">Telefonní číslo *</label>
-                    <input type="text" name="kontaktni_telefon" class="input-clean" value="{{ pes.kontaktni_telefon|default:'' }}" required placeholder="+420 ...">
+                    <input type="text" name="kontaktni_telefon" class="input-clean"
+                           value="{{ pes.kontaktni_telefon|default:'' }}" required placeholder="+420 ...">
                 </div>
                 <div class="col-md-4">
                     <label class="label-gold">E-mail pro kontakt *</label>
-                    <input type="email" name="kontaktni_email" class="input-clean" value="{{ pes.kontaktni_email|default:'' }}" required placeholder="vas@email.cz">
+                    <input type="email" name="kontaktni_email" class="input-clean"
+                           value="{{ pes.kontaktni_email|default:'' }}" required placeholder="vas@email.cz">
                 </div>
                 <div class="col-12">
                     <label class="label-gold">Adresa pro zaslání dárků nebo známky</label>
-                    <input type="text" name="adresa_pro_darky" class="input-clean" value="{{ pes.adresa_pro_darky|default:'' }}" placeholder="Ulice, č.p., město, PSČ">
-                    <small class="text-muted"><i class="fas fa-gift text-warning"></i> Tato adresa umožní nálezci zaslat vám nalezenou známku nebo dáreček od ePes.online.</small>
+                    <input type="text" name="adresa_pro_darky" class="input-clean"
+                           value="{{ pes.adresa_pro_darky|default:'' }}" placeholder="Ulice, č.p., město, PSČ">
+                    <small class="text-muted"><i class="fas fa-gift text-warning"></i> Tato adresa umožní nálezci zaslat
+                        vám nalezenou známku nebo dáreček od ePes.online.</small>
                 </div>
 
                 <div class="col-12 mt-4">
@@ -159,23 +169,94 @@
                             <div class="col-md-3 text-center mb-3 mb-md-0">
                                 <div class="p-2 bg-light rounded-4 border d-inline-block">
                                     <i class="fas fa-qrcode fa-4x text-muted opacity-50"></i>
-                                    <div class="small fw-bold text-muted mt-1" style="font-size: 0.6rem;">SOS IDENTITA</div>
+                                    <div class="small fw-bold text-muted mt-1" style="font-size: 0.6rem;">SOS IDENTITA
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-9">
                                 <label class="d-flex align-items-start gap-3 fw-bold" style="cursor: pointer;">
-                                    <input type="checkbox" name="regenerovat_qr" style="width: 28px; height: 28px; margin-top: 2px;">
+                                    <input type="checkbox" name="regenerovat_qr"
+                                           style="width: 28px; height: 28px; margin-top: 2px;">
                                     <div>
                                         <span class="d-block text-danger">AKTIVOVAT NOVÝ SOS KÓD</span>
-                                        <p class="text-muted fw-normal small mb-0">Zaškrtněte pouze v případě, že jste ztratili známku.</p>
+                                        <p class="text-muted fw-normal small mb-0">Zaškrtněte pouze v případě, že jste
+                                            ztratili známku.</p>
                                     </div>
                                 </label>
                                 <div class="sos-warning mt-3">
-                                    <i class="fas fa-exclamation-triangle"></i> <strong>POZOR:</strong> Aktivací nové identity se stará známka okamžitě <strong>zneplatní</strong> pro nálezce!
+                                    <i class="fas fa-exclamation-triangle"></i> <strong>POZOR:</strong> Aktivací nové
+                                    identity se stará známka okamžitě <strong>zneplatní</strong> pro nálezce!
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div class="edit-card">
+            <h5 class="section-title"><i class="fas fa-award text-warning"></i> Chovnost a Původ</h5>
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label class="label-gold">Chovatelská stanice</label>
+                    <input type="text" name="chovatelska_stanice" class="input-clean"
+                           value="{{ pes.chovatelska_stanice|default:'' }}" placeholder="Např. Od Zlaté řeky">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="label-gold">Otec (Sir)</label>
+                    <input type="text" name="otec" class="input-clean" value="{{ pes.otec|default:'' }}"
+                           placeholder="Jméno otce">
+                </div>
+                <div class="col-md-6">
+                    <label class="label-gold">Matka (Dam)</label>
+                    <input type="text" name="matka" class="input-clean" value="{{ pes.matka|default:'' }}"
+                           placeholder="Jméno matky">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="label-gold">Bonitace / Chovnost</label>
+                    <input type="text" name="bonitace" class="input-clean" value="{{ pes.bonitace|default:'' }}"
+                           placeholder="Např. Chovný, Výborný">
+                </div>
+                <div class="col-md-6">
+                    <label class="label-gold">Skupina / Barva</label>
+                    <input type="text" name="skupina_barva" class="input-clean"
+                           value="{{ pes.skupina_barva|default:'' }}" placeholder="Např. Černá se znaky">
+                </div>
+                <div class="row g-2 mt-2">
+                    <div class="col-md-4">
+                        <label class="label-gold">RTG HD (Kyčle)</label>
+                        <input type="text" name="rtg_hd" class="input-clean" value="{{ pes.rtg_hd|default:'' }}"
+                               placeholder="Např. A/A">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="label-gold">RTG ED (Lokty)</label>
+                        <input type="text" name="rtg_ed" class="input-clean" value="{{ pes.rtg_ed|default:'' }}"
+                               placeholder="Např. 0/0">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="label-gold">RTG Páteř</label>
+                        <input type="text" name="rtg_pater" class="input-clean" value="{{ pes.rtg_pater|default:'' }}"
+                               placeholder="Např. SA 0">
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label class="label-gold">Dosažené tituly a výstavy</label>
+                    <textarea name="tituly" class="input-clean" rows="2"
+                              placeholder="Např. 3x CAC, 2x res. CACIB, Junior Šampion...">{{ pes.tituly|default:'' }}</textarea>
+                </div>
+
+                <div class="col-12">
+                    <label class="label-gold">Nahrát rodokmen (PDF)</label>
+                    <div class="d-flex align-items-center gap-3">
+                        <input type="file" name="rodokmen_pdf" class="input-clean" accept="application/pdf">
+                        {% if pes.rodokmen_pdf %}
+                        <span class="badge bg-success"><i class="fas fa-check"></i> Nahráno</span>
+                        {% endif %}
+                    </div>
+                    <small class="text-muted">Připojením PDF umožníte nálezci nebo zájemcům nahlédnout do
+                        původu.</small>
                 </div>
             </div>
         </div>
@@ -185,19 +266,38 @@
             <div class="row g-3">
                 <div class="col-md-4">
                     <label class="label-gold">Poslední očkování</label>
-                    <input type="date" name="posledni_ockovani" class="input-clean" value="{{ pes.posledni_ockovani|date:'Y-m-d' }}">
+                    <input type="date" name="posledni_ockovani" class="input-clean"
+                           value="{{ pes.posledni_ockovani|date:'Y-m-d' }}">
                 </div>
                 <div class="col-md-4">
                     <label class="label-gold">Poslední odčervení</label>
-                    <input type="date" name="posledni_odcerveni" class="input-clean" value="{{ pes.posledni_odcerveni|date:'Y-m-d' }}">
+                    <input type="date" name="posledni_odcerveni" class="input-clean"
+                           value="{{ pes.posledni_odcerveni|date:'Y-m-d' }}">
                 </div>
                 <div class="col-md-4">
                     <label class="label-gold">Klíšťata / Blechy</label>
-                    <input type="date" name="posledni_klistata" class="input-clean" value="{{ pes.posledni_klistata|date:'Y-m-d' }}">
+                    <input type="date" name="posledni_klistata" class="input-clean"
+                           value="{{ pes.posledni_klistata|date:'Y-m-d' }}">
                 </div>
                 <div class="col-12">
                     <label class="label-gold">Poznámky lékaře / Alergie</label>
-                    <textarea name="zdravotni_poznamky" class="input-clean" rows="3" placeholder="Alergie, léky nebo důležitá zdravotní upozornění...">{{ pes.zdravotni_poznamky|default:'' }}</textarea>
+                    <textarea name="zdravotni_poznamky" class="input-clean" rows="3"
+                              placeholder="Alergie, léky nebo důležitá zdravotní upozornění...">{{ pes.zdravotni_poznamky|default:'' }}</textarea>
+                </div>
+            </div>
+        </div>
+        <div class="edit-card">
+            <h5 class="section-title"><i class="fas fa-comment-dots text-primary"></i> Povaha a instrukce pro nálezce
+                (Free)</h5>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="label-gold">Popis zvířete a pokyny pro nouzi</label>
+                    <textarea name="popis" class="input-clean" rows="4"
+                              placeholder="Napište vše, co by měl nálezce vědět. Např.: Je plachý, slyší na jméno, miluje piškoty, nesnáší psy...">{{ pes.popis|default:'' }}</textarea>
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i> Tento text uvidí každý, kdo naskenuje známku, když bude zvíře
+                        <strong>ztracené</strong>.
+                    </small>
                 </div>
             </div>
         </div>
@@ -243,18 +343,30 @@
         const optPes = document.getElementById('opt-pes');
         const optKocka = document.getElementById('opt-kocka');
 
+        // Najdeme ikonu v náhledu, pokud tam ještě není fotka
+        const placeholderIcon = document.querySelector('#no-photo i');
+
         if (druh === 'kocka') {
             document.body.classList.add('is-kocka');
             optKocka.classList.add('active');
             optPes.classList.remove('active');
+            // Změna ikony na kočku
+            if (placeholderIcon) {
+                placeholderIcon.className = 'fas fa-cat fa-4x text-muted opacity-25';
+            }
         } else {
             document.body.classList.remove('is-kocka');
             optPes.classList.add('active');
             optKocka.classList.remove('active');
+            // Změna ikony na psa
+            if (placeholderIcon) {
+                placeholderIcon.className = 'fas fa-dog fa-4x text-muted opacity-25';
+            }
         }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        // Inicializace při načtení stránky
         setSpecies(document.getElementById('id_druh').value);
     });
 </script>
