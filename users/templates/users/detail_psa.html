@@ -15,55 +15,39 @@
     }
     body { background-color: var(--alfa-bg); font-family: 'Plus Jakarta Sans', sans-serif; color: var(--alfa-brown); }
 
-    /* Horní karta - sjednocení a oprava mobilní verze */
     .profile-card-top {
-        background: white;
-        border-radius: 25px;
-        padding: 25px;
-        border: 2px solid var(--species-color);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        margin-bottom: 25px;
+        background: white; border-radius: 25px; padding: 25px; border: 2px solid var(--species-color);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 25px;
     }
 
     .profile-img {
         width: 130px; height: 130px; border-radius: 20px; object-fit: cover;
-        border: 2px solid var(--species-color);
-        padding: 4px; background: white;
+        border: 2px solid var(--species-color); padding: 4px; background: white;
     }
 
     .qr-badge {
         background: var(--alfa-bg); padding: 10px; border-radius: 18px;
-        border: 1px solid var(--species-light);
-        display: inline-block; text-align: center; min-width: 90px;
+        border: 1px solid var(--species-light); display: inline-block; text-align: center; min-width: 90px;
     }
 
-    /* Tlačítka */
-    .btn-stack { width: 100%; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; transition: 0.2s; }
+    .btn-stack { width: 100%; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; transition: 0.2s; cursor: pointer; }
     .btn-ztrata { background: var(--alfa-danger); color: white; }
     .btn-success { background: #28a745 !important; color: white !important; }
     .btn-uprava { background: var(--species-color); color: white; }
     .btn-pdf { background: transparent; color: var(--alfa-brown); border: 2px solid var(--alfa-brown); }
-    .btn-stack:hover { opacity: 0.9; transform: translateY(-1px); color: white; }
-    .btn-pdf:hover { background: var(--alfa-brown); color: white; }
+    .btn-stack:hover { opacity: 0.9; transform: translateY(-1px); }
 
-    /* Karty a sekce */
     .info-card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; border: 1px solid var(--species-light); position: relative; overflow: hidden; }
     .section-header { font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 10px; margin-bottom: 20px; color: var(--species-color); font-size: 0.9rem; }
 
-    /* Galerie */
     .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin-top: 20px; }
     .media-container { position: relative; aspect-ratio: 1/1; border-radius: 15px; overflow: hidden; background: #eee; border: 1px solid #ddd; }
     .media-item { width: 100%; height: 100%; object-fit: cover; }
 
-    /* Premium zámek */
     .premium-lock-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(4px); z-index: 10; display: flex; align-items: center; justify-content: center; text-align: center; }
     .blur-content { filter: blur(3px); pointer-events: none; user-select: none; opacity: 0.6; }
 
-    .btn-species-outline {
-        border: 2px solid var(--species-color) !important;
-        color: var(--species-color) !important;
-        font-weight: 800; border-radius: 15px; transition: 0.3s;
-    }
+    .btn-species-outline { border: 2px solid var(--species-color) !important; color: var(--species-color) !important; font-weight: 800; border-radius: 15px; transition: 0.3s; background: transparent; }
     .btn-species-outline:hover { background: var(--species-color) !important; color: white !important; }
 </style>
 
@@ -96,7 +80,7 @@
                     <div class="qr-badge shadow-sm mb-3 mb-md-0">
                         <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data={{ request.build_absolute_uri }}"
                              style="width: 70px; height: 70px;">
-                        <div style="font-size: 0.55rem; font-weight: 800; color: var(--species-color); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <div style="font-size: 0.55rem; font-weight: 800; color: var(--species-color); margin-top: 5px; text-transform: uppercase;">
                             SOS Identita
                         </div>
                     </div>
@@ -104,41 +88,43 @@
             </div>
 
             <div class="col-md-4 d-flex flex-column gap-2">
+                <button onclick="sdiletProfil()" class="btn-stack btn-species-outline"><i class="fas fa-share-alt"></i>
+                    SDÍLET PROFIL
+                </button>
+                <hr class="my-1 opacity-25">
+                {% if je_majitel %}
                 {% if not pes.je_ztraceny %}
                 <form id="ztrata-form" action="{% url 'prepnout_ztratu' pes.id %}" method="POST" class="m-0">
                     {% csrf_token %}
                     <input type="hidden" name="lat" id="gps-lat">
                     <input type="hidden" name="lon" id="gps-lon">
-                    <button type="button" onclick="nahlasitZtratuSGPS()" class="btn-stack btn-ztrata">
-                        <i class="fas fa-bullhorn"></i> NAHLÁSIT ZTRÁTU
+                    <button type="button" onclick="nahlasitZtratuSGPS()" class="btn-stack btn-ztrata"><i
+                            class="fas fa-bullhorn"></i> NAHLÁSIT ZTRÁTU
                     </button>
                 </form>
                 {% else %}
-                <a href="{% url 'prepnout_ztratu' pes.id %}" class="btn-stack btn-success">
-                    <i class="fas fa-check-circle"></i> NALEZENO (DOMA)
-                </a>
+                <a href="{% url 'prepnout_ztratu' pes.id %}" class="btn-stack btn-success"><i
+                        class="fas fa-check-circle"></i> NALEZENO (DOMA)</a>
                 {% endif %}
-
-                <a href="{% url 'upravit_psa' pes.id %}" class="btn-stack btn-uprava">
-                    <i class="fas fa-edit"></i> UPRAVIT
-                </a>
-
-                <a href="{% url 'export_pes_pdf' pes.id %}" class="btn-stack btn-pdf">
-                    <i class="fas fa-file-pdf"></i> PDF EXPORT
-                </a>
+                <a href="{% url 'upravit_psa' pes.id %}" class="btn-stack btn-uprava"><i class="fas fa-edit"></i>
+                    UPRAVIT</a>
+                <a href="{% url 'export_pes_pdf' pes.id %}" class="btn-stack btn-pdf"><i class="fas fa-file-pdf"></i>
+                    PDF EXPORT</a>
+                {% endif %}
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-lg-6 mb-4">
-            <div class="info-card h-100 shadow-sm p-3 p-md-4 rounded-4 bg-white">
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="info-card h-100 shadow-sm p-3 p-md-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="section-header mb-0"><i class="fas fa-notes-medical me-2"></i>Zdravotní karta</h5>
-                    <a href="{% url 'upravit_psa' pes.id %}"
-                       class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold" style="font-size: 0.7rem;">
+                    {% if je_majitel %}
+                    <a href="{% url 'upravit_psa' pes.id %}" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold" style="font-size: 0.7rem;">
                         <i class="fas fa-edit"></i> UPRAVIT VŠE
                     </a>
+                    {% endif %}
                 </div>
 
                 <div class="table-responsive">
@@ -147,178 +133,131 @@
                             <td class="text-muted py-2">Aktuální váha:</td>
                             <td class="text-end fw-bold py-2">
                                 {{ pes.vaha|default:"-" }} kg
-                                <a href="{% url 'zdravotni_historie' pes.id %}" class="ms-1 text-muted opacity-50"
-                                   title="Historie váhy">
-                                    <i class="fas fa-history fa-xs"></i>
-                                </a>
+                                {% if je_majitel %}<a href="{% url 'zdravotni_historie' pes.id %}" class="ms-1 text-muted opacity-50"><i class="fas fa-history fa-xs"></i></a>{% endif %}
                             </td>
                         </tr>
-
                         <tr class="border-top">
                             <td class="text-muted py-2">Poslední očkování:</td>
                             <td class="text-end py-2">
                                 <div class="d-flex align-items-center justify-content-end gap-2">
                                     <span class="fw-bold">{{ pes.posledni_ockovani|date:"d. m. Y"|default:"-" }}</span>
-                                    <div class="d-flex gap-2 ms-1">
-                                        <a href="{% url 'zdravotni_historie' pes.id %}" class="text-muted small"
-                                           title="Historie">
-                                            <i class="fas fa-history"></i>
-                                        </a>
-                                        <a href="{% url 'pridat_ockovani' pes.id %}"
-                                           style="color: var(--species-color);" title="Přidat nové">
-                                            <i class="fas fa-plus-circle"></i>
-                                        </a>
-                                    </div>
+                                    {% if je_majitel %}<a href="{% url 'pridat_ockovani' pes.id %}" style="color: var(--species-color);"><i class="fas fa-plus-circle"></i></a>{% endif %}
                                 </div>
                             </td>
                         </tr>
-
                         <tr>
                             <td class="text-muted py-2">Poslední odčervení:</td>
                             <td class="text-end py-2">
                                 <div class="d-flex align-items-center justify-content-end gap-2">
                                     <span class="fw-bold">{{ pes.posledni_odcerveni|date:"d. m. Y"|default:"-" }}</span>
-                                    <div class="d-flex gap-2 ms-1">
-                                        <a href="{% url 'zdravotni_historie' pes.id %}" class="text-muted small">
-                                            <i class="fas fa-history"></i>
-                                        </a>
-                                        <a href="{% url 'pridat_odcerveni' pes.id %}"
-                                           style="color: var(--species-color);">
-                                            <i class="fas fa-plus-circle"></i>
-                                        </a>
-                                    </div>
+                                    {% if je_majitel %}<a href="{% url 'pridat_odcerveni' pes.id %}" style="color: var(--species-color);"><i class="fas fa-plus-circle"></i></a>{% endif %}
                                 </div>
                             </td>
                         </tr>
-
                         <tr>
-                            <td class="py-2" style="color: var(--species-color); font-weight: 600;">Příští odčervení:
-                            </td>
+                            <td class="py-2" style="color: var(--species-color); font-weight: 600;">Příští odčervení:</td>
                             <td class="text-end fw-bold py-2" style="color: var(--species-color);">
                                 {{ pes.pristi_odcerveni|date:"d. m. Y"|default:"-" }}
                             </td>
                         </tr>
-
                         <tr class="border-top">
                             <td class="text-muted py-2">Klíšťata / Blechy:</td>
                             <td class="text-end py-2">
                                 <div class="d-flex align-items-center justify-content-end gap-2">
                                     <span class="fw-bold">{{ pes.posledni_klistata|date:"d. m. Y"|default:"-" }}</span>
-                                    <div class="d-flex gap-2 ms-1">
-                                        <a href="{% url 'zdravotni_historie' pes.id %}" class="text-muted small">
-                                            <i class="fas fa-history"></i>
-                                        </a>
-                                        <a href="{% url 'pridat_parazity' pes.id %}"
-                                           style="color: var(--species-color);">
-                                            <i class="fas fa-plus-circle"></i>
-                                        </a>
-                                    </div>
+                                    {% if je_majitel %}<a href="{% url 'pridat_parazity' pes.id %}" style="color: var(--species-color);"><i class="fas fa-plus-circle"></i></a>{% endif %}
                                 </div>
                             </td>
                         </tr>
                     </table>
                 </div>
 
-                {% if pes.zdravotni_poznamky %}
-                <div class="mt-3 p-3 rounded-4 bg-light border-start border-4"
-                     style="border-color: var(--species-color) !important;">
-                    <small class="d-block fw-bold text-muted mb-1 uppercase" style="font-size: 0.65rem;">POZNÁMKY
-                        LÉKAŘE:</small>
+                {% if je_majitel and pes.zdravotni_poznamky %}
+                <div class="mt-3 p-3 rounded-4 bg-light border-start border-4" style="border-color: var(--species-color) !important;">
+                    <small class="d-block fw-bold text-muted mb-1 uppercase" style="font-size: 0.65rem;">POZNÁMKY LÉKAŘE:</small>
                     <p class="small mb-0 text-dark">{{ pes.zdravotni_poznamky|linebreaksbr }}</p>
                 </div>
                 {% endif %}
             </div>
         </div>
 
-        <div class="col-lg-6 mb-4">
-            <div class="info-card h-100 shadow-sm p-3 p-md-4 rounded-4 bg-white position-relative overflow-hidden">
-                {% if not profil.is_premium %}
-                <div class="premium-lock-overlay"
-                     style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 5; display: flex; align-items: center; justify-content: center; text-align: center;">
+        <div class="col-lg-6">
+            <div class="info-card h-100 shadow-sm p-3 p-md-4 position-relative">
+                {% if not profil.is_premium and not je_majitel %}
+                <div class="premium-lock-overlay">
                     <div class="p-3">
                         <i class="fas fa-crown fa-2x text-warning mb-2"></i>
-                        <h6 class="fw-bold">Chovatelské údaje a Rodokmen</h6>
-                        <p class="small text-muted mb-2">Dostupné pouze v Premium verzi</p>
-                        <a href="{% url 'cenik' %}"
-                           class="btn btn-sm btn-warning rounded-pill px-3 fw-bold">AKTIVOVAT</a>
+                        <h6 class="fw-bold">Chovatelské údaje</h6>
+                        <p class="small text-muted mb-2">Dostupné v Premium verzi</p>
+                        <a href="{% url 'cenik' %}" class="btn btn-sm btn-warning rounded-pill px-3 fw-bold">AKTIVOVAT</a>
                     </div>
                 </div>
                 {% endif %}
 
-                <div class="{% if not profil.is_premium %}blur-content{% endif %}">
-                    <h5 class="section-header mb-3">
+                <div class="{% if not profil.is_premium and not je_majitel %}blur-content{% endif %}">
+                    <h5 class="section-header mb-4">
                         <i class="fas fa-dna me-2"></i>
                         {% if pes.druh == 'kocka' %}Specifikace a Výstavy{% else %}Původ a Chovnost{% endif %}
                     </h5>
 
-                    <div class="bg-light p-3 rounded-4 mb-3 border">
-                        <small class="fw-bold text-muted text-uppercase d-block mb-2" style="font-size: 0.6rem;">Rodokmen
-                            (Rodiče):</small>
-                        <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                            <span class="small text-muted">Otec:</span>
-                            <strong class="small">{{ pes.otec_manualni|default:"Nezadáno" }}</strong>
+                    <div class="bg-light p-3 rounded-4 mb-4 border-0 shadow-sm" style="background: linear-gradient(145deg, #f8f9fa, #ffffff);">
+                        <small class="fw-bold text-muted text-uppercase d-block mb-2" style="font-size: 0.65rem; letter-spacing: 1px;">
+                            <i class="fas fa-sitemap me-1"></i> Rodokmen (Rodiče)
+                        </small>
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-white">
+                            <span class="small text-muted"><i class="fas fa-mars me-2 opacity-50"></i>Otec:</span>
+                            <strong class="small text-dark">{{ pes.otec_manualni|default:"Nezadáno" }}</strong>
                         </div>
-                        <div class="d-flex justify-content-between">
-                            <span class="small text-muted">Matka:</span>
-                            <strong class="small">{{ pes.matka_manualni|default:"Nezadáno" }}</strong>
+                        <div class="d-flex justify-content-between align-items-center py-2">
+                            <span class="small text-muted"><i class="fas fa-venus me-2 opacity-50"></i>Matka:</span>
+                            <strong class="small text-dark">{{ pes.matka_manualni|default:"Nezadáno" }}</strong>
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-between mb-2 border-bottom pb-1">
-                        <span class="text-muted">Plemeno:</span>
-                        <strong>{{ pes.rasa|default:"Nezadáno" }}</strong>
+                    <div class="breeding-list">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted small fw-600">Plemeno:</span>
+                            <span class="fw-bold px-3 py-1 bg-white border rounded-pill shadow-sm small">{{ pes.rasa|default:"Nezadáno" }}</span>
+                        </div>
+
+                        {% if pes.druh == 'pes' %}
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted small fw-600">RTG (HD/ED):</span>
+                            <span class="fw-800" style="color: var(--species-color);">{{ pes.rtg_hd|default:"-" }} / {{ pes.rtg_ed|default:"-" }}</span>
+                        </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted small fw-600">Chovná stanice:</span>
+                            <span class="fw-bold text-end small">{{ pes.chovna_stanice|default:"-" }}</span>
+                        </div>
+
+                        <div class="mt-4 p-3 rounded-4 bg-species-light border-0 text-center text-md-start">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted small fw-bold text-uppercase">{% if pes.druh == 'kocka' %}Tituly{% else %}Bonitace / Tituly{% endif %}:</span>
+                                <i class="fas fa-award text-warning"></i>
+                            </div>
+                            <div class="mt-1 fw-800" style="font-size: 1.1rem; color: var(--species-color);">
+                                {{ pes.bonitace|default:"-" }}
+                            </div>
+                        </div>
                     </div>
 
-                    {% if pes.druh == 'kocka' %}
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Testy (FIV/FeLV):</span>
-                        <strong>{{ pes.testy_fiv_felv|default:"-" }}</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Skupina / Barva:</span>
-                        <strong>{{ pes.ems_kod|default:"-" }}</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Tituly z výstav:</span>
-                        <strong>{{ pes.vystavy_tituly|default:"-" }}</strong>
-                    </div>
-                    {% else %}
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>RTG (HD/ED):</span>
-                        <strong>{{ pes.rtg_hd|default:"-" }} / {{ pes.rtg_ed|default:"-" }}</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Pracovní zkoušky:</span>
-                        <strong>{{ pes.zkousky|default:"-" }}</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Výstavy:</span>
-                        <strong>{{ pes.vystavy|default:"-" }}</strong>
-                    </div>
-                    {% endif %}
-
-                    <div class="d-flex justify-content-between mb-2 border-top pt-2">
-                        <span>Stanice:</span>
-                        <strong>{{ pes.chovna_stanice|default:"-" }}</strong>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <span>Bonitace/Chovnost:</span>
-                        <strong>{{ pes.bonitace|default:"-" }}</strong>
-                    </div>
-
-                    <div class="mt-3">
-                        <a href="{% url 'upravit_psa' pes.id %}" class="btn btn-sm w-100 btn-light border py-2"
-                           style="font-size: 0.75rem;">
-                            <i class="fas fa-file-upload me-1"></i> NAHRÁT RODOKMEN (PDF)
+                    {% if je_majitel %}
+                    <div class="mt-4">
+                        <a href="{% url 'upravit_psa' pes.id %}" class="btn-stack btn-pdf">
+                            <i class="fas fa-file-pdf"></i> NAHRÁT RODOKMEN (PDF)
                         </a>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="info-card">
+    <div class="info-card mt-4">
         <h5 class="section-header"><i class="fas fa-images text-warning"></i> Mediální galerie</h5>
+        {% if je_majitel %}
         <div class="row g-2 mb-4">
             <div class="col-6">
                 <button class="btn btn-species-outline w-100 py-3" onclick="document.getElementById('fIn').click()"><i
@@ -331,18 +270,23 @@
                 </button>
             </div>
         </div>
+        {% endif %}
 
         <form action="{% url 'pridat_foto' pes.id %}" method="POST" enctype="multipart/form-data" class="d-none">
             {% csrf_token %}<input type="file" name="obrazek" id="fIn" onchange="this.form.submit()">
+        </form>
+        <form action="{% url 'pridat_video' pes.id %}" method="POST" enctype="multipart/form-data" class="d-none">
+            {% csrf_token %}<input type="file" name="video_soubor" id="vIn" accept="video/*"
+                                   onchange="this.form.submit()">
         </form>
 
         <div class="media-grid">
             {% for foto in galeriefotky %}
             <div class="media-container shadow-sm">
                 <img src="{{ foto.obrazek.url }}" class="media-item">
-                <a href="{% url 'smazat_foto' foto.id %}"
-                   class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"><i
-                        class="fas fa-trash fa-xs"></i></a>
+                {% if je_majitel %}<a href="{% url 'smazat_foto' foto.id %}"
+                                      class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"><i
+                    class="fas fa-trash fa-xs"></i></a>{% endif %}
             </div>
             {% endfor %}
         </div>
@@ -359,41 +303,22 @@
                     document.getElementById('gps-lat').value = position.coords.latitude;
                     document.getElementById('gps-lon').value = position.coords.longitude;
                     document.getElementById('ztrata-form').submit();
-                }, function(error) {
+                }, function() {
                     alert("Poloha nezjištěna. Nahlašuji bez GPS.");
                     document.getElementById('ztrata-form').submit();
                 }, { timeout: 8000 });
-            } else {
-                document.getElementById('ztrata-form').submit();
-            }
+            } else { document.getElementById('ztrata-form').submit(); }
         }
     }
-    // Data, která přijdou z databáze po naskenování QR
-const dogDetail = {
-  // Základ
-  id: "epes-001",
-  name: "Argo z Černých lesů",
-  isLost: false, // KLÍČOVÝ PŘEPÍNAČ
 
-  // Premium / PP sekce
-  breed: "Německý ovčák",
-  birthDate: "2023-05-15",
-  titles: ["Výborný 1", "VT", "Krajský vítěz"],
-  health: "HD A (0/0), ED (0/0), DNA gpr.",
-  pedigreeUrl: "https://databaze.cz/argo-pp", // Odkaz na rodokmen
-
-  // Galerie a sítě
-  gallery: ["foto1.jpg", "foto2.jpg"],
-  instagram: "argo_the_shepherd",
-
-  // Nouzové údaje
-  emergencyContact: "+420 777 123 456",
-  emergencyNote: "Pozor, Argo je plachý k cizím lidem, lákejte na piškoty.",
-  lastLocation: {
-    lat: 50.0755,
-    lng: 14.4378,
-    timestamp: "2026-03-12T19:50:00"
-  }
-};
+    function sdiletProfil() {
+        if (navigator.share) {
+            navigator.share({
+                title: 'Profil: {{ pes.jmeno }}',
+                text: 'Podívejte se na SOS profil mého mazlíčka na Epes.online',
+                url: window.location.href
+            });
+        }
+    }
 </script>
 {% endblock %}

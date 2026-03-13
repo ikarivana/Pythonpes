@@ -1,18 +1,67 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"
-      rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
     :root {
-        --p-brown: #5d4037;
-        --p-gold: #c5a059;
+        --primary-brown: #5d4037;
+        --accent-gold: #c5a059;
         --p-bg: #fdfaf7;
-        --p-lila: #b39ddb; /* Lila barva pro kočky */
+        --cat-purple: #b39ddb;
+        --cat-bg: #f8f4ff;
+        --dog-bg: #fffcf5;
     }
+
     body { background-color: var(--p-bg) !important; font-family: 'Plus Jakarta Sans', sans-serif; }
 
+    /* --- STYLY PRO KARTY (PŘEVZATO ZE SEZNAMU) --- */
+    .pet-card {
+        border-radius: 24px;
+        border: 1px solid #efebe9;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        background: white;
+        position: relative;
+    }
+    .pet-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(93, 64, 55, 0.1) !important;
+    }
+    .badge-species {
+        position: absolute;
+        top: 15px; left: 15px;
+        padding: 5px 12px;
+        border-radius: 10px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        z-index: 5;
+    }
+    .badge-dog { background: var(--dog-bg); color: var(--accent-gold); border: 1px solid var(--accent-gold); }
+    .badge-cat { background: var(--cat-bg); color: var(--cat-purple); border: 1px solid var(--cat-purple); }
+
+    .qr-wrapper {
+        background: white;
+        padding: 10px;
+        border-radius: 15px;
+        display: inline-block;
+        border: 1px solid #f3efec;
+    }
+
+    .btn-action {
+        border-radius: 15px;
+        padding: 12px;
+        font-weight: 700;
+        text-decoration: none !important;
+        display: block;
+        transition: 0.3s;
+        border: none;
+    }
+    .btn-dog { background: var(--accent-gold); color: white !important; }
+    .btn-cat { background: var(--cat-purple); color: white !important; }
+
+    /* --- STYLY PRO PROFILOVOU ČÁST --- */
     .profile-main-card {
         background: white;
         border-radius: 24px;
@@ -21,38 +70,6 @@
         padding: 30px;
         margin-bottom: 30px;
     }
-
-    /* Základní karta mazlíčka */
-    .pet-card {
-        background: white;
-        border-radius: 20px;
-        padding: 20px;
-        border: 2px solid transparent;
-        transition: 0.3s ease;
-        text-decoration: none !important;
-        display: block;
-    }
-    .pet-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(93, 64, 55, 0.1);
-    }
-
-    /* Barevné rozlišení */
-    .pet-card-dog { border-color: var(--p-gold); background: #fffcf5; }
-    .pet-card-cat { border-color: var(--p-lila); background: #f8f4ff; }
-
-    .back-nav {
-        display: inline-flex;
-        align-items: center;
-        text-decoration: none !important;
-        color: var(--p-brown);
-        font-weight: 700;
-        font-size: 0.9rem;
-        margin-bottom: 20px;
-        transition: 0.3s;
-    }
-    .back-nav:hover { color: var(--p-gold); transform: translateX(-5px); }
-
     .profile-avatar {
         width: 110px; height: 110px;
         object-fit: cover;
@@ -60,48 +77,23 @@
         border: 4px solid white;
         box-shadow: 0 5px 15px rgba(0,0,0,0.08);
     }
-
-    .pet-avatar-small {
-        width: 60px; height: 60px;
-        object-fit: cover;
-        border-radius: 15px;
-    }
-
     .info-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #bcaaa4; font-weight: 700; margin-bottom: 2px; }
-    .info-value { color: var(--p-brown); font-weight: 600; margin-bottom: 12px; }
+    .info-value { color: var(--primary-brown); font-weight: 600; margin-bottom: 12px; }
 
-    .btn-edit-main {
-        background: var(--p-brown) !important;
-        color: white !important;
-        border-radius: 12px;
-        padding: 12px 24px;
-        font-weight: 700;
-        border: none;
-    }
-
-    .btn-add-pet {
-        border: 2px solid var(--p-gold);
-        color: var(--p-gold);
-        border-radius: 12px;
-        padding: 8px 20px;
-        font-weight: 700;
-        text-decoration: none !important;
-    }
-    .btn-add-pet:hover { background: var(--p-gold); color: white; }
-
-    .detail-link {
-        transition: 0.2s;
-        padding: 5px 10px;
-        border-radius: 8px;
-    }
-    .detail-link:hover {
-        color: var(--p-gold) !important;
-        background: rgba(197, 160, 89, 0.05);
+    .premium-badge {
+        background: linear-gradient(45deg, #c5a059, #b8860b);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        display: inline-block;
+        margin-top: 8px;
     }
 </style>
 
 <div class="container py-4">
-    <a href="/" class="back-nav">
+    <a href="/" class="text-decoration-none mb-4 d-inline-block fw-bold" style="color: var(--primary-brown);">
         <i class="fas fa-arrow-left me-2"></i> Zpět na domů
     </a>
 
@@ -109,16 +101,20 @@
         <div class="row align-items-center">
             <div class="col-md-auto text-center mb-3 mb-md-0">
                 {% if user.profil.fotka %}
-                <img src="{{ user.profil.fotka.url }}" class="profile-avatar">
+                    <img src="{{ user.profil.fotka.url }}" class="profile-avatar">
                 {% else %}
-                <div class="profile-avatar bg-light d-flex align-items-center justify-content-center mx-auto">
-                    <i class="fas fa-user text-muted fa-2x"></i>
-                </div>
+                    <div class="profile-avatar bg-light d-flex align-items-center justify-content-center mx-auto">
+                        <i class="fas fa-user text-muted fa-2x"></i>
+                    </div>
+                {% endif %}
+
+                {% if user.profil.is_premium %}
+                    <div class="d-block"><span class="premium-badge"><i class="fas fa-crown me-1"></i> ALFA PREMIUM</span></div>
                 {% endif %}
             </div>
 
             <div class="col-md ms-md-3">
-                <h2 class="fw-bold mb-4" style="font-family: 'Playfair Display', serif; color: var(--p-brown);">
+                <h2 class="fw-bold mb-4" style="font-family: 'Playfair Display', serif; color: var(--primary-brown);">
                     {{ user.first_name }} {{ user.last_name }}
                 </h2>
                 <div class="row">
@@ -128,21 +124,16 @@
                     </div>
                     <div class="col-sm-6">
                         <div class="info-label">Telefonní kontakt</div>
-                        <div class="info-value">
-                            {% if user.profil.telefon %}{{ user.profil.telefon }}{% else %}Nenadáno{% endif %}
-                        </div>
+                        <div class="info-value">{% if user.profil.telefon %}{{ user.profil.telefon }}{% else %}Neuvedeno{% endif %}</div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-auto text-center text-md-end mt-3 mt-md-0">
-                <a href="{% url 'upravit_profil' %}" class="btn-edit-main shadow-sm text-decoration-none">
+            <div class="col-md-auto text-center text-md-end">
+                <a href="{% url 'upravit_profil' %}" class="btn shadow-sm text-decoration-none px-4 py-2 fw-bold"
+                   style="background: var(--primary-brown); color: white; border-radius: 12px;">
                     <i class="fas fa-pen me-2"></i> UPRAVIT PROFIL
                 </a>
-                <div class="mt-2">
-                    <a href="{% url 'smazat_profil' %}" class="text-danger small text-decoration-none opacity-50"
-                       onclick="return confirm('Opravdu smazat účet?')">Smazat účet</a>
-                </div>
             </div>
         </div>
     </div>
@@ -150,66 +141,104 @@
     <div class="row">
         <div class="col-lg-8">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4 class="fw-bold m-0" style="color: var(--p-brown);">Moji parťáci</h4>
-                <a href="{% url 'pridat_psa' %}" class="btn-add-pet">
+                <h4 class="fw-bold m-0" style="color: var(--primary-brown);">Moji parťáci</h4>
+                <a href="{% url 'pridat_psa' %}" class="btn px-4 fw-bold"
+                   style="border: 2px solid var(--accent-gold); color: var(--accent-gold); border-radius: 12px;">
                     <i class="fas fa-plus me-1"></i> Přidat
                 </a>
             </div>
 
-            <div class="row g-3">
-                {% for pes in user.profil.psi.all %}
+            <div class="row g-4">
+                {% for mazlicek in user.profil.psi.all %}
                 <div class="col-md-6">
-                    <div class="pet-card shadow-sm {% if pes.druh == 'kocka' %}pet-card-cat{% else %}pet-card-dog{% endif %}">
-                        <div class="d-flex align-items-center">
-                            {% if pes.fotka %}
-                            <img src="{{ pes.fotka.url }}" class="pet-avatar-small me-3">
+                    <div class="card pet-card shadow-sm h-100">
+                        <div class="badge-species {% if mazlicek.druh == 'kocka' %}badge-cat{% else %}badge-dog{% endif %}">
+                            {% if mazlicek.druh == 'kocka' %}<i class="fas fa-cat me-1"></i> Kočka{% else %}<i class="fas fa-dog me-1"></i> Pes{% endif %}
+                        </div>
+
+                        <div class="position-absolute top-0 end-0 p-3" style="z-index: 10;">
+                            <div class="dropdown">
+                                <button class="btn btn-light bg-white btn-sm rounded-circle shadow-sm border" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-h text-muted"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-2" style="border-radius: 15px;">
+                                    <li><a class="dropdown-item py-2" href="{% url 'upravit_psa' mazlicek.pk %}"><i class="fas fa-edit me-2 text-warning"></i> Upravit</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item py-2 text-danger" href="{% url 'smazat_psa' mazlicek.pk %}" onclick="return confirm('Opravdu smazat?')"><i class="fas fa-trash-alt me-2"></i> Smazat</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="text-center pt-5">
+                            {% if mazlicek.fotka %}
+                                <img src="{{ mazlicek.fotka.url }}" class="rounded-circle shadow-sm" style="width: 120px; height: 120px; object-fit: cover; border: 5px solid white;">
                             {% else %}
-                            <div class="pet-avatar-small bg-light d-flex align-items-center justify-content-center me-3">
-                                <i class="fas {% if pes.druh == 'kocka' %}fa-cat{% else %}fa-dog{% endif %} text-muted"></i>
-                            </div>
+                                <div class="d-flex align-items-center justify-content-center bg-light rounded-circle mx-auto shadow-sm" style="width: 120px; height: 120px; border: 5px solid white;">
+                                    <i class="fas {% if mazlicek.druh == 'kocka' %}fa-cat{% else %}fa-dog{% endif %} fa-3x text-muted opacity-50"></i>
+                                </div>
                             {% endif %}
+                        </div>
 
-                            <div class="flex-grow-1">
-                                <h6 class="fw-bold mb-0" style="color: var(--p-brown);">{{ pes.jmeno }}</h6>
-                                <p class="small text-muted mb-0">{{ pes.plemeno|default:"Mazlíček" }}</p>
+                        <div class="card-body p-4 text-center d-flex flex-column">
+                            <h4 class="fw-bold mb-1">
+                                <a href="{% url 'detail_psa' mazlicek.pk %}" class="text-decoration-none text-dark" style="font-family: 'Playfair Display', serif;">
+                                    {{ mazlicek.jmeno }}
+                                </a>
+                            </h4>
+                            <p class="text-muted mb-3 small">{{ mazlicek.plemeno|default:"Mazlíček" }}</p>
+
+                            <div class="mb-4">
+                                <div class="qr-wrapper shadow-sm">
+                                    {% if mazlicek.qr_kod %}
+                                        <img src="{{ mazlicek.qr_kod.url }}" alt="QR" style="width: 70px; height: 70px; object-fit: contain;">
+                                    {% else %}
+                                        <div style="width: 70px; height: 70px;" class="d-flex align-items-center justify-content-center text-muted">
+                                            <i class="fas fa-qrcode fa-2x opacity-25"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
                             </div>
 
-                            <a href="{% url 'detail_psa' pes.id %}"
-                               class="d-flex align-items-center text-decoration-none text-muted detail-link">
-                                <span class="small me-2 d-none d-sm-inline"
-                                      style="font-weight: 600; font-size: 0.75rem; letter-spacing: 0.5px;">DETAIL</span>
-                                <i class="fas fa-chevron-right"></i>
-                            </a>
+                            <div class="mt-auto">
+                                <a href="{% url 'detail_psa' mazlicek.pk %}" class="btn-action w-100 shadow-sm {% if mazlicek.druh == 'kocka' %}btn-cat{% else %}btn-dog{% endif %}">
+                                    OTEVŘÍT DENÍK
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
                 {% empty %}
-                <div class="col-12">
-                    <div class="empty-pet-slot">
-                        <i class="fas fa-paw fa-2x mb-2 opacity-20"></i>
-                        <p class="mb-0">Zatím jste nepřidali žádného mazlíčka.</p>
-                    </div>
+                <div class="col-12 text-center py-4">
+                    <p class="text-muted">Zatím tu nemáš žádné parťáky.</p>
                 </div>
                 {% endfor %}
             </div>
         </div>
 
         <div class="col-lg-4 mt-4 mt-lg-0">
-            <div class="profile-main-card p-4">
-                <h6 class="fw-bold mb-3 text-center">Stav tvé smečky</h6>
-                <div class="progress mb-2" style="height: 10px; border-radius: 10px;">
-                    <div class="progress-bar"
-                         style="width: {% if user.profil.psi.all.count == 1 %}50%{% elif user.profil.psi.all.count >= 2 %}100%{% else %}5%{% endif %}; background: var(--p-gold);"></div>
-                </div>
-                <div class="d-flex justify-content-between small fw-bold text-muted">
-                    <span>Kapacita</span>
-                    <span>{{ user.profil.psi.all.count }} / 2</span>
-                </div>
-                <hr>
-                <a href="{% url 'cenik' %}" class="btn w-100 py-3 fw-bold shadow-sm"
-                   style="background: linear-gradient(45deg, #c5a059, #b8860b); color: white; border-radius: 15px; border: none;">
-                    <i class="fas fa-crown me-2"></i> AKTIVOVAT PREMIUM
-                </a>
+            <div class="profile-main-card p-4 text-center">
+                <h6 class="fw-bold mb-3">Stav tvé smečky</h6>
+
+                {% if user.profil.is_premium %}
+                    <div class="py-3">
+                        <div class="mb-2" style="color: var(--accent-gold); font-size: 2rem;"><i class="fas fa-crown"></i></div>
+                        <h5 class="fw-bold" style="color: var(--accent-gold);">Alfa Premium aktivní</h5>
+                        <p class="small text-muted">Využíváš všechny výhody naplno. Kapacita tvé smečky je neomezená!</p>
+                    </div>
+                {% else %}
+                    <div class="progress mb-2" style="height: 10px; border-radius: 10px; background: #eee;">
+                        <div class="progress-bar" style="width: {% if user.profil.psi.all.count == 1 %}50%{% elif user.profil.psi.all.count >= 2 %}100%{% else %}5%{% endif %}; background: var(--accent-gold);"></div>
+                    </div>
+                    <div class="d-flex justify-content-between small fw-bold text-muted mb-4">
+                        <span>Kapacita</span>
+                        <span>{{ user.profil.psi.all.count }} / 2</span>
+                    </div>
+                    <hr>
+                    <a href="{% url 'cenik' %}" class="btn w-100 py-3 fw-bold shadow-sm mt-2"
+                       style="background: linear-gradient(45deg, #c5a059, #b8860b); color: white; border-radius: 15px; border: none;">
+                        <i class="fas fa-crown me-2"></i> AKTIVOVAT PREMIUM
+                    </a>
+                {% endif %}
             </div>
         </div>
     </div>

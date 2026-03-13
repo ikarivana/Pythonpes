@@ -211,13 +211,13 @@ def pridat_psa(request):
     return render(request, 'users/pridat_psa.html', {'form': form})
 
 
-login_required
-
-
+@login_required
 def upravit_psa(request, pk):
-    # Načtení psa - kontrola, že patří přihlášenému uživateli
-    pes = get_object_or_404(Pes, pk=pk, majitel=request.user.profil)
+    # 1. Zajištění profilu a načtení psa
+    profil, _ = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
+    pes = get_object_or_404(Pes, pk=pk, majitel=profil)
 
+    # Načtení souvisejících dat (pro zobrazení v šabloně)
     vystavy = pes.vystavy_seznam.all()
     vrhy = pes.potomci.all()
 
@@ -227,7 +227,7 @@ def upravit_psa(request, pk):
             try:
                 pes = form.save(commit=False)
 
-                # Manuální mapování polí
+                # Manuální mapování polí z POST dat
                 pes.rasa = request.POST.get('rasa')
                 pes.adresa_pro_darky = request.POST.get('adresa')
                 pes.otec_manualni = request.POST.get('otec')
@@ -238,15 +238,18 @@ def upravit_psa(request, pk):
                 pes.popis = request.POST.get('popis')
                 pes.kontaktni_telefon = request.POST.get('kontaktni_telefon')
 
-                if request.user.profil.is_premium or request.user.is_staff:
+                # Premium pole
+                if profil.is_premium or request.user.is_staff:
                     pes.rtg_hd = request.POST.get('rtg_hd')
                     pes.rtg_ed = request.POST.get('rtg_ed')
                     pes.rtg_pater = request.POST.get('rtg_pater')
 
+                # Datumy prevence
                 pes.posledni_ockovani = request.POST.get('posledni_ockovani') or None
                 pes.posledni_odcerveni = request.POST.get('posledni_odcerveni') or None
                 pes.posledni_klistata = request.POST.get('posledni_klistata') or None
 
+                # Logika pro QR kód
                 if request.POST.get('regenerovat_qr'):
                     if pes.qr_kod:
                         pes.qr_kod.delete(save=False)
@@ -264,43 +267,73 @@ def upravit_psa(request, pk):
                 pes.save()
                 messages.success(request, "Změny uloženy!")
                 return redirect('detail_psa', pes_id=pes.id)
+
             except Exception as e:
                 messages.error(request, f"Chyba při ukládání: {e}")
         else:
+            # Tento else patří k 'if form.is_valid()'
             messages.error(request, "Opravte chyby ve formuláři.")
     else:
+        # Tento else patří k 'if request.method == 'POST''
         form = PesForm(instance=pes, request=request)
 
+    # Finální render je zarovnaný s prvním 'if'
     return render(request, 'users/upravit_psa.html', {
-        'form': form, 'pes': pes, 'vystavy': vystavy, 'vrhy': vrhy
+        'form': form,
+        'pes': pes,
+        'vystavy': vystavy,
+        'vrhy': vrhy
     })
 
 
-# --- TATO FUNKCE TI CHYBĚLA NEBO BYLA ŠPATNĚ ODSZENÁ ---
 def detail_psa(request, pes_id):
+    # 1. Načtení psa
     pes = get_object_or_404(Pes, id=pes_id)
 
-    # Zjistíme, jestli se kouká majitel (pro zobrazení tlačítek Upravit/Smazat)
+    # 2. Načtení profilu pro "Premium" zámek
+    profil = pes.majitel
+
+    # 3. Kontrola, zda je uživatel majitel
     je_majitel = False
     if request.user.is_authenticated:
         try:
+            # Porovnáváme uživatele přes profil majitele
             if pes.majitel.uzivatel == request.user:
                 je_majitel = True
         except:
-            je_majitel = False
+            pass
 
-    # 1. Pokud je pes ztracený, ukaž SOS kartu (veřejnou pro nálezce)
-    if pes.je_ztraceny:
-        return render(request, 'home/sos_profil.html', {
-            'pes': pes,
-            'je_majitel': je_majitel
-        })
+    # 4. Načtení MEDIÍ (Fotky a Videa)
+    galeriefotky = pes.galerie_fotky.all()
+    galerievidea = pes.galerie_videa.all()
 
-    # 2. Jinak ukaž klasický veřejný detail
-    return render(request, 'home/detail_pes.html', {
+    # 5. Výběr šablony (TADY JE TA ZMĚNA)
+    # Nouzový profil ukaž JEN tehdy, když je pes ztracený A prohlížející NENÍ majitel
+    if pes.je_ztraceny and not je_majitel:
+        template_name = 'users/nouzovy_profil.html'
+    else:
+        # Pokud jsi majitel (i u ztraceného psa), uvidíš plný detail_psa.html
+        template_name = 'users/detail_psa.html'
+
+    context = {
         'pes': pes,
-        'je_majitel': je_majitel
+        'profil': profil,
+        'je_majitel': je_majitel,
+        'galeriefotky': galeriefotky,
+        'galerievidea': galerievidea,
+    }
+
+    return render(request, template_name, context)
+
+    # 6. RENDER - Posíláme vše do šablony
+    return render(request, template_name, {
+        'pes': pes,
+        'profil': profil,
+        'je_majitel': je_majitel,
+        'galeriefotky': galeriefotky,
+        'galerievidea': galerievidea, # Teď už můžeš v šabloně vypsat i videa
     })
+
 @login_required
 def smazat_psa(request, pk):
     # Najdeme psa, který patří přihlášenému uživateli
