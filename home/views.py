@@ -80,25 +80,33 @@ def simpleshop_webhook(request):
 
 
 def mapa_sluzeb(request):
-    # 1. Načtení služeb (to už tam máš)
-    # Schválené služby vytáhneme bez těch tří teček
+    # 1. Načtení schválených služeb
     sluzby_queryset = Sluzba.objects.filter(schvaleno=True)
     sluzby_data = []
 
-    # ... kód pro přidání služeb do sluzby_data ...
+    for s in sluzby_queryset:
+        if s.lat and s.lon:
+            sluzby_data.append({
+                'id': s.id,
+                'nazev': s.nazev,
+                'typ': s.get_typ_display(), # Tohle je ten hezký název s ikonou pro popup
+                'typ_slug': s.typ,
+                'lat': float(s.lat),
+                'lon': float(s.lon),
+                'adresa': s.adresa,
+                'url': f"/detail-sluzby/{s.id}/", # Uprav podle potřeby
+                'is_ztrata': False
+            })
 
-    # 2. OPRAVA: Musíme definovat 'ztraceni_psi'
-    from users.models import Pes  # Nezapomeň na import modelu Pes
+    # 2. Ztracení psi
     ztraceni_psi = Pes.objects.filter(je_ztraceny=True)
-
-    # 3. Teď už cyklus nebude házet chybu
     for p in ztraceni_psi:
         if p.lat and p.lon:
             sluzby_data.append({
                 'id': p.id,
                 'nazev': f"🚨 HLEDÁ SE: {p.jmeno}",
                 'typ': "ZTRACENÝ MAZLÍČEK",
-                'typ_slug': 'ztrata',
+                'typ_slug': 'ztrata', # Speciální slug pro SOS barvu
                 'lat': float(p.lat),
                 'lon': float(p.lon),
                 'adresa': getattr(p, 'posledni_vyskyt', "Poloha neupřesněna"),
@@ -106,8 +114,18 @@ def mapa_sluzeb(request):
                 'is_ztrata': True
             })
 
+    # 3. Kategorie pro filtry (automaticky ze seznamu)
+    kategorie = []
+    videno = set()
+    for s in sluzby_data:
+        if s['typ'] not in videno:
+            kategorie.append({'nazev': s['typ'], 'slug': s['typ_slug']})
+            videno.add(s['typ'])
+
+    # POZOR NA ODSZENÍ - return musí být až úplně na konci funkce
     return render(request, 'home/mapa_sluzeb.html', {
         'sluzby_json': json.dumps(sluzby_data),
+        'kategorie': kategorie,
         'je_prihlasen': request.user.is_authenticated
     })
 
