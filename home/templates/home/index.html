@@ -8,22 +8,27 @@
         --epes-bg: #fdfaf4;
         --sos-red: #e35d6a;
         --cat-purple: #9b86bd;
+        --card-shadow: rgba(62, 39, 35, 0.05);
     }
 
     /* Adaptivní barvy pro kočky */
-    .is-kocka { --epes-gold: var(--cat-purple); --epes-brown: #2d1b4d; }
+    .is-kocka {
+        --epes-gold: var(--cat-purple);
+        --epes-brown: #2d1b4d;
+        --epes-bg: #f9f7ff;
+    }
 
-    body { background-color: var(--epes-bg); font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background-color: var(--epes-bg); font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.3s ease; }
     .home-container { max-width: 1100px; margin: 0 auto; padding: 15px; }
 
     /* Hero sekce */
-    .hero-alfa { padding: 20px 5px; }
-    .hero-alfa h2 { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--epes-brown); margin-bottom: 5px; }
+    .hero-alfa { padding: 30px 5px; }
+    .hero-alfa h2 { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--epes-brown); margin-bottom: 5px; }
 
     .status-badge {
         display: inline-flex; align-items: center; gap: 8px; background: white;
-        padding: 6px 14px; border-radius: 50px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        color: var(--epes-gold); font-weight: 700; font-size: 0.8rem;
+        padding: 8px 18px; border-radius: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        color: var(--epes-gold); font-weight: 700; font-size: 0.85rem;
     }
 
     /* Hlavní rozcestník */
@@ -40,7 +45,7 @@
         padding: 25px;
         text-decoration: none !important;
         color: var(--epes-brown);
-        box-shadow: 0 10px 30px rgba(62, 39, 35, 0.05);
+        box-shadow: 0 10px 30px var(--card-shadow);
         border: 1px solid rgba(197, 160, 89, 0.1);
         transition: 0.3s ease;
         display: flex;
@@ -48,9 +53,14 @@
         gap: 20px;
     }
     .main-card:hover { transform: translateY(-5px); border-color: var(--epes-gold); }
-    .icon-box { width: 60px; height: 60px; background: var(--epes-bg); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; flex-shrink: 0; }
+    .icon-box {
+        width: 60px; height: 60px; background: var(--epes-bg);
+        border-radius: 20px; display: flex; align-items: center;
+        justify-content: center; font-size: 1.8rem; flex-shrink: 0;
+        transition: 0.3s;
+    }
 
-    /* KOMUNITA - Celý řádek */
+    /* Sekce Komunita */
     .section-label { display: flex; align-items: center; gap: 15px; margin: 45px 0 20px 0; }
     .section-label h4 { font-weight: 800; color: var(--epes-brown); margin: 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6; }
     .section-label .line { flex-grow: 1; height: 1px; background: var(--epes-gold); opacity: 0.2; }
@@ -69,66 +79,80 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.04); border: 1px solid transparent;
         transition: 0.2s;
     }
-    .sub-card:hover { border-color: var(--epes-gold); background: var(--epes-bg); }
+    .sub-card:hover { border-color: var(--epes-gold); background: var(--epes-bg); color: var(--epes-gold); }
 
-    /* PROFESIONÁLNÍ INFO SEKCE */
+    /* Profesionální info sekce (Karty) */
     .info-section-premium {
         background: #fff;
         border-radius: 40px;
-        padding: 40px 20px; /* Zmenšený padding pro mobily */
-        margin: 40px 10px; /* Přidán margin z boku, aby se nedotýkalo hran displeje */
+        padding: 60px 30px;
+        margin: 60px 0;
         box-shadow: 0 25px 60px rgba(62, 39, 35, 0.04);
         border: 1px solid rgba(197, 160, 89, 0.05);
-        overflow: hidden; /* Pojistka proti vytečení obsahu */
     }
 
-    .feature-item {
-        display: flex;
-        gap: 15px; /* Menší mezera mezi ikonou a textem */
-        align-items: flex-start;
-        margin-bottom: 25px;
-        width: 100%; /* Aby položka zabrala jen co může */
+    .epes-features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+        margin-top: 40px;
     }
 
-    .feature-content {
-        flex: 1; /* Tato řádka je klíčová - text se zalomí a nebude tlačit ikonu ven */
-        min-width: 0; /* Oprava pro flexbox přetékání */
+    .feature-card {
+        background: white;
+        padding: 30px;
+        border-radius: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        border: 1px solid #f8f8f8;
+        transition: 0.3s ease;
+        height: 100%;
+    }
+    .feature-card:hover { transform: translateY(-5px); border-color: var(--epes-gold); }
+
+    .feature-icon {
+        font-size: 1.8rem;
+        color: var(--epes-gold);
+        margin-bottom: 20px;
+        display: block;
     }
 
-    .f-icon {
-        width: 45px; /* Trochu menší ikony na mobilu */
-        height: 45px;
-        font-size: 1.4rem;
-        flex-shrink: 0; /* Zabráni ikoně, aby se smrskla */
+    .feature-card h4 {
+        font-weight: 800;
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+        color: var(--epes-brown);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
-    @media (max-width: 480px) {
-        .info-header h3 {
-            font-size: 1.5rem; /* Menší nadpis na malých mobilech */
-        }
-        .feature-content h5 {
-            font-size: 1rem;
-        }
-        .feature-content p {
-            font-size: 0.8rem;
-            line-height: 1.4;
-        }
+    .feature-card p {
+        font-size: 0.9rem;
+        color: #6c757d;
+        line-height: 1.6;
+        margin: 0;
     }
-    /* Bezpečnostní zvýraznění pro mapu */
-    .f-icon-danger { background: #fff5f5 !important; color: var(--sos-red) !important; }
 
-    /* Dolní banner o spolupráci */
+    /* Dolní prvky */
     .vs-box {
-        margin-top: 50px; padding: 25px;
-        background: #fcfcfc; border-radius: 25px;
-        border: 1px solid #f0f0f0;
-        text-align: center;
+        margin-top: 50px; padding: 30px;
+        background: var(--epes-bg); border-radius: 25px;
+        text-align: center; border: 1px dashed var(--epes-gold);
+    }
+
+    .slogan-footer {
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: var(--epes-gold);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-top: 50px;
+        opacity: 0.9;
     }
 
     @media (max-width: 768px) {
         .community-full-row { grid-template-columns: repeat(2, 1fr); }
-        .info-header h3 { font-size: 1.6rem; }
-        .main-card { padding: 18px; }
+        .hero-alfa h2 { font-size: 2rem; }
+        .info-section-premium { padding: 40px 20px; }
     }
 </style>
 
@@ -136,20 +160,27 @@
 
     {# HERO #}
     <div class="hero-alfa text-center">
-        <div class="mb-2">
-            <span style="font-size: 2rem;">🐕</span>
+        <div class="mb-3">
+            {% if user.pes_set.first.druh == 'kocka' %}
+            <span style="font-size: 2.5rem;">🐈</span>
             <span style="font-size: 1.5rem; color: var(--epes-gold); margin: 0 15px; vertical-align: middle;">&</span>
-            <span style="font-size: 2rem;">🐈</span>
+            <span style="font-size: 1.8rem; opacity: 0.5;">🐕</span>
+            {% else %}
+            <span style="font-size: 2.5rem;">🐕</span>
+            <span style="font-size: 1.5rem; color: var(--epes-gold); margin: 0 15px; vertical-align: middle;">&</span>
+            <span style="font-size: 1.8rem; opacity: 0.5;">🐈</span>
+            {% endif %}
         </div>
         <h2>Ahoj, {{ user.username }}!</h2>
-        <p class="text-muted">Bezpečný domov pro vaše psy i kočky</p>
+        <p class="text-muted">Bezpečný domov pro vaše {{ user.pes_set.first.druh|yesno:"kočky,psy" }}</p>
+
         <div class="status-badge">
             {% if user.profil.is_premium %}
             <i class="fas fa-crown"></i> ALFA PROFIL AKTIVNÍ
             {% else %}
             <i class="fas fa-heart"></i> MILOVNÍK ZVÍŘAT
+            {% endif %}
         </div>
-        {% endif %}
     </div>
 
     {# HLAVNÍ ROZCESTNÍK #}
@@ -165,19 +196,19 @@
             <div class="icon-box">📍</div>
             <div>
                 <h5 class="fw-bold m-0">Mapa služeb</h5>
-                <p class="text-muted small m-0">Dog-friendly místa a okolí</p>
+                <p class="text-muted small m-0">Prověřená místa v okolí</p>
             </div>
         </a>
         <a href="{% url 'seznam_psu' %}" class="main-card">
-            <div class="icon-box">📑</div>
+            <div class="icon-box">{% if user.pes_set.first.druh == 'kocka' %}🐈{% else %}📑{% endif %}</div>
             <div>
                 <h5 class="fw-bold m-0">Moje zvířata</h5>
-                <p class="text-muted small m-0">SOS identity a zdravotní deník</p>
+                <p class="text-muted small m-0">SOS identity a deník</p>
             </div>
         </a>
     </div>
 
-    {# KOMUNITA NA CELÝ ŘÁDEK #}
+    {# KOMUNITA #}
     <div class="section-label">
         <h4>Komunita a vyžití</h4>
         <div class="line"></div>
@@ -187,79 +218,72 @@
         <a href="{% url 'zed_plemene' 'hlidani' %}" class="sub-card">🏠 Hlídání</a>
         <a href="{% url 'zed_plemene' 'psi-hriste' %}" class="sub-card">🌳 Hřiště</a>
         <a href="{% url 'zed_plemene' 'vystavy' %}" class="sub-card">🏆 Výstavy</a>
-        <a href="{% url 'zed_plemene' 'lovecke-akce' %}" class="sub-card">🌲 Lov a akce</a>
+        <a href="{% url 'zed_plemene' 'lovecke-akce' %}" class="sub-card">🌲 Akce</a>
         <a href="{% url 'seznam_zdi' %}" class="sub-card">🐾 Všechny rasy</a>
     </div>
 
-    {# INFORMAČNÍ SEKCE - DOKONALÁ OCHRANA #}
+    {# INFO SEKCE - DIGITÁLNÍ ŠTÍT #}
     <div class="info-section-premium">
-        <div class="info-header">
-            <span class="badge-intro">Ekosystém ePes.online</span>
-            <h3>Komplexní bezpečí pro vašeho parťáka</h3>
+        <div class="text-center mb-5">
+        <span class="badge-intro"
+              style="color: var(--epes-gold); font-weight: 800; letter-spacing: 1px; text-transform: uppercase; font-size: 0.7rem;">
+              Ekosystém ePes.online
+        </span>
+            <h3 class="fw-800" style="font-size: 2rem; color: var(--epes-brown); letter-spacing: -1px;">
+                Společně tvoříme <span style="color: var(--epes-gold);">nejbezpečnější prostor</span> pro vaše mazlíčky.
+            </h3>
+            <p class="text-muted mt-2">Chytré funkce a komunita, která nenechá nikoho v nouzi.</p>
         </div>
 
-        <div class="feature-grid">
-            <div class="feature-item">
-                <div class="f-icon">🛡️</div>
-                <div class="feature-content">
-                    <h5>Aktivní SOS záchrana</h5>
-                    <p>Zatímco čip v registru čeká na čtečku, ePes propojí nálezce s vámi ihned přes mobilní
-                        telefon.</p>
-                </div>
+        <div class="epes-features">
+            <div class="feature-card">
+                <i class="fas fa-map-marked-alt feature-icon"></i>
+                <h4>Interaktivní mapa</h4>
+                <p>Nejsme seznam, jsme živý prostor pro váš bezpečný pohyb v terénu.</p>
             </div>
-            <div class="feature-item">
-                <div class="f-icon">📍</div>
-                <div class="feature-content">
-                    <h5>Lokalizace nálezce</h5>
-                    <p>Při načtení SOS známky získáte okamžitou notifikaci s polohou, kde se váš mazlíček právě
-                        nachází.</p>
-                </div>
+            <div class="feature-card">
+                <i class="fas fa-bell feature-icon"></i>
+                <h4>Inteligentní notifikace</h4>
+                <p>Okamžité upozornění na návnady nebo ztraceného parťáka ve vašem okolí.</p>
             </div>
-            <div class="feature-item">
-                <div class="f-icon f-icon-danger">⚠️</div>
-                <div class="feature-content">
-                    <h5>Interaktivní ochrana na mapě</h5>
-                    <p>Vidíte varování v reálném čase. Červený špendlík na mapě vás upozorní na probíhající hony, lovy
-                        nebo nebezpečné návnady.</p>
-                </div>
+            <div class="feature-card">
+                <i class="fas {% if user.pes_set.first.druh == 'kocka' %}fa-shield-cat{% else %}fa-shield-dog{% endif %} feature-icon"></i>
+                <h4>Štít komunity</h4>
+                <p>Hlášení nástrah a nebezpečí dřív, než do nich váš parťák stihne šlápnout.</p>
             </div>
-            <div class="feature-item">
-                <div class="f-icon">📄</div>
-                <div class="feature-content">
-                    <h5>PDF Leták na kliknutí</h5>
-                    <p>V nouzi systém vygeneruje hotový plakát "Hledá se" s aktuální fotkou a kontakty připravený k
-                        tisku.</p>
-                </div>
+            <div class="feature-card">
+                <i class="fas fa-bolt feature-icon"></i>
+                <h4>SOS jedním klikem</h4>
+                <p>Nálezce nasdílí svou přesnou GPS polohu přímo vám do mobilu skrze SOS známku.</p>
             </div>
-            <div class="feature-item">
-                <div class="f-icon">📱</div>
-                <div class="feature-content">
-                    <h5>Zdraví a identita</h5>
-                    <p>Očkování, alergie i léky. Kompletní digitální kartu zvířete máte zdarma stále u sebe ve svém
-                        mobilu.</p>
-                </div>
+            <div class="feature-card">
+                <i class="fas fa-book-medical feature-icon"></i>
+                <h4>Veterinární deník</h4>
+                <p>Kompletní zdravotní karta, termíny očkování a historie ošetření vždy u sebe.</p>
             </div>
-            <div class="feature-item">
-                <div class="f-icon">💎</div>
-                <div class="feature-content">
-                    <h5>Alfa profil bez limitů</h5>
-                    <p>Získejte neomezený počet zvířat pod jedním účtem a neomezený prostor pro média a vzpomínky.</p>
-                </div>
+            <div class="feature-card">
+                <i class="fas fa-handshake feature-icon"></i>
+                <h4>Inzerce a adopce</h4>
+                <p>Najděte parťáka, potřeby z druhé ruky nebo pomozte útulkům v nouzi.</p>
             </div>
         </div>
 
         <div class="vs-box">
-            <p class="m-0 text-secondary" style="font-size: 0.9rem; line-height: 1.6;">
+            <p class="m-0 text-secondary" style="font-size: 0.95rem; line-height: 1.6;">
                 <i class="fas fa-shield-heart text-warning me-2"></i>
-                <strong>Doplňujeme oficiální registry.</strong> Registr je nezbytný základ,
-                ale <strong>ePes.online</strong> je váš aktivní štít pro každodenní bezpečí a bleskovou pomoc.
+                <strong>Doplňujeme oficiální registry.</strong> Registr je nezbytný základ, ale
+                <strong>ePes.online</strong> je váš aktivní štít pro každodenní bezpečí.
             </p>
         </div>
 
-        <div class="text-center mt-5">
-            <p style="font-size: 0.7rem; font-weight: 800; color: var(--epes-gold); letter-spacing: 2px; text-transform: uppercase;">
-                Děkujeme, že s námi chráníte ty, kteří nám nerozumí
-            </p>
+        <div class="text-center slogan-footer">
+            {% if user.pes_set.first.druh == 'kocka' %}
+            <i class="fas fa-fingerprint me-2" style="font-size: 0.8rem; opacity: 0.7;"></i>
+            RYCHLÁ CESTA DOMŮ ZAČÍNÁ TADY. DIGITÁLNÍ IDENTITA PRO KAŽDOU KOČIČÍ TLAPKU.
+            {% else %}
+            <i class="fas fa-shield-halved me-2" style="font-size: 0.8rem; opacity: 0.7;"></i>
+            VAŠE POJISTKA PRO NEČEKANÉ SITUACE. CHYTRÝ PROFIL, KTERÝ MLUVÍ ZA VAŠEHO PSA.
+            {% endif %}
         </div>
     </div>
 </div>

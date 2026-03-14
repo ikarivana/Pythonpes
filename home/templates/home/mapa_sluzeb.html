@@ -1,6 +1,7 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
+<meta name="referrer" content="always">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
@@ -129,23 +130,50 @@
 
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h2 class="map-title m-0" style="font-size: clamp(1.2rem, 4vw, 1.8rem);">📍 Interaktivní mapa</h2>
-                    <a href="{% url 'pridat_sluzbu' %}" class="badge-filter" style="background-color: var(--gold); text-decoration: none; display: flex; align-items: center; gap: 8px;">
-                        <i class="fas fa-plus-circle"></i> <span class="d-none d-sm-inline">PŘIDAT NA MAPU</span><span class="d-inline d-sm-none">PŘIDAT</span>
-                    </a>
+                    <div class="text-end">
+                        <a href="{% url 'pridat_sluzbu' %}" class="badge-filter"
+                           style="background-color: var(--gold); text-decoration: none; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-plus-circle"></i> <span
+                                class="d-none d-sm-inline">PŘIDAT NA MAPU</span><span
+                                class="d-inline d-sm-none">PŘIDAT</span>
+                        </a>
+                        <small class="d-block text-muted mt-1" style="font-size: 0.65rem; font-weight: 600;">*Podléhá
+                            schválení administrátorem</small>
+                    </div>
                 </div>
 
                 <div class="d-flex flex-wrap gap-2 mb-3">
-                    <button class="badge-filter" style="background-color: var(--mid-brown);" onclick="filtrujMapu('vse')">Vše</button>
+                    <button class="badge-filter" style="background-color: var(--mid-brown);"
+                            onclick="filtrujMapu('vse')">Vše
+                    </button>
                     <button class="badge-filter pulse-search" onclick="filtrujMapu('ztrata')">🚨 HLEDÁ SE!</button>
-                    <button class="badge-filter" style="background-color: var(--danger-red-dark);" onclick="filtrujMapu('nebezpeci')">⚠️ NEBEZPEČÍ</button>
-                    <button class="badge-filter" style="background-color: #212121;" onclick="filtrujMapu('veterina')">🩺 Veterina</button>
-                    <button class="badge-filter" style="background-color: #00bcd4;" onclick="filtrujMapu('strihani')">✂️ Salóny</button>
-                    <button class="badge-filter" style="background-color: #1976d2;" onclick="filtrujMapu('obchod')">🛍️ Obchody</button>
-                    <button class="badge-filter" style="background-color: #f57c00;" onclick="filtrujMapu('hotel')">🏠 Hotely</button>
-                    <button class="badge-filter" style="background-color: #388e3c;" onclick="filtrujMapu('wellness')">🌊 Wellness</button>
-                    <button class="badge-filter" style="background-color: #7b1fa2;" onclick="filtrujMapu('cvicak')">🎾 Výcvik</button>
-                    <button class="badge-filter" style="background-color: #9e9e9e;" onclick="filtrujMapu('utulek')">🏘️ Útulky</button>
-                    <button class="badge-filter" style="background-color: var(--gold); color: white;" onclick="filtrujMapu('chovna_stanice')">✨ Chovné stanice</button>
+                    <button class="badge-filter" style="background-color: var(--danger-red-dark);"
+                            onclick="filtrujMapu('nebezpeci')">⚠️ NEBEZPEČÍ
+                    </button>
+                    <button class="badge-filter" style="background-color: #212121;" onclick="filtrujMapu('veterina')">🩺
+                        Veterina
+                    </button>
+                    <button class="badge-filter" style="background-color: #00bcd4;" onclick="filtrujMapu('strihani')">✂️
+                        Salóny
+                    </button>
+                    <button class="badge-filter" style="background-color: #1976d2;" onclick="filtrujMapu('obchod')">🛍️
+                        Obchody
+                    </button>
+                    <button class="badge-filter" style="background-color: #f57c00;" onclick="filtrujMapu('hotel')">🏠
+                        Hotely
+                    </button>
+                    <button class="badge-filter" style="background-color: #388e3c;" onclick="filtrujMapu('wellness')">🌊
+                        Wellness
+                    </button>
+                    <button class="badge-filter" style="background-color: #7b1fa2;" onclick="filtrujMapu('cvicak')">🎾
+                        Výcvik
+                    </button>
+                    <button class="badge-filter" style="background-color: #9e9e9e;" onclick="filtrujMapu('utulek')">🏘️
+                        Útulky
+                    </button>
+                    <button class="badge-filter" style="background-color: var(--gold); color: white;"
+                            onclick="filtrujMapu('chovna_stanice')">✨ Chovné stanice
+                    </button>
                 </div>
 
                 <div id="map" style="min-height: 400px; height: 70vh !important;"></div>
@@ -156,8 +184,10 @@
             <div class="p-3 rounded-4" style="background-color: #fcfaf8; border: 1px dashed var(--border-tan);">
                 <p class="text-muted mb-0" style="font-size: 0.85rem; line-height: 1.5;">
                     <i class="fas fa-info-circle me-1" style="color: var(--gold);"></i>
-                    <strong>Informace o datech:</strong> Některé body na mapě (služby, veterina, obchody) byly vloženy z veřejně dostupných informačních zdrojů.
-                    Pokud si přejete záznam o vaší provozovně <strong>upravit, doplnit nebo trvale odstranit</strong>, prosíme, kontaktujte nás na
+                    <strong>Informace o datech:</strong> Každý nový špendlík se na mapě zobrazí až <strong>po schválení
+                    administrátorem</strong> (obvykle do 24 hodin).
+                    Některé body na mapě byly vloženy z veřejně dostupných zdrojů. Pokud si přejete záznam upravit nebo
+                    odstranit, kontaktujte nás na
                     <a href="mailto:elivdruhy@gmail.com" style="color: var(--mid-brown); font-weight: 700;">elivdruhy@gmail.com</a>.
                 </p>
             </div>
@@ -192,7 +222,9 @@
 
         map = L.map('map').setView([49.8, 15.5], 7);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap'
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            crossOrigin: true,
+            referrerPolicy: 'no-referrer-when-downgrade'
         }).addTo(map);
 
         sluzby.forEach(function(s) {

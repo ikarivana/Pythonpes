@@ -49,6 +49,34 @@
 
     .btn-species-outline { border: 2px solid var(--species-color) !important; color: var(--species-color) !important; font-weight: 800; border-radius: 15px; transition: 0.3s; background: transparent; }
     .btn-species-outline:hover { background: var(--species-color) !important; color: white !important; }
+
+   /* Tlačítko zdravotního deníku - oprava barvy */
+.btn-denik-link {
+    /* Pokud je to kočka, použijeme fialovou, jinak hnědou */
+    background-color: {% if pes.druh == 'kocka' %}rgba(142, 68, 173, 0.1){% else %}rgba(62, 39, 35, 0.05){% endif %} !important;
+    color: var(--species-color) !important;
+    border: 1.5px solid var(--species-color) !important;
+    padding: 6px 14px !important;
+    border-radius: 12px !important;
+    font-size: 0.75rem !important;
+    font-weight: 800 !important;
+    text-decoration: none !important;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-denik-link:hover {
+    background-color: var(--species-color) !important;
+    color: white !important;
+    transform: translateY(-2px);
+}
+
+.btn-denik-link i {
+    color: inherit !important; /* Ikona bude mít stejnou barvu jako text */
+}
 </style>
 
 <div class="container py-4">
@@ -115,14 +143,17 @@
         </div>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4 mb-4">
+
         <div class="col-lg-6">
             <div class="info-card h-100 shadow-sm p-3 p-md-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="section-header mb-0"><i class="fas fa-notes-medical me-2"></i>Zdravotní karta</h5>
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                    <h5 class="section-header mb-0">
+                        <i class="fas fa-notes-medical me-2"></i>ZDRAVOTNÍ KARTA
+                    </h5>
                     {% if je_majitel %}
-                    <a href="{% url 'upravit_psa' pes.id %}" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold" style="font-size: 0.7rem;">
-                        <i class="fas fa-edit"></i> UPRAVIT VŠE
+                    <a href="{% url 'zdravotni_historie' pes.id %}" class="btn-denik-link">
+                        <i class="fas fa-book-medical me-1"></i> ZDRAVOTNÍ DENÍK
                     </a>
                     {% endif %}
                 </div>
@@ -179,9 +210,7 @@
                 </div>
                 {% endif %}
             </div>
-        </div>
-
-        <div class="col-lg-6">
+        </div> <div class="col-lg-6">
             <div class="info-card h-100 shadow-sm p-3 p-md-4 position-relative">
                 {% if not profil.is_premium and not je_majitel %}
                 <div class="premium-lock-overlay">
@@ -254,43 +283,44 @@
             </div>
         </div>
     </div>
+</div>
 
-    <div class="info-card mt-4">
-        <h5 class="section-header"><i class="fas fa-images text-warning"></i> Mediální galerie</h5>
-        {% if je_majitel %}
-        <div class="row g-2 mb-4">
-            <div class="col-6">
-                <button class="btn btn-species-outline w-100 py-3" onclick="document.getElementById('fIn').click()"><i
-                        class="fas fa-camera me-2"></i> FOTO
-                </button>
-            </div>
-            <div class="col-6">
-                <button class="btn btn-species-outline w-100 py-3" onclick="document.getElementById('vIn').click()"><i
-                        class="fas fa-video me-2"></i> VIDEO
-                </button>
-            </div>
+<div class="info-card mt-4">
+    <h5 class="section-header"><i class="fas fa-images text-warning"></i> Mediální galerie</h5>
+    {% if je_majitel %}
+    <div class="row g-2 mb-4">
+        <div class="col-6">
+            <button class="btn btn-species-outline w-100 py-3" onclick="document.getElementById('fIn').click()"><i
+                    class="fas fa-camera me-2"></i> FOTO
+            </button>
         </div>
-        {% endif %}
-
-        <form action="{% url 'pridat_foto' pes.id %}" method="POST" enctype="multipart/form-data" class="d-none">
-            {% csrf_token %}<input type="file" name="obrazek" id="fIn" onchange="this.form.submit()">
-        </form>
-        <form action="{% url 'pridat_video' pes.id %}" method="POST" enctype="multipart/form-data" class="d-none">
-            {% csrf_token %}<input type="file" name="video_soubor" id="vIn" accept="video/*"
-                                   onchange="this.form.submit()">
-        </form>
-
-        <div class="media-grid">
-            {% for foto in galeriefotky %}
-            <div class="media-container shadow-sm">
-                <img src="{{ foto.obrazek.url }}" class="media-item">
-                {% if je_majitel %}<a href="{% url 'smazat_foto' foto.id %}"
-                                      class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"><i
-                    class="fas fa-trash fa-xs"></i></a>{% endif %}
-            </div>
-            {% endfor %}
+        <div class="col-6">
+            <button class="btn btn-species-outline w-100 py-3" onclick="document.getElementById('vIn').click()"><i
+                    class="fas fa-video me-2"></i> VIDEO
+            </button>
         </div>
     </div>
+    {% endif %}
+
+    <form action="{% url 'pridat_foto' pes.id %}" method="POST" enctype="multipart/form-data" class="d-none">
+        {% csrf_token %}<input type="file" name="obrazek" id="fIn" onchange="this.form.submit()">
+    </form>
+    <form action="{% url 'pridat_video' pes.id %}" method="POST" enctype="multipart/form-data" class="d-none">
+        {% csrf_token %}<input type="file" name="video_soubor" id="vIn" accept="video/*"
+                               onchange="this.form.submit()">
+    </form>
+
+    <div class="media-grid">
+        {% for foto in galeriefotky %}
+        <div class="media-container shadow-sm">
+            <img src="{{ foto.obrazek.url }}" class="media-item">
+            {% if je_majitel %}<a href="{% url 'smazat_foto' foto.id %}"
+                                  class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"><i
+                class="fas fa-trash fa-xs"></i></a>{% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
 </div>
 
 <script>

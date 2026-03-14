@@ -1037,13 +1037,13 @@ def seznam_notifikaci(request):
 
 def zdravotni_historie(request, pes_id):
     pes = get_object_or_404(Pes, id=pes_id)
-    # Načteme všechny záznamy z toho nového modelu, co máš na fotce
+
     zaznamy = pes.denik.all().order_by('-datum')
+
     return render(request, 'users/zdravotni_historie.html', {
         'pes': pes,
-        'zaznamy': zaznamy
+        'zaznamy': zaznamy,
     })
-
 
 def pridat_zaznam(request, pes_id):
     pes = get_object_or_404(Pes, id=pes_id)

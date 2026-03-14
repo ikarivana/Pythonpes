@@ -23,6 +23,7 @@ urlpatterns = [
 
     # --- ZDRAVOTNÍ ZÁZNAMY ---
     path('zaznam/upravit/<int:pk>/', views.upravit_zaznam, name='upravit_zaznam'),
+    path('zaznam/smazat/<int:pk>/', views.smazat_zaznam, name='smazat_zaznam'),
     path('pes/<int:pes_id>/historie/', views.zdravotni_historie, name='zdravotni_historie'),
     path('pes/<int:pes_id>/pridat-zaznam/', views.pridat_zaznam, name='pridat_zaznam'),
     path('pes/<int:pes_id>/vaha/', views.zdravotni_historie, name='vaha_historie'),

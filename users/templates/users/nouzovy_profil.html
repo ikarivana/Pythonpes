@@ -136,13 +136,33 @@
     });
 
     function sendPos(lat, lng) {
-        fetch("{% url 'odeslat_polohu' pes.id %}", {
-            method: "POST",
-            headers: {"X-CSRFToken": "{{ csrf_token }}", "Content-Type": "application/json"},
-            body: JSON.stringify({lat: lat, lng: lng})
-        }).then(() => {
-            document.getElementById('statusResult').innerHTML = "Majitel informován!";
-        });
+    // Kontrola, zda máme souřadnice
+    if (!lat || !lng) {
+        document.getElementById('statusResult').innerHTML = "⚠️ Nepodařilo se získat polohu (GPS vypnuta).";
+        document.getElementById('statusResult').style.color = "red";
+        return;
     }
+
+    fetch("{% url 'odeslat_polohu' pes.id %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/json"
+        },
+        // Změněno lng -> lon, aby to sedělo na váš model
+        body: JSON.stringify({lat: lat, lon: lng})
+    })
+    .then(response => {
+        if (response.ok) {
+            document.getElementById('statusResult').innerHTML = "✅ Poloha odeslána. Majitel informován!";
+            document.getElementById('statusResult').style.color = "var(--sos-green)";
+        } else {
+            throw new Error('Chyba serveru');
+        }
+    })
+    .catch(error => {
+        document.getElementById('statusResult').innerHTML = "❌ Chyba při odesílání dat.";
+    });
+}
 </script>
 {% endblock %}
