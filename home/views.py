@@ -20,18 +20,25 @@ from users.models import Prispevek, Pes, ProfilMajitele
 def index(request):
     is_premium = False
     if request.user.is_authenticated:
-        # Používáme hasattr pro bezpečné ověření existence profilu
         if hasattr(request.user, 'profilmajitele'):
             profil = request.user.profilmajitele
             is_premium = profil.is_premium and (not profil.premium_do or profil.premium_do >= date.today())
+
+    # --- NOVINKA: Vytáhneme krizová hlášení z mapy (nebezpečí a ztráty) ---
+    # Chceme jen ty, co nejsou starší než např. 7 dní, aby to bylo aktuální
+    limit_cas = timezone.now() - timedelta(days=7)
+    krizova_hlaseni = Sluzba.objects.filter(
+        typ__in=['nebezpeci', 'ztrata'],
+        vytvoreno__gte=limit_cas
+    ).order_by('-vytvoreno')[:3] # Stačí 3 nejnovější, ať to nezaspamuje index
 
     context = {
         'je_premium': is_premium,
         'ztraceni_psi': Pes.objects.filter(je_ztraceny=True),
         'posledni_prispevky': Prispevek.objects.all().order_by('-datum_pridani')[:5],
+        'krizova_hlaseni': krizova_hlaseni, # Přidáme do kontextu
     }
     return render(request, 'home/index.html', context)
-
 
 # --- 2. PLATEBNÍ SYSTÉM (SIMPLESHOP) ---
 @csrf_exempt
@@ -94,7 +101,8 @@ def mapa_sluzeb(request):
                 'lat': float(s.lat),
                 'lon': float(s.lon),
                 'adresa': s.adresa,
-                'url': f"/detail-sluzby/{s.id}/", # Uprav podle potřeby
+                'url': f"/detail-sluzby/{s.id}/",
+                'web': s.web,
                 'is_ztrata': False
             })
 
@@ -129,6 +137,10 @@ def mapa_sluzeb(request):
         'je_prihlasen': request.user.is_authenticated
     })
 
+def detail_sluzby(request, pk):
+    sluzba = get_object_or_404(Sluzba, pk=pk)
+    return render(request, 'home/detail_sluzby.html', {'sluzba': sluzba})
+
 @login_required
 def pridat_sluzbu(request):
     """Tato funkce umožní lidem přidat novou službu."""
@@ -146,18 +158,27 @@ def pridat_sluzbu(request):
         form = SluzbaForm()
     return render(request, 'home/pridat_sluzbu.html', {'form': form})
 
+
 @login_required
 def upravit_sluzbu(request, pk):
-    """Tato funkce umožní vlastnikovi změnit údaje u jeho služby."""
     sluzba = get_object_or_404(Sluzba, pk=pk, vlastnik=request.user)
     if request.method == 'POST':
         form = SluzbaForm(request.POST, instance=sluzba)
         if form.is_valid():
-            form.save()
-            messages.info(request, "Změny byly uloženy.")
+            upravena = form.save(commit=False)
+
+            # LOGIKA SCHVALOVÁNÍ:
+            # Pokud je to nebezpečí nebo ztráta, necháme 'schvaleno' jak je (nebo True).
+            # Ostatní (salony, veteriny) při změně raději shodíme do False pro kontrolu.
+            if upravena.typ not in ['nebezpeci', 'ztrata']:
+                upravena.schvaleno = False
+                messages.info(request, "Změny uloženy a čekají na schválení.")
+            else:
+                messages.success(request, "Záznam byl okamžitě aktualizován.")
+
+            upravena.save()
             return redirect('mapa_sluzeb')
     else:
-        # Tady pošleme do formuláře stávající data služby
         form = SluzbaForm(instance=sluzba)
     return render(request, 'home/pridat_sluzbu.html', {'form': form, 'editace': True})
 

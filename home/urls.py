@@ -11,6 +11,7 @@ urlpatterns = [
     path('mapa/pridat/', views.pridat_sluzbu, name='pridat_sluzbu'),
     path('mapa/upravit/<int:pk>/', views.upravit_sluzbu, name='upravit_sluzbu'),
     path('mapa/smazat/<int:pk>/', views.smazat_sluzbu, name='smazat_sluzbu'),
+    path('detail-sluzby/<int:pk>/', views.detail_sluzby, name='detail_sluzby'),
 
     # Komunitní tlačítka na mapě (pro Nebezpečí)
     path('mapa/nahlasit-neaktualni/<int:id>/', views.nahlasit_neaktualni, name='nahlasit_neaktualni'),

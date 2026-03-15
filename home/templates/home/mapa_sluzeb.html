@@ -202,6 +202,28 @@
     var allMarkers = [];
     var map;
 
+    // --- NOVÁ FUNKCE PRO KOMUNITNÍ TLAČÍTKA ---
+    window.overitMisto = function(id, akce) {
+        // Volá tvé Django views přes AJAX
+        fetch(`/mapa/${akce}/${id}/`, {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'deleted') {
+                alert("Děkujeme! Nebezpečí bylo potvrzeno více lidmi a bylo odstraněno z mapy.");
+                location.reload();
+            } else if (data.status === 'ok') {
+                alert("Děkujeme za nahlášení aktuálního stavu!");
+            }
+        })
+        .catch(error => {
+            console.error('Chyba:', error);
+            alert("Došlo k chybě při odesílání.");
+        });
+    };
+
     var configMap = {
         'ztrata': { color: '#ff0000', icon: 'fa-bell' },
         'nebezpeci': { color: '#8b0000', icon: 'fa-triangle-exclamation' },
@@ -221,10 +243,11 @@
         if (!mapElement) return;
 
         map = L.map('map').setView([49.8, 15.5], 7);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            crossOrigin: true,
-            referrerPolicy: 'no-referrer-when-downgrade'
+
+        // Používáme stabilnější TileLayer
+        L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap přispěvatelé',
+            crossOrigin: true
         }).addTo(map);
 
         sluzby.forEach(function(s) {
@@ -235,6 +258,7 @@
                 var conf = configMap[s.typ_slug] || { color: '#3e2723', icon: 'fa-map-marker-alt' };
                 var marker;
 
+                // Vykreslení ikon (SOS animace pro ztráty zůstává)
                 if (s.typ_slug === 'ztrata') {
                     var sosIcon = L.divIcon({
                         html: `<div class="sos-marker-wrapper"><div class="sos-marker-circle"><i class="fas ${conf.icon}"></i></div><div class="sos-marker-arrow"></div></div>`,
@@ -249,13 +273,53 @@
                     marker = L.marker([lat, lon], { icon: classicIcon }).addTo(map);
                 }
 
+                // Logika pro obsah vyskakovacího okna
+                var isNebezpeci = (s.typ_slug === 'nebezpeci');
                 var isZtrata = (s.typ_slug === 'ztrata');
+                let tlacitkaHtml = '';
+
+                if (isNebezpeci) {
+                    // --- NOVÁ TLAČÍTKA PRO NEBEZPEČÍ ---
+                    tlacitkaHtml = `
+                        <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 6px;">
+                            <div style="color: #8b0000; font-weight: bold; text-align: center; padding: 4px; border: 1.5px solid #8b0000; border-radius: 8px; font-size: 0.75rem; background: #fff5f5;">
+                                ⚠️ BUĎTE OPATRNÍ!
+                            </div>
+                            <div style="display: flex; gap: 4px;">
+                                <button onclick="overitMisto(${s.id}, 'stale-aktualni')"
+                                        style="flex: 1; background: #d4edda; color: #155724; border: none; padding: 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; cursor: pointer;">
+                                    <i class="fas fa-check"></i> JE TU
+                                </button>
+                                <button onclick="overitMisto(${s.id}, 'nahlasit-neaktualni')"
+                                        style="flex: 1; background: #f8d7da; color: #721c24; border: none; padding: 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; cursor: pointer;">
+                                    <i class="fas fa-times"></i> NENÍ TU
+                                </button>
+                            </div>
+                        </div>`;
+                } else {
+                    // Standardní tlačítka pro ostatní místa
+                    if (s.web) {
+                        tlacitkaHtml += `
+                            <a href="${s.web}" target="_blank" style="background: #28a745; color: white; margin-bottom: 6px; display: block; text-align: center; text-decoration: none; padding: 6px; border-radius: 6px; font-size: 0.8rem; font-weight: bold;">
+                                🌐 NAVŠTÍVIT WEB
+                            </a>`;
+                    }
+                    tlacitkaHtml += `
+                        <a href="${s.url}" style="background: ${isZtrata ? '#ff0000' : 'var(--mid-brown)'}; color: white; display: block; text-align: center; text-decoration: none; padding: 6px; border-radius: 6px; font-size: 0.8rem; font-weight: bold;">
+                            ${isZtrata ? '📢 POMOCT NAJÍT' : 'ℹ️ DETAIL'}
+                        </a>`;
+                }
+
                 var popupHtml = `
-                    <div style="min-width:180px; ${isZtrata ? 'border: 3px solid red; padding: 10px; border-radius: 12px;' : ''}">
-                        <b style="color: ${isZtrata ? 'red' : 'var(--mid-brown)'}; display: block; font-size: 1rem;">${isZtrata ? '🚨 HLEDÁ SE: ' : ''}${s.nazev}</b>
-                        <span style="color: var(--gold); font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">${s.typ}</span>
-                        <div style="margin: 8px 0; font-size: 0.85rem; color: #555;">📍 ${s.adresa}</div>
-                        ${s.url ? `<a href="${s.url}" class="btn-call" style="background: ${isZtrata ? '#ff0000' : 'var(--mid-brown)'}; color: white;">${isZtrata ? 'POMOCT NAJÍT' : 'DETAIL'}</a>` : ''}
+                    <div style="min-width:180px; ${(isZtrata || isNebezpeci) ? 'border: 3px solid #ff0000; padding: 10px; border-radius: 12px;' : ''}">
+                        <b style="color: ${(isZtrata || isNebezpeci) ? '#ff0000' : 'var(--mid-brown)'}; display: block; font-size: 1rem;">
+                            ${isZtrata ? '🚨 HLEDÁ SE: ' : ''}${isNebezpeci ? '⚠️ NEBEZPEČÍ: ' : ''}${s.nazev}
+                        </b>
+                        <span style="color: var(--gold); font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">
+                            ${s.typ}
+                        </span>
+                        <div style="margin: 8px 0; font-size: 0.85rem; color: #333;">📍 ${s.adresa}</div>
+                        ${tlacitkaHtml}
                     </div>`;
 
                 marker.bindPopup(popupHtml);
@@ -266,7 +330,7 @@
         setTimeout(function() { map.invalidateSize(); }, 500);
     });
 
-    // 3. Filtrování
+    // 3. Filtrování kategorií (zůstává plně funkční)
     function filtrujMapu(kategorie) {
         if (!map) return;
         allMarkers.forEach(function(item) {

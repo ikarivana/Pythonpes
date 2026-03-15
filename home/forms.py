@@ -1,11 +1,13 @@
 from django import forms
 from .models import Sluzba
 
+
 class SluzbaForm(forms.ModelForm):
-    # Přidáme explicitně pole typ s ikonkami přímo pro uživatele
+    # Přidáme explicitně pole typ s ikonkami
     typ = forms.ChoiceField(
         choices=Sluzba.TYPY_SLUZEB,
-        label="Co je to za místo?"
+        label="Co je to za místo?",
+        required=False  # Uděláme i typ nepovinný, pokud by zlobil
     )
 
     class Meta:
@@ -21,14 +23,22 @@ class SluzbaForm(forms.ModelForm):
             'lon': 'Zeměpisná délka (vyplní se z mapy)',
         }
         widgets = {
-            'popis': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Např. Skvělá káva a miska s vodou vždy připravena...'}),
-            'lat': forms.TextInput(attrs={'readonly': 'readonly'}), # Uživatel by neměl psát ručně
+            'popis': forms.Textarea(
+                attrs={'rows': 3, 'placeholder': 'Např. Skvělá káva a miska s vodou vždy připravena...'}),
+            'lat': forms.TextInput(attrs={'readonly': 'readonly'}),
             'lon': forms.TextInput(attrs={'readonly': 'readonly'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Hromadné přidání třídy pro stylování všech polí najednou
+
+        # KLÍČOVÁ ZMĚNA: Nastavíme pole jako nepovinná
+        self.fields['nazev'].required = False
+        self.fields['adresa'].required = False
+        self.fields['lat'].required = False
+        self.fields['lon'].required = False
+
+        # Hromadné přidání třídy pro stylování
         for field in self.fields.values():
             field.widget.attrs.update({
                 'class': 'form-control custom-brown-input',

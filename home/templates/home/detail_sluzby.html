@@ -1,0 +1,59 @@
+{% extends "home/base.html" %} {% block content %}
+<div class="container mt-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'mapa_sluzeb' %}">Mapa</a></li>
+            <li class="breadcrumb-item active">{{ sluzba.nazev }}</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="card-title text-brown">{{ sluzba.nazev }}</h1>
+                <span class="badge bg-warning text-dark">{{ sluzba.get_typ_display }}</span>
+            </div>
+
+            <p class="text-muted"><i class="fas fa-map-marker-alt"></i> {{ sluzba.adresa }}</p>
+            <hr>
+
+            <h5 class="mt-4">Popis služby</h5>
+            <p class="card-text">{{ sluzba.popis|default:"Pro tuto službu nebyl zadán žádný podrobný popis." }}</p>
+
+            <div class="row mt-4">
+                {% if sluzba.telefon %}
+                <div class="col-md-6">
+                    <strong>📞 Telefon:</strong>
+                    <p><a href="tel:{{ sluzba.telefon }}">{{ sluzba.telefon }}</a></p>
+                </div>
+                {% endif %}
+
+                {% if sluzba.web %}
+                <div class="col-md-6">
+                    <strong>🌐 Webové stránky:</strong>
+                    <p><a href="{{ sluzba.web }}" target="_blank">{{ sluzba.web }}</a></p>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="mt-4 d-flex flex-wrap gap-2 align-items-center">
+                <a href="{% url 'mapa_sluzeb' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Zpět na mapu
+                </a>
+
+                {% if user == sluzba.vlastnik %}
+                <div class="ms-md-auto d-flex gap-2">
+                    <a href="{% url 'upravit_sluzbu' sluzba.pk %}" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Upravit údaje
+                    </a>
+
+                    <a href="{% url 'smazat_sluzbu' sluzba.pk %}" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Smazat
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

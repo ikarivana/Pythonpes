@@ -4,6 +4,8 @@
 <style>
     :root {
         --border-tan: #e2d1c3;
+        --danger-red: #dc3545;
+        --loss-orange: #fd7e14;
     }
 
     #map-picker {
@@ -16,80 +18,61 @@
         z-index: 1;
     }
 
-    /* Stylování Django formuláře */
-    #map-form p {
-        margin-bottom: 15px;
-    }
+    /* Dynamické barvy karet pro krizové situace */
+    .mode-nebezpeci { border: 3px solid var(--danger-red) !important; background-color: #fff8f8 !important; }
+    .mode-ztrata { border: 3px solid var(--loss-orange) !important; background-color: #fffaf5 !important; }
 
+    .btn-nebezpeci { background-color: var(--danger-red) !important; color: white !important; }
+    .btn-ztrata { background-color: var(--loss-orange) !important; color: white !important; }
+
+    #map-form p { margin-bottom: 15px; }
     #map-form input, #map-form select, #map-form textarea {
-        width: 100%;
-        padding: 12px;
-        border-radius: 12px;
-        border: 1.5px solid var(--border-tan);
-        background: #fff;
-        transition: 0.3s;
+        width: 100%; padding: 12px; border-radius: 12px; border: 1.5px solid var(--border-tan); background: #fff;
     }
 
-    #map-form input:focus {
-        border-color: var(--gold);
-        outline: none;
-        box-shadow: 0 0 10px rgba(197, 160, 89, 0.1);
+    .gps-status {
+        font-size: 0.9rem; padding: 10px; border-radius: 15px; margin-bottom: 15px; text-align: center; font-weight: bold;
     }
+    .status-searching { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+    .status-fixed { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
 
-    .gps-visible {
-        display: block !important;
-        background-color: #fffdf5 !important;
-        border: 2px solid var(--gold) !important;
-        padding: 15px;
-        border-radius: 15px;
-        margin-top: 10px;
-    }
-
-    .btn-gps {
-        background: white;
-        border: 2px solid var(--mid-brown);
-        color: var(--mid-brown);
-        border-radius: 12px;
-        padding: 10px;
-        transition: 0.3s;
-        width: 100%;
-    }
-
-    .btn-gps:hover {
-        background: var(--mid-brown);
-        color: white;
-    }
-
-    .form-card {
-        border-radius: 25px;
-        border: none;
-        background: white;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    }
-
-    .section-title {
-        color: var(--mid-brown);
-        font-family: 'Playfair Display', serif;
-        font-weight: 800;
-    }
+    .form-card { border-radius: 25px; border: none; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+    .section-title { color: var(--mid-brown); font-family: 'Playfair Display', serif; font-weight: 800; }
 </style>
+
+{% if form.errors %}
+    <div style="color: red; background: #fee; padding: 10px; border-radius: 10px; margin-bottom: 20px;">
+        <strong>Chyba při ukládání:</strong>
+        {{ form.errors }}
+    </div>
+{% endif %}
 
 <div class="container-fluid mt-4">
     <div class="d-flex align-items-center mb-4">
         <a href="{% url 'mapa_sluzeb' %}" class="text-decoration-none me-3" style="color: var(--mid-brown);">
             <i class="fas fa-arrow-left fa-lg"></i>
         </a>
-        <h2 class="mb-0 section-title">📍 Přidat místo na mapu</h2>
+        <h2 class="mb-0 section-title">
+            {% if editace %}
+                <i class="fas fa-edit"></i> Upravit údaje
+            {% elif request.GET.typ == 'nebezpeci' %}
+                ⚠️ NAHLÁSIT NEBEZPEČÍ
+            {% elif request.GET.typ == 'ztrata' %}
+                🔍 NAHLÁSIT ZTRÁTU ZVÍŘETE
+            {% else %}
+                📍 Přidat místo na mapu
+            {% endif %}
+        </h2>
     </div>
 
     <div class="row g-4">
         <div class="col-lg-5">
-            <div class="card form-card p-4">
-                <p class="text-muted small mb-3">Pomozte ostatním páníčkům najít skvělá místa nebo je varujte před nebezpečím.</p>
-
-                <button type="button" class="btn-gps mb-4 fw-bold" onclick="najdiMne()">
-                    <i class="fas fa-location-arrow me-2"></i> Použít moji aktuální polohu
-                </button>
+            <div class="card form-card p-4 mode-{{ request.GET.typ }}">
+                {% if not editace and request.GET.typ in 'nebezpeci,ztrata' %}
+                <div id="gps-indicator" class="gps-status status-searching">
+                    <i class="fas fa-spinner fa-spin"></i> Zaměřuji polohu pro rychlé hlášení...
+                </div>
+                {% endif %}
 
                 <form method="post" id="map-form">
                     {% csrf_token %}
@@ -98,10 +81,12 @@
                     </div>
 
                     <div class="d-flex gap-2 mt-4">
-                        <button type="submit" class="btn fw-bold flex-grow-1 py-3" style="background-color: var(--gold); color: var(--dark-cocoa); border-radius: 15px;">
-                            ZVEŘEJNIT NA MAPĚ
+                        <button type="submit" class="btn fw-bold flex-grow-1 py-3 btn-{{ request.GET.typ }}"
+                                style="{% if not request.GET.typ %}background-color: var(--gold); color: var(--dark-cocoa);{% endif %} border-radius: 15px;">
+                            {% if editace %}ULOŽIT ZMĚNY{% else %}ZVEŘEJNIT HNED{% endif %}
                         </button>
-                        <a href="{% url 'mapa_sluzeb' %}" class="btn d-flex align-items-center px-4" style="border: 1.5px solid var(--border-tan); border-radius: 15px; color: #8d7d77;">
+                        <a href="{% url 'mapa_sluzeb' %}" class="btn d-flex align-items-center px-4"
+                           style="border: 1.5px solid var(--border-tan); border-radius: 15px; color: #8d7d77;">
                             Zrušit
                         </a>
                     </div>
@@ -110,12 +95,16 @@
         </div>
 
         <div class="col-lg-7">
-            <div class="card shadow-sm p-0" style="border-radius: 25px; overflow: hidden; border: none;">
+            <div class="card shadow-sm p-0 position-relative" style="border-radius: 25px; overflow: hidden; border: none;">
+                <button type="button" class="btn btn-light fw-bold" onclick="najdiMne()"
+                        style="position: absolute; top: 15px; right: 15px; z-index: 1000; border: 2px solid var(--mid-brown);">
+                    <i class="fas fa-location-arrow text-primary"></i> MOJE POLOHA
+                </button>
                 <div id="map-picker"></div>
             </div>
             <div class="mt-3 d-flex align-items-center justify-content-center gap-2 text-muted small">
                 <i class="fas fa-info-circle text-gold"></i>
-                <span>Klikněte do mapy pro ruční označení místa nebo přetáhněte značku.</span>
+                <span>Klikněte do mapy pro označení místa nebo přetáhněte značku.</span>
             </div>
         </div>
     </div>
@@ -125,94 +114,86 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    var mapPicker;
-    var marker;
+    var mapPicker, marker;
 
-    function ukazPoleSouradnic() {
-        const latInput = document.getElementById('id_lat');
-        const lonInput = document.getElementById('id_lon');
-        if (latInput && lonInput) {
-            latInput.closest('p').className = 'gps-visible';
-            lonInput.closest('p').className = 'gps-visible';
-            latInput.closest('p').style.display = 'block';
-            lonInput.closest('p').style.display = 'block';
-        }
+    // Pomocná funkce pro převod GPS na adresu (Nominatim)
+    function aktualizujAdresu(lat, lon) {
+        const adresaIn = document.getElementById('id_adresa');
+        if (!adresaIn) return;
+
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.display_name) {
+                    adresaIn.value = data.display_name;
+                }
+            })
+            .catch(err => console.log("Adresa nenalezena, zůstává původní."));
     }
 
-    function setCoords(lat, lon) {
-        document.getElementById('id_lat').value = lat.toFixed(6);
-        document.getElementById('id_lon').value = lon.toFixed(6);
-
+    window.setCoords = function(lat, lon) {
+        const latIn = document.getElementById('id_lat');
+        const lonIn = document.getElementById('id_lon');
+        if (latIn && lonIn) {
+            latIn.value = lat.toFixed(6);
+            lonIn.value = lon.toFixed(6);
+        }
         if (marker) {
             marker.setLatLng([lat, lon]);
         } else {
-            // Použijeme tvou barvu pro marker (pokud máš vlastní ikonu, sem s ní)
             marker = L.marker([lat, lon], {draggable: true}).addTo(mapPicker);
             marker.on('dragend', function(e) {
-                var pos = marker.getLatLng();
-                setCoords(pos.lat, pos.lng);
+                const newPos = e.target.getLatLng();
+                setCoords(newPos.lat, newPos.lng);
+                aktualizujAdresu(newPos.lat, newPos.lng);
             });
         }
-    }
+    };
 
-    function najdiMne() {
+    window.najdiMne = function() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(pos) {
                 const lat = pos.coords.latitude;
                 const lon = pos.coords.longitude;
                 mapPicker.setView([lat, lon], 16);
                 setCoords(lat, lon);
+                aktualizujAdresu(lat, lon); // Zkusíme přepsat "Poloha z mapy" skutečnou adresou
             }, function() {
-                alert("Nepodařilo se získat polohu. Povolte prosím GPS v prohlížeči.");
-            });
+                console.log("GPS nedostupná.");
+            }, { enableHighAccuracy: true });
         }
-    }
-
-    function geokodujAdresu() {
-        const adresa = document.getElementById('id_adresa').value;
-        if (adresa.length > 5) {
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(adresa)}&limit=1`)
-                .then(r => r.json())
-                .then(data => {
-                    if (data.length > 0) {
-                        const lat = parseFloat(data[0].lat);
-                        const lon = parseFloat(data[0].lon);
-                        mapPicker.setView([lat, lon], 16);
-                        setCoords(lat, lon);
-                    }
-                });
-        }
-    }
+    };
 
     document.addEventListener('DOMContentLoaded', function() {
+        // Inicializace mapy (openstreetmap.fr je spolehlivý)
         mapPicker = L.map('map-picker').setView([49.8, 15.5], 7);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap'
+        L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
         }).addTo(mapPicker);
 
-        // Skrytí lat/lon polí v základu
-        const latInput = document.getElementById('id_lat');
-        const lonInput = document.getElementById('id_lon');
-        if (latInput && lonInput) {
-            latInput.closest('p').style.display = 'none';
-            lonInput.closest('p').style.display = 'none';
-        }
+        const nazevIn = document.getElementById('id_nazev');
+        const adresaIn = document.getElementById('id_adresa');
+        const form = document.getElementById('map-form');
 
-        {% if form.errors %}
-            ukazPoleSouradnic();
+        if (form) form.setAttribute('novalidate', 'novalidate');
+
+        // LOGIKA PRO RYCHLÉ HLÁŠENÍ (KRIZE)
+        {% if request.GET.typ == 'nebezpeci' or request.GET.typ == 'ztrata' %}
+            if (nazevIn && !nazevIn.value) {
+                nazevIn.value = "{% if request.GET.typ == 'nebezpeci' %}⚠️ Nahlášené nebezpečí{% else %}🔍 Ztracené zvíře{% endif %}";
+            }
+            if (adresaIn && !adresaIn.value) {
+                adresaIn.value = "Hledám polohu...";
+            }
+            window.najdiMne(); // Okamžitý start GPS
         {% endif %}
 
         mapPicker.on('click', function(e) {
             setCoords(e.latlng.lat, e.latlng.lng);
+            aktualizujAdresu(e.latlng.lat, e.latlng.lng);
         });
 
-        // Naslouchání na změnu adresy pro automatické zaměření
-        const adresaField = document.getElementById('id_adresa');
-        if (adresaField) {
-            adresaField.addEventListener('blur', geokodujAdresu);
-        }
-
-        setTimeout(() => { mapPicker.invalidateSize(); }, 400);
+        setTimeout(() => { mapPicker.invalidateSize(); }, 500);
     });
 </script>
 {% endblock %}

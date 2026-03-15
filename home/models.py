@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 
 class Sluzba(models.Model):
     TYPY_SLUZEB = [
+        ('ztrata', '🚨 ZTRACENÉ ZVÍŘE'),
         ('nebezpeci', '⚠️ NEBEZPEČÍ (Návnady, střepy, apod.)'),
         ('obchod', '🛒 Obchod pro psy'),
         ('veterina', '🏥 Veterinář'),
