@@ -6,7 +6,7 @@ from django.core.files import File
 from django.db import models
 from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
-
+from django.utils import timezone
 
 
 class PromoKod(models.Model):
@@ -62,9 +62,16 @@ class Pes(models.Model):
     rtg_pater = models.CharField(max_length=100, blank=True, null=True)
     bonitace = models.TextField(blank=True, null=True)
 
+    # Nahrání rodokmenu v PDF
+    rodokmen_pdf = models.FileField(upload_to='rodokmeny/', blank=True, null=True, verbose_name="Rodokmen v PDF")
+
     # QR a SOS stav
     qr_kod = models.ImageField(upload_to='qr_kody/', blank=True, null=True)
     je_ztraceny = models.BooleanField(default=False)
+
+    # Detailní texty (pro detail psa a pro nálezce)
+    zdravotni_poznamky = models.TextField(blank=True, null=True, verbose_name="Alergie a lékařské poznámky")
+    popis = models.TextField(blank=True, null=True, verbose_name="Povaha a instrukce pro nálezce")
 
     # Aktuální prevence
     posledni_ockovani = models.DateField(null=True, blank=True)
@@ -75,29 +82,60 @@ class Pes(models.Model):
     def __str__(self):
         return self.jmeno
 
+    class Meta:
+        verbose_name = "Pes"
+        verbose_name_plural = "Psi"
+
     @property
     def vek(self):
-        if not self.datum_narozeni: return "Nezadáno"
+        if not self.datum_narozeni:
+            return "Nezadáno"
+
         today = date.today()
-        years = today.year - self.datum_narozeni.year - ((today.month, today.day) < (self.datum_narozeni.month, self.datum_narozeni.day))
-        return f"{years} let"
+
+        # Výpočet celých let
+        years = today.year - self.datum_narozeni.year - (
+                    (today.month, today.day) < (self.datum_narozeni.month, self.datum_narozeni.day))
+
+        # Pokud je zvířeti 1 rok a více, vrátíme roky
+        if years >= 1:
+            return f"{years} let"
+
+        # Pokud je mladší než 1 rok, spočítáme měsíce
+        months = (today.year - self.datum_narozeni.year) * 12 + today.month - self.datum_narozeni.month
+        if today.day < self.datum_narozeni.day:
+            months -= 1
+
+        # Ošetření pro případ, že je zvíře narozené dnes nebo v budoucnu
+        if months <= 0:
+            return "Novorozeně"
+
+        return f"{months} měs."
 
     def save(self, *args, **kwargs):
+        # Nejdřív uložíme, abychom měli ID
         super().save(*args, **kwargs)
+
+        # Generujeme QR kód, jen pokud ještě neexistuje
         if not self.qr_kod:
             try:
-                qr_url = f"https://epes.online/pes/{self.id}/"
+                # POZOR: Tady musí být přesná URL, která ti funguje v prohlížeči
+                qr_url = f"https://epes.online/users/pes-detail/{self.id}/"
+
                 qr = qrcode.QRCode(version=1, box_size=10, border=5)
                 qr.add_data(qr_url)
                 qr.make(fit=True)
+
                 img = qr.make_image(fill_color="black", back_color="white")
                 canvas = BytesIO()
                 img.save(canvas, format='PNG')
                 canvas.seek(0)
+
+                # Uložíme soubor a updatujeme jen pole qr_kod, aby se necyklilo save()
                 self.qr_kod.save(f'qr_pes_{self.id}.png', File(canvas), save=False)
                 super(Pes, self).save(update_fields=['qr_kod'])
-            except:
-                pass
+            except Exception as e:
+                print(f"Chyba při tvorbě QR: {e}")
 
 # --- 2. MODEL PRO VÝSTAVY ---
 class Vystava(models.Model):
@@ -113,7 +151,6 @@ class Vystava(models.Model):
 
 # --- 3. MODEL PRO VRHY ---
 class Vrh(models.Model):
-    # Opraveno: rOdič, ne rOdec :)
     rodic = models.ForeignKey(Pes, on_delete=models.CASCADE, related_name='potomci')
     datum_narozeni = models.DateField()
     oznaceni_vrhu = models.CharField(max_length=50, help_text="Např. Vrh A")
@@ -135,6 +172,10 @@ class Ockovani(models.Model):
 
     def __str__(self):
         return f"{self.nazev_vakciny} - {self.pes.jmeno}"
+
+    class Meta:
+        verbose_name = "Očkování"
+        verbose_name_plural = "Očkování"
 
 # --- GALERIE FOTEK ---
 class GalerieFotka(models.Model):

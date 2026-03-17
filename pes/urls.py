@@ -26,5 +26,7 @@ urlpatterns = [
     path('inzerce/', include('inzerce.urls')),
 ]
 
-# TENTO ŘÁDEK ZAJISTÍ FOTKY VÝVOJI I PRODUKCI
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Pro Rošti někdy musíme přidat i mimo DEBUG, pokud nepoužíváš Nginx pro média:
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

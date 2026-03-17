@@ -16,31 +16,71 @@ from .forms import SluzbaForm, KontaktForm
 from users.models import Prispevek, Pes, ProfilMajitele
 
 
-# --- 1. HLAVNÍ STRÁNKA ---
 def index(request):
+    # 1. Zabezpečení proti chybám v Premium (pokud model neexistuje)
     is_premium = False
-    if request.user.is_authenticated:
-        if hasattr(request.user, 'profilmajitele'):
+    try:
+        if request.user.is_authenticated and hasattr(request.user, 'profilmajitele'):
             profil = request.user.profilmajitele
             is_premium = profil.is_premium and (not profil.premium_do or profil.premium_do >= date.today())
+    except Exception:
+        is_premium = False
 
-    # --- NOVINKA: Vytáhneme krizová hlášení z mapy (nebezpečí a ztráty) ---
-    # Chceme jen ty, co nejsou starší než např. 7 dní, aby to bylo aktuální
+    # 2. Načtení dat z mapy
     limit_cas = timezone.now() - timedelta(days=7)
-    krizova_hlaseni = Sluzba.objects.filter(
-        typ__in=['nebezpeci', 'ztrata'],
-        vytvoreno__gte=limit_cas
-    ).order_by('-vytvoreno')[:3] # Stačí 3 nejnovější, ať to nezaspamuje index
+    try:
+        mapa_hlaseni = Sluzba.objects.filter(
+            typ__in=['nebezpeci', 'ztrata'],
+            vytvoreno__gte=limit_cas
+        )
+    except Exception:
+        mapa_hlaseni = []
 
+    # 3. Načtení ztracených psů
+    try:
+        ztraceni_mazlicci = Pes.objects.filter(je_ztraceny=True)
+    except Exception:
+        ztraceni_mazlicci = []
+
+    krizova_hlaseni = []
+
+    # 4. Sjednocení hlášení (Klíčové pro šablonu!)
+    for h in mapa_hlaseni:
+        krizova_hlaseni.append({
+            'typ': h.typ,
+            'nazev': getattr(h, 'nazev', 'Hlášení z mapy'),
+            'adresa': getattr(h, 'adresa', 'Lokalita neupřesněna'),
+            'foto_url': None,
+            'objekt_id': h.id
+        })
+
+    for p in ztraceni_mazlicci:
+        # TADY JE TA NEJČASTĚJŠÍ CHYBA:
+        # Pokud soubor v media/users neexistuje, p.fotka.url vyhodí chybu.
+        f_url = None
+        if p.fotka:
+            try:
+                f_url = p.fotka.url
+            except (ValueError, RuntimeError):
+                f_url = None  # Pokud soubor chybí na disku, prostě url nedáme
+
+        krizova_hlaseni.append({
+            'typ': 'ztrata',
+            'nazev': f"HLEDÁ SE: {p.jmeno}",
+            'adresa': "Poslední výskyt u majitele",
+            'foto_url': f_url,
+            'objekt_id': p.id
+        })
+
+    # 5. Context pro šablonu
     context = {
-        'je_premium': is_premium,
-        'ztraceni_psi': Pes.objects.filter(je_ztraceny=True),
-        'posledni_prispevky': Prispevek.objects.all().order_by('-datum_pridani')[:5],
-        'krizova_hlaseni': krizova_hlaseni, # Přidáme do kontextu
+        'is_premium': is_premium,
+        'krizova_hlaseni': krizova_hlaseni[:3],
     }
+
     return render(request, 'home/index.html', context)
 
-# --- 2. PLATEBNÍ SYSTÉM (SIMPLESHOP) ---
+
 @csrf_exempt
 def simpleshop_webhook(request):
     """Zpracování plateb ze Simpleshopu."""

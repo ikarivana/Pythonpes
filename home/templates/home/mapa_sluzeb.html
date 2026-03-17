@@ -311,16 +311,16 @@
                 }
 
                 var popupHtml = `
-                    <div style="min-width:180px; ${(isZtrata || isNebezpeci) ? 'border: 3px solid #ff0000; padding: 10px; border-radius: 12px;' : ''}">
-                        <b style="color: ${(isZtrata || isNebezpeci) ? '#ff0000' : 'var(--mid-brown)'}; display: block; font-size: 1rem;">
-                            ${isZtrata ? '🚨 HLEDÁ SE: ' : ''}${isNebezpeci ? '⚠️ NEBEZPEČÍ: ' : ''}${s.nazev}
-                        </b>
-                        <span style="color: var(--gold); font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">
-                            ${s.typ}
-                        </span>
-                        <div style="margin: 8px 0; font-size: 0.85rem; color: #333;">📍 ${s.adresa}</div>
-                        ${tlacitkaHtml}
-                    </div>`;
+    <div style="min-width:180px; ${(isZtrata || isNebezpeci) ? 'border: 3px solid #ff0000; padding: 10px; border-radius: 12px;' : ''}">
+        <b style="color: ${(isZtrata || isNebezpeci) ? '#ff0000' : 'var(--mid-brown)'}; display: block; font-size: 1rem;">
+            ${(isZtrata && !s.nazev.includes('HLEDÁ SE')) ? '🚨 HLEDÁ SE: ' : ''}${(isNebezpeci && !s.nazev.includes('NEBEZPEČÍ')) ? '⚠️ NEBEZPEČÍ: ' : ''}${s.nazev}
+        </b>
+        <span style="color: var(--gold); font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">
+            ${s.typ}
+        </span>
+        <div style="margin: 8px 0; font-size: 0.85rem; color: #333;">📍 ${s.adresa}</div>
+        ${tlacitkaHtml}
+    </div>`;
 
                 marker.bindPopup(popupHtml);
                 allMarkers.push({ instance: marker, typ: s.typ_slug });

@@ -204,12 +204,14 @@
 
                 <div class="col-md-6">
                     <label class="label-gold">Otec (Sir)</label>
-                    <input type="text" name="otec" class="input-clean" value="{{ pes.otec|default:'' }}"
+                    <input type="text" name="otec_manualni" class="input-clean"
+                           value="{{ pes.otec_manualni|default:'' }}"
                            placeholder="Jméno otce">
                 </div>
                 <div class="col-md-6">
                     <label class="label-gold">Matka (Dam)</label>
-                    <input type="text" name="matka" class="input-clean" value="{{ pes.matka|default:'' }}"
+                    <input type="text" name="matka_manualni" class="input-clean"
+                           value="{{ pes.matka_manualni|default:'' }}"
                            placeholder="Jméno matky">
                 </div>
 
@@ -257,6 +259,34 @@
                     </div>
                     <small class="text-muted">Připojením PDF umožníte nálezci nebo zájemcům nahlédnout do
                         původu.</small>
+                </div>
+                <div class="edit-card">
+                    <h5 class="section-title"><i class="fas fa-trophy text-warning"></i> Výstavy a odchovy</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="label-gold">Historie výstav</label>
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'pridat_uspech' pes.id %}"
+                                   class="btn btn-outline-dark rounded-pill py-2 shadow-sm">
+                                    <i class="fas fa-plus-circle me-1"></i> Zapsat novou výstavu
+                                </a>
+                            </div>
+                            <small class="text-muted d-block mt-2">Zde můžete přidat konkrétní výstavu, datum a získané
+                                ocenění.</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="label-gold">Záznamy vrhů</label>
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'pridat_vrh' pes.id %}"
+                                   class="btn btn-outline-dark rounded-pill py-2 shadow-sm">
+                                    <i class="fas fa-baby-carriage me-1"></i> Zapsat nový vrh
+                                </a>
+                            </div>
+                            <small class="text-muted d-block mt-2">Pro chovné jedince: evidence narozených štěňat a
+                                datumů.</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

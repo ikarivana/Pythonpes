@@ -19,7 +19,7 @@
         transition: all 0.3s ease;
         overflow: hidden;
         background: white;
-        position: relative; /* Důležité pro badge */
+        position: relative;
     }
 
     .pet-card:hover {
@@ -69,8 +69,7 @@
 </style>
 
 <div class="container py-5">
-    <div class="row g-4">
-        {% if psi %}
+    <div class="row g-4"> {% if psi %}
             {% for mazlicek in psi %}
             <div class="col-md-6 col-lg-4">
                 <div class="card pet-card shadow-sm h-100">
@@ -123,7 +122,7 @@
                         </div>
 
                         <div class="mt-auto">
-                            <a href="{% url 'detail_psa' mazlicek.pk %}" class="btn-action w-100 shadow-sm {% if mazlicek.druh == 'kocka' %}btn-cat{% else %}btn-dog{% endif %}">
+                            <a href="{% url 'detail_psa' mazlicek.pk %}" class="btn-action {% if mazlicek.druh == 'kocka' %}btn-cat{% else %}btn-dog{% endif %}" style="text-align: center; color: white !important;">
                                 OTEVŘÍT DENÍK
                             </a>
                         </div>
@@ -136,7 +135,6 @@
                 <div class="empty-state-card shadow-sm mx-auto" style="max-width: 800px; background: white; border-radius: 40px; padding: 60px 20px;">
                     <h2 class="fw-bold mb-2" style="font-family: 'Playfair Display', serif; color: var(--primary-brown);">Vaše smečka je zatím prázdná</h2>
                     <p class="text-muted mb-5">Začněte tím, že přidáte svého prvního parťáka.</p>
-
                     <div class="row justify-content-center g-4">
                         <div class="col-6 col-sm-4">
                             <a href="{% url 'pridat_psa' %}" class="btn-add-choice btn-add-dog shadow-sm" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; padding: 20px; border-radius: 20px; border: 1px solid var(--accent-gold); background: var(--dog-bg); color: var(--accent-gold);">
@@ -154,6 +152,5 @@
                 </div>
             </div>
         {% endif %}
-    </div>
-</div>
+    </div> </div>
 {% endblock %}

@@ -11,12 +11,35 @@ from users.models import ProfilMajitele
 # --- ADMINISTRACE SLUŽEB ---
 @admin.register(Sluzba)
 class SluzbaAdmin(admin.ModelAdmin):
-    list_display = ('nazev', 'typ', 'adresa', 'schvaleno', 'vytvoreno')
+    # Definujeme, co uvidíš v tabulce
+    list_display = ('barevny_typ', 'nazev', 'adresa', 'vytvoreno', 'potvrzeni_minus', 'schvaleno_ikona')
     list_filter = ('typ', 'schvaleno', 'vytvoreno')
-    search_fields = ('nazev', 'adresa', 'popis')
-    list_editable = ('schvaleno',)
-    # Pole vytvoreno je auto_now_add, takže musí být readonly, pokud ho chceš vidět v detailu
-    readonly_fields = ('vytvoreno',)
+    search_fields = ('nazev', 'adresa')
+
+    # Funkce pro barevné štítky v seznamu
+    def barevny_typ(self, obj):
+        colors = {
+            'nebezpeci': '#8b0000',  # Tmavě červená
+            'ztrata': '#ff0000',  # Jasně červená
+        }
+        color = colors.get(obj.typ, '#3e2723')  # Ostatní hnědá
+        return format_html(
+            '<b style="color: {}; text-transform: uppercase;">{}</b>',
+            color,
+            obj.get_typ_display()
+        )
+
+    barevny_typ.short_description = 'Typ hlášení'
+
+    # Funkce pro hezčí zobrazení schválení
+    def schvaleno_ikona(self, obj):
+        if obj.schvaleno:
+            return format_html('<span style="color: green;">✔ Schváleno</span>')
+        if obj.typ in ['nebezpeci', 'ztrata']:
+            return format_html('<span style="color: orange;">⚡ Živé (SOS)</span>')
+        return format_html('<span style="color: gray;">⌛ Čeká</span>')
+
+    schvaleno_ikona.short_description = 'Stav schválení'
 
 # --- ADMINISTRACE KONTAKTNÍCH ZPRÁV ---
 @admin.register(KontaktniZprava)
