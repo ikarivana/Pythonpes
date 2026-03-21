@@ -13,8 +13,9 @@ urlpatterns = [
 
     # --- DETAIL A NOUZOVÝ SYSTÉM (SOS) ---
     path('pes/<int:pes_id>/', views.detail_psa, name='detail_psa'),
+    path('pes/sos/<int:pes_id>/', views.nouzovy_profil_psa, name='nouzovy_profil_psa'),
 
-    path('pes/<int:pes_id>/odeslat-polohu/', views.odeslat_polohu_nalezu, name='odeslat_polohu'),
+    path('pes/<int:pes_id>/odeslat-polohu/', views.odeslat_polohu_nalezu, name='odeslat_polohu_nalezu'),
     path('pes/<int:pes_id>/odeslat-email/', views.odeslat_sos_email, name='odeslat_sos_email'),
     path('pes/<int:pes_id>/prepnout-ztratu/', views.prepnout_ztratu, name='prepnout_ztratu'),
     path('hledani-psi/', views.seznam_hledanych_psu, name='seznam_hledanych'),
@@ -30,6 +31,7 @@ urlpatterns = [
     path('pes/<int:pes_id>/pridat-uspech/', views.pridat_uspech, name='pridat_uspech'),
     path('pes/<int:pes_id>/kariera/', views.kariera_psa, name='kariera_psa'),
     path('uspech/<int:uspech_id>/smazat/', views.smazat_uspech, name='smazat_uspech'),
+    path('pridat-vrh/<int:pes_id>/', views.pridat_vrh, name='pridat_vrh'),
 
     # --- SPRÁVA GALERIE ---
     path('pes/<int:pes_id>/galerie/pridat-foto/', views.pridat_foto, name='pridat_foto'),

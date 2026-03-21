@@ -157,7 +157,9 @@
                         <i class="fas fa-check me-2"></i>AKTIVNÍ
                     </button>
                     {% else %}
-                    <a href="https://vaseshop.simpleshop.cz/objednavka/rocni-id/" class="btn-alfa-gold mt-5 text-center shadow">ZÍSKAT PLÁN I ZNÁMKU</a>
+                    <a href="https://form.simpleshop.cz/8oPjA/buy/?custom_params[user_id]={{ user.id }}" class="btn-alfa-gold mt-5 text-center shadow">
+                        ZÍSKAT PLÁN I ZNÁMKU
+                    </a>
                     {% endif %}
                 </div>
             </div>
@@ -182,7 +184,9 @@
                     {% if user.profil.is_premium %}
                     <button class="btn btn-light w-100 mt-5 py-3 fw-bold rounded-4 border text-muted" disabled>MÁTE AKTIVNÍ</button>
                     {% else %}
-                    <a href="https://vaseshop.simpleshop.cz/objednavka/mesicni-id/" class="btn-alfa-outline mt-5 text-center">ZVOLIT MĚSÍČNĚ</a>
+                    <a href="https://form.simpleshop.cz/RYD2D/buy/?custom_params[user_id]={{ user.id }}" class="btn-alfa-outline mt-5 text-center">
+                        ZVOLIT MĚSÍČNĚ
+                    </a>
                     {% endif %}
                 </div>
             </div>

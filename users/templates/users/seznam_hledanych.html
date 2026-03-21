@@ -69,7 +69,6 @@
         z-index: 2;
     }
 
-    /* Druh zvířete - ikonka */
     .species-indicator {
         position: absolute;
         top: 25px;
@@ -88,26 +87,30 @@
     .photo-wrapper {
         position: relative;
         display: inline-block;
-        margin-bottom: 25px;
+        margin-bottom: 35px; /* Zvětšený prostor pro QR */
     }
     .pet-avatar {
-        width: 150px;
-        height: 150px;
+        width: 160px;
+        height: 160px;
         object-fit: cover;
         border-radius: 50%;
         border: 6px solid #fff;
         box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
+
+    /* OPRAVENÝ A ZVĚTŠENÝ QR KÓD */
     .mini-qr {
         position: absolute;
-        bottom: 8px;
-        right: 0;
-        width: 50px;
-        height: 50px;
+        bottom: -5px;
+        right: -10px;
+        width: 85px;  /* Výrazně zvětšeno */
+        height: 85px; /* Výrazně zvětšeno */
         background: white;
-        padding: 5px;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        padding: 8px;
+        border-radius: 18px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        border: 4px solid white; /* Bílý okraj pro separaci od fotky */
+        z-index: 5;
     }
 
     .pet-name { font-weight: 800; color: var(--text-dark); font-size: 1.6rem; margin-bottom: 2px; }
@@ -187,7 +190,7 @@
 
                 <div class="location-info">
                     <i class="fas fa-map-marker-alt me-2"></i>
-                    {{ mazlicek.oblast_ztraty }}
+                    {{ mazlicek.oblast_ztraty|default:"Neznámá lokalita" }}
                 </div>
 
                 <a href="{% url 'nouzovy_profil_psa' mazlicek.id %}" class="btn-help">

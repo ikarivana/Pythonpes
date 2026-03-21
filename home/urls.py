@@ -24,6 +24,6 @@ urlpatterns = [
     path('gdpr/', views.gdpr, name='gdpr'),
     path('cenik/', views.cenik, name='cenik'),
 
-    path('simpleshop/webhook/', simpleshop_webhook, name='simpleshop_webhook'),
+    path('webhook/simpleshop/', views.simpleshop_webhook, name='simpleshop_webhook'),
     path('dekujeme-za-nakup/', views.dekujeme_za_nakup, name='dekujeme_za_nakup'),
 ]

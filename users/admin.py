@@ -32,8 +32,8 @@ class OckovaniInline(admin.TabularInline):
 # --- ADMIN PSA (HLAVNÍ) ---
 @admin.register(models.Pes)
 class PesAdmin(admin.ModelAdmin):
-    # OPRAVA: Odstraněno 'pohlavi', které v modelu Pes nemáš
-    list_display = ('nahled_foto', 'jmeno', 'druh_ikona', 'rasa', 'majitel', 'je_ztraceny')
+    # Přidal jsem lat a lon do zobrazení v seznamu, abyste hned viděl, kdo má polohu
+    list_display = ('nahled_foto', 'jmeno', 'druh_ikona', 'rasa', 'majitel', 'je_ztraceny', 'lat', 'lon')
     list_filter = ('je_ztraceny', 'druh', 'rasa')
     list_editable = ('je_ztraceny',)
     search_fields = ('jmeno', 'cip', 'majitel__uzivatel__username', 'majitel__uzivatel__email')
@@ -42,16 +42,19 @@ class PesAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Základní informace', {
-            # OPRAVA: Odstraněno 'pohlavi' (v modelu ho nemáš)
             'fields': (('jmeno', 'druh'), ('rasa', 'majitel'), 'cip')
         }),
         ('Zdraví a Status', {
-            'fields': ('je_ztraceny', 'qr_kod', 'nahled_velky'),
+            # PŘIDEJTE lat a lon SEM:
+            'fields': ('je_ztraceny', 'lat', 'lon', 'qr_kod', 'nahled_velky'),
+        }),
+        ('SOS Kontakty', {
+            'fields': (('kontaktni_jmeno', 'kontaktni_telefon'), 'kontaktni_email', 'adresa_pro_darky'),
+            'classes': ('collapse',),
         }),
     )
 
     def nahled_foto(self, obj):
-        # OPRAVA: Vztah ForeignKey má related_name 'galerie_fotky'
         prvni_foto = obj.galerie_fotky.first()
         if prvni_foto and prvni_foto.obrazek:
             return format_html(
@@ -72,7 +75,6 @@ class PesAdmin(admin.ModelAdmin):
         return ikony.get(obj.druh, '🐾')
 
     druh_ikona.short_description = "Druh"
-
 
 # --- SOCIÁLNÍ SÍŤ ---
 @admin.register(models.Prispevek)

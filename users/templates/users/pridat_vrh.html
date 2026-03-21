@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-dark text-white">
+            <h4 class="mb-0">
+                <i class="fas fa-baby-carriage"></i>
+                Nový vrh pro: {{ zvíře.jmeno }}
+                <small>({% if zvíře.druh == 'kocka' %}Kočka{% else %}Pes{% endif %})</small>
+            </h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Označení vrhu</label>
+                        <input type="text" name="oznaceni_vrhu" class="form-control" placeholder="Např. Vrh A" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Datum narození</label>
+                        <input type="date" name="datum_narozeni" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">
+                            {% if zvíře.druh == 'kocka' %}Počet kocourů{% else %}Počet psů (samců){% endif %}
+                        </label>
+                        <input type="number" name="pocet_samcu" class="form-control" value="0" min="0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">
+                            {% if zvíře.druh == 'kocka' %}Počet koček{% else %}Počet fen (samic){% endif %}
+                        </label>
+                        <input type="number" name="pocet_samic" class="form-control" value="0" min="0">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        {% if zvíře.druh == 'kocka' %}Otec koťat{% else %}Otec štěňat{% endif %} (druhý rodič)
+                    </label>
+                    <input type="text" name="druhy_rodic" class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Poznámka</label>
+                    <textarea name="poznamka" class="form-control" rows="3"></textarea>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Uložit záznam</button>
+                    <a href="{% url 'upravit_psa' zvíře.id %}" class="btn btn-outline-secondary">Zrušit</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

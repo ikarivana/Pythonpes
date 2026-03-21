@@ -9,12 +9,16 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
+import json
+from datetime import date
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
 
 # Importy tvých modelů a forem
 from .models import Sluzba, KontaktniZprava
 from .forms import SluzbaForm, KontaktForm
 from users.models import Prispevek, Pes, ProfilMajitele
-
 
 def index(request):
     # 1. Zabezpečení proti chybám v Premium (pokud model neexistuje)
@@ -83,48 +87,38 @@ def index(request):
 
 @csrf_exempt
 def simpleshop_webhook(request):
-    """Zpracování plateb ze Simpleshopu."""
-    if request.method != 'POST':
-        return HttpResponse("Method not allowed", status=405)
+    print("--- WEBHOOK VOLÁN ---")
+    data = request.POST
 
-    try:
-        # Sjednocení načítání dat (JSON i POST)
-        if request.content_type == 'application/json':
-            data = json.loads(request.body)
-        else:
-            data = request.POST
+    # SimpleShop posílá email v poli mail_to[0] nebo customer_email
+    email = data.get('mail_to[0]') or data.get('customer_email') or data.get('email')
 
-        # Simpleshop posílá data v hluboké struktuře nebo napřímo
-        email = data.get('customer', {}).get('email') if isinstance(data.get('customer'), dict) else data.get(
-            'customer_email')
-        event = data.get('event')
-        product_id = str(data.get('product', {}).get('id')) if isinstance(data.get('product'), dict) else str(
-            data.get('product_id'))
+    # DEBUG hláška pro tebe do logu
+    print(f"DEBUG: Zkouším aktivovat e-mail: {email}")
 
-        if event == 'invoice.paid' and email:
-            user = User.objects.filter(email__iexact=email).first()
-            if user:
-                # Získáme nebo vytvoříme profil
-                profil, created = ProfilMajitele.objects.get_or_create(uzivatel=user)
+    if email:
+        # Hledáme uživatele v databázi
+        user = User.objects.filter(email__iexact=email.strip()).first()
 
-                # Rozlišení tarifů
-                dni_pridat = 30 if product_id == '142677' else 365 if product_id == '142680' else 0
+        if user:
+            profil, created = ProfilMajitele.objects.get_or_create(uzivatel=user)
+            profil.is_premium = True
 
-                if dni_pridat > 0:
-                    profil.is_premium = True
-                    # Pokud již premium má, přičteme k datu, jinak od dneška
-                    start_date = max(profil.premium_do or date.today(), date.today())
-                    profil.premium_do = start_date + timedelta(days=dni_pridat)
-                    profil.save()
-                    return HttpResponse(f"✅ Premium aktivováno na {dni_pridat} dní", status=200)
+            # Zjistíme, co si koupil (v logu jsme viděli 'Roční Profi')
+            produkt = data.get('items[0][text]', '')
 
-            return HttpResponse("User not found", status=404)
+            if "Roční" in produkt:
+                profil.premium_do = date.today() + timedelta(days=365)
+                print(f"DEBUG: Nastaveno ROČNÍ premium pro {email}")
+            else:
+                # Defaultně měsíc pro ostatní (Chovatel)
+                profil.premium_do = date.today() + timedelta(days=31)
+                print(f"DEBUG: Nastaveno MĚSÍČNÍ premium pro {email}")
 
-        return HttpResponse("Ignored event", status=200)
+            profil.save()
 
-    except Exception as e:
-        return HttpResponse(f"Error: {str(e)}", status=500)
-
+    print("DEBUG: V datech nebyl nalezen žádný e-mail.")
+    return HttpResponse("NO EMAIL PROVIDED", status=200)
 
 def mapa_sluzeb(request):
     # 1. Načtení schválených služeb
@@ -136,7 +130,7 @@ def mapa_sluzeb(request):
             sluzby_data.append({
                 'id': s.id,
                 'nazev': s.nazev,
-                'typ': s.get_typ_display(), # Tohle je ten hezký název s ikonou pro popup
+                'typ': s.get_typ_display(),
                 'typ_slug': s.typ,
                 'lat': float(s.lat),
                 'lon': float(s.lon),
@@ -148,21 +142,35 @@ def mapa_sluzeb(request):
 
     # 2. Ztracení psi
     ztraceni_psi = Pes.objects.filter(je_ztraceny=True)
-    for p in ztraceni_psi:
-        if p.lat and p.lon:
-            sluzby_data.append({
-                'id': p.id,
-                'nazev': f"🚨 HLEDÁ SE: {p.jmeno}",
-                'typ': "ZTRACENÝ MAZLÍČEK",
-                'typ_slug': 'ztrata', # Speciální slug pro SOS barvu
-                'lat': float(p.lat),
-                'lon': float(p.lon),
-                'adresa': getattr(p, 'posledni_vyskyt', "Poloha neupřesněna"),
-                'url': reverse('nouzovy_profil_psa', args=[p.id]),
-                'is_ztrata': True
-            })
 
-    # 3. Kategorie pro filtry (automaticky ze seznamu)
+    # --- TENTO PRINT TEĎ UŽ UVIDÍŠ V TERMINÁLU ---
+    print(f"DEBUG: V databázi nalezeno ztracených psů: {ztraceni_psi.count()}")
+
+    for p in ztraceni_psi:
+        # Pustíme psa dál, pokud pole nejsou None
+        if p.lat is not None and p.lon is not None:
+            try:
+                # POZOR: Musí se to jmenovat 'detail_psa', jak máš v urls.py
+                pes_url = reverse('detail_psa', args=[p.id])
+
+                sluzby_data.append({
+                    'id': p.id,
+                    'nazev': f"🚨 HLEDÁ SE: {p.jmeno}",
+                    'typ': "ZTRACENÝ MAZLÍČEK",
+                    'typ_slug': 'ztrata',
+                    'lat': float(p.lat),
+                    'lon': float(p.lon),
+                    'adresa': getattr(p, 'posledni_vyskyt', "Poloha neupřesněna"),
+                    'url': pes_url,
+                    'is_ztrata': True
+                })
+                print(f"DEBUG: Pes {p.jmeno} úspěšně přidán do seznamu.")
+            except Exception as e:
+                print(f"DEBUG: Chyba u psa {p.jmeno}: {e}")
+        else:
+            print(f"DEBUG: Pes {p.jmeno} je ztracený, ale NEMÁ SOUŘADNICE v DB!")
+
+    # 3. Kategorie pro filtry
     kategorie = []
     videno = set()
     for s in sluzby_data:
@@ -170,7 +178,8 @@ def mapa_sluzeb(request):
             kategorie.append({'nazev': s['typ'], 'slug': s['typ_slug']})
             videno.add(s['typ'])
 
-    # POZOR NA ODSZENÍ - return musí být až úplně na konci funkce
+    print(f"DEBUG: Celkem objektů na mapu: {len(sluzby_data)}")
+
     return render(request, 'home/mapa_sluzeb.html', {
         'sluzby_json': json.dumps(sluzby_data),
         'kategorie': kategorie,
@@ -294,8 +303,3 @@ def dekujeme_za_nakup(request):
     """Zobrazí stránku po úspěšné platbě."""
     return render(request, 'home/dekujeme.html')
 
-@csrf_exempt
-def simpleshop_webhook(request):
-    """Tady se zpracovávají automatické platby (webhook)."""
-    # Pokud zatím nemáš logiku, necháme tu jen základ:
-    return HttpResponse("OK", status=200)

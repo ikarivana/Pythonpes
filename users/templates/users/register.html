@@ -121,30 +121,67 @@
 </div>
 
 <script>
+// 1. PŘEPÍNÁNÍ PES / KOČKA (Tvoje původní funkce)
 function setPersonType(type) {
     const isCat = type === 'kocka';
-    document.getElementById('is_cat_person').value = isCat;
+    const isCatInput = document.getElementById('is_cat_person');
+    if (isCatInput) isCatInput.value = isCat;
 
-    // Vizuální přepnutí
-    document.getElementById('type-dog').classList.toggle('active', !isCat);
-    document.getElementById('type-cat').classList.toggle('active', isCat);
+    // Vizuální přepnutí aktivních tříd
+    const dogBtn = document.getElementById('type-dog');
+    const catBtn = document.getElementById('type-cat');
+    if (dogBtn) dogBtn.classList.toggle('active', !isCat);
+    if (catBtn) catBtn.classList.toggle('active', isCat);
 
-    // Změna textů
+    // Změna textů v závislosti na výběru
     const title = document.getElementById('reg-title');
     const subtitle = document.getElementById('reg-subtitle');
     const giftTitle = document.getElementById('gift-title');
+    const submitBtn = document.querySelector('.btn-modern');
 
     if (isCat) {
-        title.innerHTML = 'Kočičí tlapka 🐾';
-        subtitle.innerText = 'Založte si profil a získejte dárky pro kočičku.';
-        giftTitle.innerText = 'Dárky pro kočičku?';
-        document.querySelector('.btn-modern').style.background = '#9b87f5';
+        if (title) title.innerHTML = 'Kočičí tlapka 🐾';
+        if (subtitle) subtitle.innerText = 'Založte si profil a získejte dárky pro kočičku.';
+        if (giftTitle) giftTitle.innerText = 'Dárky pro kočičku?';
+        if (submitBtn) submitBtn.style.background = '#9b87f5';
     } else {
-        title.innerHTML = 'Nová tlapka 🐾';
-        subtitle.innerText = 'Založte si profil a získejte dárky pro pejska.';
-        giftTitle.innerText = 'Dárky pro pejska?';
-        document.querySelector('.btn-modern').style.background = '#8d6e63';
+        if (title) title.innerHTML = 'Nová tlapka 🐾';
+        if (subtitle) subtitle.innerText = 'Založte si profil a získejte dárky pro pejska.';
+        if (giftTitle) giftTitle.innerText = 'Dárky pro pejska?';
+        if (submitBtn) submitBtn.style.background = '#8d6e63';
     }
 }
+
+// 2. LOGIKA PRO "OKO" (PŘEPÍNÁNÍ VIDITELNOSTI HESLA)
+// Spustí se po načtení stránky
+document.addEventListener('DOMContentLoaded', function() {
+    // Najdeme všechna tlačítka s ikonou oka
+    const toggleButtons = document.querySelectorAll('.toggle-password');
+
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Zabráníme odeslání formuláře při kliknutí na oko
+            e.preventDefault();
+
+            // Najdeme input, který patří k tomuto tlačítku
+            // (.password-container je obal, který jsi definoval v HTML)
+            const container = this.closest('.password-container');
+            const input = container.querySelector('input');
+            const icon = this.querySelector('i');
+
+            if (input.type === "password") {
+                // Zobrazit heslo
+                input.type = "text";
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                // Skrýt heslo
+                input.type = "password";
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    });
+});
 </script>
 {% endblock %}

@@ -5,8 +5,11 @@ import qrcode
 from django.core.files import File
 from django.db import models
 from django.contrib.auth.models import User
+from django.http import request
 from django.template.defaultfilters import slugify
 from django.utils import timezone
+
+import pes
 
 
 class PromoKod(models.Model):
@@ -85,6 +88,15 @@ class Pes(models.Model):
     class Meta:
         verbose_name = "Pes"
         verbose_name_plural = "Psi"
+
+    @property
+    def je_premium(self):
+        # Kontroluje, zda má majitel aktivní is_premium a zda nevypršelo datum
+        if self.majitel and self.majitel.is_premium:
+            if self.majitel.premium_do:
+                return self.majitel.premium_do >= date.today()
+            return True  # Má is_premium, ale nemá nastavené datum = platí napořád
+        return False
 
     @property
     def vek(self):
@@ -202,7 +214,9 @@ class GalerieVideo(models.Model):
 class Uspech(models.Model):
     pes = models.ForeignKey(Pes, on_delete=models.CASCADE, related_name='uspechy')
     nazev = models.CharField(max_length=200)
-    typ = models.CharField(max_length=100, blank=True)  # např. Výstava, Zkouška
+    typ = models.CharField(max_length=100, blank=True)
+    oceneni = models.CharField(max_length=200, blank=True)
+    misto = models.CharField(max_length=200, blank=True)
     datum = models.DateField(null=True, blank=True)
 
 # --- SOCIÁLNÍ SÍŤ ---
