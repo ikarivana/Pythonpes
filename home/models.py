@@ -32,10 +32,16 @@ class Sluzba(models.Model):
     potvrzeni_minus = models.IntegerField(default=0, verbose_name="Nahlášení jako neaktivní")
 
     # Souřadnice pro mapu
-    lat = models.FloatField(verbose_name="Zeměpisná šířka")
-    lon = models.FloatField(verbose_name="Zeměpisná délka")
+    lat = models.FloatField(verbose_name="Zeměpisná šířka", null=True, blank=True)
+    lon = models.FloatField(verbose_name="Zeměpisná délka", null=True, blank=True)
 
     vytvoreno = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        # Pokud jde o SOS kategorii, schválíme ji automaticky hned při uložení
+        if self.typ in ['ztrata', 'nebezpeci', 'navnada']:
+            self.schvaleno = True
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Služba"

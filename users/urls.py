@@ -8,14 +8,16 @@ urlpatterns = [
     path('pridat/', views.pridat_psa, name='pridat_psa'),
     path('upravit/<int:pk>/', views.upravit_psa, name='upravit_psa'),
     path('smazat/<int:pk>/', views.smazat_psa, name='smazat_psa'),
-    path('veterinar/', views.veterinar, name='veterinar'),
+    path('veterinar/<int:pes_id>/', views.veterinar, name='veterinar_s_id'),
     path('dashboard/', views.dashboard, name='dashboard'),
 
     # --- DETAIL A NOUZOVÝ SYSTÉM (SOS) ---
     path('pes/<int:pes_id>/', views.detail_psa, name='detail_psa'),
-    path('pes/sos/<int:pes_id>/', views.nouzovy_profil_psa, name='nouzovy_profil_psa'),
+    path('veterinar/<int:pes_id>/', views.veterinar, name='veterinar'),
 
-    path('pes/<int:pes_id>/odeslat-polohu/', views.odeslat_polohu_nalezu, name='odeslat_polohu_nalezu'),
+    # Sjednocení názvu na 'odeslat_polohu', aby fungoval JS fetch
+    path('pes/<int:pes_id>/odeslat-polohu/', views.odeslat_polohu_nalezu, name='odeslat_polohu'),
+
     path('pes/<int:pes_id>/odeslat-email/', views.odeslat_sos_email, name='odeslat_sos_email'),
     path('pes/<int:pes_id>/prepnout-ztratu/', views.prepnout_ztratu, name='prepnout_ztratu'),
     path('hledani-psi/', views.seznam_hledanych_psu, name='seznam_hledanych'),
@@ -25,11 +27,12 @@ urlpatterns = [
     path('zaznam/smazat/<int:pk>/', views.smazat_zaznam, name='smazat_zaznam'),
     path('pes/<int:pes_id>/historie/', views.zdravotni_historie, name='zdravotni_historie'),
     path('pes/<int:pes_id>/pridat-zaznam/', views.pridat_zaznam, name='pridat_zaznam'),
-
-    # OPRAVA: Odstraněny duplicitní názvy (name) a cesty
+    path('pes/<int:pes_id>/kariera/', views.kariera_psa, name='kariera_psa'),
     path('ockovani/pridat/<int:pes_id>/', views.pridat_ockovani, name='pridat_ockovani'),
     path('pes/<int:pes_id>/pridat-uspech/', views.pridat_uspech, name='pridat_uspech'),
-    path('pes/<int:pes_id>/kariera/', views.kariera_psa, name='kariera_psa'),
+    path('pes/<int:pes_id>/vrhy/', views.vrhy_psa, name='vrhy_psa'),
+    path('pes/<int:pes_id>/chovnost/', views.chovnost_psa, name='chovnost_psa'),
+    path('pes/<int:pes_id>/upravit-chovnost/', views.upravit_chovnost, name='upravit_chovnost'),
     path('uspech/<int:uspech_id>/smazat/', views.smazat_uspech, name='smazat_uspech'),
     path('pridat-vrh/<int:pes_id>/', views.pridat_vrh, name='pridat_vrh'),
 
@@ -39,6 +42,7 @@ urlpatterns = [
     path('foto/smazat/<int:pk>/', views.smazat_foto, name='smazat_foto'),
     path('video/smazat/<int:pk>/', views.smazat_video, name='smazat_video'),
     path('pes/<int:pes_id>/pdf/', views.export_pes_pdf, name='export_pes_pdf'),
+    path('pes/<int:pes_id>/nahrat-rodokmen/', views.nahrat_rodokmen, name='nahrat_rodokmen'),
 
     # --- LOGIN / LOGOUT / REGISTRACE ---
     path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),

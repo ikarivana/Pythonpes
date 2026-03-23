@@ -47,6 +47,9 @@ class PesForm(forms.ModelForm):
             # SOS sekce
             'kontaktni_telefon': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+420...'}),
             'popis': forms.Textarea(attrs={'rows': 2, 'class': 'form-control', 'placeholder': 'Vzkaz pro nálezce...'}),
+            'lat': forms.HiddenInput(),
+            'lon': forms.HiddenInput(),
+            'posledni_vyskyt': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Kde se ztratil?'}),
 
             # Chovné (Premium)
             'bonitace': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),

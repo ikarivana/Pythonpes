@@ -48,6 +48,7 @@ class Pes(models.Model):
     adresa_pro_darky = models.TextField(blank=True, null=True)
     lat = models.FloatField(blank=True, null=True, verbose_name="Zeměpisná šířka")
     lon = models.FloatField(blank=True, null=True, verbose_name="Zeměpisná délka")
+    je_u_nalezece = models.BooleanField(default=False)
 
     # Základní info
     cip = models.CharField(max_length=50, blank=True, null=True)
@@ -212,12 +213,20 @@ class GalerieVideo(models.Model):
 
 # --- OSTATNÍ DOPLŇKY (Úspěchy, Zdraví) ---
 class Uspech(models.Model):
+    TYPY_AKCI = [
+        ('vystava', 'Výstava'),
+        ('zkouska', 'Zkouška / Bonitace'),
+        ('sport', 'Sportovní výkon'),
+    ]
     pes = models.ForeignKey(Pes, on_delete=models.CASCADE, related_name='uspechy')
+    typ = models.CharField(max_length=20, choices=TYPY_AKCI, default='vystava')
     nazev = models.CharField(max_length=200)
-    typ = models.CharField(max_length=100, blank=True)
-    oceneni = models.CharField(max_length=200, blank=True)
-    misto = models.CharField(max_length=200, blank=True)
-    datum = models.DateField(null=True, blank=True)
+    misto = models.CharField(max_length=200, blank=True, null=True)
+    datum = models.DateField()
+    oceneni = models.CharField(max_length=200) # Např. "Výborný 1, CAC"
+
+    class Meta:
+        ordering = ['-datum'] # Nejnovější úspěchy nahoře
 
 # --- SOCIÁLNÍ SÍŤ ---
 class Plemeno(models.Model):

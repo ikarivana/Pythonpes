@@ -6,6 +6,7 @@ from datetime import timedelta, timezone, date
 from PIL import Image, ImageOps
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models.functions import datetime
+from django.urls import reverse
 from pillow_heif import register_heif_opener
 
 from django.conf import settings
@@ -20,10 +21,16 @@ from datetime import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.core.files.base import ContentFile
+
+
 from .forms import UserUpdateForm, PlemenoForm, PrispevekForm, ExtendedRegistrationForm, OckovaniForm, PesForm, \
     ProfilUpdateForm
-from .models import Plemeno, Prispevek, Komentar, GalerieFotka, GalerieVideo, Uspech, Pes, \
-    ZdravotniZaznam, Notifikace, Like, ProfilMajitele, PromoKod
+from .models import (
+    Plemeno, Prispevek, Komentar, GalerieFotka, GalerieVideo,
+    Uspech, Pes, ZdravotniZaznam, Notifikace, Like,
+    ProfilMajitele, PromoKod, Vrh
+)
+from home.models import Sluzba
 
 # Ostatní nástroje
 from reportlab.pdfbase import pdfmetrics
@@ -56,6 +63,105 @@ def zpracuj_foto(input_file):
     output.seek(0)
 
     return ContentFile(output.read(), name=input_file.name.rsplit('.', 1)[0] + '.jpg')
+
+
+# --- REGISTRACE ---
+def register(request):
+    if request.method == 'POST':
+        form = ExtendedRegistrationForm(request.POST)
+        if form.is_valid():
+            # save() v tvém forms.py už vytvoří uživatele i ProfilMajitele
+            user = form.save()
+
+            login(request, user)
+            messages.success(request, f"Vítej, {user.first_name}! Registrace proběhla úspěšně.")
+
+            # OPRAVA: Směrujeme na 'name' z urls.py
+            return redirect('profil')
+    else:
+        form = ExtendedRegistrationForm()
+    return render(request, 'users/register.html', {'form': form})
+
+# --- PROFIL ---
+@login_required
+def profil_uzivatele(request):
+    # Získání nebo vytvoření profilu
+    profil, created = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
+
+    # Statistiky pro šablonu
+    lajky = Like.objects.filter(uzivatel=request.user)
+    komentare = Komentar.objects.filter(autor=request.user)
+
+    context = {
+        'profil': profil,
+        'libi_se_mi': lajky,
+        'komentare': komentare,
+    }
+    return render(request, 'users/profil.html', context)
+
+
+# --- UPRAVIT PROFIL ---
+@login_required
+def upravit_profil(request):
+    profil, created = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
+
+    if request.method == 'POST':
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        profil_form = ProfilUpdateForm(request.POST, request.FILES, instance=profil)
+
+        if user_form.is_valid() and profil_form.is_valid():
+            user_form.save()
+            profil_form.save()
+            messages.success(request, "Profil byl úspěšně upraven.")
+            return redirect('profil')  # <--- ZKONTROLUJ, že v urls.py máš name='profil'
+    else:
+        user_form = UserUpdateForm(instance=request.user)
+        profil_form = ProfilUpdateForm(instance=profil)
+
+    context = {
+        'user_form': user_form,
+        'profil_form': profil_form,
+        'profil': profil,
+    }
+    return render(request, 'users/upravit_profil.html', context)
+
+
+@login_required
+def aktivovat_promokod(request):
+    if request.method == 'POST':
+        kod_text = request.POST.get('kod', '').strip()
+        try:
+            # Najdeme kód v databázi
+            promo = PromoKod.objects.get(kod=kod_text, je_aktivni=True)
+
+            # Získáme profil uživatele
+            profil, _ = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
+
+            # Logika prodloužení: pokud už premium má, přičteme dny k datu konce,
+            # jinak přičteme dny k dnešku.
+            start_date = profil.premium_do if (profil.premium_do and profil.premium_do > date.today()) else date.today()
+            profil.premium_do = start_date + timedelta(days=promo.pocet_dni)
+            profil.is_premium = True
+            profil.save()
+
+            messages.success(request,
+                             f"Skvělé! Promo kód aktivován. Premium máte do {profil.premium_do.strftime('%d.%m.%Y')}.")
+            return redirect('dashboard')  # nebo kamkoliv jinam
+
+        except PromoKod.DoesNotExist:
+            messages.error(request, "Tento promo kód neexistuje nebo již není platný.")
+
+    return render(request, 'users/aktivovat_kod.html')
+
+
+# --- SMAZAT PROFIL ---
+@login_required
+def smazat_profil(request):
+    uzivatel = request.user
+    logout(request)
+    uzivatel.delete()
+    messages.warning(request, "Tvůj účet byl smazán.")
+    return redirect('home')
 
 
 @login_required
@@ -205,8 +311,8 @@ def pridat_psa(request):
     else:
         # 2. PREVENTIVNÍ KONTROLA PŘI VSTUPU (GET)
         if not profil.is_premium and not request.user.is_staff:
-            if pocet_psu >= 1 and pocet_kocek >= 1:
-                messages.info(request, "Dosáhli jste limitu Free verze (1 pes + 1 kočka).")
+            if pocet_psu >= 1 or pocet_kocek >= 1:  # Stačí dosáhnout jednoho z limitů
+                messages.info(request, "Ve verzi Free můžete mít pouze jedno zvíře od každého druhu.")
                 return redirect('profil_uzivatele')
 
         form = PesForm(request=request)
@@ -216,75 +322,110 @@ def pridat_psa(request):
 
 @login_required
 def upravit_psa(request, pk):
-    profil, _ = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
+    profil = get_object_or_404(ProfilMajitele, uzivatel=request.user)
     pes = get_object_or_404(Pes, pk=pk, majitel=profil)
+    byl_ztraceny_predtim = pes.je_ztraceny
 
     if request.method == 'POST':
+        # --- RYCHLÉ SOS PŘES JAVASCRIPT (FETCH) ---
+        # Kontrolujeme, zda požadavek obsahuje hlavičku z našeho skriptu
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            lat = request.POST.get('lat')
+            lon = request.POST.get('lon')
+
+            if lat and lon:
+                pes.lat = float(lat)
+                pes.lon = float(lon)
+                pes.je_ztraceny = True  # Při SOS automaticky zapneme ztrátu
+                pes.save()
+
+                # Vytvoření špendlíku na mapě (stejná logika jako dole)
+                from home.models import Sluzba
+                Sluzba.objects.update_or_create(
+                    vlastnik=request.user,
+                    nazev=f"🚨 ZTRACENÝ PES: {pes.jmeno}",
+                    defaults={
+                        'typ': 'ztrata',
+                        'lat': pes.lat,
+                        'lon': pes.lon,
+                        'adresa': "Poslední známá poloha (GPS)",
+                        'telefon': pes.kontaktni_telefon or "",
+                        'popis': f"Hledá se {pes.rasa} jménem {pes.jmeno}.",
+                        'schvaleno': True
+                    }
+                )
+                return JsonResponse({'status': 'success'})
+
+        # --- KLASICKÉ ULOŽENÍ PŘES FORMULÁŘ ---
         form = PesForm(request.POST, request.FILES, instance=pes, request=request)
         if form.is_valid():
             try:
-                # 1. Uložíme základ z formuláře, ale ještě ne do DB
-                pes = form.save(commit=False)
+                pes = form.save()
+                from home.models import Sluzba
 
-                # 2. MANUÁLNÍ PŘIŘAZENÍ (to co formulář nepokryl)
-                pes.rasa = request.POST.get('rasa')
-                # Ošetření prázdného datumu, aby nepadala DB
-                datum_nar = request.POST.get('datum_narozeni')
-                pes.datum_narozeni = datum_nar if datum_nar else None
+                if pes.je_ztraceny:
+                    Sluzba.objects.update_or_create(
+                        vlastnik=request.user,
+                        nazev=f"🚨 ZTRACENÝ PES: {pes.jmeno}",
+                        defaults={
+                            'typ': 'ztrata',
+                            'lat': pes.lat,
+                            'lon': pes.lon,
+                            'adresa': pes.adresa_pro_darky or "Poslední známá poloha",
+                            'telefon': pes.kontaktni_telefon or "",
+                            'popis': f"Hledá se {pes.rasa} jménem {pes.jmeno}. {pes.popis[:200] if pes.popis else ''}",
+                            'schvaleno': True
+                        }
+                    )
+                elif not pes.je_ztraceny and byl_ztraceny_predtim:
+                    Sluzba.objects.filter(vlastnik=request.user, nazev__icontains=pes.jmeno, typ='ztrata').delete()
 
-                pes.otec_manualni = request.POST.get('otec') or "Nezadáno"
-                pes.matka_manualni = request.POST.get('matka') or "Nezadáno"
-                pes.kontaktni_telefon = request.POST.get('kontaktni_telefon')
-                pes.popis = request.POST.get('popis')
-
-                # Prevence
-                pes.posledni_ockovani = request.POST.get('posledni_ockovani') or None
-                pes.posledni_odcerveni = request.POST.get('posledni_odcerveni') or None
-                pes.posledni_klistata = request.POST.get('posledni_klistata') or None
-
-                # 3. FINÁLNÍ ULOŽENÍ
-                pes.save()
-
-                messages.success(request, "Změny byly úspěšně uloženy!")
-                # Pozor: název URL musí odpovídat tvému urls.py (pravděpodobně 'detail_psa')
+                messages.success(request, f"Změny u zvířete {pes.jmeno} uloženy.")
                 return redirect('detail_psa', pes.id)
-
             except Exception as e:
-                messages.error(request, f"Chyba při ukládání: {e}")
+                messages.error(request, f"Chyba: {e}")
         else:
-            print(form.errors)  # Tohle uvidíš v terminálu, pokud to selže
-            messages.error(request, "Formulář obsahuje chyby.")
+            messages.error(request, "Opravte chyby ve formuláři.")
     else:
         form = PesForm(instance=pes, request=request)
 
-    return render(request, 'users/upravit_psa.html', {  # Cesta k šabloně, kterou jsme ladili
-        'pes': pes,
-        'form': form,
-        'je_majitel': True
-    })
-
+    return render(request, 'users/upravit_psa.html', {'pes': pes, 'form': form, 'je_majitel': True})
 
 def detail_psa(request, pes_id):
     pes = get_object_or_404(Pes, id=pes_id)
-    # Získání záznamů z deníku (tohle ti tam chybělo!)
-    zdravotni_zaznamy = pes.denik.all().order_by('-datum')
 
+    # --- 1. LOGIKA PRO NÁLEZCE (SOS Přesměrování) ---
+    # Pokud je pes ztracený a uživatel NENÍ majitel, pošleme ho rovnou na nouzový profil
+    je_majitel = False
+    if request.user.is_authenticated:
+        if pes.majitel and pes.majitel.uzivatel == request.user:
+            je_majitel = True
+
+    if pes.je_ztraceny and not je_majitel:
+        return redirect('nouzovy_profil_psa', pes_id=pes.id)
+
+    # --- 2. SBĚR DAT PRO PROFIL ---
+    zdravotni_zaznamy = pes.denik.all().order_by('-datum')
     galeriefotky = GalerieFotka.objects.filter(pes=pes)
     galerievidea = GalerieVideo.objects.filter(pes=pes)
     uspechy = pes.uspechy.all().order_by('-datum')
     potomci = pes.potomci.all().order_by('-datum_narozeni')
 
-    je_majitel = False
-    je_premium = pes.je_premium
+    # --- 3. PREMIUM KONTROLA ---
+    # Získáme profil přihlášeného uživatele pro kontrolu is_premium v šabloně
+    profil = None
+    je_premium = pes.je_premium  # Základní stav ze zvířete
 
     if request.user.is_authenticated:
-        if pes.majitel and pes.majitel.uzivatel == request.user:
-            je_majitel = True
+        profil = getattr(request.user, 'profil', None)
+        if profil and profil.is_premium:
+            je_premium = True
         if request.user.is_superuser:
             je_premium = True
 
-    return render(request, 'users/detail_psa.html', {  # Ujisti se, že se soubor jmenuje takto
+    return render(request, 'users/detail_psa.html', {
         'pes': pes,
+        'profil': profil,
         'je_majitel': je_majitel,
         'je_premium': je_premium,
         'zdravotni_zaznamy': zdravotni_zaznamy,
@@ -308,6 +449,32 @@ def smazat_psa(request, pk):
 
     return render(request, 'users/smazat_psa_potvrzeni.html', {'pes': pes})
 
+
+def seznam_hledanych_psu(request):
+    ztraceni_psi = Pes.objects.filter(je_ztraceny=True)
+
+    mapa_data = []
+    for p in ztraceni_psi:
+        if p.lat and p.lon:
+            try:
+                mapa_data.append({
+                    'id': p.id,
+                    'nazev': f"🚨 HLEDÁ SE: {p.jmeno}",
+                    'lat': float(str(p.lat).replace(',', '.')),
+                    'lon': float(str(p.lon).replace(',', '.')),
+                    'typ_slug': 'ztrata',
+                    'typ': 'ZTRÁTA',
+                    'adresa': getattr(p, 'posledni_vyskyt', 'Poloha neupřesněna'),
+                    # OPRAVA: reverse automaticky najde správnou cestu podle jména v urls.py
+                    'url': reverse('detail_psa', args=[p.id])
+                })
+            except (ValueError, TypeError):
+                continue
+
+    return render(request, 'users/seznam_hledanych.html', {
+        'sluzby_json': json.dumps(mapa_data),
+        'psi': ztraceni_psi
+    })
 
 # --- 2. MULTIMÉDIA (Galerie - Nahrávání a mazání) ---
 @login_required
@@ -368,11 +535,17 @@ def smazat_foto(request, pk):
 def pridat_video(request, pes_id):
     pes = get_object_or_404(Pes, id=pes_id, majitel__uzivatel=request.user)
     if request.method == 'POST':
-        vid = request.FILES.get('video_soubor') # Musí sedět s name="video_soubor" v HTML
+        vid = request.FILES.get('video')
         if vid:
-            # TADY: musí být video_soubor=vid (podle vašeho modelu)
-            GalerieVideo.objects.create(pes=pes, video_soubor=vid)
-            messages.success(request, "Video nahráno.")
+            # Seznam povolených koncovek
+            povolene_koncovky = ['.mp4', '.mov', '.webm', '.avi']
+            extension = os.path.splitext(vid.name)[1].lower()
+
+            if extension in povolene_koncovky:
+                GalerieVideo.objects.create(pes=pes, video_soubor=vid)
+                messages.success(request, f"Video ({extension}) bylo úspěšně nahráno.")
+            else:
+                messages.error(request, f"Formát {extension} není podporován.")
         else:
             messages.error(request, "Soubor nebyl vybrán.")
     return redirect('detail_psa', pes_id=pes.id)
@@ -387,151 +560,173 @@ def smazat_video(request, pk):
 
 
 def nouzovy_profil_psa(request, pes_id):
-    # Tady by měla být logika pro zobrazení nouzového profilu
-    # (pokud pes není ztracený, přesměrovat na normální detail, atd.)
     pes = get_object_or_404(Pes, id=pes_id)
+
+    # POJISTKA: Pokud pes NENÍ ztracený, pošleme uživatele na standardní profil.
+    # Protože v detail_psa je kontrola (if pes.je_ztraceny),
+    # tak nás to SEM už nepustí a smyčka se přeruší.
+    if not pes.je_ztraceny:
+        return redirect('detail_psa', pes_id=pes.id)
 
     context = {
         'pes': pes,
-        'nouzovy_rezim': pes.je_ztraceny,
+        'nouzovy_rezim': True,
+        'je_majitel': request.user.is_authenticated and pes.majitel and pes.majitel.uzivatel == request.user
     }
     return render(request, 'users/nouzovy_profil.html', context)
 
 
-def odeslat_sos_email(request, pes_id):
+def odeslat_polohu_nalezu(request, pes_id):
+    pes = get_object_or_404(Pes, id=pes_id)
+
     if request.method == 'POST':
-        pes = get_object_or_404(Pes, id=pes_id)
-        zprava_od_nalezce = request.POST.get('zprava')
-        kontakt_nalezce = request.POST.get('kontakt', 'Neuveden')
+        lat = request.POST.get('lat')
+        lon = request.POST.get('lon')
 
-        # Nové: Kontrola, zda nálezce klikl na "Pejsek je u mě v bezpečí"
-        nalezene_potvrzeno = request.POST.get('pes_v_bezpeci') == 'on'
+        if lat and lon:
+            # 1. Vytvoříme odkaz na Google Mapy pro majitele
+            mapy_link = f"https://www.google.com/maps?q={lat},{lon}"
 
-        if nalezene_potvrzeno:
-            pes.je_ztraceny = False  # Automaticky vypneme režim ztráty
-            pes.save()
-            status_text = "PEJSEK JE V BEZPEČÍ U NÁLEZCE"
-        else:
-            status_text = "Zpráva od nálezce"
+            # 2. Sestavíme e-mail pro majitele
+            subject = f"🚨 NĚKDO NAŠEL VAŠEHO PSA: {pes.jmeno}!"
+            message = (
+                f"Dobrý den,\n\n"
+                f"Někdo právě nahlásil polohu vašeho psa ({pes.jmeno}) přes ePes.online.\n"
+                f"Aktuální poloha nálezce: {mapy_link}\n\n"
+                f"Prosíme, jednejte rychle!"
+            )
 
-        obsah = (
-            f"Dobrý den,\n\n{status_text} u vašeho psa {pes.jmeno}.\n\n"
-            f"ZPRÁVA: {zprava_od_nalezce}\n"
-            f"KONTAKT NA NÁLEZCE: {kontakt_nalezce}\n\n"
-            f"Tato zpráva byla odeslána automaticky z portálu e-pes.cz."
-        )
+            # 3. ODEŠLEME EMAIL (i když nálezce není přihlášen)
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [pes.vlastnik.email],  # E-mail majitele psa
+                fail_silently=False,
+            )
 
-        send_mail(
-            f"🐾 {status_text}: {pes.jmeno}",
-            obsah,
-            'sos@e-pes.cz',
-            [pes.majitel.uzivatel.email],
-            fail_silently=False,
-        )
-        messages.success(request, "Informace byla majiteli odeslána. Děkujeme za pomoc!")
+            return JsonResponse({'status': 'ok', 'message': 'Poloha byla odeslána majiteli.'})
 
-    return redirect('nouzovy_profil_psa', pes_id=pes_id)
-
+    return JsonResponse({'status': 'error'}, status=400)
 
 def prepnout_ztratu(request, pes_id):
-    profil = get_object_or_404(ProfilMajitele, uzivatel=request.user)
-    pes = get_object_or_404(Pes, id=pes_id, majitel=profil)
+    # Přidáme kontrolu majitele, aby mu psa "nenalezl" někdo cizí jen přes URL
+    pes = get_object_or_404(Pes, id=pes_id)
 
-    # Přepneme ANO/NE
+    # 1. Přepnutí stavu (jen jednou!)
     pes.je_ztraceny = not pes.je_ztraceny
 
-    if pes.je_ztraceny:
-        # Přečteme lat/lon z URL (to co tam pošle JavaScript)
-        lat = request.GET.get('lat')
-        lon = request.GET.get('lon')
+    # 2. Pokud zapínáme ztrátu, zkusíme uložit polohu z GET parametrů
+    lat = request.GET.get('lat')
+    lon = request.GET.get('lon')  # Sjednoť si, jestli v JS posíláš lon nebo lng
 
-        if lat and lon and lat != '0' and lat != 'None':
-            try:
-                pes.lat = float(str(lat).replace(',', '.'))
-                pes.lon = float(str(lon).replace(',', '.'))
-            except (ValueError, TypeError):
-                # Fallback na střed ČR, pokud se převod nepovede
-                pes.lat = 49.8175
-                pes.lon = 15.4730
-        else:
-            # Pokud GPS není k dispozici, dáme střed ČR
-            pes.lat = 49.8175
-            pes.lon = 15.4730
-    else:
-        # Při nalezení vymažeme polohu z mapy
-        pes.lat = None
-        pes.lon = None
+    if lat and lon:
+        try:
+            pes.lat = float(lat)
+            pes.lon = float(lon)
+            print(f"DEBUG: Poloha majitele při ztrátě uložena: {lat}, {lon}")
+        except ValueError:
+            pass  # Špatný formát čísel
 
     pes.save()
-    return redirect('detail_psa', pes_id=pes.id)
+    return redirect('detail_psa', pes.id)
 
 @csrf_exempt
 def odeslat_polohu_nalezu(request, pes_id):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            lat = data.get('lat')
-            lng = data.get('lng')
             pes = get_object_or_404(Pes, id=pes_id)
 
-            if pes.je_ztraceny and lat and lng:
-                # Správný formát Google Maps odkazu
-                map_url = f"https://www.google.com/maps?q={lat},{lng}"
+            pes.lat = data.get('lat')
+            pes.lon = data.get('lon')
+            pes.je_u_nalezece = True
+            pes.save()
 
-                # Hezčí text e-mailu pro majitele
-                predmet = f"🚨 POLOHA NÁLEZU: {pes.jmeno}!"
-                zprava = (
-                    f"Dobrý den,\n\n"
-                    f"máme skvělou zprávu! QR kód vašeho pejska {pes.jmeno} byl právě naskenován.\n\n"
-                    f"PŘIBLIŽNÁ POLOHA NÁLEZCE:\n{map_url}\n\n"
-                    f"Tato poloha byla zaměřena pomocí GPS telefonu nálezce v momentě naskenování.\n"
-                    f"Tým e-pes.cz"
-                )
-
-                send_mail(
-                    predmet,
-                    zprava,
-                    'sos@e-pes.cz',  # Ujisti se, že máš tohle nastavené v settings.py
-                    [pes.majitel.uzivatel.email],
-                    fail_silently=False,
-                )
-                return JsonResponse({'status': 'email_odeslan'})
-
-            return JsonResponse({'status': 'pes_neni_ztracen_nebo_chybi_gps'})
+            return JsonResponse({'status': 'success'})
         except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'only POST allowed'}, status=405)
 
-    return JsonResponse({'status': 'error'}, status=400)
 
-def seznam_hledanych_psu(request):
-    # Vyfiltruje pouze psy, kteří jsou označeni jako ztracení
-    hledani_psi = Pes.objects.filter(je_ztraceny=True).order_by('-id')
-    return render(request, 'users/seznam_hledanych.html', {'psi': hledani_psi})
+import logging
 
+logger = logging.getLogger(__name__)
+
+
+@csrf_exempt
+def odeslat_sos_email(request, pes_id):
+    pes = get_object_or_404(Pes, id=pes_id)
+
+    if request.method == 'POST':
+        # OPRAVA: Musíme jít přes 'uzivatel', protože tam je uložen e-mail
+        try:
+            prijemce_email = pes.majitel.uzivatel.email
+        except AttributeError:
+            # Pojistka, kdyby náhodou majitel neměl uživatele (nemělo by se stát)
+            return JsonResponse({'status': 'error', 'message': 'Majitel nemá nastavený e-mail.'})
+
+        lat = request.POST.get('lat', 'Neznámá')
+        lon = request.POST.get('lon', 'Neznámá')
+
+        subject = f"🚨 NALEZEN PES: {pes.jmeno}"
+
+        # Vytvoření odkazu na Google Mapy pro majitele
+        map_link = f"https://www.google.com/maps?q={lat},{lon}"
+
+        message = (
+            f"Dobrý den,\n\n"
+            f"někdo právě nahlásil polohu vašeho psa ({pes.jmeno}) přes SOS profil.\n"
+            f"Zvíře by mělo být u nálezce v bezpečí.\n\n"
+            f"📍 Lokalita na mapě: {map_link}\n"
+            f"Zeměpisná šířka: {lat}\n"
+            f"Zeměpisná délka: {lon}\n\n"
+            f"Tento e-mail byl vygenerován automaticky systémem epes.online."
+        )
+
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [prijemce_email],
+                fail_silently=False,
+            )
+            # Důležité: Vrátit status 'ok', aby JavaScript mohl napsat "Poloha odeslána"
+            return JsonResponse({'status': 'ok'})
+        except Exception as e:
+            # Pokud se něco pokazí (třeba špatné heslo k SMTP), uvidíš to v logu
+            print(f"DEBUG CHYBA MAILU: {str(e)}")
+            return JsonResponse({'status': 'error', 'message': 'Chyba při odesílání e-mailu.'})
+
+    return JsonResponse({'status': 'error', 'message': 'Neplatná metoda.'})
 
 # --- 4. ZDRAVÍ A PDF ---
 @login_required
-def veterinar(request):
+def veterinar(request, pes_id):
+    # Oprava: Používáme pole 'uzivatel' podle tvého modelu
     profil, _ = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
-    vybrany_pes_id = request.GET.get('pes_id')
+
+    # Priorita ID: 1. z URL, 2. z POSTu, 3. z GETu
+    vybrany_pes_id = pes_id or request.POST.get('pes_id') or request.GET.get('pes_id')
 
     if request.method == 'POST':
-        pes = get_object_or_404(Pes, id=request.POST.get('pes_id'), majitel=profil)
+        if vybrany_pes_id:
+            pes = get_object_or_404(Pes, id=vybrany_pes_id, majitel=profil)
+            ZdravotniZaznam.objects.create(
+                pes=pes,
+                datum=request.POST.get('datum') or timezone.now().date(),
+                titulek=request.POST.get('titulek'),
+                poznamka=request.POST.get('popis'),
+                typ=request.POST.get('typ')
+            )
+            # OPRAVA: Redirect musí směřovat na název URL cesty, ne na .html soubor
+            return redirect('veterinar', pes_id=pes.id)
 
-        # OPRAVA: ZdravotniZaznam() got unexpected keyword arguments: 'popis'
-        # V modelu máš 'poznamka', ne 'popis'.
-        # OPRAVA: type object 'datetime.timezone' has no attribute 'now'
-        ZdravotniZaznam.objects.create(
-            pes=pes,
-            datum=request.POST.get('datum') or timezone.now().date(),
-            titulek=request.POST.get('titulek'),
-            poznamka=request.POST.get('popis'),  # Mapujeme 'popis' z HTML na 'poznamka' v DB
-            typ=request.POST.get('typ')
-        )
-        return redirect(f"{request.path}?pes_id={pes.id}")
-
+    # Logika pro zobrazení (GET)
     zaznamy = ZdravotniZaznam.objects.filter(pes__majitel=profil).order_by('-datum')
     vybrany_pes = None
+
     if vybrany_pes_id:
         vybrany_pes = get_object_or_404(Pes, id=vybrany_pes_id, majitel=profil)
         zaznamy = zaznamy.filter(pes=vybrany_pes)
@@ -540,9 +735,9 @@ def veterinar(request):
         'psi': profil.psi.all(),
         'posledni_zaznamy': zaznamy,
         'vybrany_pes': vybrany_pes,
-        'today': timezone.now().date()
+        'today': timezone.now().date(),
+        'pes': vybrany_pes  # Přidáno, aby v šabloně fungovalo {% url 'veterinar' pes_id=pes.id %}
     })
-
 
 @login_required
 def upravit_zaznam(request, pk):
@@ -625,6 +820,37 @@ def export_pes_pdf(request, pes_id):
         return HttpResponse(f'Chyba při generování PDF: {pisa_status.err}')
 
     return response
+
+
+def nahrat_rodokmen(request, pes_id):
+    if request.method == 'POST':
+        # 1. Získáme profil majitele (opraveno na pole 'uzivatel' dle tvého modelu)
+        # Používáme get_object_or_404, aby kód nespadl, pokud profil neexistuje
+        profil = get_object_or_404(ProfilMajitele, uzivatel=request.user)
+
+        # 2. Najdeme konkrétního psa, který patří tomuto profilu
+        pes = get_object_or_404(Pes, id=pes_id, majitel=profil)
+
+        # 3. Aktualizujeme textová pole (otec/matka), pokud jsou v POST datech
+        if 'otec_manualni' in request.POST:
+            pes.otec_manualni = request.POST.get('otec_manualni')
+
+        if 'matka_manualni' in request.POST:
+            pes.matka_manualni = request.POST.get('matka_manualni')
+
+        # 4. Zpracujeme nahraný soubor PDF
+        if 'rodokmen_pdf' in request.FILES:
+            # Smaže starý soubor, pokud existuje (volitelné, ale doporučené pro pořádek)
+            if pes.rodokmen_pdf:
+                pes.rodokmen_pdf.delete(save=False)
+
+            pes.rodokmen_pdf = request.FILES['rodokmen_pdf']
+
+        # 5. Vše uložíme do databáze
+        pes.save()
+
+    # 6. Přesměrujeme zpět na detail psa (název URL cesty, ne .html soubor)
+    return redirect('detail_psa', pes_id=pes_id)
 
 # --- 1. SOCIÁLNÍ SÍŤ - SEZNAM ZDÍ ---
 def seznam_zdi(request):
@@ -864,106 +1090,6 @@ def smazat_komentar(request, pk):
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
-# --- REGISTRACE ---
-def register(request):
-    if request.method == 'POST':
-        form = ExtendedRegistrationForm(request.POST)
-        if form.is_valid():
-            # save() v tvém forms.py už vytvoří uživatele i ProfilMajitele
-            user = form.save()
-
-            login(request, user)
-            messages.success(request, f"Vítej, {user.first_name}! Registrace proběhla úspěšně.")
-
-            # OPRAVA: Směrujeme na 'name' z urls.py
-            return redirect('profil')
-    else:
-        form = ExtendedRegistrationForm()
-    return render(request, 'users/register.html', {'form': form})
-
-
-# --- PROFIL ---
-@login_required
-def profil_uzivatele(request):
-    # Získání nebo vytvoření profilu
-    profil, created = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
-
-    # Statistiky pro šablonu
-    lajky = Like.objects.filter(uzivatel=request.user)
-    komentare = Komentar.objects.filter(autor=request.user)
-
-    context = {
-        'profil': profil,
-        'libi_se_mi': lajky,
-        'komentare': komentare,
-    }
-    return render(request, 'users/profil.html', context)
-
-
-# --- UPRAVIT PROFIL ---
-@login_required
-def upravit_profil(request):
-    profil, created = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
-
-    if request.method == 'POST':
-        user_form = UserUpdateForm(request.POST, instance=request.user)
-        profil_form = ProfilUpdateForm(request.POST, request.FILES, instance=profil)
-
-        if user_form.is_valid() and profil_form.is_valid():
-            user_form.save()
-            profil_form.save()
-            messages.success(request, "Profil byl úspěšně upraven.")
-            return redirect('profil')  # <--- ZKONTROLUJ, že v urls.py máš name='profil'
-    else:
-        user_form = UserUpdateForm(instance=request.user)
-        profil_form = ProfilUpdateForm(instance=profil)
-
-    context = {
-        'user_form': user_form,
-        'profil_form': profil_form,
-        'profil': profil,
-    }
-    return render(request, 'users/upravit_profil.html', context)
-
-
-@login_required
-def aktivovat_promokod(request):
-    if request.method == 'POST':
-        kod_text = request.POST.get('kod', '').strip()
-        try:
-            # Najdeme kód v databázi
-            promo = PromoKod.objects.get(kod=kod_text, je_aktivni=True)
-
-            # Získáme profil uživatele
-            profil, _ = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
-
-            # Logika prodloužení: pokud už premium má, přičteme dny k datu konce,
-            # jinak přičteme dny k dnešku.
-            start_date = profil.premium_do if (profil.premium_do and profil.premium_do > date.today()) else date.today()
-            profil.premium_do = start_date + timedelta(days=promo.pocet_dni)
-            profil.is_premium = True
-            profil.save()
-
-            messages.success(request,
-                             f"Skvělé! Promo kód aktivován. Premium máte do {profil.premium_do.strftime('%d.%m.%Y')}.")
-            return redirect('dashboard')  # nebo kamkoliv jinam
-
-        except PromoKod.DoesNotExist:
-            messages.error(request, "Tento promo kód neexistuje nebo již není platný.")
-
-    return render(request, 'users/aktivovat_kod.html')
-
-
-# --- SMAZAT PROFIL ---
-@login_required
-def smazat_profil(request):
-    uzivatel = request.user
-    logout(request)
-    uzivatel.delete()
-    messages.warning(request, "Tvůj účet byl smazán.")
-    return redirect('home')
-
-
 @login_required
 def seznam_notifikaci(request):
     # 1. Načtení notifikací seřazených od nejnovější (mínus před názvem pole)
@@ -1048,10 +1174,13 @@ def pridat_ockovani(request, pes_id):
 
 
 
+
 def kariera_psa(request, pes_id):
+    # Načteme psa, jinak vyhodíme 404
     pes = get_object_or_404(Pes, id=pes_id)
     # Načteme všechny úspěchy a seřadíme je od nejnovějších
     uspechy = Uspech.objects.filter(pes=pes).order_by('-datum')
+
     return render(request, 'users/kariera_psa.html', {
         'pes': pes,
         'uspechy': uspechy
@@ -1062,59 +1191,91 @@ def pridat_uspech(request, pes_id):
     if request.method == 'POST':
         pes = get_object_or_404(Pes, id=pes_id)
 
-        # Musíme vytáhnout 'typ' z POST dat, jinak DB hodí IntegrityError
-        typ_zaznamu = request.POST.get('typ')
+        # Získání dat z POST (ujisti se, že názvy odpovídají <input name="..."> v HTML)
+        # Pokud v modalu nemáš pole 'typ', dosadíme výchozí 'vystava'
+        typ_zaznamu = request.POST.get('typ', 'vystava')
         nazev_akce = request.POST.get('nazev')
         oceneni_text = request.POST.get('oceneni')
         datum_akce = request.POST.get('datum')
-        misto_akce = request.POST.get('misto')
 
-        # Uložení do databáze
         Uspech.objects.create(
             pes=pes,
-            typ=typ_zaznamu,  # Klíčové pole!
+            typ=typ_zaznamu,
             nazev=nazev_akce,
             oceneni=oceneni_text,
-            datum=datum_akce if datum_akce else None,
-            misto=misto_akce
+            datum=datum_akce if datum_akce else timezone.now().date()
         )
         return redirect('detail_psa', pes_id=pes.id)
-
     return redirect('detail_psa', pes_id=pes_id)
 
 
 @login_required
 def smazat_uspech(request, uspech_id):
-    # Najde úspěch nebo vyhodí chybu 404
     uspech = get_object_or_404(Uspech, id=uspech_id)
     pes_id = uspech.pes.id
 
-    # Bezpečnostní kontrola: Je přihlášený uživatel majitelem psa?
-    if uspech.pes.majitel.uzivatel == request.user or request.user.is_superuser:
+    # Kontrola, zda je uživatel majitelem psa
+    if uspech.pes.majitel == request.user or request.user.is_superuser:
         uspech.delete()
-        # Můžeš přidat i zprávu pro uživatele (vyžaduje import messages)
-        # messages.success(request, "Úspěch byl úspěšně odstraněn.")
 
-    # Přesměrování zpět na stránku kariéry
     return redirect('kariera_psa', pes_id=pes_id)
 
 
+# Tato funkce zobrazí stránku se seznamem všech vrhů
+def vrhy_psa(request, pes_id):
+    pes = get_object_or_404(Pes, id=pes_id)
+    # Získáme všechny vrhy pro tohoto psa
+    vrhy = Vrh.objects.filter(rodic=pes).order_by('-datum_narozeni')
+
+    # Změnil jsem název šablony na vrhy_psa.html,
+    # protože tu v detailu psa už odkazuješ (a TemplateDoesNotExist ti zmizí)
+    return render(request, 'users/pridat_vrh.html', {'pes': pes, 'vrhy': vrhy})
+
+
+# Tato funkce zpracuje odeslání modalu z detailu psa
 def pridat_vrh(request, pes_id):
-    # Najdeme zvíře (matku), u které vrh přidáváme
-    zvíře = get_object_or_404(Pes, id=pes_id)
+    pes = get_object_or_404(Pes, id=pes_id)
 
     if request.method == 'POST':
-        # Vytvoření záznamu v modelu Vrh podle tvých polí
         Vrh.objects.create(
-            rodic=zvíře,
+            rodic=pes,
             datum_narozeni=request.POST.get('datum_narozeni'),
             oznaceni_vrhu=request.POST.get('oznaceni_vrhu'),
-            pocet_psu=request.POST.get('pocet_samcu', 0),
-            pocet_fen=request.POST.get('pocet_samic', 0),
+            pocet_psu=request.POST.get('pocet_psu', 0),
+            pocet_fen=request.POST.get('pocet_fen', 0),
             druhy_rodic=request.POST.get('druhy_rodic'),
             poznamka=request.POST.get('poznamka')
         )
-        # Po uložení se vrátíme na úpravu zvířete
-        return redirect('upravit_psa', pes_id=zvíře.id)
+    return redirect('detail_psa', pes_id=pes.id)
 
-    return render(request, 'users/pridat_vrh.html', {'zvíře': zvíře})
+
+@login_required
+def chovnost_psa(request, pes_id):
+    """Zobrazí stránku s detaily o chovnosti, RTG a testech."""
+    pes = get_object_or_404(Pes, id=pes_id)
+    return render(request, 'users/chovnost_psa.html', {
+        'pes': pes,
+        'je_majitel': pes.majitel == request.user
+    })
+
+
+@login_required
+def upravit_chovnost(request, pes_id):
+    """Zpracuje formulář pro aktualizaci chovnosti, bonitace a testů."""
+    pes = get_object_or_404(Pes, id=pes_id, majitel=request.user)
+
+    if request.method == 'POST':
+        # Načtení dat z formuláře (ujisti se, že name v HTML odpovídá těmto klíčům)
+        pes.chovnost = request.POST.get('chovnost')
+        pes.bonitace = request.POST.get('bonitace')
+        pes.zdravotni_testy = request.POST.get('zdravotni_testy')
+
+        # Pokud máš v modelu pole pro RTG (např. DKK, DLK)
+        pes.dkk = request.POST.get('dkk')
+        pes.dlk = request.POST.get('dlk')
+
+        pes.save()
+        return redirect('detail_psa', pes_id=pes.id)
+
+    return render(request, 'users/upravit_chovnost.html', {'pes': pes})
+

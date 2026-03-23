@@ -8,13 +8,26 @@
     :root {
         --sos-red: #d63031;
         --sos-green: #2ecc71;
-        --sos-green-light: #f1fcf4; /* Světle zelená pro horní kartu */
-        --species-color: {% if pes.druh == 'kocka' %}#5e478e{% else %}#5d4037{% endif %}; /* Lila / Hnědá */
+        --sos-green-light: #f1fcf4;
+        --species-color: {% if pes.druh == 'kocka' %}#5e478e{% else %}#5d4037{% endif %};
     }
-    .sos-container { max-width: 800px; margin: 20px auto; font-family: 'Plus Jakarta Sans', sans-serif; }
-    .btn-back { display: inline-flex; align-items: center; gap: 8px; color: #8d7d77; text-decoration: none; font-weight: 700; margin-bottom: 20px; }
 
-    /* 1. Horní karta - světle zelená */
+    .sos-container {
+        max-width: 800px;
+        margin: 20px auto;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #8d7d77;
+        text-decoration: none;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
     .safe-toggle-card {
         background: var(--sos-green-light);
         border-radius: 20px;
@@ -24,26 +37,107 @@
         margin-bottom: 25px;
     }
 
-    .switch { position: relative; display: inline-block; width: 80px; height: 44px; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-    .slider:before { position: absolute; content: ""; height: 36px; width: 36px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-    input:checked + .slider { background-color: var(--sos-green); }
-    input:checked + .slider:before { transform: translateX(36px); }
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 80px;
+        height: 44px;
+    }
 
-    .sos-card { background: white; border-radius: 25px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); margin-bottom: 20px; }
-    .pet-photo { width: 140px; height: 140px; object-fit: cover; border-radius: 50%; border: 4px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 15px; }
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
 
-    /* Tlačítka kontakt a vzkaz */
-    .contact-btn { background: var(--species-color); color: white !important; width: 100%; padding: 15px; border-radius: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none !important; border: none; }
-    .submit-msg-btn { background: var(--species-color); color: white; border: none; width: 100%; font-weight: 800; padding: 15px; border-radius: 15px; transition: 0.3s; }
-    .submit-msg-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 34px;
+    }
 
-    .medical-notice { background: #fff5f5; border-radius: 15px; padding: 15px; border-left: 5px solid var(--sos-red); margin-bottom: 20px; }
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 36px;
+        width: 36px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
 
-    /* Styl pro sekci očkování */
-    .vax-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #eee; }
-    .vax-item:last-child { border-bottom: none; }
+    input:checked + .slider {
+        background-color: var(--sos-green);
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(36px);
+    }
+
+    .sos-card {
+        background: white;
+        border-radius: 25px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+        margin-bottom: 20px;
+    }
+
+    .pet-photo {
+        width: 140px;
+        height: 140px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid white;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
+    }
+
+    .contact-btn {
+        background: var(--species-color);
+        color: white !important;
+        width: 100%;
+        padding: 15px;
+        border-radius: 15px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-decoration: none !important;
+        border: none;
+    }
+
+    .submit-msg-btn {
+        background: var(--species-color);
+        color: white;
+        border: none;
+        width: 100%;
+        font-weight: 800;
+        padding: 15px;
+        border-radius: 15px;
+        transition: 0.3s;
+    }
+
+    .submit-msg-btn:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+
+    .medical-notice {
+        background: #fff5f5;
+        border-radius: 15px;
+        padding: 15px;
+        border-left: 5px solid var(--sos-red);
+        margin-bottom: 20px;
+    }
 </style>
 
 <div class="sos-container px-3">
@@ -65,7 +159,7 @@
         <div class="col-md-5">
             <div class="sos-card text-center">
                 {% if pes.fotka %}
-                <img src="{{ pes.fotka.url }}" class="pet-photo">
+                    <img src="{{ pes.fotka.url }}" class="pet-photo">
                 {% endif %}
                 <h2 class="fw-800 mb-0" style="color: var(--species-color);">{{ pes.jmeno }}</h2>
                 <p class="text-muted fw-600">{{ pes.rasa|default:"Kříženec" }}</p>
@@ -75,8 +169,7 @@
                         <i class="fas fa-phone-alt"></i> ZOBRAZIT TELEFON
                     </button>
                     <div id="revealed-phone" style="display: none;" class="mt-3">
-                        <a href="tel:{{ pes.kontaktni_telefon|default:pes.majitel.telefon }}" class="contact-btn"
-                           style="background: var(--sos-green);">
+                        <a href="tel:{{ pes.kontaktni_telefon|default:pes.majitel.telefon }}" class="contact-btn" style="background: var(--sos-green);">
                             <i class="fas fa-phone-alt"></i> {{ pes.kontaktni_telefon|default:pes.majitel.telefon }}
                         </a>
                     </div>
@@ -86,33 +179,28 @@
 
         <div class="col-md-7">
             <div class="sos-card">
-                <h5 class="fw-800 mb-3"><i class="fas fa-notes-medical me-2" style="color: var(--sos-red);"></i> Zdraví
-                    a povaha</h5>
-
+                <h5 class="fw-800 mb-3"><i class="fas fa-notes-medical me-2" style="color: var(--sos-red);"></i> Zdraví a povaha</h5>
                 <div class="medical-notice">
-                    {# Zkusíme vypsat popis. Pokud neexistuje, vypíšeme testovací text #}
                     {% if pes.popis and pes.popis != "" %}
-                    <p class="mb-0 fw-bold text-dark" style="white-space: pre-wrap;">{{ pes.popis }}</p>
+                        <p class="mb-0 fw-bold text-dark" style="white-space: pre-wrap;">{{ pes.popis }}</p>
                     {% else %}
-                    <p class="text-muted small italic mb-0">
-                        <i class="fas fa-info-circle"></i> Majitel zatím nevyplnil žádné povahové vlastnosti.
-                    </p>
+                        <p class="text-muted small italic mb-0">
+                            <i class="fas fa-info-circle"></i> Majitel zatím nevyplnil žádné povahové vlastnosti.
+                        </p>
                     {% endif %}
                 </div>
             </div>
-        </div>
 
-        <div class="sos-card">
-            <h5 class="fw-800 mb-3">Zanechat zprávu</h5>
-            <form action="{% url 'odeslat_sos_email' pes.id %}" method="POST">
-                {% csrf_token %}
-                <textarea name="zprava" class="form-control mb-3 rounded-4 border-0 bg-light" rows="3"
-                          placeholder="Kde se zvíře nachází?"></textarea>
-                <button type="submit" class="submit-msg-btn">ODESLAT VZKAZ</button>
-            </form>
+            <div class="sos-card">
+                <h5 class="fw-800 mb-3"><i class="fas fa-envelope me-2"></i> Zanechat zprávu</h5>
+                <form action="{% url 'odeslat_sos_email' pes.id %}" method="POST">
+                    {% csrf_token %}
+                    <textarea name="zprava" class="form-control mb-3 rounded-4 border-0 bg-light" rows="3" placeholder="Kde se zvíře nachází?"></textarea>
+                    <button type="submit" class="submit-msg-btn">ODESLAT VZKAZ</button>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 </div>
 
 <script>
@@ -123,46 +211,52 @@
 
     document.getElementById('safeToggle').addEventListener('change', function() {
         const status = document.getElementById('statusResult');
-        if(this.checked) {
+        if (this.checked) {
             status.style.display = 'block';
-            status.innerHTML = 'Získávám polohu...';
+            status.style.color = "black";
+            status.innerHTML = '⌛ Získávám vaši polohu...';
+
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (pos) => sendPos(pos.coords.latitude, pos.coords.longitude),
-                    () => sendPos(null, null)
+                    (err) => {
+                        console.error(err);
+                        status.innerHTML = "⚠️ Musíte povolit GPS v prohlížeči.";
+                        status.style.color = "red";
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
                 );
+            } else {
+                status.innerHTML = "❌ Váš prohlížeč nepodporuje GPS.";
             }
         }
     });
 
     function sendPos(lat, lng) {
-    // Kontrola, zda máme souřadnice
-    if (!lat || !lng) {
-        document.getElementById('statusResult').innerHTML = "⚠️ Nepodařilo se získat polohu (GPS vypnuta).";
-        document.getElementById('statusResult').style.color = "red";
-        return;
-    }
+        const formData = new FormData();
+        formData.append('lat', lat);
+        formData.append('lon', lng);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
-    fetch("{% url 'odeslat_polohu' pes.id %}", {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": "{{ csrf_token }}",
-            "Content-Type": "application/json"
-        },
-        // Změněno lng -> lon, aby to sedělo na váš model
-        body: JSON.stringify({lat: lat, lon: lng})
-    })
-    .then(response => {
-        if (response.ok) {
-            document.getElementById('statusResult').innerHTML = "✅ Poloha odeslána. Majitel informován!";
-            document.getElementById('statusResult').style.color = "var(--sos-green)";
-        } else {
-            throw new Error('Chyba serveru');
-        }
-    })
-    .catch(error => {
-        document.getElementById('statusResult').innerHTML = "❌ Chyba při odesílání dat.";
-    });
-}
+        fetch("{% url 'odeslat_sos_email' pes.id %}", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                document.getElementById('statusResult').innerHTML = "✅ Poloha odeslána. Majitel informován!";
+                document.getElementById('statusResult').style.color = "green";
+            } else {
+                document.getElementById('statusResult').innerHTML = "❌ Chyba: " + data.message;
+                document.getElementById('statusResult').style.color = "red";
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            document.getElementById('statusResult').innerHTML = "❌ Chyba při spojení se serverem.";
+            document.getElementById('statusResult').style.color = "red";
+        });
+    }
 </script>
 {% endblock %}

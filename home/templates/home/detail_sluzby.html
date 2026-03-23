@@ -1,4 +1,33 @@
-{% extends "home/base.html" %} {% block content %}
+{% extends "home/base.html" %}
+{% block content %}
+<style>
+    .sos-detail-card {
+        border: 3px solid #ff0000;
+        background-color: #fff5f5;
+        border-radius: 15px;
+        animation: border-pulse 2s infinite;
+    }
+    @keyframes border-pulse {
+        0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4); }
+        70% { box-shadow: 0 0 0 15px rgba(255, 0, 0, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+    }
+    .btn-sos-profile {
+        background-color: #ff0000;
+        color: white;
+        font-weight: bold;
+        padding: 15px 25px;
+        border-radius: 50px;
+        text-transform: uppercase;
+        transition: 0.3s;
+    }
+    .btn-sos-profile:hover {
+        background-color: #8b0000;
+        color: white;
+        transform: scale(1.05);
+    }
+</style>
+
 <div class="container mt-5">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
@@ -7,31 +36,48 @@
         </ol>
     </nav>
 
+    {% if sluzba.typ == 'ztrata' %}
+    <div class="sos-detail-card p-4 mb-4 text-center shadow">
+        <h2 class="text-danger fw-bold"><i class="fas fa-exclamation-triangle"></i> PROBÍHÁ PÁTRÁNÍ!</h2>
+        <p class="lead mb-4">Tento záznam se týká pohřešovaného zvířete. Pokud ho zahlédnete, okamžitě kontaktujte majitele.</p>
+
+        <a href="#" class="btn btn-sos-profile shadow-lg">
+            <i class="fas fa-dog"></i> Zobrazit plný profil psa
+        </a>
+    </div>
+    {% endif %}
+
     <div class="card shadow-sm mt-4">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
                 <h1 class="card-title text-brown">{{ sluzba.nazev }}</h1>
-                <span class="badge bg-warning text-dark">{{ sluzba.get_typ_display }}</span>
+                <span class="badge {% if sluzba.typ == 'ztrata' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                    {{ sluzba.get_typ_display }}
+                </span>
             </div>
 
             <p class="text-muted"><i class="fas fa-map-marker-alt"></i> {{ sluzba.adresa }}</p>
             <hr>
 
-            <h5 class="mt-4">Popis služby</h5>
+            <h5 class="mt-4">Popis situace / služby</h5>
             <p class="card-text">{{ sluzba.popis|default:"Pro tuto službu nebyl zadán žádný podrobný popis." }}</p>
 
             <div class="row mt-4">
                 {% if sluzba.telefon %}
-                <div class="col-md-6">
-                    <strong>📞 Telefon:</strong>
-                    <p><a href="tel:{{ sluzba.telefon }}">{{ sluzba.telefon }}</a></p>
+                <div class="col-md-6 mb-3">
+                    <div class="p-3 border rounded bg-light">
+                        <strong>📞 Telefonní kontakt:</strong>
+                        <p class="h5 mt-2"><a href="tel:{{ sluzba.telefon }}" class="text-decoration-none">{{ sluzba.telefon }}</a></p>
+                    </div>
                 </div>
                 {% endif %}
 
                 {% if sluzba.web %}
-                <div class="col-md-6">
-                    <strong>🌐 Webové stránky:</strong>
-                    <p><a href="{{ sluzba.web }}" target="_blank">{{ sluzba.web }}</a></p>
+                <div class="col-md-6 mb-3">
+                    <div class="p-3 border rounded bg-light">
+                        <strong>🌐 Webové stránky / Sociální sítě:</strong>
+                        <p class="mt-2"><a href="{{ sluzba.web }}" target="_blank" class="text-break">{{ sluzba.web }}</a></p>
+                    </div>
                 </div>
                 {% endif %}
             </div>
@@ -44,10 +90,10 @@
                 {% if user == sluzba.vlastnik %}
                 <div class="ms-md-auto d-flex gap-2">
                     <a href="{% url 'upravit_sluzbu' sluzba.pk %}" class="btn btn-primary">
-                        <i class="fas fa-edit"></i> Upravit údaje
+                        <i class="fas fa-edit"></i> Upravit
                     </a>
 
-                    <a href="{% url 'smazat_sluzbu' sluzba.pk %}" class="btn btn-danger">
+                    <a href="{% url 'smazat_sluzbu' sluzba.pk %}" class="btn btn-danger" onclick="return confirm('Opravdu smazat?')">
                         <i class="fas fa-trash"></i> Smazat
                     </a>
                 </div>

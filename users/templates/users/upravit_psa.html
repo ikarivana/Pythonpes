@@ -1,8 +1,7 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
-      rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
@@ -22,40 +21,25 @@
         position: relative;
     }
 
+    .d-none-custom { display: none !important; }
     .section-title { font-size: 1.1rem; font-weight: 800; color: var(--t-brown); margin-bottom: 20px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; display: flex; align-items: center; gap: 10px; }
     .label-gold { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--t-gold); display: block; margin-bottom: 8px; }
     .input-clean { width: 100%; border: 1.5px solid #eee; border-radius: 12px; padding: 12px 15px; font-size: 0.95rem; transition: 0.3s; background: #fff; }
     .input-clean:focus { border-color: var(--t-gold); outline: none; box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.1); }
 
-    /* Fotka a Rotace */
     .photo-edit-wrapper { position: relative; width: 160px; height: 160px; margin: 0 auto 25px; }
-    .photo-preview-container {
-        width: 160px; height: 160px; border-radius: 25px; overflow: hidden;
-        border: 3px solid var(--t-gold); background: #f8f9fa;
-    }
+    .photo-preview-container { width: 160px; height: 160px; border-radius: 25px; overflow: hidden; border: 3px solid var(--t-gold); background: #f8f9fa; }
     .photo-preview { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
 
-    .rotate-btn {
-        position: absolute; bottom: -5px; right: -5px;
-        background: var(--t-gold); color: white; border: 2px solid white;
-        width: 45px; height: 45px; border-radius: 50%; display: flex;
-        align-items: center; justify-content: center; cursor: pointer;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: 0.2s;
-    }
+    .rotate-btn { position: absolute; bottom: -5px; right: -5px; background: var(--t-gold); color: white; border: 2px solid white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: 0.2s; }
     .rotate-btn:hover { transform: scale(1.1); background: var(--t-brown); }
 
-    /* Druh zvířete přepínač */
     .species-toggle { display: flex; gap: 40px; justify-content: center; margin: 20px 0; }
     .species-option { cursor: pointer; text-align: center; opacity: 0.3; transition: 0.3s; filter: grayscale(1); }
     .species-option.active { opacity: 1; transform: scale(1.15); color: var(--t-gold); filter: grayscale(0); }
     .species-option i { font-size: 2.5rem; margin-bottom: 5px; }
 
-    /* SOS Warning */
-    .sos-warning {
-        background: #fff5f5; border: 1px solid #feb2b2; padding: 15px;
-        border-radius: 15px; margin-top: 15px; font-size: 0.85rem; color: #c53030;
-    }
-
+    .sos-warning { background: #fff5f5; border: 1px solid #feb2b2; padding: 15px; border-radius: 15px; margin-top: 15px; font-size: 0.85rem; color: #c53030; }
     .btn-save-main { background: var(--t-brown); color: white; padding: 18px; border-radius: 20px; font-weight: 800; width: 100%; transition: 0.3s; cursor: pointer; border: none; font-size: 1.1rem; }
     .btn-save-main:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(62, 39, 35, 0.2); }
 </style>
@@ -63,7 +47,7 @@
 <div class="form-container">
     <div class="text-center mb-4">
         <h2 class="fw-800 m-0">Úprava profilu</h2>
-        <p class="text-muted">Kompletní správa SOS identity a zdraví</p>
+        <p class="text-muted">Správa SOS identity a údajů o zvířeti</p>
     </div>
 
     <form method="POST" enctype="multipart/form-data"> {% csrf_token %}
@@ -71,30 +55,24 @@
         <input type="hidden" name="foto_rotace" id="id_foto_rotace" value="{{ pes.foto_rotace|default:0 }}">
 
         <div class="edit-card text-center">
-            <h5 class="section-title justify-content-center"><i class="fas fa-camera"></i> Profilová fotografie</h5>
-
+            <h5 class="section-title justify-content-center"><i class="fas fa-camera"></i> Fotografie a druh</h5>
             <div class="photo-edit-wrapper">
                 <div class="photo-preview-container">
                     {% if pes.fotka %}
-                    <img src="{{ pes.fotka.url }}" id="preview" class="photo-preview"
-                         style="transform: rotate({{ pes.foto_rotace }}deg);">
+                        <img src="{{ pes.fotka.url }}" id="preview" class="photo-preview" style="transform: rotate({{ pes.foto_rotace }}deg);">
                     {% else %}
-                    <div id="no-photo" class="h-100 d-flex align-items-center justify-content-center">
-                        <i class="fas {% if pes.druh == 'kocka' %}fa-cat{% else %}fa-dog{% endif %} fa-4x text-muted opacity-25"></i>
-                    </div>
-                    <img id="preview" class="photo-preview d-none">
+                        <div id="no-photo" class="h-100 d-flex align-items-center justify-content-center">
+                            <i class="fas {% if pes.druh == 'kocka' %}fa-cat{% else %}fa-dog{% endif %} fa-4x text-muted opacity-25"></i>
+                        </div>
+                        <img id="preview" class="photo-preview d-none">
                     {% endif %}
                 </div>
-                <button type="button" class="rotate-btn" onclick="rotateImage()" title="Otočit fotku o 90°">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
+                <button type="button" class="rotate-btn" onclick="rotateImage()"><i class="fas fa-sync-alt"></i></button>
             </div>
-
             <div class="mx-auto mb-4" style="max-width: 400px;">
                 <label class="label-gold">Změnit fotografii</label>
                 <input type="file" name="fotka" class="input-clean" onchange="previewFile()">
             </div>
-
             <div class="species-toggle">
                 <div class="species-option" id="opt-pes" onclick="setSpecies('pes')">
                     <i class="fas fa-dog"></i><br><span class="fw-bold">Pejsek</span>
@@ -108,183 +86,59 @@
         <div class="edit-card">
             <h5 class="section-title"><i class="fas fa-paw"></i> Údaje o zvířeti</h5>
             <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="label-gold">Jméno *</label>
-                    <input type="text" name="jmeno" class="input-clean" value="{{ pes.jmeno|default:'' }}" required>
-                </div>
-                <div class="col-md-6">
-                    <label class="label-gold">Plemeno / Rasa *</label>
-                    <input type="text" name="rasa" class="input-clean" value="{{ pes.rasa|default:'' }}" required>
-                </div>
-                <div class="col-md-4">
-                    <label class="label-gold">Váha (kg)</label>
-                    <input type="number" name="vaha" class="input-clean" step="0.1" value="{{ pes.vaha|default:'' }}">
-                </div>
-                <div class="col-md-4">
-                    <label class="label-gold">Datum narození</label>
-                    <input type="date" name="datum_narozeni" class="input-clean"
-                           value="{{ pes.datum_narozeni|date:'Y-m-d' }}">
-                </div>
-                <div class="col-md-4">
-                    <label class="label-gold">Identifikační čip</label>
-                    <input type="text" name="cip" class="input-clean" value="{{ pes.cip|default:'' }}"
-                           placeholder="Kód mikročipu">
-                    <small class="text-muted d-block mt-1" style="font-size: 0.65rem; line-height: 1.2;">
-                        <i class="fas fa-info-circle text-primary"></i> Čip není nutný pro profil, ale **doporučujeme
-                        jej uvést** pro rychlejší identifikaci v útulku.
-                    </small>
+                <div class="col-md-6"><label class="label-gold">Jméno *</label><input type="text" name="jmeno" class="input-clean" value="{{ pes.jmeno|default:'' }}" required></div>
+                <div class="col-md-6"><label class="label-gold">Rasa / Plemeno *</label><input type="text" name="rasa" class="input-clean" value="{{ pes.rasa|default:'' }}" required></div>
+                <div class="col-md-4"><label class="label-gold">Váha (kg)</label><input type="number" name="vaha" class="input-clean" step="0.1" value="{{ pes.vaha|default:'' }}"></div>
+                <div class="col-md-4"><label class="label-gold">Datum narození</label><input type="date" name="datum_narozeni" class="input-clean" value="{{ pes.datum_narozeni|date:'Y-m-d' }}"></div>
+                <div class="col-md-4"><label class="label-gold">Identifikační čip</label><input type="text" name="cip" class="input-clean" value="{{ pes.cip|default:'' }}"></div>
+            </div>
+        </div>
+
+        <div class="edit-card">
+            <h5 class="section-title"><i class="fas fa-award text-warning"></i> Chovnost a Původ</h5>
+            <div class="row g-3">
+                <div class="col-md-12"><label class="label-gold">Chovatelská stanice</label><input type="text" name="chovatelska_stanice" class="input-clean" value="{{ pes.chovatelska_stanice|default:'' }}"></div>
+                <div class="col-md-6"><label class="label-gold">Otec (Sir)</label><input type="text" name="otec_manualni" class="input-clean" value="{{ pes.otec_manualni|default:'' }}"></div>
+                <div class="col-md-6"><label class="label-gold">Matka (Dam)</label><input type="text" name="matka_manualni" class="input-clean" value="{{ pes.matka_manualni|default:'' }}"></div>
+
+                <div class="col-md-6 only-pes"><label class="label-gold">Bonitace</label><input type="text" name="bonitace" class="input-clean" value="{{ pes.bonitace|default:'' }}"></div>
+                <div class="col-md-6 only-pes"><label class="label-gold">Skupina / Barva</label><input type="text" name="skupina_barva" class="input-clean" value="{{ pes.skupina_barva|default:'' }}"></div>
+                <div class="col-md-4 only-pes"><label class="label-gold">RTG HD</label><input type="text" name="rtg_hd" class="input-clean" value="{{ pes.rtg_hd|default:'' }}"></div>
+                <div class="col-md-4 only-pes"><label class="label-gold">RTG ED</label><input type="text" name="rtg_ed" class="input-clean" value="{{ pes.rtg_ed|default:'' }}"></div>
+                <div class="col-md-4 only-pes"><label class="label-gold">RTG Páteř</label><input type="text" name="rtg_pater" class="input-clean" value="{{ pes.rtg_pater|default:'' }}"></div>
+
+                <div class="col-12"><label class="label-gold">Výstavy a tituly</label><textarea name="tituly" class="input-clean" rows="2">{{ pes.tituly|default:'' }}</textarea></div>
+                <div class="col-12">
+                    <label class="label-gold">Rodokmen (PDF)</label>
+                    <input type="file" name="rodokmen_pdf" class="input-clean" accept="application/pdf">
                 </div>
             </div>
         </div>
 
         <div class="edit-card" style="background: #fffcf9; border: 1.5px solid rgba(220, 53, 69, 0.2);">
-            <h5 class="section-title"><i class="fas fa-shield-alt text-danger"></i> SOS Profil a Kontakty na vás</h5>
+            <h5 class="section-title"><i class="fas fa-shield-alt text-danger"></i> SOS Kontakty a Adresa</h5>
             <div class="row g-3">
-                <div class="col-md-4">
-                    <label class="label-gold">Vaše jméno (SOS Kontakt) *</label>
-                    <input type="text" name="kontaktni_jmeno" class="input-clean"
-                           value="{{ pes.kontaktni_jmeno|default:'' }}" required>
-                </div>
-                <div class="col-md-4">
-                    <label class="label-gold">Telefonní číslo *</label>
-                    <input type="text" name="kontaktni_telefon" class="input-clean"
-                           value="{{ pes.kontaktni_telefon|default:'' }}" required placeholder="+420 ...">
-                </div>
-                <div class="col-md-4">
-                    <label class="label-gold">E-mail pro kontakt *</label>
-                    <input type="email" name="kontaktni_email" class="input-clean"
-                           value="{{ pes.kontaktni_email|default:'' }}" required placeholder="vas@email.cz">
-                </div>
+                <div class="col-md-4"><label class="label-gold">SOS Jméno *</label><input type="text" name="kontaktni_jmeno" class="input-clean" value="{{ pes.kontaktni_jmeno|default:'' }}" required></div>
+                <div class="col-md-4"><label class="label-gold">SOS Telefon *</label><input type="text" name="kontaktni_telefon" class="input-clean" value="{{ pes.kontaktni_telefon|default:'' }}" required></div>
+                <div class="col-md-4"><label class="label-gold">SOS E-mail *</label><input type="email" name="kontaktni_email" class="input-clean" value="{{ pes.kontaktni_email|default:'' }}" required></div>
+
                 <div class="col-12">
                     <label class="label-gold">Adresa pro zaslání dárků nebo známky</label>
-                    <input type="text" name="adresa_pro_darky" class="input-clean"
-                           value="{{ pes.adresa_pro_darky|default:'' }}" placeholder="Ulice, č.p., město, PSČ">
-                    <small class="text-muted"><i class="fas fa-gift text-warning"></i> Tato adresa umožní nálezci zaslat
-                        vám nalezenou známku nebo dáreček od ePes.online.</small>
+                    <input type="text" name="adresa_pro_darky" class="input-clean" value="{{ pes.adresa_pro_darky|default:'' }}" placeholder="Ulice, č.p., město, PSČ">
+                    <small class="text-muted"><i class="fas fa-gift text-warning"></i> Pokud nálezce najde známku, může vám ji (nebo dárek) poslat na tuto adresu.</small>
                 </div>
 
                 <div class="col-12 mt-4">
                     <div class="p-4 border rounded-4 bg-white shadow-sm">
-                        <div class="row align-items-center">
-                            <div class="col-md-3 text-center mb-3 mb-md-0">
-                                <div class="p-2 bg-light rounded-4 border d-inline-block">
-                                    <i class="fas fa-qrcode fa-4x text-muted opacity-50"></i>
-                                    <div class="small fw-bold text-muted mt-1" style="font-size: 0.6rem;">SOS IDENTITA
-                                    </div>
-                                </div>
+                        <label class="d-flex align-items-start gap-3 fw-bold" style="cursor: pointer;">
+                            <input type="checkbox" name="regenerovat_qr" style="width: 25px; height: 25px;">
+                            <div>
+                                <span class="text-danger">GENEROVAT NOVOU SOS IDENTITU (QR)</span>
+                                <p class="text-muted fw-normal small mb-0">Zaškrtněte pouze v případě, že jste ztratili známku.</p>
                             </div>
-                            <div class="col-md-9">
-                                <label class="d-flex align-items-start gap-3 fw-bold" style="cursor: pointer;">
-                                    <input type="checkbox" name="regenerovat_qr"
-                                           style="width: 28px; height: 28px; margin-top: 2px;">
-                                    <div>
-                                        <span class="d-block text-danger">AKTIVOVAT NOVÝ SOS KÓD</span>
-                                        <p class="text-muted fw-normal small mb-0">Zaškrtněte pouze v případě, že jste
-                                            ztratili známku.</p>
-                                    </div>
-                                </label>
-                                <div class="sos-warning mt-3">
-                                    <i class="fas fa-exclamation-triangle"></i> <strong>POZOR:</strong> Aktivací nové
-                                    identity se stará známka okamžitě <strong>zneplatní</strong> pro nálezce!
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="edit-card">
-            <h5 class="section-title"><i class="fas fa-award text-warning"></i> Chovnost a Původ</h5>
-            <div class="row g-3">
-                <div class="col-md-12">
-                    <label class="label-gold">Chovatelská stanice</label>
-                    <input type="text" name="chovatelska_stanice" class="input-clean"
-                           value="{{ pes.chovatelska_stanice|default:'' }}" placeholder="Např. Od Zlaté řeky">
-                </div>
-
-                <div class="col-md-6">
-                    <label class="label-gold">Otec (Sir)</label>
-                    <input type="text" name="otec_manualni" class="input-clean"
-                           value="{{ pes.otec_manualni|default:'' }}"
-                           placeholder="Jméno otce">
-                </div>
-                <div class="col-md-6">
-                    <label class="label-gold">Matka (Dam)</label>
-                    <input type="text" name="matka_manualni" class="input-clean"
-                           value="{{ pes.matka_manualni|default:'' }}"
-                           placeholder="Jméno matky">
-                </div>
-
-                <div class="col-md-6">
-                    <label class="label-gold">Bonitace / Chovnost</label>
-                    <input type="text" name="bonitace" class="input-clean" value="{{ pes.bonitace|default:'' }}"
-                           placeholder="Např. Chovný, Výborný">
-                </div>
-                <div class="col-md-6">
-                    <label class="label-gold">Skupina / Barva</label>
-                    <input type="text" name="skupina_barva" class="input-clean"
-                           value="{{ pes.skupina_barva|default:'' }}" placeholder="Např. Černá se znaky">
-                </div>
-                <div class="row g-2 mt-2">
-                    <div class="col-md-4">
-                        <label class="label-gold">RTG HD (Kyčle)</label>
-                        <input type="text" name="rtg_hd" class="input-clean" value="{{ pes.rtg_hd|default:'' }}"
-                               placeholder="Např. A/A">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="label-gold">RTG ED (Lokty)</label>
-                        <input type="text" name="rtg_ed" class="input-clean" value="{{ pes.rtg_ed|default:'' }}"
-                               placeholder="Např. 0/0">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="label-gold">RTG Páteř</label>
-                        <input type="text" name="rtg_pater" class="input-clean" value="{{ pes.rtg_pater|default:'' }}"
-                               placeholder="Např. SA 0">
-                    </div>
-                </div>
-
-                <div class="col-12">
-                    <label class="label-gold">Dosažené tituly a výstavy</label>
-                    <textarea name="tituly" class="input-clean" rows="2"
-                              placeholder="Např. 3x CAC, 2x res. CACIB, Junior Šampion...">{{ pes.tituly|default:'' }}</textarea>
-                </div>
-
-                <div class="col-12">
-                    <label class="label-gold">Nahrát rodokmen (PDF)</label>
-                    <div class="d-flex align-items-center gap-3">
-                        <input type="file" name="rodokmen_pdf" class="input-clean" accept="application/pdf">
-                        {% if pes.rodokmen_pdf %}
-                        <span class="badge bg-success"><i class="fas fa-check"></i> Nahráno</span>
-                        {% endif %}
-                    </div>
-                    <small class="text-muted">Připojením PDF umožníte nálezci nebo zájemcům nahlédnout do
-                        původu.</small>
-                </div>
-                <div class="edit-card">
-                    <h5 class="section-title"><i class="fas fa-trophy text-warning"></i> Výstavy a odchovy</h5>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="label-gold">Historie výstav</label>
-                            <div class="d-grid gap-2">
-                                <a href="{% url 'pridat_uspech' pes.id %}"
-                                   class="btn btn-outline-dark rounded-pill py-2 shadow-sm">
-                                    <i class="fas fa-plus-circle me-1"></i> Zapsat novou výstavu
-                                </a>
-                            </div>
-                            <small class="text-muted d-block mt-2">Zde můžete přidat konkrétní výstavu, datum a získané
-                                ocenění.</small>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="label-gold">Záznamy vrhů</label>
-                            <div class="d-grid gap-2">
-                                <a href="{% url 'pridat_vrh' pes.id %}"
-                                   class="btn btn-outline-dark rounded-pill py-2 shadow-sm">
-                                    <i class="fas fa-baby-carriage me-1"></i> Zapsat nový vrh
-                                </a>
-                            </div>
-                            <small class="text-muted d-block mt-2">Pro chovné jedince: evidence narozených štěňat a
-                                datumů.</small>
+                        </label>
+                        <div class="sos-warning mt-2">
+                            <i class="fas fa-exclamation-triangle"></i> <strong>POZOR:</strong> Tato akce <strong>zneplatní</strong> vaši současnou známku. Původní QR kód už nebude po naskenování fungovat!
                         </div>
                     </div>
                 </div>
@@ -292,43 +146,12 @@
         </div>
 
         <div class="edit-card">
-            <h5 class="section-title"><i class="fas fa-heartbeat text-success"></i> Zdravotní karta</h5>
+            <h5 class="section-title"><i class="fas fa-heartbeat text-success"></i> Zdraví a Pokyny</h5>
             <div class="row g-3">
-                <div class="col-md-4">
-                    <label class="label-gold">Poslední očkování</label>
-                    <input type="date" name="posledni_ockovani" class="input-clean"
-                           value="{{ pes.posledni_ockovani|date:'Y-m-d' }}">
-                </div>
-                <div class="col-md-4">
-                    <label class="label-gold">Poslední odčervení</label>
-                    <input type="date" name="posledni_odcerveni" class="input-clean"
-                           value="{{ pes.posledni_odcerveni|date:'Y-m-d' }}">
-                </div>
-                <div class="col-md-4">
-                    <label class="label-gold">Klíšťata / Blechy</label>
-                    <input type="date" name="posledni_klistata" class="input-clean"
-                           value="{{ pes.posledni_klistata|date:'Y-m-d' }}">
-                </div>
-                <div class="col-12">
-                    <label class="label-gold">Poznámky lékaře / Alergie</label>
-                    <textarea name="zdravotni_poznamky" class="input-clean" rows="3"
-                              placeholder="Alergie, léky nebo důležitá zdravotní upozornění...">{{ pes.zdravotni_poznamky|default:'' }}</textarea>
-                </div>
-            </div>
-        </div>
-        <div class="edit-card">
-            <h5 class="section-title"><i class="fas fa-comment-dots text-primary"></i> Povaha a instrukce pro nálezce
-                (Free)</h5>
-            <div class="row g-3">
-                <div class="col-12">
-                    <label class="label-gold">Popis zvířete a pokyny pro nouzi</label>
-                    <textarea name="popis" class="input-clean" rows="4"
-                              placeholder="Napište vše, co by měl nálezce vědět. Např.: Je plachý, slyší na jméno, miluje piškoty, nesnáší psy...">{{ pes.popis|default:'' }}</textarea>
-                    <small class="text-muted">
-                        <i class="fas fa-info-circle"></i> Tento text uvidí každý, kdo naskenuje známku, když bude zvíře
-                        <strong>ztracené</strong>.
-                    </small>
-                </div>
+                <div class="col-md-4"><label class="label-gold">Očkování</label><input type="date" name="posledni_ockovani" class="input-clean" value="{{ pes.posledni_ockovani|date:'Y-m-d' }}"></div>
+                <div class="col-md-4"><label class="label-gold">Odčervení</label><input type="date" name="posledni_odcerveni" class="input-clean" value="{{ pes.posledni_odcerveni|date:'Y-m-d' }}"></div>
+                <div class="col-md-4"><label class="label-gold">Klíšťata</label><input type="date" name="posledni_klistata" class="input-clean" value="{{ pes.posledni_klistata|date:'Y-m-d' }}"></div>
+                <div class="col-12"><label class="label-gold">Popis pro nálezce (Povaha, alergie...)</label><textarea name="popis" class="input-clean" rows="4">{{ pes.popis|default:'' }}</textarea></div>
             </div>
         </div>
 
@@ -339,15 +162,34 @@
 </div>
 
 <script>
-    let currentRotation = {{ pes.foto_rotace|default:0 }};
+    function setSpecies(druh) {
+        document.getElementById('id_druh').value = druh;
+        const optPes = document.getElementById('opt-pes');
+        const optKocka = document.getElementById('opt-kocka');
+        const placeholderIcon = document.querySelector('#no-photo i');
+        const pesFields = document.querySelectorAll('.only-pes');
+
+        if (druh === 'kocka') {
+            document.body.classList.add('is-kocka');
+            optKocka.classList.add('active');
+            optPes.classList.remove('active');
+            pesFields.forEach(el => el.classList.add('d-none-custom'));
+            if (placeholderIcon) placeholderIcon.className = 'fas fa-cat fa-4x text-muted opacity-25';
+        } else {
+            document.body.classList.remove('is-kocka');
+            optPes.classList.add('active');
+            optKocka.classList.remove('active');
+            pesFields.forEach(el => el.classList.remove('d-none-custom'));
+            if (placeholderIcon) placeholderIcon.className = 'fas fa-dog fa-4x text-muted opacity-25';
+        }
+    }
 
     function rotateImage() {
-        currentRotation = (currentRotation + 90) % 360;
+        let rotationInput = document.getElementById('id_foto_rotace');
+        let currentRotation = (parseInt(rotationInput.value) + 90) % 360;
+        rotationInput.value = currentRotation;
         const img = document.getElementById('preview');
-        if (img) {
-            img.style.transform = `rotate(${currentRotation}deg)`;
-        }
-        document.getElementById('id_foto_rotace').value = currentRotation;
+        if (img) img.style.transform = `rotate(${currentRotation}deg)`;
     }
 
     function previewFile() {
@@ -355,48 +197,17 @@
         const noPhoto = document.getElementById('no-photo');
         const file = document.querySelector('input[type=file]').files[0];
         const reader = new FileReader();
-
-        reader.onloadend = function () {
+        reader.onloadend = () => {
             if (noPhoto) noPhoto.classList.add('d-none');
             preview.classList.remove('d-none');
             preview.src = reader.result;
-            currentRotation = 0;
             preview.style.transform = `rotate(0deg)`;
             document.getElementById('id_foto_rotace').value = 0;
         }
-
-        if (file) { reader.readAsDataURL(file); }
+        if (file) reader.readAsDataURL(file);
     }
 
-    function setSpecies(druh) {
-        document.getElementById('id_druh').value = druh;
-        const optPes = document.getElementById('opt-pes');
-        const optKocka = document.getElementById('opt-kocka');
-
-        // Najdeme ikonu v náhledu, pokud tam ještě není fotka
-        const placeholderIcon = document.querySelector('#no-photo i');
-
-        if (druh === 'kocka') {
-            document.body.classList.add('is-kocka');
-            optKocka.classList.add('active');
-            optPes.classList.remove('active');
-            // Změna ikony na kočku
-            if (placeholderIcon) {
-                placeholderIcon.className = 'fas fa-cat fa-4x text-muted opacity-25';
-            }
-        } else {
-            document.body.classList.remove('is-kocka');
-            optPes.classList.add('active');
-            optKocka.classList.remove('active');
-            // Změna ikony na psa
-            if (placeholderIcon) {
-                placeholderIcon.className = 'fas fa-dog fa-4x text-muted opacity-25';
-            }
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // Inicializace při načtení stránky
+    document.addEventListener('DOMContentLoaded', () => {
         setSpecies(document.getElementById('id_druh').value);
     });
 </script>

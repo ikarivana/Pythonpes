@@ -1,61 +1,87 @@
-{% extends "base.html" %}
+{% extends 'home/base.html' %}
 {% block content %}
-<div class="container mt-5">
-    <div class="card shadow">
-        <div class="card-header bg-dark text-white">
-            <h4 class="mb-0">
-                <i class="fas fa-baby-carriage"></i>
-                Nový vrh pro: {{ zvíře.jmeno }}
-                <small>({% if zvíře.druh == 'kocka' %}Kočka{% else %}Pes{% endif %})</small>
-            </h4>
+<div class="container py-5">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <a href="{% url 'detail_psa' pes.id %}" class="text-decoration-none text-muted small fw-bold">
+                <i class="fas fa-arrow-left me-1"></i> ZPĚT NA PROFIL
+            </a>
+            <h2 class="fw-800 mt-2" style="color: #6f42c1;">Přehled vrhů: {{ pes.jmeno }}</h2>
         </div>
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Označení vrhu</label>
-                        <input type="text" name="oznaceni_vrhu" class="form-control" placeholder="Např. Vrh A" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Datum narození</label>
-                        <input type="date" name="datum_narozeni" class="form-control" required>
-                    </div>
-                </div>
+        {% if je_majitel %}
+            <button class="btn btn-dark rounded-pill px-4 fw-bold" data-bs-toggle="modal" data-bs-target="#modalVrh">
+                <i class="fas fa-plus me-2"></i>PŘIDAT VRH
+            </button>
+        {% endif %}
+    </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">
-                            {% if zvíře.druh == 'kocka' %}Počet kocourů{% else %}Počet psů (samců){% endif %}
-                        </label>
-                        <input type="number" name="pocet_samcu" class="form-control" value="0" min="0">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">
-                            {% if zvíře.druh == 'kocka' %}Počet koček{% else %}Počet fen (samic){% endif %}
-                        </label>
-                        <input type="number" name="pocet_samic" class="form-control" value="0" min="0">
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">
-                        {% if zvíře.druh == 'kocka' %}Otec koťat{% else %}Otec štěňat{% endif %} (druhý rodič)
-                    </label>
-                    <input type="text" name="druhy_rodic" class="form-control">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Poznámka</label>
-                    <textarea name="poznamka" class="form-control" rows="3"></textarea>
-                </div>
-
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary">Uložit záznam</button>
-                    <a href="{% url 'upravit_psa' zvíře.id %}" class="btn btn-outline-secondary">Zrušit</a>
-                </div>
-            </form>
+    <div class="row g-3 mb-5">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 text-center">
+                <small class="text-muted fw-bold text-uppercase">Celkem vrhů</small>
+                <h3 class="fw-800 mb-0">{{ pes.potomci.count }}</h3>
+            </div>
         </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 text-center border-start border-4" style="border-color: #6f42c1 !important;">
+                <small class="text-muted fw-bold text-uppercase">Celkem potomků</small>
+                <h3 class="fw-800 mb-0">
+                    {{ celkovy_pocet_stenat }}
+                </h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for vrh in vrhy %}
+            <div class="col-12 mb-4">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-2 text-center border-end">
+                                <div class="display-6 fw-800 text-primary">{{ vrh.oznaceni_vrhu }}</div>
+                                <div class="small fw-bold text-muted">{{ vrh.datum_narozeni|date:"d.m.Y" }}</div>
+                            </div>
+                            <div class="col-md-5 ps-md-4">
+                                <h5 class="fw-800 mb-1">Partner / Druhý rodič</h5>
+                                <p class="text-muted mb-0"><i class="fas fa-heart me-2 text-danger"></i>{{ vrh.druhy_rodic }}</p>
+                                {% if vrh.poznamka %}
+                                    <div class="mt-2 small italic text-muted">
+                                        <strong>Poznámka:</strong> {{ vrh.poznamka }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="d-flex justify-content-center gap-4">
+                                    <div>
+                                        <i class="fas fa-mars fa-2x text-primary opacity-25"></i>
+                                        <div class="fw-800 h4 mb-0">{{ vrh.pocet_psu }}</div>
+                                        <small class="text-muted fw-bold">PSI</small>
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-venus fa-2x text-danger opacity-25"></i>
+                                        <div class="fw-800 h4 mb-0">{{ vrh.pocet_fen }}</div>
+                                        <small class="text-muted fw-bold">FENY</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-end">
+                                {% if je_majitel %}
+                                    <button class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5">
+                <img src="/static/images/empty-paw.svg" style="width: 80px; opacity: 0.2;">
+                <p class="text-muted mt-3">Zatím nebyly evidovány žádné vrhy.</p>
+            </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

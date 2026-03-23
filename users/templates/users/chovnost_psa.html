@@ -1,0 +1,85 @@
+{% extends 'home/base.html' %}
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <a href="{% url 'detail_psa' pes.id %}" class="text-decoration-none text-muted small fw-bold">
+            <i class="fas fa-arrow-left me-1"></i> ZPĚT NA PROFIL
+        </a>
+        <h2 class="fw-800 mt-3"><i class="fas fa-award text-primary me-2"></i>Chovná karta: {{ pes.jmeno }}</h2>
+        <span class="badge {% if pes.chovnost == 'Chovný' %}bg-success{% else %}bg-secondary{% endif %} px-4 py-2 rounded-pill">
+            {{ pes.chovnost|upper|default:"NEPOSOUZENO" }}
+        </span>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">Bonitace a uchovnění</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-4 p-3 bg-light rounded-3">
+                        <label class="small fw-bold text-muted d-block mb-1">BONITAČNÍ KÓD</label>
+                        <span class="h5 fw-800 text-dark">{{ pes.bonitace|default:"Nebyla provedena" }}</span>
+                    </div>
+
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
+                            <span class="text-muted">Datum uchovnění</span>
+                            <span class="fw-bold">{{ pes.datum_uchovneni|date:"d.m.Y"|default:"-" }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
+                            <span class="text-muted">Klub / Organizace</span>
+                            <span class="fw-bold">{{ pes.klub|default:"-" }}</span>
+                        </li>
+                    </ul>
+
+                    {% if je_majitel %}
+                    <div class="mt-4">
+                        <a href="{% url 'upravit_psa' pes.id %}" class="btn btn-outline-primary w-100 rounded-pill fw-bold">
+                            <i class="fas fa-edit me-2"></i>UPRAVIT ÚDAJE
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between">
+                    <h5 class="fw-bold mb-0">Zdravotní testy (RTG, DNA, Klinika)</h5>
+                    <i class="fas fa-microscope text-muted"></i>
+                </div>
+                <div class="card-body p-4">
+                    <div class="p-4 rounded-4 border-start border-4 border-primary bg-light mb-4">
+                        <p class="mb-0 text-dark fw-600" style="white-space: pre-wrap;">{{ pes.zdravotni_testy|default:"Žádné testy nebyly zatím zveřejněny." }}</p>
+                    </div>
+
+                    <div class="alert alert-info border-0 rounded-4 small">
+                        <i class="fas fa-info-circle me-2"></i> 
+                        Tyto výsledky jsou potvrzeny oficiálními certifikáty uloženými v registru majitele.
+                    </div>
+                    
+                    {% if pes.druh == 'pes' %}
+                    <div class="row g-2 mt-2">
+                        <div class="col-6">
+                            <div class="p-2 border rounded-3 text-center">
+                                <small class="d-block text-muted">RTG DKK</small>
+                                <strong class="text-primary">{{ pes.rtg_dkk|default:"-" }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 border rounded-3 text-center">
+                                <small class="d-block text-muted">RTG DLK</small>
+                                <strong class="text-primary">{{ pes.rtg_dlk|default:"-" }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

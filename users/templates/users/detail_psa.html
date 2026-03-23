@@ -1,7 +1,8 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
@@ -10,309 +11,302 @@
         --alfa-gold: #c5a059;
         --alfa-bg: #fdfaf6;
         --alfa-danger: #dc3545;
-        --sos-red: #d63031;
         --sos-green: #2ecc71;
-        --sos-green-light: #f1fcf4;
-        --species-color: {% if pes.druh == 'kocka' %}#8e44ad{% else %}#3e2723{% endif %};
+        --species-color: {% if pes.druh == 'kocka' %}#8e44ad{% else %}#c5a059{% endif %};
+        --species-dark: {% if pes.druh == 'kocka' %}#703688{% else %}#3e2723{% endif %};
         --species-light: {% if pes.druh == 'kocka' %}rgba(142, 68, 173, 0.1){% else %}rgba(197, 160, 89, 0.1){% endif %};
     }
 
-    .pulse-sos { animation: sos-pulse-light 2.5s infinite; }
-    .shadow-sos { box-shadow: 0 10px 40px rgba(220, 53, 69, 0.08) !important; }
-    .sos-icon-circle { width: 50px; height: 50px; }
-
-    @keyframes blink-sos {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-    }
-
-    @keyframes sos-pulse-light {
-        0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.1); }
-        70% { box-shadow: 0 0 0 15px rgba(220, 53, 69, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
-    }
-
-    .hvr-grow { transition: transform 0.2s; text-decoration: none !important; }
-    .hvr-grow:hover { transform: scale(1.03); }
+    .hover-opacity:hover { opacity: 0.7; transition: 0.2s; }
+    .hover-gold:hover { color: #b8860b !important; transition: 0.2s; }
+    .hover-dark:hover { opacity: 0.7; transition: 0.2s; color: #000 !important; }
 
     body { background-color: var(--alfa-bg); font-family: 'Plus Jakarta Sans', sans-serif; color: var(--alfa-brown); }
 
-    .profile-card-top { background: white; border-radius: 25px; padding: 25px; border: 2px solid var(--species-color); box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 25px; }
-    .profile-img { width: 130px; height: 130px; border-radius: 20px; object-fit: cover; border: 2px solid var(--species-color); padding: 4px; background: white; }
-    .btn-stack { width: 100%; padding: 11px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; transition: 0.2s; cursor: pointer; margin-bottom: 6px; }
-    .btn-ztrata { background: var(--alfa-danger); color: white; }
-    .btn-uprava { background: var(--species-color); color: white; }
-    .btn-species-outline { border: 2px solid var(--species-color) !important; color: var(--species-color) !important; font-weight: 800; border-radius: 15px; background: transparent; }
-    .info-card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; border: 1px solid var(--species-light); position: relative; }
-    .premium-lock { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.85); backdrop-filter: blur(4px); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 20px; text-align: center; padding: 20px; }
-    .btn-mini { padding: 4px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; text-decoration: none; border: none; transition: 0.2s; cursor: pointer; }
-    .btn-mini-species { background: var(--species-color); color: white; }
-    .btn-mini-dark { background: var(--alfa-brown); color: white; }
-    .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; }
-    .media-container { aspect-ratio: 1/1; border-radius: 15px; overflow: hidden; background: #eee; border: 1px solid #ddd; }
-    .media-item { width: 100%; height: 100%; object-fit: cover; }
+    /* Karty */
+    .profile-header-card { background: white; border-radius: 20px; padding: 25px; border: 1px solid var(--species-light); margin-bottom: 20px; }
+    .info-card { background: white; border-radius: 20px; padding: 20px; border: 1px solid var(--species-light); margin-bottom: 15px; height: 100%; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
 
-    .safe-toggle-card { background: var(--sos-green-light); border-radius: 20px; padding: 25px; text-align: center; border: 2px solid #e0f2e5; margin-bottom: 25px; }
-    .switch { position: relative; display: inline-block; width: 80px; height: 44px; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-    .slider:before { position: absolute; content: ""; height: 36px; width: 36px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-    input:checked + .slider { background-color: var(--sos-green); }
-    input:checked + .slider:before { transform: translateX(36px); }
-    .contact-btn { background: var(--species-color); color: white !important; width: 100%; padding: 15px; border-radius: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none !important; border: none; }
-    .medical-notice { background: #fff5f5; border-radius: 15px; padding: 15px; border-left: 5px solid var(--sos-red); margin-bottom: 20px; }
+    /* Obrázek a QR */
+    .main-profile-img { width: 120px; height: 120px; border-radius: 20px; object-fit: cover; border: 4px solid var(--species-color); }
+    .qr-thumb { width: 60px; height: 60px; border-radius: 10px; cursor: pointer; border: 1px solid #eee; }
+
+    /* Tlačítka */
+    .btn-stack { width: 100%; padding: 12px 5px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; text-decoration: none !important; transition: 0.2s; }
+    .btn-ztrata { background: var(--alfa-danger); color: white; }
+    .btn-doma { background: var(--sos-green); color: white; }
+    .btn-uprava { background: var(--alfa-brown); color: white; }
+    .btn-pdf { background: #1a1a1a; color: white; }
+    .btn-outline-species { border: 2px solid var(--species-color); color: var(--species-color); background: transparent; }
+    .btn-xs { padding: 4px 12px; font-size: 0.75rem; border-radius: 10px; font-weight: 700; border: none; }
+
+    /* Galerie Grid */
+    .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+    .media-container { position: relative; aspect-ratio: 1/1; overflow: hidden; border-radius: 12px; }
+    .media-item { width: 100%; height: 100%; object-fit: cover; }
+    .video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); color: white; cursor: pointer; }
+    .delete-btn { position: absolute; top: 5px; right: 5px; background: rgba(255, 0, 0, 0.8); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 14px; display: flex; align-items: center; justify-content: center; z-index: 10; }
 </style>
 
 <div class="container py-4">
-
-    {% if pes.je_ztraceny %}
-        <div class="sos-container mx-auto" style="max-width: 800px;">
-            {% if je_majitel %}
-                <div class="alert alert-danger border-0 shadow-lg rounded-4 mb-4 p-3 shadow-sos pulse-sos" style="background: white; border-left: 5px solid #d63031 !important;">
-                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="sos-icon-circle bg-light rounded-circle p-3 d-flex align-items-center justify-content-center">
-                                <i class="fas fa-exclamation-triangle fa-lg text-danger blink-sos"></i>
-                            </div>
-                            <div>
-                                <h5 class="fw-800 m-0 text-dark" style="font-size: 1.1rem; letter-spacing: -0.5px;">SOS REŽIM AKTIVNÍ</h5>
-                                <p class="small text-muted m-0">Tuto lištu vidíte pouze vy jako majitel.</p>
-                            </div>
-                        </div>
-                        <div class="d-flex gap-2 justify-content-center">
-                            <a href="{% url 'upravit_psa' pes.id %}" class="btn btn-sm btn-white bg-white rounded-pill px-4 fw-bold shadow-sm hvr-grow" style="color: #1a1a1a !important; border: 1px solid #ddd !important;">
-                                <i class="fas fa-edit me-1 text-primary"></i> SPRAVOVAT
-                            </a>
-                            <a href="{% url 'prepnout_ztratu' pes.id %}" class="btn btn-sm btn-success rounded-pill px-4 fw-bold shadow-sm hvr-grow">
-                                <i class="fas fa-home me-1"></i> UŽ JE DOMA
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
-
-            <div class="safe-toggle-card shadow-sm">
-                <h4 class="fw-800 mb-2">Máte zvíře u sebe?</h4>
-                <p class="text-muted small">Zapněte, pokud je v bezpečí. Majiteli se odešle vaše poloha.</p>
-                <label class="switch">
-                    <input type="checkbox" id="safeToggle">
-                    <span class="slider"></span>
-                </label>
-                <div id="statusResult" class="mt-3 fw-bold" style="display: none;"></div>
-            </div>
-
-            <div class="row g-4">
-                <div class="col-md-5">
-                    <div class="info-card text-center shadow-sm">
-                        {% if pes.fotka %}
-                            <img src="{{ pes.fotka.url }}" class="profile-img mb-3" style="width:160px; height:160px; border-radius: 50%; object-fit: cover; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-                        {% endif %}
-                        <h2 class="fw-800 mb-0" style="color: var(--species-color);">{{ pes.jmeno }}</h2>
-                        <p class="text-muted fw-600">{{ pes.rasa|default:"Kříženec" }}</p>
-                        <div id="contactSection">
-                            <button class="contact-btn py-3" id="showPhoneBtn" onclick="showPhone()">
-                                <i class="fas fa-phone-alt"></i> ZOBRAZIT TELEFON
-                            </button>
-                            <div id="revealed-phone" style="display: none;" class="mt-3">
-                                <a href="tel:{{ pes.kontaktni_telefon|default:pes.majitel.telefon }}" class="fw-bold text-decoration-none" style="color: var(--species-color); font-size: 1.2rem;">
-                                   <i class="fas fa-phone-alt"></i> {{ pes.kontaktni_telefon|default:pes.majitel.telefon }}
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-7">
-                    <div class="info-card h-100 shadow-sm">
-                        <h5 class="fw-800 mb-3"><i class="fas fa-notes-medical me-2" style="color: var(--sos-red);"></i> Zdraví a povaha</h5>
-                        <div class="medical-notice text-dark fw-bold mb-4">
-                            {{ pes.popis|default:"Majitel zatím nevyplnil žádné specifické instrukce." }}
-                        </div>
-                        <h5 class="fw-800 mb-3"><i class="fas fa-envelope me-2 text-muted"></i>Napsat majiteli</h5>
-                        <form action="{% url 'odeslat_sos_email' pes.id %}" method="POST">
-                            {% csrf_token %}
-                            <textarea name="zprava" class="form-control mb-3 rounded-4 border-0 bg-light" rows="4" placeholder="Kde jste zvíře viděli nebo kde se teď nachází?"></textarea>
-                            <button type="submit" class="contact-btn shadow-sm w-100 py-3">ODESLAT VZKAZ</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    {% else %}
-        <div class="profile-card-top shadow-sm">
-            <div class="row align-items-center">
-                <div class="col-md-auto text-center mb-3 mb-md-0">
-                    {% if pes.fotka %}<img src="{{ pes.fotka.url }}" class="profile-img shadow-sm">{% endif %}
-                </div>
-                <div class="col-md">
-                    <h1 style="font-weight: 800; font-size: 2.5rem; margin:0; color: var(--species-color);">{{ pes.jmeno }}</h1>
-                    <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-3 mb-3">
-                        <span class="fw-bold text-muted small"><i class="fas fa-birthday-cake text-warning"></i> {{ pes.vek }}</span>
-                        <span class="badge bg-light text-dark border px-3 py-2 rounded-pill small">ID: {{ pes.cip|default:"NENÍ ČIPOVÁN" }}</span>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data={{ request.build_absolute_uri }}" style="width: 50px; border-radius: 8px;">
-                        <small class="fw-bold text-uppercase opacity-50" style="font-size: 0.6rem;">SOS Digitální Identita</small>
-                    </div>
-                </div>
-                <div class="col-md-4 mt-3 mt-md-0">
-                    {% if je_majitel %}
-                        <button onclick="shareProfile()" class="btn-stack btn-species-outline"><i class="fas fa-share-alt"></i> SDÍLET PROFIL</button>
-                        <a href="{% url 'upravit_psa' pes.id %}" class="btn-stack btn-uprava"><i class="fas fa-edit"></i> UPRAVIT</a>
-                        <button onclick="odeslatZtratuSGPS()" class="btn-stack btn-ztrata">
-                            <i class="fas fa-bullhorn"></i> NAHLÁSIT ZTRÁTU
-                        </button>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <div class="row g-4 mt-2">
-            <div class="col-lg-6">
-                <div class="info-card h-100 shadow-sm position-relative">
-                    {% if not je_premium %}
-                        <div class="premium-lock">
-                            <i class="fas fa-lock text-warning mb-2"></i>
-                            <h6>ALFA DENÍK</h6>
-                            <a href="{% url 'cenik' %}" class="btn btn-sm btn-warning rounded-pill fw-bold">AKTIVOVAT</a>
-                        </div>
-                    {% endif %}
-
-                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-                        {% if je_majitel %}
-                        <a href="{% url 'zdravotni_historie' pes.id %}" class="text-decoration-none hvr-grow">
-                            <h5 class="fw-bold m-0 text-danger" style="font-size: 0.9rem;">
-                                <i class="fas fa-notes-medical me-2"></i>DENÍK
-                                <i class="fas fa-chevron-right ms-1 small opacity-50"></i>
-                            </h5>
-                        </a>
-                        {% endif %}
-
-                        {% if je_majitel %}
-                            <div class="d-flex gap-1">
-                                <button class="btn-mini btn-mini-species" data-bs-toggle="modal" data-bs-target="#modalOckovani">OČKOVÁNÍ</button>
-                                <button class="btn-mini btn-mini-dark" data-bs-toggle="modal" data-bs-target="#modalZdravi">ZÁZNAM</button>
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="row g-1 text-center mb-3 border-bottom pb-3">
-                        <div class="col-3 border-end small text-muted" style="font-size: 0.65rem;">VÁHA<br><strong class="text-dark">{{ pes.vaha|default:"-" }}kg</strong></div>
-                        <div class="col-3 border-end small text-muted" style="font-size: 0.65rem;">OČKO<br><strong class="text-dark">{{ pes.posledni_ockovani|date:"d.m"|default:"-" }}</strong></div>
-                        <div class="col-3 border-end small text-muted" style="font-size: 0.65rem;">ČERV<br><strong class="text-dark">{{ pes.posledni_odcerveni|date:"d.m"|default:"-" }}</strong></div>
-                        <div class="col-3 small text-muted" style="font-size: 0.65rem;">KLÍŠTĚ<br><strong class="text-dark">{{ pes.posledni_klistata|date:"d.m"|default:"-" }}</strong></div>
-                    </div>
-
-                    <div class="zdravotni-vypis" style="max-height: 250px; overflow-y: auto;">
-                        {% for zaznam in zdravotni_zaznamy|slice:":4" %}
-                            <div class="p-2 mb-2 rounded-3 border-start border-4 shadow-sm small" style="border-color: #dc3545; background: #f8f9fa;">
-                                <div class="d-flex justify-content-between">
-                                    <b class="text-dark">{{ zaznam.titulek }}</b>
-                                    <span class="text-muted" style="font-size: 0.7rem;">{{ zaznam.datum|date:"d.m" }}</span>
-                                </div>
-                            </div>
-                        {% empty %}
-                            <p class="text-center text-muted small py-3">Zatím žádné záznamy.</p>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-6">
-                <div class="info-card h-100 shadow-sm">
-                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-                        {% if je_majitel %}
-                        <a href="{% url 'kariera_psa' pes.id %}" class="text-decoration-none hvr-grow">
-                            <h5 class="fw-bold m-0" style="font-size: 0.9rem; color: var(--alfa-gold);">
-                                <i class="fas fa-trophy me-2"></i>KARIÉRA
-                                <i class="fas fa-chevron-right ms-1 small opacity-50"></i>
-                            </h5>
-                        </a>
-                        {% endif %}
-
-                        {% if je_majitel %}
-                            <button class="btn-mini btn-mini-species" data-bs-toggle="modal" data-bs-target="#modalUspech">+ ÚSPĚCH</button>
-                        {% endif %}
-                    </div>
-
-                    <div class="uspechy-vypis">
-                        {% for uspech in uspechy|slice:":4" %}
-                            <div class="p-2 mb-2 rounded-3 border-start border-4 shadow-sm small" style="border-color: var(--alfa-gold); background: #fffcf5;">
-                                <b>{{ uspech.nazev }}</b> - <span class="text-success">{{ uspech.oceneni }}</span>
-                            </div>
-                        {% empty %}
-                            <p class="text-center text-muted small py-3">Zatím žádné úspěchy.</p>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="info-card mt-4 shadow-sm">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="fw-bold m-0"><i class="fas fa-images text-warning me-2"></i>GALERIE</h5>
-                {% if je_majitel %}
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-dark rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalFoto">FOTO</button>
-                        <button class="btn btn-sm btn-dark rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalVideo">VIDEO</button>
+    <div class="profile-header-card shadow-sm">
+        <div class="row g-4 align-items-center">
+            <div class="col-auto">
+                {% if pes.fotka %}
+                    <img src="{{ pes.fotka.url }}" class="main-profile-img">
+                {% else %}
+                    <div class="main-profile-img bg-light d-flex align-items-center justify-content-center">
+                        <i class="fas {% if pes.druh == 'kocka' %}fa-cat{% else %}fa-dog{% endif %} fa-3x text-muted"></i>
                     </div>
                 {% endif %}
             </div>
-            <div class="media-grid">
-                {% for f in galeriefotky %}<div class="media-container"><img src="{{ f.obrazek.url }}" class="media-item"></div>{% endfor %}
-                {% for v in galerievidea %}
-                    <div class="media-container">
-                        <video class="media-item" controls playsinline><source src="{{ v.video_soubor.url }}"></video>
+
+            <div class="col">
+                <h1 class="fw-800 mb-1" style="color: var(--species-dark);">{{ pes.jmeno }}</h1>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge rounded-pill" style="background: var(--species-light); color: var(--species-dark); font-size: 1rem; padding: 8px 15px;">
+                        <i class="fas fa-birthday-cake text-danger me-2"></i>{{ pes.vek }}
+                    </span>
+                    {% if pes.je_chovny %}
+                        <span class="badge bg-success rounded-pill p-2 px-3">CHOVNÝ</span>
+                    {% endif %}
+                </div>
+                <div class="text-muted small fw-600">ČIP: {{ pes.cip|default:"Neevidován" }}</div>
+            </div>
+
+            <div class="col-auto d-none d-md-block text-center border-start ps-4">
+                {% if pes.qr_kod %}
+                    <img src="{{ pes.qr_kod.url }}" class="qr-thumb" data-bs-toggle="modal" data-bs-target="#modalQR">
+                    <div class="mt-1 fw-bold" style="font-size: 0.65rem;">SOS QR</div>
+                {% endif %}
+            </div>
+
+            <div class="col-12 col-xl-4">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <button onclick="shareProfile()" class="btn-stack btn-outline-species"><i class="fas fa-share-alt"></i> SDÍLET</button>
                     </div>
+                    {% if je_majitel %}
+                        <div class="col-6">
+                            <a href="{% url 'upravit_psa' pes.id %}" class="btn-stack btn-uprava"><i class="fas fa-edit"></i> UPRAVIT</a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'export_pes_pdf' pes.id %}" class="btn-stack btn-pdf"><i class="fas fa-file-pdf"></i> EXPORT</a>
+                        </div>
+                        <div class="col-6">
+                            {% if pes.je_ztraceny %}
+                                <a href="{% url 'prepnout_ztratu' pes.id %}" class="btn-stack btn-doma"><i class="fas fa-check-circle"></i> DOMA</a>
+                            {% else %}
+                                <button onclick="nahlasitZtratuGPS()" class="btn-stack btn-ztrata"><i class="fas fa-bullhorn"></i> SOS</button>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="info-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="m-0">
+                        {% if je_majitel %}
+                            <a href="{% url 'veterinar' pes_id=pes.id %}" class="text-decoration-none">
+                                <h6 class="fw-bold text-danger m-0 hover-opacity">
+                                    <i class="fas fa-notes-medical me-2"></i>DENÍK <small class="ms-1" style="font-size: 0.6rem; vertical-align: middle;">(VETERINÁŘ ➔)</small>
+                                </h6>
+                            </a>
+                        {% else %}
+                            <h6 class="fw-bold text-danger m-0">
+                                <i class="fas fa-notes-medical me-2"></i>DENÍK
+                            </h6>
+                        {% endif %}
+                    </div>
+                    {% if je_majitel %}
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-outline-danger btn-xs" data-bs-toggle="modal" data-bs-target="#modalOckovani">+ OČKO</button>
+                            <button class="btn btn-dark btn-xs" data-bs-toggle="modal" data-bs-target="#modalZdravi">+ ZÁPIS</button>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="row text-center bg-light rounded-4 py-3 g-0">
+                    <div class="col-3 border-end">Váha<br><b class="d-block mt-1">{{ pes.vaha|default:"-" }} kg</b></div>
+                    <div class="col-3 border-end">Očko<br><b class="d-block mt-1">{{ pes.posledni_ockovani|date:"d.m"|default:"-" }}</b></div>
+                    <div class="col-3 border-end">Odčerv.<br><b class="d-block mt-1">{{ pes.posledni_odcerveni|date:"d.m"|default:"-" }}</b></div>
+                    <div class="col-3">Parazit.<br><b class="d-block mt-1">{{ pes.posledni_klistata|date:"d.m"|default:"-" }}</b></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="info-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="m-0">
+                        {% if je_majitel %}
+                            <a href="{% url 'kariera_psa' pes.id %}" class="text-decoration-none">
+                                <h6 class="fw-bold text-warning m-0 hover-gold">
+                                    <i class="fas fa-trophy me-2"></i>KARIÉRA A ZKOUŠKY <small class="ms-1" style="font-size: 0.6rem; vertical-align: middle;">➔</small>
+                                </h6>
+                            </a>
+                        {% else %}
+                            <h6 class="fw-bold text-warning m-0">
+                                <i class="fas fa-trophy me-2"></i>KARIÉRA A ZKOUŠKY
+                            </h6>
+                        {% endif %}
+                    </div>
+                    {% if je_majitel %}
+                        <button class="btn btn-outline-warning btn-xs text-dark fw-bold" data-bs-toggle="modal" data-bs-target="#modalUspech">+ PŘIDAT</button>
+                    {% endif %}
+                </div>
+                {% for uspech in pes.uspechy.all|slice:":3" %}
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="small">{{ uspech.nazev }}</span>
+                        <b class="text-success small">{{ uspech.oceneni }}</b>
+                    </div>
+                {% empty %}
+                    <p class="small text-muted py-3 m-0">Zatím žádné úspěchy.</p>
                 {% endfor %}
             </div>
         </div>
-    {% endif %}
+
+        <div class="col-12">
+            <div class="info-card">
+                <div class="d-flex gap-2 mb-3">
+                    <button type="button" class="btn btn-dark btn-sm rounded-pill px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalRodokmen">
+                        <i class="fas fa-edit me-1"></i> UPRAVIT RODOKMEN
+                    </button>
+                    {% if pes.rodokmen_pdf %}
+                        <a href="{{ pes.rodokmen_pdf.url }}" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill px-4 fw-bold shadow-sm">
+                            <i class="fas fa-file-pdf me-1"></i> ZOBRAZIT PDF
+                        </a>
+                    {% endif %}
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <div class="bg-light p-3 rounded-3 small">OTEC: <b>{{ pes.otec_manualni|default:"Nezadáno" }}</b></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="bg-light p-3 rounded-3 small">MATKA: <b>{{ pes.matka_manualni|default:"Nezadáno" }}</b></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="info-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="m-0">
+                        {% if je_majitel %}
+                            <a href="{% url 'vrhy_psa' pes.id %}" class="text-decoration-none">
+                                <h6 class="fw-bold m-0 hover-dark">
+                                    <i class="fas fa-paw text-secondary me-2"></i>
+                                    {% if pes.druh == 'kocka' %}VRHY / KOŤATA{% else %}VRHY / ŠTĚŇATA{% endif %}
+                                    <small class="ms-1 text-muted" style="font-size: 0.6rem;">➔</small>
+                                </h6>
+                            </a>
+                        {% else %}
+                            <h6 class="fw-bold m-0">
+                                <i class="fas fa-paw text-secondary me-2"></i>
+                                {% if pes.druh == 'kocka' %}VRHY / KOŤATA{% else %}VRHY / ŠTĚŇATA{% endif %}
+                            </h6>
+                        {% endif %}
+                    </div>
+                    {% if je_majitel %}
+                        <button class="btn btn-dark btn-xs fw-bold" data-bs-toggle="modal" data-bs-target="#modalVrh">+ PŘIDAT</button>
+                    {% endif %}
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead class="small text-muted">
+                            <tr><th>Datum</th><th>Název</th><th>Počet</th><th>Partner</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for vrh in pes.vrhy.all %}
+                                <tr class="small border-bottom">
+                                    <td>{{ vrh.datum|date:"d.m.Y" }}</td>
+                                    <td><b>{{ vrh.nazev }}</b></td>
+                                    <td>{{ vrh.pocet_stenat }}</td>
+                                    <td>{{ vrh.partner_jmeno|default:"-" }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr><td colspan="4" class="text-center py-3 small text-muted">Žádné odchovy.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="info-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold m-0"><i class="fas fa-images text-warning me-2"></i>GALERIE</h6>
+                    {% if je_majitel %}
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-dark btn-xs fw-bold px-3 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalVideo">
+                                <i class="fas fa-video me-1"></i> VIDEO
+                            </button>
+                            <button class="btn btn-dark btn-xs fw-bold px-3 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalFoto">
+                                <i class="fas fa-camera me-1"></i> FOTO
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="media-grid">
+                    {% for f in pes.galerie_fotky.all %}
+                        <div class="media-container shadow-sm">
+                            <img src="{{ f.obrazek.url }}" class="media-item" loading="lazy">
+                            {% if je_majitel %}
+                                <form action="{% url 'smazat_foto' f.id %}" method="POST" class="m-0">
+                                    {% csrf_token %}
+                                    <button type="submit" class="delete-btn">×</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    {% for v in pes.galerie_videa.all %}
+                        <div class="media-container shadow-sm bg-black">
+                            <video class="media-item" preload="metadata" controls playsinline style="object-fit: cover;">
+                                <source src="{{ v.video_soubor.url }}">
+                                Váš prohlížeč nepodporuje video.
+                            </video>
+                            {% if je_majitel %}
+                                <form action="{% url 'smazat_video' v.id %}" method="POST" class="m-0">
+                                    {% csrf_token %}
+                                    <button type="submit" class="delete-btn" style="z-index: 10;">×</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% if je_majitel %}
     <div class="modal fade" id="modalOckovani" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4 shadow-lg">
-                <form action="{% url 'pridat_zaznam' pes.id %}" method="POST">
+            <div class="modal-content" style="border-radius:20px;">
+                <form method="POST" action="{% url 'zdravotni_historie' pes.id %}">
                     {% csrf_token %}
-                    <input type="hidden" name="typ" value="ockovani">
-                    <div class="modal-header border-0 pb-0">
-                        <h5 class="fw-bold mt-2 ms-2"><i class="fas fa-syringe text-danger me-2"></i>Nové očkování</h5>
+                    <div class="modal-header border-0">
+                        <h5 class="fw-bold">Nové očkování</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body p-4">
-                        <input type="text" name="titulek" class="form-control mb-3" placeholder="Název vakcíny" required>
-                        <input type="date" name="datum" class="form-control" value="{{ today|date:'Y-m-d' }}">
+                    <div class="modal-body">
+                        <input type="hidden" name="typ" value="ockovani">
+                        <label class="small fw-bold">Datum</label>
+                        <input type="date" name="datum" class="form-control mb-3" required value="{% now 'Y-m-d' %}">
+                        <label class="small fw-bold">Vakcína / Poznámka</label>
+                        <input type="text" name="poznamka" class="form-control" placeholder="Např. Nobivac">
                     </div>
-                    <div class="modal-footer border-0 pt-0">
-                        <button type="submit" class="btn btn-danger w-100 rounded-pill py-2 fw-bold shadow-sm">ULOŽIT</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="modalZdravi" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4 shadow-lg">
-                <form action="{% url 'pridat_zaznam' pes.id %}" method="POST">
-                    {% csrf_token %}
-                    <div class="modal-header border-0 pb-0">
-                        <h5 class="fw-bold mt-2 ms-2">Nový záznam</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body p-4">
-                        <select name="typ" class="form-select mb-3">
-                            <option value="vaha">Vážení (v kg)</option>
-                            <option value="paraziti">Paraziti</option>
-                            <option value="kontrola">Kontrola</option>
-                        </select>
-                        <input type="text" name="titulek" class="form-control mb-3" placeholder="Hodnota / Poznámka" required>
-                        <input type="date" name="datum" class="form-control" value="{{ today|date:'Y-m-d' }}">
-                    </div>
-                    <div class="modal-footer border-0 pt-0">
-                        <button type="submit" class="btn btn-dark w-100 rounded-pill py-2">ULOŽIT</button>
+                    <div class="modal-footer border-0">
+                        <button type="submit" class="btn btn-danger w-100">ULOŽIT</button>
                     </div>
                 </form>
             </div>
@@ -321,32 +315,91 @@
 
     <div class="modal fade" id="modalUspech" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4">
-                <form action="{% url 'pridat_uspech' pes.id %}" method="POST">
+            <div class="modal-content" style="border-radius:20px;">
+                <form method="POST" action="{% url 'kariera_psa' pes.id %}">
                     {% csrf_token %}
-                    <div class="modal-body p-4">
-                        <h5 class="fw-bold mb-3">🏆 Úspěch</h5>
-                        <input type="text" name="nazev" class="form-control mb-2" placeholder="Název">
-                        <input type="text" name="oceneni" class="form-control mb-2" placeholder="Ocenění">
-                        <input type="date" name="datum" class="form-control" value="{{ today|date:'Y-m-d' }}">
+                    <div class="modal-header border-0">
+                        <h5 class="fw-bold">Nový úspěch</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label class="small fw-bold">Název akce</label>
+                        <input type="text" name="nazev" class="form-control mb-3" required>
+                        <label class="small fw-bold">Ocenění / Titul</label>
+                        <input type="text" name="oceneni" class="form-control">
                     </div>
                     <div class="modal-footer border-0">
-                        <button type="submit" class="btn w-100 rounded-pill text-white" style="background:var(--alfa-gold)">ZAPSAT</button>
+                        <button type="submit" class="btn btn-warning w-100">PŘIDAT</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="modalVideo" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4">
-                <form action="{% url 'pridat_video' pes.id %}" method="POST" enctype="multipart/form-data">
+    <div class="modal fade" id="modalRodokmen" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content" style="border-radius: 25px; border: 1px solid rgba(197, 160, 89, 0.2); background-color: #fff; overflow: hidden;">
+                <form method="POST" enctype="multipart/form-data" action="{% url 'nahrat_rodokmen' pes_id=pes.id %}">
                     {% csrf_token %}
-                    <div class="modal-body p-4 text-center">
-                        <h5>Nahrát video</h5>
-                        <input type="file" name="video_soubor" class="form-control mb-3" accept="video/*" required>
-                        <button type="submit" class="btn btn-dark w-100 rounded-pill">ODESLAT</button>
+                    <div class="modal-header border-0 p-4 pb-2">
+                        <h5 class="fw-800 m-0" style="color: #3e2723;"><i class="fas fa-sitemap me-2 text-gold"></i>Rodokmen a předci</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4 pt-2">
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="small fw-800 text-muted mb-1 text-uppercase">Jméno otce</label>
+                                <input type="text" name="otec_manualni" class="form-control border-0 bg-light p-3 rounded-4"
+                                       value="{{ pes.otec_manualni|default:'' }}" placeholder="Zadejte jméno otce">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small fw-800 text-muted mb-1 text-uppercase">Jméno matky</label>
+                                <input type="text" name="matka_manualni" class="form-control border-0 bg-light p-3 rounded-4"
+                                       value="{{ pes.matka_manualni|default:'' }}" placeholder="Zadejte jméno matky">
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="small fw-800 text-muted mb-1 text-uppercase text-start d-block">Soubor rodokmenu (PDF)</label>
+                            <input type="file" name="rodokmen_pdf" class="form-control border-0 bg-light p-3 rounded-4" accept="application/pdf">
+                        </div>
+                        {% if pes.rodokmen_pdf %}
+                            <div class="mt-4 p-3 rounded-4 bg-light border shadow-sm">
+                                <label class="small fw-800 text-muted mb-2 d-block text-uppercase text-center">Aktuálně nahraný dokument</label>
+                                <div class="rounded-3 overflow-hidden" style="height: 400px; background: #eee;">
+                                    <embed src="{{ pes.rodokmen_pdf.url }}" type="application/pdf" width="100%" height="100%">
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="modal-footer border-0 p-4">
+                        <button type="submit" class="btn w-100 py-3 fw-bold text-white shadow-sm" style="background: #3e2723; border-radius: 18px;">
+                            <i class="fas fa-save me-2"></i>ULOŽIT ZMĚNY
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalVrh" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px;">
+                <form method="POST" action="{% url 'pridat_vrh' pes.id %}">
+                    {% csrf_token %}
+                    <div class="modal-header border-0">
+                        <h5 class="fw-bold">Nový vrh</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-2">
+                            <div class="col-6"><label class="small">Datum</label><input type="date" name="datum" class="form-control"></div>
+                            <div class="col-6"><label class="small">Název</label><input type="text" name="nazev" class="form-control" placeholder="Vrh A"></div>
+                            <div class="col-6"><label class="small">Počet</label><input type="number" name="pocet_stenat" class="form-control"></div>
+                            <div class="col-6"><label class="small">Partner</label><input type="text" name="partner_jmeno" class="form-control"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="submit" class="btn btn-dark w-100">ULOŽIT VRH</button>
                     </div>
                 </form>
             </div>
@@ -355,79 +408,132 @@
 
     <div class="modal fade" id="modalFoto" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4">
-                <form action="{% url 'pridat_foto' pes.id %}" method="POST" enctype="multipart/form-data">
+            <div class="modal-content" style="border-radius: 20px;">
+                <form method="POST" enctype="multipart/form-data" action="{% url 'pridat_foto' pes.id %}">
                     {% csrf_token %}
-                    <div class="modal-body p-4">
-                        <h5>Nahrát fotku</h5>
-                        <input type="file" name="obrazek" class="form-control mb-3" accept="image/*" required>
-                        <button type="submit" class="btn btn-dark w-100 rounded-pill">ULOŽIT</button>
+                    <div class="modal-header border-0">
+                        <h5 class="fw-bold">Přidat fotku</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="file" name="obrazek" class="form-control" accept="image/*" required>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="submit" class="btn btn-dark w-100">NAHRÁT</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="modalVideo" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:20px;">
+                <form method="POST" enctype="multipart/form-data" action="{% url 'pridat_video' pes.id %}">
+                    {% csrf_token %}
+                    <div class="modal-header border-0">
+                        <h5 class="fw-bold">Nahrát video</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="file" name="video" class="form-control" accept="video/*" required>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="submit" class="btn btn-dark w-100">ULOŽIT VIDEO</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalZdravi" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 30px;">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-800 m-0" style="color: #4a342e;">🩺 Nový lékařský záznam</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form method="POST" action="{% url 'veterinar_s_id' pes.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="pes_id" value="{{ pes.id }}">
+                        <div class="mb-3">
+                            <label class="small fw-bold text-muted mb-1 text-uppercase">Typ návštěvy</label>
+                            <select name="typ" class="form-select border-0 bg-light p-3 rounded-4" required>
+                                <option value="Kontrola">🔍 Kontrola</option>
+                                <option value="Urgentní">🚨 Urgentní</option>
+                                <option value="Vážení">⚖️ Vážení / Váha</option>
+                                <option value="Ošetření">🩹 Ošetření</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="small fw-bold text-muted mb-1 text-uppercase">Předmět / Diagnóza</label>
+                            <input type="text" name="titulek" class="form-control border-0 bg-light p-3 rounded-4" placeholder="např. Pravidelné vážení" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="small fw-bold text-muted mb-1 text-uppercase">Lékařská zpráva / Poznámka</label>
+                            <textarea name="popis" class="form-control border-0 bg-light p-3 rounded-4" rows="3" placeholder="Zadejte podrobnosti nebo váhu..."></textarea>
+                        </div>
+                        <button type="submit" class="btn w-100 py-3 fw-bold text-white shadow-sm" style="background: #4a342e; border-radius: 15px;">
+                            ULOŽIT ZÁZNAM
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endif %}
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-    function showPhone() {
-        document.getElementById('showPhoneBtn').style.display = 'none';
-        document.getElementById('revealed-phone').style.display = 'block';
-    }
-
-    function odeslatZtratuSGPS() {
-        if (confirm("Chcete nahlásit ztrátu a uložit vaši aktuální polohu?")) {
-            const btn = document.querySelector('.btn-ztrata');
-            if(btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ZAMĚŘUJI...';
-
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    window.location.href = "{% url 'prepnout_ztratu' pes.id %}?lat=" + lat + "&lon=" + lon;
-                }, function(error) {
-                    alert("Nepodařilo se zaměřit polohu. Zapínám SOS bez souřadnic.");
-                    window.location.href = "{% url 'prepnout_ztratu' pes.id %}";
-                }, { enableHighAccuracy: true, timeout: 5000 });
+    async function shareProfile() {
+        const shareData = { title: 'Profil: {{ pes.jmeno }}', text: 'Podívejte se na profil mého mazlíčka {{ pes.jmeno }} na ePes.online', url: window.location.href };
+        try {
+            if (navigator.share && navigator.canShare(shareData)) {
+                await navigator.share(shareData);
             } else {
-                window.location.href = "{% url 'prepnout_ztratu' pes.id %}";
+                await navigator.clipboard.writeText(window.location.href);
+                alert("Zkopírováno.");
             }
+        } catch (err) {
+            console.error(err);
         }
     }
 
-    document.getElementById('safeToggle')?.addEventListener('change', function() {
-        const status = document.getElementById('statusResult');
-        if(this.checked) {
-            status.style.display = 'block';
-            status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Odesílám polohu majiteli...';
-
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((pos) => {
-                    fetch("{% url 'odeslat_polohu_nalezu' pes.id %}", {
-                        method: "POST",
-                        headers: {
-                            "X-CSRFToken": "{{ csrf_token }}",
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            lat: pos.coords.latitude,
-                            lon: pos.coords.longitude,
-                            zprava: "Nálezce zajistil zvíře!"
-                        })
-                    }).then(() => {
-                        status.innerHTML = "✅ Poloha odeslána!";
-                        status.style.color = "var(--sos-green)";
-                    });
-                });
+    async function nahlasitZtratuGPS() {
+        if (confirm("Opravdu chcete nahlásit ztrátu a odeslat GPS?")) {
+            if (!navigator.geolocation) {
+                alert("GPS není podporováno.");
+                return;
             }
-        }
-    });
-
-    function shareProfile() {
-        if (navigator.share) {
-            navigator.share({ title: 'Profil: {{ pes.jmeno }}', url: window.location.href });
-        } else {
-            navigator.clipboard.writeText(window.location.href); alert("Odkaz zkopírován.");
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                try {
+                    const response = await fetch("{% url 'upravit_psa' pes.pk %}", {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({
+                            'je_ztraceny': 'on',
+                            'lat': lat,
+                            'lon': lon,
+                            'jmeno': '{{ pes.jmeno }}'
+                        })
+                    });
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert("Chyba.");
+                    }
+                } catch (error) {
+                    alert("Chyba spojení.");
+                }
+            });
         }
     }
 </script>
