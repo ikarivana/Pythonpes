@@ -126,43 +126,80 @@
     };
 
     document.addEventListener('DOMContentLoaded', function() {
-        map = L.map('map').setView([49.8, 15.5], 7);
-        L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
+        const urlParams = new URLSearchParams(window.location.search);
+        // Ošetření čárky z URL parametrů
+        const urlLat = parseFloat(String(urlParams.get('lat') || '').replace(',', '.'));
+        const urlLon = parseFloat(String(urlParams.get('lon') || '').replace(',', '.'));
+        const urlZoom = parseInt(urlParams.get('zoom')) || 12;
 
+        // 1. NASTAVENÍ STARTOVNÍ POZICE
+        let startPos = [49.8, 15.5];
+        let startZoom = 7;
+
+        if (!isNaN(urlLat) && !isNaN(urlLon)) {
+            startPos = [urlLat, urlLon];
+            startZoom = urlZoom;
+        }
+
+        // 2. INICIALIZACE MAPY (rovnou na cíl)
+        map = L.map('map').setView(startPos, startZoom);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        // Pojistka pro správné vykreslení velikosti
+        setTimeout(function() {
+            map.invalidateSize();
+            if (!isNaN(urlLat)) map.panTo([urlLat, urlLon]);
+        }, 300);
+
+        // 3. PROCHÁZENÍ SLUŽEB
         sluzby.forEach(function(s) {
             var lat = parseFloat(String(s.lat).replace(',', '.'));
             var lon = parseFloat(String(s.lon).replace(',', '.'));
+
             if (isNaN(lat) || isNaN(lon)) return;
 
             var conf = configMap[s.typ_slug] || { color: '#3e2723', icon: 'fa-map-marker-alt' };
-            var icon;
+            var markerIcon;
 
             if (s.typ_slug === 'ztrata') {
-                icon = L.divIcon({
-                    html: `<div class="sos-marker-wrapper"><div class="sos-marker-circle"><i class="fas ${conf.icon}"></i></div><div class="sos-marker-arrow"></div></div>`,
+                markerIcon = L.divIcon({
+                    html: `<div class="sos-marker-wrapper pulse"><div class="sos-marker-circle" style="background-color: ${conf.color};"><i class="fas ${conf.icon}"></i></div><div class="sos-marker-arrow"></div></div>`,
                     className: '', iconSize: [40, 52], iconAnchor: [20, 52], popupAnchor: [0, -52]
                 });
             } else {
-                icon = L.divIcon({
-                    html: `<div class="custom-marker"><div class="marker-dot" style="background-color: ${conf.color};"><i class="fas ${conf.icon}" style="font-size: 13px;"></i></div><div class="marker-tip-small" style="border-top: 8px solid ${conf.color};"></div></div>`,
+                markerIcon = L.divIcon({
+                    html: `<div class="custom-marker"><div class="marker-dot" style="background-color: ${conf.color};"><i class="fas ${conf.icon}" style="font-size: 13px; color: white;"></i></div><div class="marker-tip-small" style="border-top: 8px solid ${conf.color};"></div></div>`,
                     className: '', iconSize: [30, 38], iconAnchor: [15, 38], popupAnchor: [0, -38]
                 });
             }
 
-            var marker = L.marker([lat, lon], { icon: icon }).addTo(map);
+            var marker = L.marker([lat, lon], { icon: markerIcon }).addTo(map);
 
-            // Popup obsah
             var popupHtml = `
-    <div style="min-width:160px;">
-        <b style="color:var(--mid-brown);">${s.nazev}</b><br>
-        <small style="color:var(--gold); font-weight:bold;">${s.typ}</small><br>
-        <div style="margin-top:5px;">📍 ${s.adresa}</div>
-        <a href="${s.url}" style="display:block; background:var(--mid-brown); color:white; text-align:center; padding:5px; border-radius:5px; margin-top:8px; text-decoration:none; font-size:0.8rem;">DETAIL</a>
-    </div>`;
-
+                <div style="min-width:160px;">
+                    <b style="color:#3e2723;">${s.nazev}</b><br>
+                    <small style="color:#c5a059; font-weight:bold;">${s.typ}</small><br>
+                    <div style="margin-top:5px; font-size: 0.85rem;">📍 ${s.adresa || 'Poloha GPS'}</div>
+                    <a href="${s.url}" style="display:block; background:#3e2723; color:white; text-align:center; padding:5px; border-radius:8px; margin-top:8px; text-decoration:none; font-size:0.8rem; font-weight:bold;">ZOBRAZIT DETAIL</a>
+                </div>`;
             marker.bindPopup(popupHtml);
+
+            // AUTO-OPEN POPUP (pokud se souřadnice blíží těm v URL)
+            if (!isNaN(urlLat) && Math.abs(lat - urlLat) < 0.01 && Math.abs(lon - urlLon) < 0.01) {
+                // Otevřeme bublinu s malým zpožděním, aby to vypadalo čistě
+                setTimeout(function() {
+                    marker.openPopup();
+                }, 800);
+            }
+
             allMarkers.push({ instance: marker, typ: s.typ_slug });
         });
+        if (!isNaN(urlLat) && !isNaN(urlLon)) {
+            filtrujMapu('ztrata');
+        }
     });
 
     function filtrujMapu(kategorie) {

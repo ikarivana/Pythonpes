@@ -17,7 +17,7 @@ urlpatterns = [
 
     # Sjednocení názvu na 'odeslat_polohu', aby fungoval JS fetch
     path('pes/<int:pes_id>/odeslat-polohu/', views.odeslat_polohu_nalezu, name='odeslat_polohu'),
-
+    path('pes/<int:pes_id>/nouzovy-profil/', views.nouzovy_profil_psa, name='nouzovy_profil_psa'),
     path('pes/<int:pes_id>/odeslat-email/', views.odeslat_sos_email, name='odeslat_sos_email'),
     path('pes/<int:pes_id>/prepnout-ztratu/', views.prepnout_ztratu, name='prepnout_ztratu'),
     path('hledani-psi/', views.seznam_hledanych_psu, name='seznam_hledanych'),
@@ -64,6 +64,8 @@ urlpatterns = [
 
     # --- SOCIÁLNÍ SÍŤ ---
     path('zdi/', views.seznam_zdi, name='seznam_zdi'),
+    path('zdi/pridat/<str:typ_kategorie>/<str:zviratko_typ>/', views.pridat_polozku_vse,
+         name='pridat_polozku_with_type'),
     path('zdi/pridat/<str:typ_kategorie>/', views.pridat_polozku_vse, name='pridat_polozku'),
     path('zed/<slug:slug>/', views.zed_plemene, name='zed_plemene'),
     path('plemeno/smazat/<int:plemeno_id>/', views.smazat_plemeno, name='smazat_plemeno'),

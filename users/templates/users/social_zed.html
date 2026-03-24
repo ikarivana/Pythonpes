@@ -96,31 +96,39 @@
     </div>
 
     <div class="row g-4 mb-5">
-        <div class="col-md-3 col-6">
-            <a href="{% url 'pridat_polozku' 'ostatni' %}" class="nav-card shadow-sm">
-                <div class="mb-2" style="font-size: 2rem;">🧬</div>
-                <h6 class="fw-bold mb-0">Nové Plemeno</h6>
-            </a>
-        </div>
-        <div class="col-md-3 col-6">
-            <a href="{% url 'pridat_polozku' 'vystavy' %}" class="nav-card shadow-sm">
-                <div class="mb-2" style="font-size: 2rem;">🏆</div>
-                <h6 class="fw-bold mb-0">Nová Výstava</h6>
-            </a>
-        </div>
-        <div class="col-md-3 col-6">
-            <a href="{% url 'zed_plemene' 'psi-hriste' %}" class="nav-card shadow-sm">
-                <div class="mb-2" style="font-size: 2rem;">🎾</div>
-                <h6 class="fw-bold mb-0">Hřiště & Parky</h6>
-            </a>
-        </div>
-        <div class="col-md-3 col-6">
-            <a href="{% url 'pridat_polozku' 'lovecka' %}" class="nav-card shadow-sm">
-                <div class="mb-2" style="font-size: 2rem;">🌿</div>
-                <h6 class="fw-bold mb-0">Akce v přírodě</h6>
-            </a>
-        </div>
+    <div class="col-md-3 col-6">
+        <a href="{% url 'pridat_polozku_with_type' 'ostatni' 'pes' %}" class="nav-card shadow-sm">
+            <div class="mb-2" style="font-size: 2rem;">🐶</div>
+            <h6 class="fw-bold mb-0">Nové Plemeno (Pes)</h6>
+        </a>
     </div>
+
+    <div class="col-md-3 col-6">
+        <a href="{% url 'pridat_polozku_with_type' 'ostatni' 'kocka' %}" class="nav-card shadow-sm" style="border-color: #e2d9f3;">
+            <div class="mb-2" style="font-size: 2rem;">🐱</div>
+            <h6 class="fw-bold mb-0" style="color: #673ab7;">Nové Plemeno (Kočka)</h6>
+        </a>
+    </div>
+
+    <div class="col-md-2 col-4">
+        <a href="{% url 'pridat_polozku' 'vystavy' %}" class="nav-card shadow-sm">
+            <div class="mb-2" style="font-size: 1.5rem;">🏆</div>
+            <h6 class="fw-bold mb-0">Výstava</h6>
+        </a>
+    </div>
+    <div class="col-md-2 col-4">
+        <a href="{% url 'zed_plemene' 'psi-hriste' %}" class="nav-card shadow-sm">
+            <div class="mb-2" style="font-size: 1.5rem;">🎾</div>
+            <h6 class="fw-bold mb-0">Hřiště</h6>
+        </a>
+    </div>
+    <div class="col-md-2 col-4">
+        <a href="{% url 'pridat_polozku' 'lovecka' %}" class="nav-card shadow-sm">
+            <div class="mb-2" style="font-size: 1.5rem;">🌿</div>
+            <h6 class="fw-bold mb-0">Akce</h6>
+        </a>
+    </div>
+</div>
 
     <h4 class="section-header">Hlídání a venčení</h4>
     <div class="row g-4 mb-5">
@@ -156,33 +164,6 @@
                 {% endif %}
             {% endfor %}
         </select>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
-            <h4 class="section-header">🏆 Výstavy</h4>
-            <div class="row g-2">
-                {% for p in plemena_vystavy %}
-                    <div class="col-6">
-                        <a href="{% url 'zed_plemene' p.slug %}" class="breed-item shadow-sm">{{ p.nazev }}</a>
-                    </div>
-                {% empty %}
-                    <p class="text-muted ps-3 small">Žádné aktuální výstavy.</p>
-                {% endfor %}
-            </div>
-        </div>
-        <div class="col-md-6">
-            <h4 class="section-header">🌿 Příroda & Lov</h4>
-            <div class="row g-2">
-                {% for p in plemena_lovecka %}
-                    <div class="col-6">
-                        <a href="{% url 'zed_plemene' p.slug %}" class="breed-item shadow-sm">{{ p.nazev }}</a>
-                    </div>
-                {% empty %}
-                    <p class="text-muted ps-3 small">Žádné plánované akce.</p>
-                {% endfor %}
-            </div>
-        </div>
     </div>
 </div>
 {% endblock %}

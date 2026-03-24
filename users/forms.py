@@ -161,7 +161,16 @@ class ProfilUpdateForm(forms.ModelForm):
 class PlemenoForm(forms.ModelForm):
     class Meta:
         model = Plemeno
-        fields = ['nazev', 'ikona', 'kategorie']
+        # Pole 'kategorie' jsme odstranili, protože ho doplňujeme automaticky ve views.py
+        fields = ['nazev', 'ikona']
+        labels = {
+            'nazev': 'Název plemene nebo akce',
+            'ikona': 'Úvodní fotka / Ikona',
+        }
+        widgets = {
+            'nazev': forms.TextInput(attrs={'class': 'form-control'}),
+            'ikona': forms.FileInput(attrs={'class': 'form-control'}),
+        }
 
 
 # --- 3. OSTATNÍ FORMULÁŘE ---

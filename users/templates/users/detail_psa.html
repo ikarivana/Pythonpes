@@ -173,9 +173,11 @@
         <div class="col-12">
             <div class="info-card">
                 <div class="d-flex gap-2 mb-3">
+                    {% if je_majitel %}
                     <button type="button" class="btn btn-dark btn-sm rounded-pill px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalRodokmen">
                         <i class="fas fa-edit me-1"></i> UPRAVIT RODOKMEN
                     </button>
+                    {% endif %}
                     {% if pes.rodokmen_pdf %}
                         <a href="{{ pes.rodokmen_pdf.url }}" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill px-4 fw-bold shadow-sm">
                             <i class="fas fa-file-pdf me-1"></i> ZOBRAZIT PDF

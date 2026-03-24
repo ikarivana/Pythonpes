@@ -1,10 +1,12 @@
 import os
 import json
 import io
+import uuid
 from datetime import timedelta, timezone, date
 
 from PIL import Image, ImageOps
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.messages import info
 from django.db.models.functions import datetime
 from django.urls import reverse
 from pillow_heif import register_heif_opener
@@ -961,29 +963,46 @@ def upravit_komentar(request, pk):
 
 # --- 3. PŘIDÁNÍ POLOŽKY (S KATEGORIÍ) ---
 @login_required
-def pridat_polozku_vse(request, typ_kategorie):
+def pridat_polozku_vse(request, typ_kategorie, zviratko_typ='pes'):
+    # Logika titulků a nápověd
+    if typ_kategorie == 'vystavy':
+        placeholder_text = "Např. Mezinárodní výstava psů Praha 2026"
+        titul = "Nová Výstava"
+    elif typ_kategorie == 'lovecka':
+        placeholder_text = "Např. Barvářské zkoušky honičů"
+        titul = "Nová Akce"
+    else:
+        placeholder_text = "Např. Britská krátkosrstá" if zviratko_typ == 'kocka' else "Např. Zlatý retrívr"
+        titul = f"Nové plemeno ({'Kočka' if zviratko_typ == 'kocka' else 'Pes'})"
+
     if request.method == 'POST':
         form = PlemenoForm(request.POST, request.FILES)
         if form.is_valid():
             plemeno = form.save(commit=False)
-
-            # Nastavení kategorie podle URL (vystavy/lovecka/ostatni)
             plemeno.kategorie = typ_kategorie
 
-            navrzeny_slug = slugify(plemeno.nazev)
+            # Ošetření názvu pro kočky proti duplicitě
+            if zviratko_typ == 'kocka':
+                nizky_nazev = plemeno.nazev.lower()
+                if 'kočka' not in nizky_nazev and 'kocka' not in nizky_nazev:
+                    plemeno.nazev = f"Kočka {plemeno.nazev}"
 
-            # Kontrola duplicity
-            if Plemeno.objects.filter(slug=navrzeny_slug).exists():
-                messages.error(request, f"Položka s názvem '{plemeno.nazev}' již existuje!")
-                return render(request, 'users/pridat_polozku.html', {'form': form, 'typ': typ_kategorie})
-
-            plemeno.slug = navrzeny_slug
+            plemeno.slug = slugify(plemeno.nazev)
             plemeno.save()
-            messages.success(request, f"Položka {plemeno.nazev} byla přidána.")
             return redirect('seznam_zdi')
+        # Pokud form není validní, Django vypíše chyby do form.errors
     else:
         form = PlemenoForm()
-    return render(request, 'users/pridat_polozku.html', {'form': form, 'typ': typ_kategorie})
+
+    # TENTO ŘÁDEK JE KLÍČOVÝ: Nastaví nápovědu i po neúspěšném odeslání
+    form.fields['nazev'].widget.attrs['placeholder'] = placeholder_text
+
+    return render(request, 'users/pridat_polozku.html', {
+        'form': form,
+        'titul': titul,
+        'zviratko_typ': zviratko_typ,
+        'info': {'typ': zviratko_typ, 'titul': titul}
+    })
 
 
 # --- 4. ADMIN TLAČÍTKA (MAZÁNÍ) ---
