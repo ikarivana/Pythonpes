@@ -84,7 +84,6 @@
     .btn-dog-action { background: var(--accent-gold); color: white !important; }
     .btn-cat-action { background: var(--cat-purple); color: white !important; }
 
-    /* Premium odznak v profilu */
     .alfa-badge {
         background: linear-gradient(45deg, #c5a059, #b8860b);
         color: white;
@@ -127,10 +126,9 @@
 
     <div class="row">
         <div class="col-lg-8">
-            <div class="d-flex justify-content-between align-items-center mb-4 section-title">
+            <div class="d-flex justify-content-between align-items-center mb-4">
                 <h4 class="fw-bold m-0" style="color: var(--primary-brown);">Moji parťáci</h4>
 
-                {# OPRAVENÁ LOGIKA TLAČÍTKA PŘIDAT #}
                 {% if not user.profil.is_premium and not user.is_superuser and user.profil.psi.all.count >= 1 %}
                     <a href="{% url 'cenik' %}" class="btn-add-pet btn-locked-gold shadow-sm">
                         <i class="fas fa-lock me-2"></i> Přidat (Limit 1)
@@ -162,7 +160,17 @@
                         </div>
 
                         <h4 class="fw-bold mb-1">{{ mazlicek.jmeno }}</h4>
-                        <p class="text-muted small mb-3">{{ mazlicek.rasa|default:"Mazlíček" }}</p>
+                        <p class="text-muted small mb-2">{{ mazlicek.rasa|default:"Mazlíček" }}</p>
+
+                        <div class="mb-3 d-flex justify-content-center">
+                            {% if mazlicek.qr_kod %}
+                                <div style="background: white; padding: 4px; border-radius: 10px; border: 1px solid #efebe9; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">
+                                    <img src="{{ mazlicek.qr_kod.url }}" alt="QR kód" style="width: 60px; height: 60px; display: block;">
+                                </div>
+                            {% else %}
+                                <span class="badge bg-light text-muted fw-normal" style="font-size: 0.6rem;">Generování QR...</span>
+                            {% endif %}
+                        </div>
 
                         <div class="mt-auto">
                             <a href="{% url 'detail_psa' mazlicek.pk %}"
@@ -184,12 +192,11 @@
             <div class="profile-main-card p-4 text-center sticky-top" style="top: 20px;">
                 <h6 class="fw-bold mb-3">Stav tvé smečky</h6>
 
-                {# Dynamický progress bar #}
                 <div class="progress mb-2" style="height: 10px; border-radius: 10px; background: #eee;">
                     {% if user.profil.is_premium or user.is_superuser %}
                         <div class="progress-bar" style="width: 100%; background: #28a745;"></div>
                     {% else %}
-                        <div class="progress-bar" style="width: {{ user.profil.psi.all.count|add:"0" }}00%; max-width: 100%; background: var(--accent-gold);"></div>
+                        <div class="progress-bar" style="width: {{ user.profil.psi.all.count }}00%; max-width: 100%; background: var(--accent-gold);"></div>
                     {% endif %}
                 </div>
 

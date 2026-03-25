@@ -289,13 +289,28 @@ def kontakt(request):
         form = KontaktForm()
     return render(request, 'home/kontakt.html', {'form': form})
 
+from django.shortcuts import render, redirect # Přidej redirect, pokud chybí
 def podminky(request):
     moje_info = {
         'jmeno': 'Ivana Elšíková',
         'ico': '23834838',
         'adresa': 'Sokolská 29, Hvozdná, 76310',
     }
+
+    if request.method == 'POST' and request.user.is_authenticated:
+
+        # Použijeme hasattr, abychom předešli chybě 500, pokud profil neexistuje
+        if hasattr(request.user, 'profil'):
+            profil = request.user.profil
+            profil.souhlas_podminky = True
+            profil.save()
+            return redirect('profil')  # Zkus tohle místo 'muj_profil'
+        else:
+            # Pokud profil neexistuje, pošleme ho aspoň na home, ať nevidí Error 500
+            return redirect('home')
+
     return render(request, 'home/podminky.html', {'kontaktni_info': moje_info})
+
 
 def gdpr(request):
     context = {

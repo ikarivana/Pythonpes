@@ -7,6 +7,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.http import request
 from django.template.defaultfilters import slugify
+from django.urls import reverse
 from django.utils import timezone
 
 import pes
@@ -29,6 +30,7 @@ class ProfilMajitele(models.Model):
     mesto = models.CharField(max_length=100, blank=True, verbose_name="Město")
     psc = models.CharField(max_length=10, blank=True, verbose_name="PSČ")
     telefon = models.CharField(max_length=20, blank=True)
+    souhlas_podminky = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Profil: {self.uzivatel.username}"
@@ -125,15 +127,16 @@ class Pes(models.Model):
 
         return f"{months} měs."
 
-    def save(self, *args, **kwargs):
-        # Nejdřív uložíme, abychom měli ID
-        super().save(*args, **kwargs)
+    # bing
+    def get_absolute_url(self):
+        return reverse('detail_psa', kwargs={'pes_id': self.id})
 
-        # Generujeme QR kód, jen pokud ještě neexistuje
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
         if not self.qr_kod:
             try:
-                # POZOR: Tady musí být přesná URL, která ti funguje v prohlížeči
-                qr_url = f"https://epes.online/users/pes-detail/{self.id}/"
+                # Opravená URL pro QR kód podle tvého urls.py
+                qr_url = f"https://epes.online/users/pes/{self.id}/"
 
                 qr = qrcode.QRCode(version=1, box_size=10, border=5)
                 qr.add_data(qr_url)

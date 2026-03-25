@@ -1,32 +1,33 @@
-"""
-URL configuration for pes project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.templates, name='templates')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='templates')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+
+# --- PŘIDÁNO PRO SITEMAPY ---
+from django.contrib.sitemaps.views import sitemap
+from home.sitemaps import StaticViewSitemap, PesSitemap
+# Pokud už máš sitemaps i pro inzerci, přidej ji sem taky:
+# from inzerce.sitemaps import InzeratSitemap
+
+sitemaps = {
+    'static': StaticViewSitemap,
+    'psi': PesSitemap,
+    # 'inzerce': InzeratSitemap,
+}
+# ----------------------------
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('home.urls')),
     path('users/', include('users.urls')),
     path('inzerce/', include('inzerce.urls')),
+
+    # --- CESTA PRO BING/GOOGLE ---
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
+         name='django.contrib.sitemaps.views.sitemap'),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-# Pro Rošti někdy musíme přidat i mimo DEBUG, pokud nepoužíváš Nginx pro média:
+
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
