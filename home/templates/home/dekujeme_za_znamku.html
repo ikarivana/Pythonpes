@@ -1,0 +1,151 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<style>
+    .success-container {
+        max-width: 800px;
+        margin: 60px auto;
+        padding: 20px;
+        position: relative;
+    }
+
+    .success-card {
+        background: #ffffff;
+        border-radius: 35px;
+        padding: 60px 40px;
+        text-align: center;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(197, 160, 89, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Animovaná krabička místo korunky */
+    @keyframes box-bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .success-icon {
+        width: 100px;
+        height: 100px;
+        background: #fffdf5;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 30px;
+        font-size: 3rem;
+        border: 2px solid var(--gold);
+        box-shadow: 0 10px 25px rgba(197, 160, 89, 0.2);
+        animation: box-bounce 2s ease-in-out infinite;
+    }
+
+    .success-card h2 {
+        font-family: 'Playfair Display', serif;
+        color: var(--dark-cocoa);
+        font-size: 2.6rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+    }
+
+    .success-card p {
+        color: #8d7d77;
+        font-size: 1.15rem;
+        line-height: 1.6;
+        margin-bottom: 40px;
+        font-weight: 500;
+    }
+
+    .btn-finish-premium {
+        background: var(--gold);
+        color: white !important;
+        font-weight: 800;
+        padding: 18px 45px;
+        border-radius: 20px;
+        text-decoration: none !important;
+        transition: 0.3s;
+        display: inline-block;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        letter-spacing: 1px;
+    }
+
+    .btn-finish-premium:hover {
+        background: var(--mid-brown);
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .paw-decoration {
+        position: absolute;
+        color: var(--gold);
+        opacity: 0.05;
+        font-size: 6rem;
+        z-index: 0;
+    }
+
+    /* Boxík pro info o doručení */
+    .delivery-info {
+        background: rgba(197, 160, 89, 0.05);
+        border: 1px dashed var(--gold);
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+</style>
+
+<div class="success-container">
+    <i class="fas fa-paw paw-decoration" style="top: -20px; left: -40px; transform: rotate(-15deg);"></i>
+    <i class="fas fa-paw paw-decoration" style="bottom: -20px; right: -40px; transform: rotate(25deg);"></i>
+
+    <div class="success-card">
+        <div class="success-icon">
+            <i class="fas fa-box-open" style="color: var(--gold);"></i>
+        </div>
+
+        <h2>Známka je na cestě! 🐾</h2>
+
+        <p>
+            Platba proběhla úspěšně a vaše nová <strong>nerezová QR známka</strong> se už připravuje k odeslání.<br>
+            Jakmile ji předáme dopravci, pošleme vám sledovací číslo do e-mailu.
+        </p>
+
+        <div class="delivery-info">
+            <span style="color: var(--dark-cocoa); font-weight: 700;">
+                <i class="fas fa-truck me-2"></i> Doručíme na vaši zadanou adresu.
+            </span>
+        </div>
+
+        <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
+            <a href="{% url 'home' %}" class="btn-finish-premium">
+                <i class="fas fa-home me-2"></i> NA HLAVNÍ STRANU
+            </a>
+            <a href="{% url 'seznam_psu' %}" class="btn px-4 py-3 fw-bold" style="border: 2px solid var(--mid-brown); border-radius: 20px; color: var(--mid-brown);">
+                <i class="fas fa-paw me-2"></i> MOJE ZVÍŘATA
+            </a>
+        </div>
+
+        <div class="mt-5 pt-4" style="border-top: 1px dashed #e2d1c3;">
+            <small class="text-muted italic">
+                Potvrzení o objednávce a fakturu jsme vám právě odeslali na e-mail.
+            </small>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const style = getComputedStyle(document.documentElement);
+        const goldColor = style.getPropertyValue('--gold').trim() || '#c5a059';
+        const cocoaColor = style.getPropertyValue('--dark-cocoa').trim() || '#3e2723';
+
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: [goldColor, cocoaColor]
+        });
+    });
+</script>
+{% endblock %}

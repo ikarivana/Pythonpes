@@ -86,40 +86,48 @@ def index(request):
 
     return render(request, 'home/index.html', context)
 
+
 @csrf_exempt
 def simpleshop_webhook(request):
     print("--- WEBHOOK VOLÁN ---")
     data = request.POST
 
-    # SimpleShop posílá email v poli mail_to[0] nebo customer_email
+    # Získání e-mailu a názvu produktu
     email = data.get('mail_to[0]') or data.get('customer_email') or data.get('email')
+    produkt = data.get('items[0][text]', '')  # Název produktu ze SimpleShopu
 
-    # DEBUG hláška pro tebe do logu
-    print(f"DEBUG: Zkouším aktivovat e-mail: {email}")
+    print(f"DEBUG: E-mail: {email}, Produkt: {produkt}")
 
     if email:
-        # Hledáme uživatele v databázi
         user = User.objects.filter(email__iexact=email.strip()).first()
 
         if user:
             profil, created = ProfilMajitele.objects.get_or_create(uzivatel=user)
-            profil.is_premium = True
 
-            # Zjistíme, co si koupil (v logu jsme viděli 'Roční Profi')
-            produkt = data.get('items[0][text]', '')
-
+            # 1. VARIANTA: Roční předplatné
             if "Roční" in produkt:
+                profil.is_premium = True
                 profil.premium_do = date.today() + timedelta(days=365)
+                profil.save()
                 print(f"DEBUG: Nastaveno ROČNÍ premium pro {email}")
-            else:
-                # Defaultně měsíc pro ostatní (Chovatel)
+
+            # 2. VARIANTA: Měsíční předplatné
+            elif "Měsíční" in produkt or "Chovatel" in produkt:
+                profil.is_premium = True
                 profil.premium_do = date.today() + timedelta(days=31)
+                profil.save()
                 print(f"DEBUG: Nastaveno MĚSÍČNÍ premium pro {email}")
 
-            profil.save()
+            # 3. VARIANTA: Pouze známka (neaktivuje premium)
+            elif "Známka" in produkt or "nerez" in produkt:
+                print(f"DEBUG: Uživatel {email} zakoupil pouze fyzickou známku.")
+                # Zde můžeš přidat třeba odeslání e-mailu sobě, že máš balit balíček
 
-    print("DEBUG: V datech nebyl nalezen žádný e-mail.")
-    return HttpResponse("NO EMAIL PROVIDED", status=200)
+            return HttpResponse("OK", status=200)
+
+    print("DEBUG: V datech nebyl nalezen žádný e-mail nebo uživatel.")
+    return HttpResponse("NO USER FOUND", status=200)
+
 
 def mapa_sluzeb(request):
     # Upravený filtr: Bereme vše schválené NEBO cokoli, co je SOS (ztráta/nebezpečí)
@@ -327,8 +335,22 @@ def cookies(request):
     return render(request, 'home/cookies.html')
 
 def cenik(request):
-    return render(request, 'home/cenik.html')
+    mazlicek = None
+    if request.user.is_authenticated:
+        # 1. Získáme profil (pokud existuje)
+        if hasattr(request.user, 'profilmajitele'):
+            profil = request.user.profilmajitele
+            # 2. Najdeme prvního psa tohoto profilu
+            mazlicek = Pes.objects.filter(majitel=profil).first()
+
+    # TENTO ŘÁDEK MUSÍ BÝT ÚPLNĚ VLEVO (mimo ty if-podmínky)
+    # Aby se stránka zobrazila i nepřihlášeným lidem
+    return render(request, 'home/cenik.html', {'mazlicek': mazlicek})
+
 
 def dekujeme_za_nakup(request):
     """Zobrazí stránku po úspěšné platbě."""
     return render(request, 'home/dekujeme.html')
+
+def dekujeme_za_znamku(request):
+    return render(request, 'home/dekujeme_za_znamku.html')

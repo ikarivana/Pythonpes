@@ -3,143 +3,108 @@
 
 {% block content %}
 <style>
-    /* 1. KROK: Definice barev - výchozí je Lila (kočka) */
     :root {
         --border-tan: #e2d1c3;
         --subtle-cream: rgba(197, 160, 89, 0.05);
-        --brand-color: #9b87f5; /* Lila fialová */
+        --brand-color: #c5a059;
         --mid-brown: #3e2723;
-        --btn-hover: #7c67d6;
+        --btn-hover: #3e2723;
     }
 
-    /* 2. KROK: Pokud mazlíček NENÍ kočka ('K'), přepneme barvy na zlatohnědou */
-    {% if mazlicek.typ_zvirete != 'K' %}
+    {% if mazlicek and mazlicek.typ_zvirete == 'K' %}
     :root {
-        --brand-color: #c5a059; /* Zlatohnědá pro psy */
-        --btn-hover: #3e2723;
+        --brand-color: #9b87f5;
+        --btn-hover: #7c67d6;
     }
     {% endif %}
 
     .pricing-container { padding: 40px 15px; }
+    .card-plan { border-radius: 30px; border: 1px solid var(--border-tan); transition: all 0.4s ease; height: 100%; background: white; display: flex; flex-direction: column; position: relative; }
+    .card-plan:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.05) !important; }
+    .card-featured { border: 2px solid var(--brand-color); background: linear-gradient(180deg, #ffffff 0%, var(--subtle-cream) 100%); }
 
-    .card-plan {
-        border-radius: 30px;
-        border: 1px solid var(--border-tan);
-        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-        height: 100%;
-        background: white;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .card-plan:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.05) !important;
-    }
-
-    .card-featured {
-        border: 2px solid var(--brand-color);
-        position: relative;
-        background: linear-gradient(180deg, #ffffff 0%, var(--subtle-cream) 100%);
-    }
-
-    .discount-tag {
-        position: absolute;
-        top: -15px;
-        left: 30px;
-        background: var(--brand-color);
-        color: white !important;
-        padding: 6px 16px;
-        border-radius: 12px;
-        font-size: 0.75rem;
-        font-weight: 800;
-        z-index: 10;
-    }
-
+    .discount-tag { position: absolute; top: -15px; left: 30px; background: var(--brand-color); color: white !important; padding: 6px 16px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; z-index: 10; }
     .price-large { font-size: 2.8rem; font-weight: 800; color: var(--mid-brown); letter-spacing: -1px; }
 
-    .badge-znamka-zdarma {
-        background: white;
-        border: 2px solid var(--brand-color);
-        color: var(--mid-brown);
-        padding: 12px;
-        border-radius: 15px;
-        font-size: 0.85rem;
-        font-weight: 800;
-        text-align: center;
-    }
-
-    .buy-tag-box {
-        background: #fdfdfd;
-        border: 1px dashed var(--border-tan);
-        border-radius: 20px;
-        padding: 12px;
-        margin-top: 20px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        text-decoration: none !important;
-        transition: 0.3s;
-    }
-    .buy-tag-box:hover { border-color: var(--brand-color); background: #fff; transform: scale(1.02); }
-
-    .tag-img-sm {
-        width: 50px; height: 50px;
-        border-radius: 10px;
-        object-fit: cover;
-        border: 1px solid var(--border-tan);
-    }
-
-    .tag-text-sm { line-height: 1.2; text-align: left; }
-    .tag-text-sm b { display: block; font-size: 0.85rem; color: var(--mid-brown); }
-    .tag-text-sm span { font-size: 0.75rem; color: var(--brand-color); font-weight: 700; }
-
-    .btn-alfa-gold { background: var(--brand-color); color: white !important; border-radius: 16px; padding: 16px; font-weight: 800; text-decoration: none !important; transition: 0.3s; text-align: center; width: 100%; display: block; border: none; }
-    .btn-alfa-gold:hover { background: var(--btn-hover); transform: translateY(-2px); }
-
-    .btn-alfa-outline { border: 2px solid var(--mid-brown); color: var(--mid-brown) !important; border-radius: 16px; padding: 16px; font-weight: 800; text-decoration: none !important; transition: 0.3s; text-align: center; width: 100%; display: block; }
-    .btn-alfa-outline:hover { background: var(--mid-brown); color: white !important; }
-
-    .feature-item { margin-bottom: 12px; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; color: #555; }
-    .feature-item i { color: var(--brand-color); width: 18px; text-align: center; }
-
-    /* SPECIÁLNÍ ZVÝRAZNĚNÍ SOS PROFILU */
-    .feature-important-sos {
+    .feature-important {
         font-weight: 800;
         color: var(--brand-color) !important;
         background: var(--subtle-cream);
-        padding: 4px 8px;
-        border-radius: 8px;
-        margin-left: -8px;
+        padding: 6px 10px;
+        border-radius: 10px;
+        margin-left: -10px;
+        border: 1px solid rgba(197, 160, 89, 0.1);
     }
+
+    /* Sjednocení horních boxů */
+    .plan-badge-box {
+        min-height: 55px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 15px;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        padding: 10px;
+        text-decoration: none !important;
+    }
+
+    /* Box pro nákup známky s fotkou navrchu */
+    .buy-tag-top {
+        background: #fdfdfd;
+        border: 1px dashed var(--border-tan);
+        border-radius: 20px;
+        padding: 10px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        text-decoration: none !important;
+        transition: 0.3s;
+    }
+    .buy-tag-top:hover { background: #fffcf5; border-style: solid; }
+    .tag-img-top { width: 60px; height: 60px; border-radius: 12px; object-fit: cover; margin-bottom: 8px; border: 1px solid var(--border-tan); }
+    .tag-text-top b { display: block; font-size: 0.85rem; color: var(--mid-brown); }
+    .tag-text-top span { font-size: 0.75rem; color: var(--brand-color); font-weight: 800; }
+
+    .btn-alfa-gold { background: var(--brand-color); color: white !important; border-radius: 16px; padding: 16px; font-weight: 800; text-decoration: none !important; transition: 0.3s; text-align: center; width: 100%; display: block; border: none; }
+    .btn-alfa-outline { border: 2px solid var(--mid-brown); color: var(--mid-brown) !important; border-radius: 16px; padding: 16px; font-weight: 800; text-decoration: none !important; transition: 0.3s; text-align: center; width: 100%; display: block; }
+
+    .feature-item { margin-bottom: 12px; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; color: #444; }
+    .feature-item i { color: var(--brand-color); width: 20px; text-align: center; }
 </style>
 
 <div class="container pricing-container">
     <div class="text-center mb-5 mt-3">
         <h2 class="fw-bold mb-3" style="color: var(--mid-brown); font-family: 'Playfair Display', serif;">Vyberte si svůj plán</h2>
+        <p class="text-muted">Chraňte své parťáky s nejlepším SOS systémem v ČR</p>
     </div>
 
     <div class="row g-4 justify-content-center align-items-stretch">
-
         <div class="col-lg-4">
             <div class="card card-plan shadow-sm p-4">
                 <div class="card-body d-flex flex-column p-0">
                     <h4 class="fw-bold">Parťák</h4>
-                    <p class="text-muted small">Základní profil</p>
-                    <div class="mb-4"><span class="price-large">0 Kč</span></div>
+                    <p class="text-muted small">Základní ochrana</p>
+                    <div class="mb-2"><span class="price-large">0 Kč</span></div>
+
+                    <div class="plan-badge-box" style="background: #f8f9fa; border: 1px dashed #ccc; color: #888; font-size: 0.85rem;">
+                        <i class="fas fa-infinity me-2"></i>NAVŽDY ZDARMA
+                    </div>
+
+                    <a href="https://form.simpleshop.cz/JmGWQ/buy/?custom_params[user_id]={{ user.id }}" class="buy-tag-top">
+                        <img src="{% static 'images/qr-znamka.jpg' %}" class="tag-img-top" alt="QR Známka" onerror="this.src='https://via.placeholder.com/60?text=Známka'">
+                        <div class="tag-text-top">
+                            <b>Známka není v ceně</b>
+                            <span>Dokoupit samostatně za 490 Kč</span>
+                        </div>
+                    </a>
 
                     <div class="feature-list flex-grow-1">
                         <div class="feature-item"><i class="fas fa-check"></i> Limit: 2 mazlíčci</div>
-                        <div class="feature-item feature-important-sos"><i class="fas fa-shield-alt"></i> SOS Nouzový profil</div>
-
-                        <a href="https://form.simpleshop.cz/144631/buy/" class="buy-tag-box">
-                            <img src="{% static 'images/znamka.jpg' %}" class="tag-img-sm" alt="QR Známka">
-                            <div class="tag-text-sm">
-                                <b>{% if mazlicek.typ_zvirete == 'K' %}Chci jen lila známku{% else %}Chci jen nerez známku{% endif %}</b>
-                                <span>490 Kč <small>(s dopravou)</small></span>
-                            </div>
-                            <i class="fas fa-chevron-right ms-auto text-muted"></i>
-                        </a>
+                        <div class="feature-item feature-important"><i class="fas fa-shield-alt"></i> SOS Nouzový profil</div>
+                        <div class="feature-item"><i class="fas fa-book-medical"></i> Základní údaje</div>
                     </div>
                     <a href="{% url 'seznam_psu' %}" class="btn-alfa-outline mt-4">UŽÍVAT ZDARMA</a>
                 </div>
@@ -151,24 +116,28 @@
                 <span class="discount-tag">NEJVÝHODNĚJŠÍ</span>
                 <div class="card-body d-flex flex-column p-0 text-center">
                     <h4 class="fw-bold">Alfa Člen</h4>
-                    <p class="text-muted small">Kompletní ochrana</p>
-                    <div class="mb-2">
-                        <span class="price-large">990 Kč</span>
-                        <span class="text-muted">/ rok</span>
+                    <p class="text-muted small">Kompletní péče bez limitů</p>
+                    <div class="mb-2"><span class="price-large">990 Kč</span><span class="text-muted">/ rok</span></div>
+
+                    <div class="plan-badge-box" style="background: white; border: 2px solid var(--brand-color); color: var(--mid-brown);">
+                        <i class="fas fa-gift me-2"></i>ZNÁMKA I DOPRAVA ZDARMA
                     </div>
 
-                    <div class="badge-znamka-zdarma mb-4">
-                        <i class="fas fa-gift me-2"></i>ZNÁMKA I DOPRAVA ZDARMA
+                    <div class="buy-tag-top" style="border: none; background: transparent;">
+                        <img src="{% static 'images/qr-znamka.jpg' %}" class="tag-img-top" style="width:80px; height:80px; border-color: var(--brand-color);" alt="QR Známka">
+                        <div class="tag-text-top">
+                            <b style="color: var(--brand-color)">Prémiová nerezová známka</b>
+                            <span>Součástí balíčku</span>
+                        </div>
                     </div>
 
                     <div class="feature-list flex-grow-1 text-start">
                         <div class="feature-item"><strong><i class="fas fa-infinity"></i> Neomezená zvířata</strong></div>
+                        <div class="feature-item feature-important"><i class="fas fa-shield-alt"></i> SOS Nouzový profil 24/7</div>
+                        <div class="feature-item feature-important"><i class="fas fa-heartbeat"></i> Kompletní zdravotní deník</div>
                         <div class="feature-item"><i class="fas fa-star"></i> Nerezová QR známka v ceně</div>
-                        <div class="feature-item feature-important-sos"><i class="fas fa-shield-alt"></i> SOS Nouzový profil</div>
-                        <div class="feature-item"><i class="fas fa-check"></i> Všechny prémiové funkce</div>
                     </div>
-
-                    <a href="https://form.simpleshop.cz/8oPjA/buy/?custom_params[user_id]={{ user.id }}" class="btn-alfa-gold mt-4 shadow">
+                    <a href="https://form.simpleshop.cz/144631/buy/?custom_params[user_id]={{ user.id }}" class="btn-alfa-gold mt-4 shadow">
                         ZÍSKAT PLÁN I ZNÁMKU
                     </a>
                 </div>
@@ -179,34 +148,32 @@
             <div class="card card-plan shadow-sm p-4">
                 <div class="card-body d-flex flex-column p-0">
                     <h4 class="fw-bold">Měsíční Alfa</h4>
-                    <p class="text-muted small">Bez závazků</p>
-                    <div class="mb-4">
-                        <span class="price-large">99 Kč</span>
-                        <span class="text-muted">/ měsíc</span>
+                    <p class="text-muted small">Všechny funkce bez závazků</p>
+                    <div class="mb-2"><span class="price-large">99 Kč</span><span class="text-muted">/ měsíc</span></div>
+
+                    <div class="plan-badge-box" style="background: #fffcf5; border: 1px solid var(--border-tan); color: var(--mid-brown); font-size: 0.85rem;">
+                        <i class="fas fa-calendar-check me-2"></i>FLEXIBILNÍ PLATBA
                     </div>
+
+                    <a href="https://form.simpleshop.cz/JmGWQ/buy/?custom_params[user_id]={{ user.id }}" class="buy-tag-top">
+                        <img src="{% static 'images/qr-znamka.jpg' %}" class="tag-img-top" alt="QR Známka" onerror="this.src='https://via.placeholder.com/60?text=Známka'">
+                        <div class="tag-text-top">
+                            <b>Známka není v ceně</b>
+                            <span>Dokoupit samostatně za 490 Kč</span>
+                        </div>
+                    </a>
 
                     <div class="feature-list flex-grow-1">
                         <div class="feature-item"><i class="fas fa-infinity"></i> Neomezená zvířata</div>
-                        <div class="feature-item feature-important-sos"><i class="fas fa-shield-alt"></i> SOS Nouzový profil</div>
-                        <div class="feature-item"><i class="fas fa-check"></i> Všechny funkce ALFA</div>
-
-                        <a href="https://form.simpleshop.cz/144631/buy/" class="buy-tag-box">
-                            <img src="{% static 'images/znamka.jpg' %}" class="tag-img-sm" alt="QR Známka">
-                            <div class="tag-text-sm">
-                                <b>Známka není v ceně</b>
-                                <span>Dokoupit za 490 Kč <small>(s dopravou)</small></span>
-                            </div>
-                            <i class="fas fa-chevron-right ms-auto text-muted"></i>
-                        </a>
+                        <div class="feature-item feature-important"><i class="fas fa-shield-alt"></i> SOS Nouzový profil</div>
+                        <div class="feature-item feature-important"><i class="fas fa-heartbeat"></i> Zdravotní deník</div>
                     </div>
-
-                    <a href="https://form.simpleshop.cz/RYD2D/buy/?custom_params[user_id]={{ user.id }}" class="btn-alfa-outline mt-4">
+                    <a href="https://form.simpleshop.cz/144632/buy/?custom_params[user_id]={{ user.id }}" class="btn-alfa-outline mt-4">
                         ZVOLIT MĚSÍČNĚ
                     </a>
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 {% endblock %}

@@ -26,4 +26,5 @@ urlpatterns = [
 
     path('webhook/simpleshop/', views.simpleshop_webhook, name='simpleshop_webhook'),
     path('dekujeme-za-nakup/', views.dekujeme_za_nakup, name='dekujeme_za_nakup'),
+    path('dekujeme-za-znamku/', views.dekujeme_za_znamku, name='dekujeme_za_znamku'),
 ]
