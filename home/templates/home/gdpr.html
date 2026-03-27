@@ -4,6 +4,13 @@
 
 {% block content %}
 <style>
+    :root {
+        /* Definice barev pro případ, že by chyběly v base.html */
+        --dark-cocoa: #3e2723;
+        --gold: #c5a059;
+        --mid-brown: #5d4037;
+    }
+
     .legal-container {
         max-width: 900px;
         margin: 0 auto;
@@ -25,7 +32,7 @@
 
     .legal-section {
         margin-bottom: 40px;
-        padding: 20px; /* Přidán vnitřní padding pro lepší hover efekt */
+        padding: 20px;
         border-left: 3px solid #fdfaf6;
         border-radius: 0 15px 15px 0;
         transition: all 0.3s ease;
@@ -33,11 +40,10 @@
 
     .legal-section:hover {
         border-left-color: var(--gold);
-        background: rgba(197, 160, 89, 0.03); /* Dynamické pozadí při najetí */
+        background: rgba(197, 160, 89, 0.03);
         transform: translateX(5px);
     }
 
-    /* Adaptace pozadí hoveru pro kočičí lila téma */
     :root[style*="--gold: #9b87f5"] .legal-section:hover {
         background: rgba(155, 135, 245, 0.03);
     }
@@ -52,7 +58,7 @@
     }
 
     .legal-section h4 i {
-        color: var(--gold); /* Ikony v barvě tématu */
+        color: var(--gold);
         width: 25px;
         text-align: center;
     }
@@ -78,7 +84,6 @@
         position: absolute;
         left: -30px;
         font-size: 0.85rem;
-        /* Tady tlapka zůstává tlapkou, je to univerzální symbol projektu */
     }
 
     .btn-legal-outline {
@@ -93,7 +98,7 @@
 
     .btn-legal-outline:hover {
         background: var(--mid-brown);
-        color: white;
+        color: white !important;
     }
 
     .btn-legal-primary {
@@ -121,7 +126,6 @@
         </p>
 
         <div class="legal-text">
-
             <section class="legal-section">
                 <h4><i class="fas fa-user-tie"></i> 1. Správce osobních údajů</h4>
                 <p>
@@ -132,7 +136,9 @@
                 </p>
                 <p>
                     V případě dotazů nás můžete kontaktovat na:
-                    <a href="mailto:{{ kontaktni_info.email }}" class="fw-bold" style="color: var(--gold); text-decoration: none;">{{ kontaktni_info.email|default:"info@epes.online" }}</a>
+                    <a href="mailto:{{ kontaktni_info.email|default:'info@epes.online' }}" class="fw-bold" style="color: var(--gold); text-decoration: none;">
+                        {{ kontaktni_info.email|default:"info@epes.online" }}
+                    </a>
                 </p>
             </section>
 

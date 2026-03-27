@@ -5,7 +5,7 @@
     .cookie-card {
         border-radius: 35px;
         border: 1px solid rgba(197, 160, 89, 0.2);
-        background-color: white; /* Čistě bílá pro lepší čitelnost */
+        background-color: white;
         max-width: 800px;
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
         transition: transform 0.3s ease;
@@ -26,14 +26,12 @@
     }
 
     .cookie-section {
-        /* Používáme barvu ze systému s nízkým průhledem pro pozadí */
         background: rgba(197, 160, 89, 0.07);
         border-left: 5px solid var(--gold);
         border-radius: 15px;
         transition: background 0.3s ease;
     }
 
-    /* Pokud je aktivní lila téma, upravíme nádech pozadí sekce */
     :root[style*="--gold: #9b87f5"] .cookie-section {
         background: rgba(155, 135, 245, 0.07);
     }
@@ -115,14 +113,26 @@
             </div>
         </div>
 
-        <div class="mt-5 d-flex flex-column flex-md-row justify-content-center gap-3">
-            <a href="{% url 'home' %}" class="btn btn-lg px-5 py-3 rounded-pill fw-bold btn-cookie-primary">
+        <div id="cookie-actions" class="mt-5 d-flex flex-column flex-md-row justify-content-center gap-3">
+            <button onclick="setCookieConsent('all')" class="btn btn-lg px-5 py-3 rounded-pill fw-bold btn-cookie-primary">
                 <i class="fas fa-check me-2"></i>Přijmout vše
-            </a>
+            </button>
 
-            <a href="{% url 'home' %}" class="btn btn-lg px-5 py-3 rounded-pill fw-bold btn-cookie-outline">
+            <button onclick="setCookieConsent('essential')" class="btn btn-lg px-5 py-3 rounded-pill fw-bold btn-cookie-outline">
                 Odmítnout volitelné
-            </a>
+            </button>
+        </div>
+
+        <div id="cookie-status" class="mt-5 text-center" style="display: none;">
+            <div class="alert alert-success rounded-pill d-inline-block px-5 py-3 border-0 shadow-sm" style="background: rgba(197, 160, 89, 0.1); color: var(--dark-cocoa);">
+                <i class="fas fa-check-circle me-2 text-success"></i>
+                <strong>Vaše nastavení bylo uloženo.</strong>
+            </div>
+            <div class="mt-3">
+                <button onclick="resetCookies()" class="btn btn-sm text-muted text-decoration-underline border-0 bg-transparent small">
+                    Chci změnit nastavení a vybrat znovu
+                </button>
+            </div>
         </div>
 
         <p class="text-center mt-4 text-muted" style="font-size: 0.75rem;">
@@ -130,4 +140,47 @@
         </p>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        checkConsentStatus();
+    });
+
+    function checkConsentStatus() {
+        const consent = localStorage.getItem('epes_cookie_consent');
+        const actions = document.getElementById('cookie-actions');
+        const status = document.getElementById('cookie-status');
+
+        if (consent && actions && status) {
+            actions.style.display = 'none';
+            status.style.display = 'block';
+        }
+    }
+
+    function setCookieConsent(consentType) {
+        // 1. Uložíme volbu do prohlížeče
+        localStorage.setItem('epes_cookie_consent', consentType);
+        localStorage.setItem('epes_cookie_date', new Date().toISOString());
+
+        // 2. Aktualizace vzhledu
+        checkConsentStatus();
+
+        // 3. Logika přesměrování s malým zpožděním pro efekt uložení
+        setTimeout(() => {
+            const prevPage = document.referrer;
+            if (prevPage && prevPage.includes(window.location.hostname) && !prevPage.includes('cookies')) {
+                window.location.href = prevPage;
+            } else {
+                window.location.href = "{% url 'home' %}";
+            }
+        }, 800);
+    }
+
+    function resetCookies() {
+        localStorage.removeItem('epes_cookie_consent');
+        localStorage.removeItem('epes_cookie_date');
+        document.getElementById('cookie-actions').style.display = 'flex';
+        document.getElementById('cookie-status').style.display = 'none';
+    }
+</script>
 {% endblock %}

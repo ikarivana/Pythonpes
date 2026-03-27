@@ -1,8 +1,7 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
-      rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
     :root {
@@ -11,11 +10,14 @@
         --t-danger: #d63031;
         --t-success: #2d6a4f;
         --t-soft-gold: rgba(197, 160, 89, 0.1);
-        --cat-lila: #8e44ad; /* Sytější lila pro lepší čitelnost */
+        --cat-lila: #8e44ad;
         --cat-soft-lila: rgba(142, 68, 173, 0.1);
     }
 
-    body { background-color: #f9f4ef; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body {
+        background-color: #f9f4ef;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
 
     /* --- BANNER --- */
     .term-header {
@@ -37,15 +39,31 @@
         height: 100%;
         overflow: hidden;
     }
-    .dog-term-card:hover { transform: translateY(-5px); }
+
+    .dog-term-card:hover {
+        transform: translateY(-5px);
+    }
 
     .dog-name-bar {
         padding: 15px 20px;
-        display: flex; justify-content: space-between; align-items: center;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
-    .bar-pes { background: var(--t-soft-gold); border-bottom: 1px solid #f8f1e5; }
-    .bar-kocka { background: var(--cat-soft-lila); border-bottom: 1px solid var(--cat-soft-lila); }
-    .bar-kocka h5 { color: var(--cat-lila) !important; }
+
+    .bar-pes {
+        background: var(--t-soft-gold);
+        border-bottom: 1px solid #f8f1e5;
+    }
+
+    .bar-kocka {
+        background: var(--cat-soft-lila);
+        border-bottom: 1px solid var(--cat-soft-lila);
+    }
+
+    .bar-kocka h5 {
+        color: var(--cat-lila) !important;
+    }
 
     .health-badge-mini {
         background: #fff;
@@ -58,52 +76,73 @@
 
     /* --- HISTORIE ZÁZNAMŮ --- */
     .incident-card {
-        background: #fff; border-radius: 20px; padding: 18px;
-        border-left: 6px solid var(--t-gold); margin-bottom: 15px;
-        display: flex; gap: 15px; align-items: center;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        background: #fff;
+        border-radius: 20px;
+        padding: 18px;
+        border-left: 6px solid var(--t-gold);
+        margin-bottom: 15px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
     }
-    /* Dynamické barvy pro záznamy v historii */
-    .incident-card.cat-border { border-left-color: var(--cat-lila); }
-    .incident-card.urgent { border-left-color: var(--t-danger); background: #fffafa; }
+
+    .incident-card.cat-border {
+        border-left-color: var(--cat-lila);
+    }
+
+    .incident-card.urgent {
+        border-left-color: var(--t-danger);
+        background: #fffafa;
+    }
 
     .qr-badge-sos {
-        flex-shrink: 0; width: 80px; height: 80px; border-radius: 12px;
-        padding: 6px; background: white; border: 1.5px solid #f0f0f0;
+        flex-shrink: 0;
+        width: 80px;
+        height: 80px;
+        border-radius: 12px;
+        padding: 6px;
+        background: white;
+        border: 1.5px solid #f0f0f0;
         text-align: center;
     }
-    .qr-badge-sos img { width: 100%; height: 100%; object-fit: contain; border-radius: 5px; }
 
-    /* Kompaktnější verze luxusního tlačítka */
-.btn-lux-add {
-    background: var(--t-brown);
-    color: white;
-    border-radius: 12px; /* Méně kulaté, víc profi */
-    padding: 8px 18px;   /* Výrazně menší padding */
-    font-size: 0.85rem;  /* Menší písmo */
-    font-weight: 700;
-    border: 1.5px solid var(--t-gold);
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
+    .qr-badge-sos img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 5px;
+    }
 
-.btn-lux-add:hover {
-    background: var(--t-gold);
-    color: white;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(197, 160, 89, 0.2);
-}
+    .btn-lux-add {
+        background: var(--t-brown);
+        color: white;
+        border-radius: 12px;
+        padding: 8px 18px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border: 1.5px solid var(--t-gold);
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
 
-.btn-lux-add i {
-    font-size: 0.9rem;
-}
+    .btn-lux-add:hover {
+        background: var(--t-gold);
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(197, 160, 89, 0.2);
+    }
 
-    /* FORMULÁŘ V MODALU */
-    .form-control:focus, .form-select:focus {
+    .btn-lux-add i {
+        font-size: 0.9rem;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
         background-color: #fff !important;
         border: 1px solid var(--t-gold) !important;
         box-shadow: 0 0 0 0.25rem var(--t-soft-gold) !important;
@@ -114,11 +153,13 @@
     <div class="term-header text-center text-lg-start">
         <div class="row align-items-center">
             <div class="col-lg-8">
-                <h1 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 800;"
-                    class="mb-2 text-white">Lékařský Deník 🩺</h1>
+                <h1 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 800;" class="mb-2 text-white">Lékařský Deník 🩺</h1>
                 <p class="text-white-50 mb-0">Zdravotní historie a termíny pro vaše parťáky.</p>
             </div>
             <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <button onclick="shareDiary()" class="btn btn-light rounded-pill px-4 fw-bold me-2 shadow-sm">
+                    <i class="fas fa-share-alt me-2 text-primary"></i> SDÍLET
+                </button>
                 <span class="badge rounded-pill bg-white bg-opacity-10 p-3 border border-white border-opacity-25 fw-bold">
                     <i class="fas fa-paw me-2 text-gold"></i>{{ psi.count }} Pacienti v péči
                 </span>
@@ -134,9 +175,7 @@
                     <h5 class="fw-bold m-0">
                         {% if mazlicek.druh == 'kocka' %}🐱{% else %}🐶{% endif %} {{ mazlicek.jmeno }}
                     </h5>
-                    <a href="{% url 'detail_psa' mazlicek.id %}"
-                       class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold"
-                       style="font-size: 0.7rem;">DETAIL</a>
+                    <a href="{% url 'detail_psa' mazlicek.id %}" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold" style="font-size: 0.7rem;">DETAIL</a>
                 </div>
                 <div class="p-3">
                     <div class="row g-2 text-center">
@@ -171,13 +210,14 @@
     <div class="vet-report-section shadow-sm bg-white p-4 p-md-5 mt-4" style="border-radius: 35px;">
         <div class="d-flex justify-content-between align-items-end mb-4">
             <div>
-                <h3 class="fw-800 mb-0" style="color: var(--t-brown); font-family: 'Playfair Display', serif;">🚨
-                    Historie</h3>
+                <h3 class="fw-800 mb-0" style="color: var(--t-brown); font-family: 'Playfair Display', serif;">🚨 Historie</h3>
                 <small class="text-muted">Chronologický přehled</small>
             </div>
+            {% if request.user.is_authenticated %}
             <button class="btn btn-lux-add shadow-sm" data-bs-toggle="modal" data-bs-target="#newIncidentModal">
                 <i class="fas fa-plus"></i> PŘIDAT
             </button>
+            {% endif %}
         </div>
 
         <div class="row g-3">
@@ -195,27 +235,25 @@
                     <div class="flex-grow-1">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <span class="badge {% if zaznam.typ == 'urgentni' %}bg-danger{% else %}bg-secondary{% endif %} mb-1"
-                                      style="font-size: 0.6rem; letter-spacing: 0.5px;">{{ zaznam.get_typ_display|upper }}</span>
+                                <span class="badge {% if zaznam.typ == 'urgentni' %}bg-danger{% else %}bg-secondary{% endif %} mb-1" style="font-size: 0.6rem; letter-spacing: 0.5px;">{{ zaznam.get_typ_display|upper }}</span>
                                 <h6 class="fw-bold mb-1" style="color: var(--t-brown);">{{ zaznam.titulek }}</h6>
                             </div>
                             <div class="d-flex gap-2">
-                                <a href="{% url 'upravit_zaznam' zaznam.pk %}" class="text-muted"><i
-                                        class="fas fa-edit"></i></a>
+                                {% if request.user.is_authenticated %}
+                                <a href="{% url 'upravit_zaznam' zaznam.pk %}" class="text-muted"><i class="fas fa-edit"></i></a>
                                 <form action="{% url 'smazat_zaznam' zaznam.pk %}" method="POST" class="d-inline">
                                     {% csrf_token %}
-                                    <button type="submit" class="border-0 bg-transparent text-danger p-0"
-                                            onclick="return confirm('Opravdu smazat?')">
+                                    <button type="submit" class="border-0 bg-transparent text-danger p-0" onclick="return confirm('Opravdu smazat?')">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
                                 </form>
+                                {% endif %}
                             </div>
                         </div>
                         <p class="small text-muted mb-2 text-truncate" style="max-width: 250px;">{{ zaznam.popis }}</p>
                         <div class="d-flex justify-content-between align-items-center border-top pt-2">
                             <span class="small fw-bold text-muted"><i class="far fa-calendar-alt me-1"></i>{{ zaznam.datum|date:"d. m. Y" }}</span>
-                            <span class="badge rounded-pill px-2 py-1 {% if zaznam.pes.druh == 'kocka' %}bg-light text-primary border-primary{% else %}bg-light text-dark border{% endif %} border"
-                                  style="font-size: 0.7rem;">
+                            <span class="badge rounded-pill px-2 py-1 {% if zaznam.pes.druh == 'kocka' %}bg-light text-primary border-primary{% else %}bg-light text-dark border{% endif %} border" style="font-size: 0.7rem;">
                                 {{ zaznam.pes.jmeno }}
                             </span>
                         </div>
@@ -247,9 +285,7 @@
                         <label class="small fw-bold text-muted mb-1 text-uppercase">Pacient</label>
                         <select name="pes_id" class="form-select border-0 bg-light p-3 rounded-4" required>
                             {% for mazlicek in psi %}
-                            <option value="{{ mazlicek.id }}">{% if mazlicek.druh == 'kocka' %}🐱{% else %}🐶{% endif %}
-                                {{ mazlicek.jmeno }}
-                            </option>
+                            <option value="{{ mazlicek.id }}">{% if mazlicek.druh == 'kocka' %}🐱{% else %}🐶{% endif %} {{ mazlicek.jmeno }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -257,23 +293,19 @@
                         <label class="small fw-bold text-muted mb-1 text-uppercase">Typ návštěvy</label>
                         <div class="d-flex gap-2">
                             <input type="radio" class="btn-check" name="typ" id="typ1" value="zaznam" checked>
-                            <label class="btn btn-outline-secondary flex-grow-1 rounded-4 py-3 fw-bold" for="typ1">📝
-                                Kontrola</label>
+                            <label class="btn btn-outline-secondary flex-grow-1 rounded-4 py-3 fw-bold" for="typ1">📝 Kontrola</label>
 
                             <input type="radio" class="btn-check" name="typ" id="typ2" value="urgentni">
-                            <label class="btn btn-outline-danger flex-grow-1 rounded-4 py-3 fw-bold" for="typ2">🚨
-                                Urgentní</label>
+                            <label class="btn btn-outline-danger flex-grow-1 rounded-4 py-3 fw-bold" for="typ2">🚨 Urgentní</label>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="small fw-bold text-muted mb-1 text-uppercase">Předmět / Diagnóza</label>
-                        <input type="text" name="titulek" class="form-control border-0 bg-light p-3 rounded-4"
-                               placeholder="např. Roční vakcinace" required>
+                        <input type="text" name="titulek" class="form-control border-0 bg-light p-3 rounded-4" placeholder="např. Roční vakcinace" required>
                     </div>
                     <div class="mb-4">
                         <label class="small fw-bold text-muted mb-1 text-uppercase">Lékařská zpráva</label>
-                        <textarea name="popis" class="form-control border-0 bg-light p-3 rounded-4" rows="3"
-                                  placeholder="Výsledek vyšetření, podané léky..."></textarea>
+                        <textarea name="popis" class="form-control border-0 bg-light p-3 rounded-4" rows="3" placeholder="Výsledek vyšetření, podané léky..."></textarea>
                     </div>
                     <button type="submit" class="btn btn-lux-add w-100 py-3 shadow">ULOŽIT ZÁZNAM</button>
                 </form>
@@ -281,4 +313,21 @@
         </div>
     </div>
 </div>
+
+<script>
+    function shareDiary() {
+        const shareData = {
+            title: 'Lékařský deník mých mazlíčků',
+            text: 'Podívejte se na zdravotní záznamy mých parťáků.',
+            url: window.location.href
+        };
+
+        if (navigator.share) {
+            navigator.share(shareData);
+        } else {
+            navigator.clipboard.writeText(window.location.href);
+            alert('Odkaz na deník byl zkopírován do schránky!');
+        }
+    }
+</script>
 {% endblock %}

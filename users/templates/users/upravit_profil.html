@@ -4,13 +4,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
+    /* ... tvoje původní styly ... */
     :root {
         --dog-primary: #5d4037;
         --dog-accent: #c5a059;
         --cat-primary: #4b3f72;
         --cat-accent: #9b87f5;
 
-        /* Detekce tématu podle tvé property is_cat_person */
         {% if user.profil.is_cat_person %}
         --current-primary: var(--cat-primary);
         --current-accent: var(--cat-accent);
@@ -21,6 +21,38 @@
 
         --input-border: #f3e5f5;
     }
+
+    /* --- NOVÉ STYLY PRO PRÁVNÍ SEKCI --- */
+    .legal-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 10px;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 0.7rem;
+        color: #6c757d;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    .delete-box {
+        margin-top: 30px;
+        padding: 20px;
+        background: #fff5f5;
+        border: 1px dashed #feb2b2;
+        border-radius: 15px;
+        text-align: center;
+    }
+    .btn-delete {
+        color: #e53e3e;
+        font-size: 0.8rem;
+        font-weight: 800;
+        text-decoration: none;
+        transition: 0.2s;
+    }
+    .btn-delete:hover { color: #c53030; text-decoration: underline; }
+    /* ----------------------------------- */
 
     .edit-wrapper {
         display: flex; justify-content: center; align-items: flex-start;
@@ -56,8 +88,7 @@
         margin-bottom: 8px; font-size: 0.75rem; text-transform: uppercase;
     }
 
-    /* Django inputy */
-    .edit-card input {
+    .edit-card input:not([type="checkbox"]) {
         width: 100% !important; padding: 12px 16px !important;
         border: 2px solid var(--input-border) !important;
         border-radius: 12px !important; background: #fafafa !important;
@@ -132,11 +163,50 @@
                 </div>
             </div>
 
+            <div class="form-section-title"><i class="fas fa-user-shield"></i> Právní doložky a soukromí</div>
+
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <div class="legal-badge">
+                    <i class="fas fa-check-circle text-success"></i> VOP ODSOUHLASENY
+                </div>
+                <div class="legal-badge">
+                    <i class="fas fa-check-circle text-success"></i> GDPR AKTIVNÍ
+                </div>
+            </div>
+
+            <div class="p-3 mb-4 rounded-4 border shadow-sm" style="background: #fafafa; border-color: var(--input-border) !important;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="font-size: 1.5rem;">🍪</div>
+                        <div>
+                            <h6 class="mb-0 fw-bold small" style="color: var(--current-primary);">Nastavení Cookies</h6>
+                            <p class="mb-0 text-muted" style="font-size: 0.7rem;">Upravte, jaké údaje o používání webu sdílíte.</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'nastaveni_cookies' %}" class="btn btn-sm px-3 rounded-pill fw-800"
+                       style="background: white; border: 2px solid var(--current-accent); color: var(--current-accent); font-size: 0.7rem;">
+                        ZMĚNIT
+                    </a>
+                </div>
+            </div>
+
+            <p class="small text-muted mb-4" style="font-size: 0.7rem; line-height: 1.4;">
+                Vaše souhlasy jsou nezbytné pro fungování portálu a doručování dárků. Cookies nám pomáhají zlepšovat svět <strong>epes.online</strong>.
+            </p>
+
             <button type="submit" class="btn-save shadow-sm">
-                ULOŽIT ZMĚNY
+                ULOŽIT ZMĚNY PROFILU
             </button>
 
-            <a href="{% url 'profil' %}" class="text-decoration-none d-block text-center mt-3 text-muted small fw-bold">
+            <div class="delete-box">
+                <p class="small text-muted mb-2">Chcete ukončit členství a smazat všechna data?</p>
+                <a href="{% url 'smazat_profil' %}" class="btn-delete"
+                   onclick="return confirm('Opravdu chcete trvale smazat svůj profil, všechna zvířata a záznamy? Tato akce je nevratná.')">
+                    <i class="fas fa-trash-alt me-1"></i> SMAZAT ÚČET A ZRUŠIT SOUHLASY
+                </a>
+            </div>
+
+            <a href="{% url 'profil' %}" class="text-decoration-none d-block text-center mt-4 text-muted small fw-bold">
                 <i class="fas fa-times me-1"></i> ZRUŠIT A VRÁTIT SE
             </a>
         </form>

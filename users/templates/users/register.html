@@ -9,7 +9,7 @@
     }
 
     .reg-card {
-        background: white; width: 100%; max-width: 550px; /* Trochu širší pro PC */
+        background: white; width: 100%; max-width: 550px;
         padding: 40px; border-radius: 30px;
         box-shadow: 0 15px 35px rgba(141, 110, 99, 0.1);
         border: 1px solid #efebe9;
@@ -34,13 +34,9 @@
     @media (max-width: 576px) {
         .reg-card { padding: 25px 20px; border-radius: 20px; }
         .reg-card h2 { font-size: 1.8rem; }
-        .address-grid { grid-template-columns: 1fr !important; } /* Adresa pod sebou */
     }
 
-    /* Mřížka pro adresu na PC */
-    .address-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; }
-
-    /* Ostatní styly z tvého původního kódu */
+    /* Ostatní styly */
     .form-group { margin-bottom: 18px; position: relative; }
     .reg-card label { font-weight: 600; color: #8d6e63; display: block; margin-bottom: 5px; font-size: 0.85rem; text-transform: uppercase; }
     .reg-card input:not([type="checkbox"]) {
@@ -65,6 +61,11 @@
     .toggle-password {
         position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
         background: none; border: none; color: #c5a059; cursor: pointer; z-index: 10;
+    }
+
+    label[for="souhlas_vop"] a:hover {
+        color: #8d6e63 !important;
+        text-decoration: none !important;
     }
 </style>
 
@@ -93,13 +94,13 @@
 
                     {# ADRESA - sekce dárků #}
                     {% if field.name == 'ulice_cp' %}
-                    <div class="address-divider" id="gift-divider">
-                        <i class="fas fa-gift" style="color: #e67e22; font-size: 1.5rem;"></i>
-                        <div>
-                            <span style="font-weight: 800; color: #5d4037; display:block;" id="gift-title">Dárky pro pejska?</span>
-                            <small style="color: #8d6e63; font-size: 0.75rem;">Nepovinné – pro zasílání odměn a známek.</small>
+                        <div class="address-divider" id="gift-divider">
+                            <i class="fas fa-gift" style="color: #e67e22; font-size: 1.5rem;"></i>
+                            <div>
+                                <span style="font-weight: 800; color: #5d4037; display:block;" id="gift-title">Dárky pro pejska?</span>
+                                <small style="color: #8d6e63; font-size: 0.75rem;">Nepovinné – pro zasílání odměn a známek.</small>
+                            </div>
                         </div>
-                    </div>
                     {% endif %}
 
                     <div class="form-group">
@@ -110,10 +111,26 @@
                                 <button type="button" class="toggle-password"><i class="fas fa-eye"></i></button>
                             {% endif %}
                         </div>
-                        {% if field.errors %}<ul class="errorlist">{% for error in field.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                        {% if field.errors %}
+                            <ul class="errorlist">
+                                {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+                            </ul>
+                        {% endif %}
                     </div>
                 {% endif %}
             {% endfor %}
+
+            {# SOUHLAS S PODMÍNKAMI #}
+            <div class="form-group mb-4 mt-4">
+                <div class="d-flex align-items-start gap-2">
+                    <input type="checkbox" name="souhlas_vop" id="souhlas_vop" required
+                           style="width: 20px; height: 20px; cursor: pointer; margin-top: 3px;">
+                    <label for="souhlas_vop" style="text-transform: none; font-weight: 500; cursor: pointer; line-height: 1.4;">
+                        Souhlasím s <a href="{% url 'podminky' %}" target="_blank" style="color: #c5a059; text-decoration: underline;">obchodními podmínkami</a>
+                        a potvrzuji, že jsem se seznámil/a se zásadami ochrany osobních údajů. <span style="color:red">*</span>
+                    </label>
+                </div>
+            </div>
 
             <button type="submit" class="btn-modern shadow-sm">Vytvořit účet</button>
         </form>
@@ -121,19 +138,17 @@
 </div>
 
 <script>
-// 1. PŘEPÍNÁNÍ PES / KOČKA (Tvoje původní funkce)
+// 1. PŘEPÍNÁNÍ PES / KOČKA
 function setPersonType(type) {
     const isCat = type === 'kocka';
     const isCatInput = document.getElementById('is_cat_person');
     if (isCatInput) isCatInput.value = isCat;
 
-    // Vizuální přepnutí aktivních tříd
     const dogBtn = document.getElementById('type-dog');
     const catBtn = document.getElementById('type-cat');
     if (dogBtn) dogBtn.classList.toggle('active', !isCat);
     if (catBtn) catBtn.classList.toggle('active', isCat);
 
-    // Změna textů v závislosti na výběru
     const title = document.getElementById('reg-title');
     const subtitle = document.getElementById('reg-subtitle');
     const giftTitle = document.getElementById('gift-title');
@@ -152,30 +167,22 @@ function setPersonType(type) {
     }
 }
 
-// 2. LOGIKA PRO "OKO" (PŘEPÍNÁNÍ VIDITELNOSTI HESLA)
-// Spustí se po načtení stránky
+// 2. LOGIKA PRO VIDITELNOST HESLA
 document.addEventListener('DOMContentLoaded', function() {
-    // Najdeme všechna tlačítka s ikonou oka
     const toggleButtons = document.querySelectorAll('.toggle-password');
 
     toggleButtons.forEach(button => {
         button.addEventListener('click', function(e) {
-            // Zabráníme odeslání formuláře při kliknutí na oko
             e.preventDefault();
-
-            // Najdeme input, který patří k tomuto tlačítku
-            // (.password-container je obal, který jsi definoval v HTML)
             const container = this.closest('.password-container');
             const input = container.querySelector('input');
             const icon = this.querySelector('i');
 
             if (input.type === "password") {
-                // Zobrazit heslo
                 input.type = "text";
                 icon.classList.remove('fa-eye');
                 icon.classList.add('fa-eye-slash');
             } else {
-                // Skrýt heslo
                 input.type = "password";
                 icon.classList.remove('fa-eye-slash');
                 icon.classList.add('fa-eye');

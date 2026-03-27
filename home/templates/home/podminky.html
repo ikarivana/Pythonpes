@@ -112,7 +112,7 @@
                         <div class="plan-box h-100">
                             <h6 class="fw-bold"><i class="fas fa-paw me-2 text-muted"></i>Plán Parťák (Zdarma)</h6>
                             <ul class="small ps-3 mb-0">
-                                <li>Správa profilu pro 1 zvíře.</li>
+                                <li>Správa profilu pro 2 zvířata.</li>
                                 <li>Základní SOS nouzový profil.</li>
                                 <li>Omezený úložný prostor pro média.</li>
                             </ul>
@@ -146,37 +146,71 @@
             </section>
 
             <section class="legal-section">
-                <h4>4. Platební podmínky a digitální obsah</h4>
+                <h4>4. Platební podmínky a prodej fyzického zboží</h4>
                 <p>
-                    Platba za Premium (Alfa) členství probíhá jednorázově (roční) nebo opakovaně (měsíční) prostřednictvím platební brány.
+                    Platba za Premium (Alfa) členství i za unikátní QR známky probíhá prostřednictvím zabezpečené platební brány <strong>ComGate</strong>.
+                    Poskytovatel služby, společnost ComGate Payments, a.s., je licencovaná Platební instituce působící pod dohledem České národní banky.
                 </p>
+
+                <div class="plan-box mb-4">
+                    <p class="small mb-2"><strong>Platební metody:</strong></p>
+                    <ul class="small mb-3">
+                        <li><strong>Platba kartou:</strong> Nejrychlejší způsob zaplacení online. Do rozhraní brány zadáte číslo karty, platnost a CVC kód. Vše je zabezpečeno standardem 3D Secure.</li>
+                        <li><strong>Online bankovní převod:</strong> Okamžitý převod peněz z vašeho internetového bankovnictví.</li>
+                    </ul>
+
+                    <p class="small mb-2"><strong>Kontakt na poskytovatele brány:</strong></p>
+                    <p class="small mb-3">
+                        ComGate Payments, a.s., Gočárova třída 1754/48b, Hradec Králové.<br>
+                        E-mail: <a href="mailto:platby-podpora@comgate.cz">platby-podpora@comgate.cz</a>, tel: +420 228 224 267.
+                    </p>
+
+                    <p class="small mb-2"><strong>Doručení fyzického zboží:</strong></p>
+                    <ul class="small mb-0">
+                        <li>Výroba QR známky začíná bezprostředně po připsání platby.</li>
+                        <li>Zboží je odesíláno standardně do <strong>5-10 pracovních dnů</strong> na adresu uvedenou v objednávce.</li>
+                        <li>Dopravu zajišťujeme prostřednictvím služby [DOPLŇTE DOPRAVCE - např. Zásilkovna].</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="legal-section">
+                <h4>5. Odstoupení od smlouvy</h4>
                 <div class="danger-box mb-4">
+                    <h6 class="fw-bold small mb-2">A) Digitální obsah (Premium členství)</h6>
+                    <p class="mb-3 small">
+                        Aktivací Premium účtu je Uživateli okamžitě zpřístupněn digitální obsah. Uživatel bere na vědomí, že tím <strong>zaniká jeho právo na odstoupení od smlouvy ve 14denní lhůtě</strong>.
+                    </p>
+
+                    <hr>
+
+                    <h6 class="fw-bold small mb-2">B) Fyzické zboží na zakázku (QR známka)</h6>
                     <p class="mb-0 small">
-                        <strong>Odstoupení od smlouvy:</strong> Vzhledem k tomu, že aktivací Premium účtu je Uživateli okamžitě zpřístupněn digitální obsah,
-                        Uživatel výslovně souhlasí s tím, že mu plnění bude poskytnuto před uplynutím lhůty pro odstoupení od smlouvy a bere na vědomí,
-                        že tím <strong>zaniká jeho právo na odstoupení od smlouvy ve 14denní lhůtě</strong>.
+                        Jelikož je každá QR známka generována unikátně pro konkrétní zvířecí profil, jedná se o zboží vyrobené na zakázku/upravené podle přání spotřebitele.
+                        <strong>V souladu s § 1837 písm. d) občanského zákoníku nelze u tohoto produktu využít právo na odstoupení od smlouvy bez udání důvodu.</strong>
+                        Právo na reklamaci v případě vady výrobku zůstává nedotčeno.
                     </p>
                 </div>
             </section>
 
             <section class="legal-section">
-                <h4>5. Komunitní bazar a Hlídání</h4>
+                <h4>6. Komunitní bazar a Hlídání</h4>
                 <p>
                     Provozovatel pouze zprostředkovává prostor pro inzerci. Neodpovídá za kvalitu služeb, zdravotní stav inzerovaných zvířat ani průběh transakcí.
                 </p>
             </section>
 
+            {% if not uz_souhlasil %}
             <div class="d-flex justify-content-center mt-5">
                 <div class="text-center p-4" style="max-width: 500px; background: var(--bg-page); border-radius: 25px; border: 1px solid var(--border-tan);">
                     <p class="mb-4" style="color: var(--mid-brown); font-weight: 600;">
-                        Děkujeme, že pomáháte tvořit bezpečný a férový svět pro naše zvířecí parťáky.
+                        Děkujeme, že pomáháte tvořit bezpečný svět pro naše zvířecí parťáky.
                     </p>
 
                     <form method="post">
                         {% csrf_token %}
                         <div class="d-flex justify-content-center gap-3">
-                            <button type="submit" class="btn px-4 py-3 fw-bold shadow-sm"
-                                    style="background: #c5a059; color: white; border-radius: 15px; border: none; min-width: 200px;">
+                            <button type="submit" class="btn-confirm">
                                 ROZUMÍM A POTVRZUJI
                             </button>
                             <a href="{% url 'home' %}" class="btn px-4 py-3 fw-bold text-muted border-0">
@@ -186,6 +220,12 @@
                     </form>
                 </div>
             </div>
+            {% else %}
+            <div class="text-center mt-5">
+                <p class="text-muted small"><i class="fas fa-check-circle me-1 text-success"></i> Tyto podmínky jste již odsouhlasili.</p>
+                <a href="{% url 'home' %}" class="btn btn-sm btn-outline-secondary mt-2">Zpět na úvod</a>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

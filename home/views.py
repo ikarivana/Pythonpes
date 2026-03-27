@@ -297,7 +297,7 @@ def kontakt(request):
         form = KontaktForm()
     return render(request, 'home/kontakt.html', {'form': form})
 
-from django.shortcuts import render, redirect # Přidej redirect, pokud chybí
+
 def podminky(request):
     moje_info = {
         'jmeno': 'Ivana Elšíková',
@@ -305,19 +305,28 @@ def podminky(request):
         'adresa': 'Sokolská 29, Hvozdná, 76310',
     }
 
-    if request.method == 'POST' and request.user.is_authenticated:
+    # KONTROLA: Pokud už uživatel souhlasil dříve, nepouštěj ho k potvrzovacímu tlačítku
+    if request.user.is_authenticated and hasattr(request.user, 'profil'):
+        if request.user.profil.souhlas_podminky:
+            # Možnost A: Přesměruj ho pryč, už tu nemá co potvrozovat
+            # return redirect('home')
 
-        # Použijeme hasattr, abychom předešli chybě 500, pokud profil neexistuje
+            # Možnost B: Zobraz mu stránku, ale v šabloně skryjeme tlačítko (lepší pro info)
+            return render(request, 'home/podminky.html', {
+                'kontaktni_info': moje_info,
+                'uz_souhlasil': True
+            })
+
+    if request.method == 'POST' and request.user.is_authenticated:
         if hasattr(request.user, 'profil'):
             profil = request.user.profil
             profil.souhlas_podminky = True
             profil.save()
-            return redirect('profil')  # Zkus tohle místo 'muj_profil'
+            return redirect('profil')
         else:
-            # Pokud profil neexistuje, pošleme ho aspoň na home, ať nevidí Error 500
             return redirect('home')
 
-    return render(request, 'home/podminky.html', {'kontaktni_info': moje_info})
+    return render(request, 'home/podminky.html', {'kontaktni_info': moje_info, 'uz_souhlasil': False})
 
 
 def gdpr(request):

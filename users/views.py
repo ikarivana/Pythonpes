@@ -72,13 +72,20 @@ def register(request):
     if request.method == 'POST':
         form = ExtendedRegistrationForm(request.POST)
         if form.is_valid():
-            # save() v tvém forms.py už vytvoří uživatele i ProfilMajitele
+            # save() vytvoří uživatele i ProfilMajitele
             user = form.save()
+
+            # --- NOVÝ KÓD PRO SOUHLAS ---
+            # Pokud v POST datech vidíme zaškrtnutý checkbox 'souhlas_vop'
+            if 'souhlas_vop' in request.POST:
+                # Získáme profil a uložíme souhlas
+                profil, created = ProfilMajitele.objects.get_or_create(uzivatel=user)
+                profil.souhlas_podminky = True
+                profil.save()
+            # ---------------------------
 
             login(request, user)
             messages.success(request, f"Vítej, {user.first_name}! Registrace proběhla úspěšně.")
-
-            # OPRAVA: Směrujeme na 'name' z urls.py
             return redirect('profil')
     else:
         form = ExtendedRegistrationForm()
@@ -115,7 +122,7 @@ def upravit_profil(request):
             user_form.save()
             profil_form.save()
             messages.success(request, "Profil byl úspěšně upraven.")
-            return redirect('profil')  # <--- ZKONTROLUJ, že v urls.py máš name='profil'
+            return redirect('profil')
     else:
         user_form = UserUpdateForm(instance=request.user)
         profil_form = ProfilUpdateForm(instance=profil)
@@ -124,9 +131,10 @@ def upravit_profil(request):
         'user_form': user_form,
         'profil_form': profil_form,
         'profil': profil,
+        # Přidáme informaci o VOP pro šablonu (volitelné)
+        'vop_chybi': not profil.souhlas_podminky
     }
     return render(request, 'users/upravit_profil.html', context)
-
 
 @login_required
 def aktivovat_promokod(request):
@@ -166,13 +174,21 @@ def smazat_profil(request):
     return redirect('home')
 
 
+from datetime import date # Nezapomeň na importy nahoře
+
 @login_required
 def dashboard(request):
-    # 1. Získáme profil (get_or_create je jistota, aby to nespadlo)
+    # 1. Získáme profil (get_or_create je jistota)
     profil, _ = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
 
-    # 2. Kontrola, zda premium neprošlo (pokud používáš premium_do)
-    # K tomu potřebuješ: from datetime import date
+    # --- PRÁVNÍ STOPKA (VOP) ---
+    # Pokud uživatel ještě nesouhlasil s VOP, nepustíme ho dál a hodíme ho na stránku s tlačítkem
+    if not profil.souhlas_podminky:
+        messages.info(request, "Před pokračováním prosím potvrďte naše aktualizované obchodní podmínky.")
+        return redirect('podminky') # 'podminky' je name z urls.py pro tvou stránku s VOP
+    # ---------------------------
+
+    # 2. Kontrola expirace Premia
     if profil.is_premium and profil.premium_do:
         if profil.premium_do < date.today():
             profil.is_premium = False
@@ -182,11 +198,11 @@ def dashboard(request):
     # 3. Načtení dat pro uživatele
     psi = Pes.objects.filter(majitel=profil)
 
-    # Statistiky (kolik má čeho)
+    # Statistiky
     pocet_psu = psi.filter(druh='pes').count()
     pocet_kocek = psi.filter(druh='kocka').count()
 
-    # Poslední zdravotní záznamy pro všechna jeho zvířata
+    # Poslední zdravotní záznamy
     posledni_zaznamy = ZdravotniZaznam.objects.filter(pes__majitel=profil).order_by('-datum')[:5]
 
     # Notifikace (nepřečtené)
@@ -199,7 +215,6 @@ def dashboard(request):
         'pocet_kocek': pocet_kocek,
         'posledni_zaznamy': posledni_zaznamy,
         'nots': nots,
-        # Pomocná proměnná pro šablonu, aby věděla, jestli zbývá málo dní premia
         'premium_konci_brzy': False
     }
 
@@ -210,7 +225,6 @@ def dashboard(request):
             context['premium_konci_brzy'] = True
 
     return render(request, 'users/dashboard.html', context)
-
 
 # --- 1. SPRÁVA PSŮ (Základní operace) ---
 
