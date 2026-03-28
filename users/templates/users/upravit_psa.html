@@ -86,8 +86,8 @@
         <div class="edit-card">
             <h5 class="section-title"><i class="fas fa-paw"></i> Údaje o zvířeti</h5>
             <div class="row g-3">
-                <div class="col-md-6"><label class="label-gold">Jméno *</label><input type="text" name="jmeno" class="input-clean" value="{{ pes.jmeno|default:'' }}" required></div>
-                <div class="col-md-6"><label class="label-gold">Rasa / Plemeno *</label><input type="text" name="rasa" class="input-clean" value="{{ pes.rasa|default:'' }}" required></div>
+                <div class="col-md-6 mb-2"><label class="label-gold">Jméno *</label><input type="text" name="jmeno" class="input-clean" value="{{ pes.jmeno|default:'' }}" required></div>
+                <div class="col-md-6 mb-2"><label class="label-gold">Rasa / Plemeno *</label><input type="text" name="rasa" class="input-clean" value="{{ pes.rasa|default:'' }}" required></div>
                 <div class="col-md-4"><label class="label-gold">Váha (kg)</label><input type="number" name="vaha" class="input-clean" step="0.1" value="{{ pes.vaha|default:'' }}"></div>
                 <div class="col-md-4"><label class="label-gold">Datum narození</label><input type="date" name="datum_narozeni" class="input-clean" value="{{ pes.datum_narozeni|date:'Y-m-d' }}"></div>
                 <div class="col-md-4"><label class="label-gold">Identifikační čip</label><input type="text" name="cip" class="input-clean" value="{{ pes.cip|default:'' }}"></div>
@@ -97,17 +97,17 @@
         <div class="edit-card">
             <h5 class="section-title"><i class="fas fa-award text-warning"></i> Chovnost a Původ</h5>
             <div class="row g-3">
-                <div class="col-md-12"><label class="label-gold">Chovatelská stanice</label><input type="text" name="chovatelska_stanice" class="input-clean" value="{{ pes.chovatelska_stanice|default:'' }}"></div>
-                <div class="col-md-6"><label class="label-gold">Otec (Sir)</label><input type="text" name="otec_manualni" class="input-clean" value="{{ pes.otec_manualni|default:'' }}"></div>
-                <div class="col-md-6"><label class="label-gold">Matka (Dam)</label><input type="text" name="matka_manualni" class="input-clean" value="{{ pes.matka_manualni|default:'' }}"></div>
+                <div class="col-md-12 mb-2"><label class="label-gold">Chovatelská stanice</label><input type="text" name="chovatelska_stanice" class="input-clean" value="{{ pes.chovatelska_stanice|default:'' }}"></div>
+                <div class="col-md-6 mb-2"><label class="label-gold">Otec (Sir)</label><input type="text" name="otec_manualni" class="input-clean" value="{{ pes.otec_manualni|default:'' }}"></div>
+                <div class="col-md-6 mb-2"><label class="label-gold">Matka (Dam)</label><input type="text" name="matka_manualni" class="input-clean" value="{{ pes.matka_manualni|default:'' }}"></div>
 
-                <div class="col-md-6 only-pes"><label class="label-gold">Bonitace</label><input type="text" name="bonitace" class="input-clean" value="{{ pes.bonitace|default:'' }}"></div>
-                <div class="col-md-6 only-pes"><label class="label-gold">Skupina / Barva</label><input type="text" name="skupina_barva" class="input-clean" value="{{ pes.skupina_barva|default:'' }}"></div>
+                <div class="col-md-6 only-pes mb-2"><label class="label-gold">Bonitace</label><input type="text" name="bonitace" class="input-clean" value="{{ pes.bonitace|default:'' }}"></div>
+                <div class="col-md-6 only-pes mb-2"><label class="label-gold">Skupina / Barva</label><input type="text" name="skupina_barva" class="input-clean" value="{{ pes.skupina_barva|default:'' }}"></div>
                 <div class="col-md-4 only-pes"><label class="label-gold">RTG HD</label><input type="text" name="rtg_hd" class="input-clean" value="{{ pes.rtg_hd|default:'' }}"></div>
                 <div class="col-md-4 only-pes"><label class="label-gold">RTG ED</label><input type="text" name="rtg_ed" class="input-clean" value="{{ pes.rtg_ed|default:'' }}"></div>
                 <div class="col-md-4 only-pes"><label class="label-gold">RTG Páteř</label><input type="text" name="rtg_pater" class="input-clean" value="{{ pes.rtg_pater|default:'' }}"></div>
 
-                <div class="col-12"><label class="label-gold">Výstavy a tituly</label><textarea name="tituly" class="input-clean" rows="2">{{ pes.tituly|default:'' }}</textarea></div>
+                <div class="col-12 mt-2"><label class="label-gold">Výstavy a tituly</label><textarea name="tituly" class="input-clean" rows="2">{{ pes.tituly|default:'' }}</textarea></div>
                 <div class="col-12">
                     <label class="label-gold">Rodokmen (PDF)</label>
                     <input type="file" name="rodokmen_pdf" class="input-clean" accept="application/pdf">
@@ -118,11 +118,11 @@
         <div class="edit-card" style="background: #fffcf9; border: 1.5px solid rgba(220, 53, 69, 0.2);">
             <h5 class="section-title"><i class="fas fa-shield-alt text-danger"></i> SOS Kontakty a Adresa</h5>
             <div class="row g-3">
-                <div class="col-md-4"><label class="label-gold">SOS Jméno *</label><input type="text" name="kontaktni_jmeno" class="input-clean" value="{{ pes.kontaktni_jmeno|default:'' }}" required></div>
-                <div class="col-md-4"><label class="label-gold">SOS Telefon *</label><input type="text" name="kontaktni_telefon" class="input-clean" value="{{ pes.kontaktni_telefon|default:'' }}" required></div>
-                <div class="col-md-4"><label class="label-gold">SOS E-mail *</label><input type="email" name="kontaktni_email" class="input-clean" value="{{ pes.kontaktni_email|default:'' }}" required></div>
+                <div class="col-md-4 mb-2"><label class="label-gold">SOS Jméno *</label><input type="text" name="kontaktni_jmeno" class="input-clean" value="{{ pes.kontaktni_jmeno|default:'' }}" required></div>
+                <div class="col-md-4 mb-2"><label class="label-gold">SOS Telefon *</label><input type="text" name="kontaktni_telefon" class="input-clean" value="{{ pes.kontaktni_telefon|default:'' }}" required></div>
+                <div class="col-md-4 mb-2"><label class="label-gold">SOS E-mail *</label><input type="email" name="kontaktni_email" class="input-clean" value="{{ pes.kontaktni_email|default:'' }}" required></div>
 
-                <div class="col-12">
+                <div class="col-12 mt-2">
                     <label class="label-gold">Adresa pro zaslání dárků nebo známky</label>
                     <input type="text" name="adresa_pro_darky" class="input-clean" value="{{ pes.adresa_pro_darky|default:'' }}" placeholder="Ulice, č.p., město, PSČ">
                     <small class="text-muted"><i class="fas fa-gift text-warning"></i> Pokud nálezce najde známku, může vám ji (nebo dárek) poslat na tuto adresu.</small>
@@ -148,10 +148,27 @@
         <div class="edit-card">
             <h5 class="section-title"><i class="fas fa-heartbeat text-success"></i> Zdraví a Pokyny</h5>
             <div class="row g-3">
-                <div class="col-md-4"><label class="label-gold">Očkování</label><input type="date" name="posledni_ockovani" class="input-clean" value="{{ pes.posledni_ockovani|date:'Y-m-d' }}"></div>
-                <div class="col-md-4"><label class="label-gold">Odčervení</label><input type="date" name="posledni_odcerveni" class="input-clean" value="{{ pes.posledni_odcerveni|date:'Y-m-d' }}"></div>
-                <div class="col-md-4"><label class="label-gold">Klíšťata</label><input type="date" name="posledni_klistata" class="input-clean" value="{{ pes.posledni_klistata|date:'Y-m-d' }}"></div>
-                <div class="col-12"><label class="label-gold">Popis pro nálezce (Povaha, alergie...)</label><textarea name="popis" class="input-clean" rows="4">{{ pes.popis|default:'' }}</textarea></div>
+                <div class="col-md-6 mb-2">
+                    <label class="label-gold">Hlavní veterinární klinika</label>
+                    <input type="text" name="hlavni_veterinar_nazev" class="input-clean"
+                           value="{{ pes.hlavni_veterinar_nazev|default:'' }}" placeholder="Např. VetKlinika Zlín">
+                </div>
+                <div class="col-md-6 mb-2">
+                    <label class="label-gold">Telefon na veterinu</label>
+                    <input type="text" name="hlavni_veterinar_telefon" class="input-clean"
+                           value="{{ pes.hlavni_veterinar_telefon|default:'' }}" placeholder="+420 ...">
+                </div>
+
+                <div class="col-12 my-1"><hr class="opacity-0"></div>
+
+                <div class="col-md-4"><label class="label-gold">Poslední Očkování</label><input type="date" name="posledni_ockovani" class="input-clean" value="{{ pes.posledni_ockovani|date:'Y-m-d' }}"></div>
+                <div class="col-md-4"><label class="label-gold">Poslední Odčervení</label><input type="date" name="posledni_odcerveni" class="input-clean" value="{{ pes.posledni_odcerveni|date:'Y-m-d' }}"></div>
+                <div class="col-md-4"><label class="label-gold">Poslední Klíšťata</label><input type="date" name="posledni_klistata" class="input-clean" value="{{ pes.posledni_klistata|date:'Y-m-d' }}"></div>
+
+                <div class="col-12 mt-3">
+                    <label class="label-gold">Popis pro nálezce (Povaha, alergie...)</label>
+                    <textarea name="popis" class="input-clean" rows="4">{{ pes.popis|default:'' }}</textarea>
+                </div>
             </div>
         </div>
 

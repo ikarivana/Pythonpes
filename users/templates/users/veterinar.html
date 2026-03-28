@@ -138,7 +138,6 @@
         box-shadow: 0 4px 12px rgba(197, 160, 89, 0.2);
     }
 
-    /* Styl pro paginaci */
     .page-link-lux {
         background: white;
         border: none;
@@ -164,6 +163,9 @@
         font-weight: 800;
         box-shadow: 0 4px 12px rgba(62, 39, 35, 0.2);
     }
+    #divKlinika {
+    transition: all 0.3s ease-in-out;
+}
 </style>
 
 <div class="container py-4">
@@ -270,7 +272,18 @@
                                 {% endif %}
                             </div>
                         </div>
-                        <p class="small text-muted mb-2 text-truncate" style="max-width: 250px;">{{ zaznam.popis }}</p>
+
+                        {# ZOBRAZENÍ KLINIKY (Změněno z osetrujici_lekar na klinika) #}
+                        {% if zaznam.klinika %}
+                        <div class="mb-1">
+                            <small class="fw-bold" style="color: var(--t-success); font-size: 0.75rem;">
+                                <i class="fas fa-hospital me-1"></i> {{ zaznam.klinika }}
+                            </small>
+                        </div>
+                        {% endif %}
+
+                        <p class="small text-muted mb-2 text-truncate" style="max-width: 250px;">{{ zaznam.poznamka }}</p>
+
                         <div class="d-flex justify-content-between align-items-center border-top pt-2">
                             <span class="small fw-bold text-muted"><i class="far fa-calendar-alt me-1"></i>{{ zaznam.datum|date:"d. m. Y" }}</span>
                             <span class="badge rounded-pill px-2 py-1 {% if zaznam.pes.druh == 'kocka' %}bg-light text-primary border-primary{% else %}bg-light text-dark border{% endif %} border" style="font-size: 0.7rem;">
@@ -325,39 +338,60 @@
         <div class="modal-content border-0 shadow-lg" style="border-radius: 30px;">
             <div class="p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4 class="fw-800 m-0" style="color: var(--t-brown);"></h4>🩺 Nový lékařský záznam</h4>
+                    <h4 class="fw-800 m-0" style="color: var(--t-brown);">🩺 Nový lékařský záznam</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
                 <form method="POST" action="{% url 'veterinar' pes_id=pes.id %}">
                     {% csrf_token %}
-                    <div class="mb-3">
-                        <label class="small fw-bold text-muted mb-1 text-uppercase">Pacient</label>
-                        <select name="pes_id" class="form-select border-0 bg-light p-3 rounded-4" required>
-                            {% for mazlicek in psi %}
-                            <option value="{{ mazlicek.id }}">{% if mazlicek.druh == 'kocka' %}🐱{% else %}🐶{% endif %} {{ mazlicek.jmeno }}</option>
-                            {% endfor %}
-                        </select>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="small fw-bold text-muted mb-1 text-uppercase">Pacient</label>
+                            <select name="pes_id" class="form-select border-0 bg-light p-3 rounded-4" required>
+                                {% for mazlicek in psi %}
+                                <option value="{{ mazlicek.id }}" {% if mazlicek.id == pes.id %}selected{% endif %}>
+                                    {% if mazlicek.druh == 'kocka' %}🐱{% else %}🐶{% endif %} {{ mazlicek.jmeno }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small fw-bold text-muted mb-1 text-uppercase">Datum</label>
+                            <input type="date" name="datum" class="form-control border-0 bg-light p-3 rounded-4" value="{{ today|date:'Y-m-d' }}">
+                        </div>
                     </div>
-                    <div class="mb-3">
+
+                    <div class="mb-3 mt-3">
                         <label class="small fw-bold text-muted mb-1 text-uppercase">Typ návštěvy</label>
                         <div class="d-flex gap-2">
-                            <input type="radio" class="btn-check" name="typ" id="typ1" value="zaznam" checked>
+                            <input type="radio" class="btn-check" name="typ" id="typ1" value="zaznam" checked onclick="toggleUrgentFields(false)">
                             <label class="btn btn-outline-secondary flex-grow-1 rounded-4 py-3 fw-bold" for="typ1">📝 Kontrola</label>
 
-                            <input type="radio" class="btn-check" name="typ" id="typ2" value="urgentni">
+                            <input type="radio" class="btn-check" name="typ" id="typ2" value="urgentni" onclick="toggleUrgentFields(true)">
                             <label class="btn btn-outline-danger flex-grow-1 rounded-4 py-3 fw-bold" for="typ2">🚨 Urgentní</label>
                         </div>
                     </div>
+
                     <div class="mb-3">
-                        <label class="small fw-bold text-muted mb-1 text-uppercase">Předmět / Diagnóza</label>
-                        <input type="text" name="titulek" class="form-control border-0 bg-light p-3 rounded-4" placeholder="např. Roční vakcinace" required>
+                        <label class="small fw-bold text-muted mb-1 text-uppercase" id="labelTitulek">Předmět / Diagnóza</label>
+                        <input type="text" name="titulek" id="inputTitulek" class="form-control border-0 bg-light p-3 rounded-4" placeholder="např. Roční vakcinace" required>
                     </div>
+
+                    <div class="mb-3" id="divKlinika">
+                        <label class="small fw-bold text-muted mb-1 text-uppercase">Veterinární klinika / Lékař</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-0 bg-light rounded-start-4 text-muted"><i class="fas fa-hospital"></i></span>
+                            <input type="text" name="klinika" class="form-control border-0 bg-light p-3 rounded-end-4" placeholder="Jméno lékaře nebo kliniky">
+                        </div>
+                    </div>
+
                     <div class="mb-4">
-                        <label class="small fw-bold text-muted mb-1 text-uppercase">Lékařská zpráva</label>
-                        <textarea name="popis" class="form-control border-0 bg-light p-3 rounded-4" rows="3" placeholder="Výsledek vyšetření, podané léky..."></textarea>
+                        <label class="small fw-bold text-muted mb-1 text-uppercase" id="labelZprava">Lékařská zpráva</label>
+                        <textarea name="popis" id="inputZprava" class="form-control border-0 bg-light p-3 rounded-4" rows="3" placeholder="Výsledek vyšetření, doporučení..."></textarea>
                     </div>
-                    <button type="submit" class="btn btn-lux-add w-100 py-3 shadow">ULOŽIT ZÁZNAM</button>
+
+                    <button type="submit" id="btnUlozit" class="btn btn-lux-add w-100 py-3 shadow">ULOŽIT ZÁZNAM</button>
                 </form>
             </div>
         </div>
@@ -365,6 +399,32 @@
 </div>
 
 <script>
+    function toggleUrgentFields(isUrgent) {
+        const divKlinika = document.getElementById('divKlinika');
+        const labelTitulek = document.getElementById('labelTitulek');
+        const inputTitulek = document.getElementById('inputTitulek');
+        const labelZprava = document.getElementById('labelZprava');
+        const inputZprava = document.getElementById('inputZprava');
+        const btnUlozit = document.getElementById('btnUlozit');
+
+        if (isUrgent) {
+            divKlinika.classList.add('d-none'); // Schová kliniku
+            labelTitulek.innerText = '🚨 CO SE DĚJE?';
+            inputTitulek.placeholder = 'Stručně popište problém (např. Průjem, Úraz)';
+            labelZprava.innerText = 'RYCHLÁ POZNÁMKA';
+            inputZprava.placeholder = 'První příznaky, čas...';
+            btnUlozit.style.background = '#d63031'; // Změní tlačítko na červené
+            btnUlozit.style.borderColor = '#d63031';
+        } else {
+            divKlinika.classList.remove('d-none'); // Ukáže kliniku
+            labelTitulek.innerText = 'PŘEDMĚT / DIAGNÓZA';
+            inputTitulek.placeholder = 'např. Roční vakcinace';
+            labelZprava.innerText = 'LÉKAŘSKÁ ZPRÁVA';
+            inputZprava.placeholder = 'Výsledek vyšetření, doporučení...';
+            btnUlozit.style.background = 'var(--t-brown)';
+            btnUlozit.style.borderColor = 'var(--t-gold)';
+        }
+    }
     function shareDiary() {
         const currentUrl = window.location.href;
         const shareData = {

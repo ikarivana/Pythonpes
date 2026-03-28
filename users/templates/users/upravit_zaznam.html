@@ -1,0 +1,137 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --t-brown: #3e2723;
+        --t-gold: #c5a059;
+        --cat-lila: #8e44ad;
+        --species-color: {% if zaznam.pes.druh == 'kocka' %}var(--cat-lila){% else %}var(--t-gold){% endif %};
+        --bg-light: #f9f9f9;
+    }
+
+    body { background-color: #fdfaf6; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    .form-control-lux {
+        border-radius: 15px;
+        background-color: var(--bg-light);
+        border: 2px solid transparent;
+        padding: 15px;
+        transition: 0.3s;
+        width: 100%;
+        color: #333;
+    }
+
+    .form-control-lux:focus {
+        background-color: #fff;
+        border-color: var(--species-color);
+        box-shadow: 0 0 15px rgba(0,0,0,0.05);
+        outline: none;
+    }
+
+    /* Styl pro přepínače typu */
+    .btn-check:checked + .btn-outline-species {
+        background-color: var(--species-color) !important;
+        border-color: var(--species-color) !important;
+        color: white !important;
+    }
+
+    .btn-outline-species {
+        border: 2px solid #eee;
+        color: #888;
+        border-radius: 15px;
+        transition: 0.3s;
+    }
+
+    .btn-check:checked + .btn-outline-danger {
+        background-color: #d63031 !important;
+        border-color: #d63031 !important;
+        color: white !important;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card border-0 shadow-lg" style="border-radius: 35px; background: #fff;">
+                <div class="card-body p-4 p-md-5">
+
+                    <div class="text-center mb-5">
+                        <span class="badge rounded-pill bg-light border px-3 py-2 mb-2 shadow-sm" style="color: var(--species-color); border-color: var(--species-color) !important;">
+                            <i class="fas fa-edit me-1"></i> MODIFIKACE ZÁZNAMU
+                        </span>
+
+                        <h2 class="fw-800 mt-2" style="color: var(--t-brown); font-family: 'Playfair Display', serif; font-size: 2.3rem;">
+                            <i class="fas {% if zaznam.pes.druh == 'kocka' %}fa-cat{% else %}fa-dog{% endif %} me-2" style="color: var(--species-color);"></i>
+                            {{ zaznam.pes.jmeno }}
+                        </h2>
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <div class="mb-4">
+                            <label class="small fw-bold text-muted mb-1 text-uppercase ms-1">Datum návštěvy</label>
+                            <input type="date" name="datum" class="form-control-lux shadow-sm"
+                                   value="{{ zaznam.datum|date:'Y-m-d' }}">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="small fw-bold text-muted mb-1 text-uppercase ms-1">Typ návštěvy</label>
+                            <div class="d-flex gap-2">
+                                <input type="radio" class="btn-check" name="typ" id="typ1" value="zaznam"
+                                       {% if zaznam.typ == 'zaznam' or not zaznam.typ %}checked{% endif %}>
+                                <label class="btn btn-outline-species flex-grow-1 py-3 fw-bold shadow-sm" for="typ1">
+                                    📝 Kontrola
+                                </label>
+
+                                <input type="radio" class="btn-check" name="typ" id="typ2" value="urgentni"
+                                       {% if zaznam.typ == 'urgentni' %}checked{% endif %}>
+                                <label class="btn btn-outline-danger flex-grow-1 py-3 fw-bold shadow-sm" for="typ2">
+                                    🚨 Urgentní
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="small fw-bold text-muted mb-1 text-uppercase ms-1">Předmět / Diagnóza</label>
+                            <input type="text" name="titulek" class="form-control-lux shadow-sm"
+                                   value="{% if zaznam.titulek and zaznam.titulek != 'None' %}{{ zaznam.titulek }}{% endif %}" placeholder="např. Roční očkování" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="small fw-bold text-muted mb-1 text-uppercase ms-1">Veterinární klinika / Lékař</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-0 bg-light rounded-start-4 text-muted">
+                                    <i class="fas fa-hospital" style="color: var(--species-color);"></i>
+                                </span>
+                                <input type="text" name="klinika" class="form-control-lux rounded-end-4 shadow-sm"
+                                       value="{% if zaznam.klinika and zaznam.klinika != 'None' %}{{ zaznam.klinika }}{% endif %}" placeholder="Jméno kliniky nebo lékaře">
+                            </div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="small fw-bold text-muted mb-1 text-uppercase ms-1">Lékařská zpráva / Poznámka</label>
+                            <textarea name="popis" class="form-control-lux shadow-sm" rows="5"
+                                      placeholder="Výsledek vyšetření, doporučení lékaře...">{% if zaznam.popis and zaznam.popis != 'None' %}{{ zaznam.popis }}{% elif zaznam.poznamka and zaznam.poznamka != 'None' %}{{ zaznam.poznamka }}{% endif %}</textarea>
+                        </div>
+
+                        <div class="d-grid gap-3">
+                            <button type="submit" class="btn btn-dark py-3 rounded-pill fw-bold shadow" style="background: var(--t-brown); border: none;">
+                                <i class="fas fa-save me-2" style="color: var(--species-color);"></i> ULOŽIT ZMĚNY
+                            </button>
+                            <div class="text-center mt-2">
+                                <a href="{% url 'veterinar' pes_id=zaznam.pes.id %}" class="btn-link text-muted fw-bold text-decoration-none py-2" style="font-size: 0.9rem;">
+                                    Zrušit a vrátit se zpět
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

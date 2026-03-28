@@ -625,24 +625,50 @@ def odeslat_polohu_nalezu(request, pes_id):
 
     return JsonResponse({'status': 'error'}, status=400)
 
+
 def prepnout_ztratu(request, pes_id):
-    # Přidáme kontrolu majitele, aby mu psa "nenalezl" někdo cizí jen přes URL
     pes = get_object_or_404(Pes, id=pes_id)
 
-    # 1. Přepnutí stavu (jen jednou!)
+    # 1. Přepnutí stavu
     pes.je_ztraceny = not pes.je_ztraceny
 
-    # 2. Pokud zapínáme ztrátu, zkusíme uložit polohu z GET parametrů
-    lat = request.GET.get('lat')
-    lon = request.GET.get('lon')  # Sjednoť si, jestli v JS posíláš lon nebo lng
+    if pes.je_ztraceny:
+        # LOGIKA PRO ZAPNUTÍ ZTRÁTY
+        lat = request.GET.get('lat')
+        lon = request.GET.get('lon')
+        if lat and lon:
+            try:
+                pes.lat = float(lat)
+                pes.lon = float(lon)
+            except ValueError:
+                pass
 
-    if lat and lon:
-        try:
-            pes.lat = float(lat)
-            pes.lon = float(lon)
-            print(f"DEBUG: Poloha majitele při ztrátě uložena: {lat}, {lon}")
-        except ValueError:
-            pass  # Špatný formát čísel
+        # AUTOMATICKY VYTVOŘIT ŠPENDLÍK V MAPĚ SLUŽEB
+        # update_or_create zajistí, že nevznikne duplicita pro jednoho psa
+        from home.models import Sluzba  # Importuj model Sluzba
+        Sluzba.objects.update_or_create(
+            nazev=f"🚨 ZTRACENÝ PES: {pes.jmeno}",
+            vlastnik=request.user,
+            defaults={
+                'lat': pes.lat,
+                'lon': pes.lon,
+                'typ': 'ztrata',
+                'schvaleno': True,  # Rovnou schváleno, aby se nemuselo do adminu
+                'adresa': "Poslední známá poloha"
+            }
+        )
+    else:
+        # LOGIKA PRO VYPNUTÍ ZTRÁTY (Pes se našel)
+        # Automaticky smažeme špendlík z mapy služeb
+        from home.models import Sluzba
+        Sluzba.objects.filter(
+            vlastnik=request.user,
+            nazev__icontains=pes.jmeno,
+            typ='ztrata'
+        ).delete()
+
+        # Resetujeme SOS stavy u psa
+        pes.je_u_nalezece = False
 
     pes.save()
     return redirect('detail_psa', pes.id)
@@ -717,7 +743,6 @@ def odeslat_sos_email(request, pes_id):
 
     return JsonResponse({'status': 'error', 'message': 'Neplatná metoda.'})
 
-# --- 4. ZDRAVÍ A PDF ---
 def veterinar(request, pes_id=None):
     # 1. Identifikace psa a profilu
     vybrany_pes = None
@@ -731,18 +756,20 @@ def veterinar(request, pes_id=None):
     else:
         return redirect('home')
 
-    # 2. Zpracování POSTu
+    # 2. Zpracování POSTu (Ukládání nového záznamu)
     if request.method == 'POST' and request.user.is_authenticated:
         if profil.uzivatel == request.user:
             target_pes_id = request.POST.get('pes_id')
             pes_obj = get_object_or_404(Pes, id=target_pes_id, majitel=profil)
 
+            # Vytvoření záznamu s novým polem 'klinika'
             ZdravotniZaznam.objects.create(
                 pes=pes_obj,
-                datum=timezone.now().date(),
+                datum=request.POST.get('datum') or timezone.now().date(),
                 titulek=request.POST.get('titulek'),
-                popis=request.POST.get('popis'), # Opraveno z 'poznamka' na 'popis' dle tvého HTML
-                typ=request.POST.get('typ')
+                poznamka=request.POST.get('popis'), # Mapujeme 'popis' z HTML na 'poznamka' v modelu
+                typ=request.POST.get('typ'),
+                klinika=request.POST.get('klinika') # <--- Nové pole z formu
             )
             return redirect('veterinar', pes_id=pes_obj.id)
 
@@ -755,38 +782,43 @@ def veterinar(request, pes_id=None):
         vsechny_moje_zaznamy = profil.psi.all()
 
     # --- STRÁNKOVÁNÍ ---
-    # Nastavíme např. 6 záznamů na stránku
     paginator = Paginator(zaznamy_list, 6)
     page_number = request.GET.get('page')
     posledni_zaznamy = paginator.get_page(page_number)
-    # -------------------
 
     return render(request, 'users/veterinar.html', {
         'psi': vsechny_moje_zaznamy,
-        'posledni_zaznamy': posledni_zaznamy, # Teď obsahuje stránkovaný objekt
+        'posledni_zaznamy': posledni_zaznamy,
         'vybrany_pes': vybrany_pes,
         'today': timezone.now().date(),
+        # Pomocná proměnná pro modal (aby věděl, ke kterému psovi defaultně ukládat)
         'pes': vybrany_pes or (vsechny_moje_zaznamy[0] if vsechny_moje_zaznamy else None)
     })
 
+
 @login_required
 def upravit_zaznam(request, pk):
-    # Získání profilu uživatele
+    # 1. Bezpečnostní pojistka: Získáme profil a ověříme, že záznam patří přihlášenému uživateli
     profil = get_object_or_404(ProfilMajitele, uzivatel=request.user)
-    # Ověření, že záznam patří psovi tohoto majitele
     zaznam = get_object_or_404(ZdravotniZaznam, pk=pk, pes__majitel=profil)
 
     if request.method == 'POST':
+        # 2. Načtení všech dat z tvého nového formuláře
+        zaznam.datum = request.POST.get('datum')
         zaznam.titulek = request.POST.get('titulek')
-        # POZOR: v tvém modelu ve view 'veterinar' používáš 'poznamka' nebo 'popis'?
-        # Pokud je v modelu 'poznamka', změň to zde:
-        zaznam.poznamka = request.POST.get('popis')
-        zaznam.typ = request.POST.get('typ')  # Přidal jsem typ, kdyby ho chtěli změnit
-        zaznam.save()
+        zaznam.klinika = request.POST.get('klinika')
+        zaznam.poznamka = request.POST.get('popis')  # V šabloně máš name="popis"
 
-        messages.success(request, "Zdravotní záznam byl upraven.")
+        # 3. Získání typu s pojistkou proti IntegrityError
+        novy_typ = request.POST.get('typ')
+        zaznam.typ = novy_typ if novy_typ else 'zaznam'
+
+        zaznam.save()  # Teď už to projde bez NOT NULL chyby
+
+        messages.success(request, "Zdravotní záznam byl úspěšně upraven.")
         return redirect('veterinar', pes_id=zaznam.pes.id)
 
+    # 4. Pro GET požadavek prostě zobrazíme editační stránku
     return render(request, 'users/upravit_zaznam.html', {'zaznam': zaznam})
 
 

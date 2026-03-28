@@ -15,6 +15,7 @@ urlpatterns = [
     path('pes/<int:pes_id>/', views.detail_psa, name='detail_psa'),
     path('veterinar/', views.veterinar, name='veterinar'),
     path('veterinar/<int:pes_id>/', views.veterinar, name='veterinar'),
+    path('zaznam/upravit/<int:pk>/', views.upravit_zaznam, name='upravit_zaznam'),
 
     # Sjednocení názvu na 'odeslat_polohu', aby fungoval JS fetch
     path('pes/<int:pes_id>/odeslat-polohu/', views.odeslat_polohu_nalezu, name='odeslat_polohu'),
