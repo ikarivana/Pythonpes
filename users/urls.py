@@ -13,6 +13,7 @@ urlpatterns = [
 
     # --- DETAIL A NOUZOVÝ SYSTÉM (SOS) ---
     path('pes/<int:pes_id>/', views.detail_psa, name='detail_psa'),
+    path('veterinar/', views.veterinar, name='veterinar'),
     path('veterinar/<int:pes_id>/', views.veterinar, name='veterinar'),
 
     # Sjednocení názvu na 'odeslat_polohu', aby fungoval JS fetch
@@ -83,4 +84,6 @@ urlpatterns = [
     path('profil/smazat/', views.smazat_profil, name='smazat_profil'),
     path('like/<int:post_id>/', views.pridej_like, name='like_post'),
     path('notifikace/', views.seznam_notifikaci, name='seznam_notifikaci'),
+    path('notifikace/smazat/<int:pk>/', views.smazat_notifikaci, name='smazat_notifikaci'),
+    path('notifikace/smazat-vse/', views.smazat_vsechny_notifikace, name='smazat_vsechny_notifikace'),
 ]

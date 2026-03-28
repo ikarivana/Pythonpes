@@ -58,6 +58,9 @@ class Pes(models.Model):
     foto_rotace = models.IntegerField(default=0)
     vaha = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     datum_narozeni = models.DateField(null=True, blank=True)
+    hlavni_veterinar_nazev = models.CharField(max_length=200, blank=True, null=True, verbose_name="Hlavní veterina")
+    hlavni_veterinar_telefon = models.CharField(max_length=20, blank=True, null=True,
+                                                verbose_name="Telefon na veterinu")
 
     # Rodokmen a RTG
     otec_manualni = models.CharField(max_length=200, blank=True, null=True)
@@ -309,12 +312,16 @@ class ZdravotniZaznam(models.Model):
         ('vaha', 'Vážení'),
         ('paraziti', 'Klíšťata / Blechy'),
         ('kontrola', 'Lékařská kontrola'),
+        ('urgentni', '🚨 Urgentní případ'),  # Přidáno pro SOS stavy
     ]
     pes = models.ForeignKey(Pes, on_delete=models.CASCADE, related_name='denik')
     datum = models.DateField()
     typ = models.CharField(max_length=20, choices=TYP_CHOICES)
     titulek = models.CharField(max_length=200, help_text="Např. název tablety nebo vakcíny")
     poznamka = models.TextField(blank=True, null=True, help_text="Zde dopíšeš léky nebo průběh kontroly")
+
+    # NOVÉ: Možnost zadat jinou kliniku než hlavní
+    klinika = models.CharField(max_length=200, blank=True, null=True, verbose_name="Ošetřující klinika")
 
     class Meta:
         ordering = ['-datum']
@@ -323,10 +330,9 @@ class ZdravotniZaznam(models.Model):
         return f"{self.get_typ_display()} - {self.pes.jmeno} ({self.datum})"
 
     def save(self, *args, **kwargs):
-        # Nejdřív uložíme samotný záznam
+        # ... tvoje stávající logika save (ockovani, odcerveni, vaha atd.) zůstává stejná ...
         super().save(*args, **kwargs)
 
-        # Potom aktualizujeme hlavní kartu zvířete (Pes/Kočka)
         if self.typ == 'ockovani':
             self.pes.posledni_ockovani = self.datum
         elif self.typ == 'odcerveni':
@@ -335,12 +341,9 @@ class ZdravotniZaznam(models.Model):
             self.pes.posledni_klistata = self.datum
         elif self.typ == 'vaha':
             try:
-                # Pokud do titulku napíšeš "25.5", převede se to na číslo pro hlavní váhu
                 import decimal
                 self.pes.vaha = decimal.Decimal(str(self.titulek).replace(',', '.'))
             except:
                 pass
 
-        # Uložíme změny u psa
         self.pes.save(update_fields=['posledni_ockovani', 'posledni_odcerveni', 'posledni_klistata', 'vaha'])
-

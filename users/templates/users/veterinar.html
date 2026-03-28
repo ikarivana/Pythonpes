@@ -114,9 +114,10 @@
         border-radius: 5px;
     }
 
+    /* --- TLAČÍTKA A FORMULÁŘ --- */
     .btn-lux-add {
         background: var(--t-brown);
-        color: white;
+        color: white !important;
         border-radius: 12px;
         padding: 8px 18px;
         font-size: 0.85rem;
@@ -128,28 +129,45 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
+        text-decoration: none;
     }
 
     .btn-lux-add:hover {
         background: var(--t-gold);
-        color: white;
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(197, 160, 89, 0.2);
     }
 
-    .btn-lux-add i {
-        font-size: 0.9rem;
+    /* Styl pro paginaci */
+    .page-link-lux {
+        background: white;
+        border: none;
+        color: var(--t-brown);
+        padding: 10px 18px;
+        border-radius: 12px;
+        font-weight: 700;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        transition: 0.3s;
+        text-decoration: none;
     }
 
-    .form-control:focus,
-    .form-select:focus {
-        background-color: #fff !important;
-        border: 1px solid var(--t-gold) !important;
-        box-shadow: 0 0 0 0.25rem var(--t-soft-gold) !important;
+    .page-link-lux:hover {
+        background: var(--t-soft-gold);
+        color: var(--t-gold);
+    }
+
+    .page-current-lux {
+        background: var(--t-brown);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-weight: 800;
+        box-shadow: 0 4px 12px rgba(62, 39, 35, 0.2);
     }
 </style>
 
 <div class="container py-4">
+    {# BANNER #}
     <div class="term-header text-center text-lg-start">
         <div class="row align-items-center">
             <div class="col-lg-8">
@@ -167,6 +185,7 @@
         </div>
     </div>
 
+    {# KARTY PACIENTŮ #}
     <div class="row g-3">
         {% for mazlicek in psi %}
         <div class="col-md-6 col-12">
@@ -207,6 +226,7 @@
         {% endfor %}
     </div>
 
+    {# HISTORIE #}
     <div class="vet-report-section shadow-sm bg-white p-4 p-md-5 mt-4" style="border-radius: 35px;">
         <div class="d-flex justify-content-between align-items-end mb-4">
             <div>
@@ -267,15 +287,45 @@
             </div>
             {% endfor %}
         </div>
+
+        {# PAGINACE #}
+        {% if posledni_zaznamy.has_other_pages %}
+        <nav class="mt-5">
+            <ul class="pagination justify-content-center border-0 gap-2">
+                {% if posledni_zaznamy.has_previous %}
+                <li class="page-item">
+                    <a class="page-link-lux" href="?page={{ posledni_zaznamy.previous_page_number }}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-current-lux">
+                        {{ posledni_zaznamy.number }} / {{ posledni_zaznamy.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if posledni_zaznamy.has_next %}
+                <li class="page-item">
+                    <a class="page-link-lux" href="?page={{ posledni_zaznamy.next_page_number }}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
     </div>
 </div>
 
+{# MODAL PRO NOVÝ ZÁZNAM #}
 <div class="modal fade" id="newIncidentModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 30px;">
             <div class="p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4 class="fw-800 m-0" style="color: var(--t-brown);">🩺 Nový lékařský záznam</h4>
+                    <h4 class="fw-800 m-0" style="color: var(--t-brown);"></h4>🩺 Nový lékařský záznam</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
@@ -316,16 +366,17 @@
 
 <script>
     function shareDiary() {
+        const currentUrl = window.location.href;
         const shareData = {
-            title: 'Lékařský deník mých mazlíčků',
-            text: 'Podívejte se na zdravotní záznamy mých parťáků.',
-            url: window.location.href
+            title: 'Lékařský deník - {{ vybrany_pes.jmeno|default:"Moji mazlíčci" }}',
+            text: 'Podívejte se na zdravotní historii a záznamy mého parťáka.',
+            url: currentUrl
         };
 
         if (navigator.share) {
-            navigator.share(shareData);
+            navigator.share(shareData).catch((err) => console.log('Sdílení selhalo:', err));
         } else {
-            navigator.clipboard.writeText(window.location.href);
+            navigator.clipboard.writeText(currentUrl);
             alert('Odkaz na deník byl zkopírován do schránky!');
         }
     }

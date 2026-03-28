@@ -7,6 +7,7 @@ from datetime import timedelta, timezone, date
 from PIL import Image, ImageOps
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.messages import info
+from django.core.paginator import Paginator
 from django.db.models.functions import datetime
 from django.urls import reverse
 from pillow_heif import register_heif_opener
@@ -24,7 +25,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.core.files.base import ContentFile
 
-
+from inzerce.models import Inzerat
 from .forms import UserUpdateForm, PlemenoForm, PrispevekForm, ExtendedRegistrationForm, OckovaniForm, PesForm, \
     ProfilUpdateForm
 from .models import (
@@ -32,7 +33,6 @@ from .models import (
     Uspech, Pes, ZdravotniZaznam, Notifikace, Like,
     ProfilMajitele, PromoKod, Vrh
 )
-from home.models import Sluzba
 
 # Ostatní nástroje
 from reportlab.pdfbase import pdfmetrics
@@ -718,65 +718,91 @@ def odeslat_sos_email(request, pes_id):
     return JsonResponse({'status': 'error', 'message': 'Neplatná metoda.'})
 
 # --- 4. ZDRAVÍ A PDF ---
-@login_required
-def veterinar(request, pes_id):
-    # Oprava: Používáme pole 'uzivatel' podle tvého modelu
-    profil, _ = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
+def veterinar(request, pes_id=None):
+    # 1. Identifikace psa a profilu
+    vybrany_pes = None
+    profil = None
 
-    # Priorita ID: 1. z URL, 2. z POSTu, 3. z GETu
-    vybrany_pes_id = pes_id or request.POST.get('pes_id') or request.GET.get('pes_id')
+    if pes_id:
+        vybrany_pes = get_object_or_404(Pes, id=pes_id)
+        profil = vybrany_pes.majitel
+    elif request.user.is_authenticated:
+        profil, _ = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
+    else:
+        return redirect('home')
 
-    if request.method == 'POST':
-        if vybrany_pes_id:
-            pes = get_object_or_404(Pes, id=vybrany_pes_id, majitel=profil)
+    # 2. Zpracování POSTu
+    if request.method == 'POST' and request.user.is_authenticated:
+        if profil.uzivatel == request.user:
+            target_pes_id = request.POST.get('pes_id')
+            pes_obj = get_object_or_404(Pes, id=target_pes_id, majitel=profil)
+
             ZdravotniZaznam.objects.create(
-                pes=pes,
-                datum=request.POST.get('datum') or timezone.now().date(),
+                pes=pes_obj,
+                datum=timezone.now().date(),
                 titulek=request.POST.get('titulek'),
-                poznamka=request.POST.get('popis'),
+                popis=request.POST.get('popis'), # Opraveno z 'poznamka' na 'popis' dle tvého HTML
                 typ=request.POST.get('typ')
             )
-            # OPRAVA: Redirect musí směřovat na název URL cesty, ne na .html soubor
-            return redirect('veterinar', pes_id=pes.id)
+            return redirect('veterinar', pes_id=pes_obj.id)
 
-    # Logika pro zobrazení (GET)
-    zaznamy = ZdravotniZaznam.objects.filter(pes__majitel=profil).order_by('-datum')
-    vybrany_pes = None
+    # 3. Logika pro zobrazení
+    if vybrany_pes:
+        zaznamy_list = ZdravotniZaznam.objects.filter(pes=vybrany_pes).order_by('-datum', '-id')
+        vsechny_moje_zaznamy = [vybrany_pes]
+    else:
+        zaznamy_list = ZdravotniZaznam.objects.filter(pes__majitel=profil).order_by('-datum', '-id')
+        vsechny_moje_zaznamy = profil.psi.all()
 
-    if vybrany_pes_id:
-        vybrany_pes = get_object_or_404(Pes, id=vybrany_pes_id, majitel=profil)
-        zaznamy = zaznamy.filter(pes=vybrany_pes)
+    # --- STRÁNKOVÁNÍ ---
+    # Nastavíme např. 6 záznamů na stránku
+    paginator = Paginator(zaznamy_list, 6)
+    page_number = request.GET.get('page')
+    posledni_zaznamy = paginator.get_page(page_number)
+    # -------------------
 
     return render(request, 'users/veterinar.html', {
-        'psi': profil.psi.all(),
-        'posledni_zaznamy': zaznamy,
+        'psi': vsechny_moje_zaznamy,
+        'posledni_zaznamy': posledni_zaznamy, # Teď obsahuje stránkovaný objekt
         'vybrany_pes': vybrany_pes,
         'today': timezone.now().date(),
-        'pes': vybrany_pes  # Přidáno, aby v šabloně fungovalo {% url 'veterinar' pes_id=pes.id %}
+        'pes': vybrany_pes or (vsechny_moje_zaznamy[0] if vsechny_moje_zaznamy else None)
     })
 
 @login_required
 def upravit_zaznam(request, pk):
-    # Najdeme záznam a ověříme, že patří psovi přihlášeného uživatele
-    zaznam = get_object_or_404(ZdravotniZaznam, pk=pk, pes__majitel=request.user.profil)
+    # Získání profilu uživatele
+    profil = get_object_or_404(ProfilMajitele, uzivatel=request.user)
+    # Ověření, že záznam patří psovi tohoto majitele
+    zaznam = get_object_or_404(ZdravotniZaznam, pk=pk, pes__majitel=profil)
 
     if request.method == 'POST':
         zaznam.titulek = request.POST.get('titulek')
-        zaznam.popis = request.POST.get('popis')
+        # POZOR: v tvém modelu ve view 'veterinar' používáš 'poznamka' nebo 'popis'?
+        # Pokud je v modelu 'poznamka', změň to zde:
+        zaznam.poznamka = request.POST.get('popis')
+        zaznam.typ = request.POST.get('typ')  # Přidal jsem typ, kdyby ho chtěli změnit
         zaznam.save()
+
         messages.success(request, "Zdravotní záznam byl upraven.")
-        return redirect('veterinar')
+        return redirect('veterinar', pes_id=zaznam.pes.id)
 
     return render(request, 'users/upravit_zaznam.html', {'zaznam': zaznam})
 
 
 @login_required
 def smazat_zaznam(request, pk):
-    zaznam = get_object_or_404(ZdravotniZaznam, pk=pk, pes__majitel=request.user.profil)
+    profil = get_object_or_404(ProfilMajitele, uzivatel=request.user)
+    zaznam = get_object_or_404(ZdravotniZaznam, pk=pk, pes__majitel=profil)
+
+    # Uložíme si ID psa před smazáním pro redirect
+    pes_id = zaznam.pes.id
+
     if request.method == 'POST':
         zaznam.delete()
         messages.success(request, "Záznam byl smazán.")
-        return redirect('veterinar')
+        return redirect('veterinar', pes_id=pes_id)
+
     return render(request, 'users/smazat_zaznam_potvrzeni.html', {'zaznam': zaznam})
 
 
@@ -1123,23 +1149,6 @@ def smazat_komentar(request, pk):
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
-@login_required
-def seznam_notifikaci(request):
-    # 1. Načtení notifikací seřazených od nejnovější (mínus před názvem pole)
-    # Používáme select_related, aby se ušetřily dotazy do DB pro odesilatele a příspěvek
-    notifikace = Notifikace.objects.filter(prijemce=request.user).select_related('odesilatel', 'prispevek').order_by(
-        '-datum_vytvoreni')
-
-    # 2. Označení nepřečtených jako přečtené (pouze těch, co jsou False)
-    # Je dobré to udělat PŘED renderováním, nebo hned po načtení
-    notifikace.filter(precteno=False).update(precteno=True)
-
-    context = {
-        'nots': notifikace,
-    }
-    return render(request, 'users/notifikace.html', context)
-
-
 def zdravotni_historie(request, pes_id):
     pes = get_object_or_404(Pes, id=pes_id)
 
@@ -1312,3 +1321,84 @@ def upravit_chovnost(request, pes_id):
 
     return render(request, 'users/upravit_chovnost.html', {'pes': pes})
 
+
+def seznam_notifikaci(request):
+    profil = request.user.profil
+    nots_list = []
+    dnes = timezone.now().date()
+
+    # --- 1. ZDRAVOTNÍ LOGIKA ---
+    psi = profil.psi.all()
+    for pes in psi:
+        kontroly = [
+            (pes.posledni_ockovani, 365, 'očkování', 'fas fa-syringe'),
+            (pes.posledni_odcerveni, 90, 'odčervení', 'fas fa-tablets'),
+            (pes.posledni_klistata, 30, 'antiparazitika', 'fas fa-bug'),
+        ]
+        for posledni_datum, dny_platnosti, nazev, ikona in kontroly:
+            if posledni_datum:
+                termin = posledni_datum + timedelta(days=dny_platnosti)
+                if termin <= dnes + timedelta(days=14):
+                    nots_list.append({
+                        'typ': 'zdravi_urgent',
+                        'pes': pes,
+                        'text': f'Blíží se termín pro {nazev} u mazlíčka {pes.jmeno}!',
+                        'datum_vytvoreni': timezone.now(),
+                        'urgent': True,
+                        'ikona_zdravi': ikona
+                    })
+
+    # --- 2. SOCIÁLNÍ LOGIKA ---
+    db_notifications = Notifikace.objects.filter(prijemce=request.user)
+    for n in db_notifications:
+        nots_list.append(n)
+
+    # --- 3. MOJE AKTIVITA (Příspěvky) ---
+    # Pole je 'datum_pridani'
+    moje_prispevky = Prispevek.objects.filter(autor=request.user).order_by('-datum_pridani')
+    for p in moje_prispevky:
+        nots_list.append({
+            'typ': 'moje_aktivita',
+            'text': f'Publikovala jsi příspěvek: "{p.text[:40]}..."',
+            'datum_vytvoreni': p.datum_pridani,
+            'prispevek': p,
+            'moje': True
+        })
+
+    # --- 4. MOJE INZERCE (Bazar) ---
+    # Pole je 'vytvoreno'
+    moje_inzeraty = Inzerat.objects.filter(autor=request.user).order_by('-vytvoreno')
+    for i in moje_inzeraty:
+        nots_list.append({
+            'typ': 'moje_inzerce',
+            'text': f'Tvůj inzerát "{i.titulek}" je vystaven v bazaru.',
+            'datum_vytvoreni': i.vytvoreno,
+            'inzerat': i,
+            'moje': True
+        })
+
+    # --- 5. SEŘAZENÍ ---
+    nots_list.sort(
+        key=lambda x: x.datum_vytvoreni if hasattr(x, 'datum_vytvoreni') else x.get('datum_vytvoreni', timezone.now()),
+        reverse=True
+    )
+
+    # --- 6. PAGINACE ---
+    paginator = Paginator(nots_list, 10)  #
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'users/notifikace.html', {
+        'nots': page_obj,
+    })
+
+@login_required
+def smazat_notifikaci(request, pk):
+    notifikace = get_object_or_404(Notifikace, pk=pk, prijemce=request.user)
+    notifikace.delete()
+    return redirect('seznam_notifikaci')
+
+@login_required
+def smazat_vsechny_notifikace(request):
+    Notifikace.objects.filter(prijemce=request.user).delete()
+    return redirect('seznam_notifikaci')
