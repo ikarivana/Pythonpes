@@ -12,6 +12,7 @@
         --card-bg: #ffffff;
         --unread-bg: #fffbf4;
         --sos-red: #dc3545;
+        --activity-grey: #f8f9fa;
     }
 
     .notification-card {
@@ -26,13 +27,11 @@
 
     .notification-card:hover { transform: scale(1.01); }
 
-    /* Barevné indikátory podle typu a druhu zvířete */
     .notification-card.unread {
         background-color: var(--unread-bg);
         border-left: 4px solid var(--gold-accent);
     }
 
-    /* Kočičí varianta */
     .notification-card.is-cat.unread {
         border-left: 4px solid var(--cat-purple);
     }
@@ -40,6 +39,13 @@
     .notification-card.urgent-alert {
         background-color: #fff5f5;
         border-left: 4px solid var(--sos-red);
+    }
+
+    /* Styl pro "Moje aktivita" - jemnější ohraničení */
+    .notification-card.my-activity {
+        opacity: 0.9;
+        border: 1px dashed #ced4da;
+        background-color: #fafafa;
     }
 
     .icon-wrapper {
@@ -83,11 +89,7 @@
     }
 
     .is-cat .btn-view-sm { background: var(--cat-purple); }
-
-    .btn-view-sm:hover {
-        opacity: 0.9;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
+    .btn-view-sm:hover { opacity: 0.9; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
     .delete-link {
         color: #ced4da;
@@ -96,7 +98,6 @@
         margin-left: 10px;
         font-size: 0.9rem;
     }
-
     .delete-link:hover { color: var(--sos-red); }
 
     .empty-icon { font-size: 3.5rem; opacity: 0.2; }
@@ -127,11 +128,14 @@
 
     <div class="list-group border-0 px-2">
         {% for n in nots %}
-            <div class="notification-card d-flex align-items-center mb-3 {% if n.urgent %}urgent-alert{% elif not n.precteno and n.typ != 'moje_aktivita' and n.typ != 'moje_inzerce' %}unread{% endif %} {% if n.pes.druh == 'kocka' %}is-cat{% endif %}"
-                 {% if n.typ == 'moje_aktivita' or n.typ == 'moje_inzerce' %}style="opacity: 0.8; border-style: dashed !important; border-width: 2px;"{% endif %}>
+            {# Definice třídy pro Moje Aktivitu #}
+            <div class="notification-card d-flex align-items-center mb-3
+                {% if n.urgent %}urgent-alert{% elif not n.precteno and n.typ != 'moje_aktivita' and n.typ != 'moje_inzerce' %}unread{% endif %}
+                {% if n.pes.druh == 'kocka' %}is-cat{% endif %}
+                {% if n.typ == 'moje_aktivita' or n.typ == 'moje_inzerce' %}my-activity{% endif %}">
 
                 {# IKONA #}
-                <div class="icon-wrapper me-3" {% if n.typ == 'moje_aktivita' or n.typ == 'moje_inzerce' %}style="background: #e9ecef;"{% endif %}>
+                <div class="icon-wrapper me-3">
                     {% if n.typ == 'moje_inzerce' %}
                         <i class="fas fa-shopping-bag text-muted"></i>
                     {% elif n.typ == 'moje_aktivita' %}
@@ -140,6 +144,8 @@
                         <i class="fas fa-heart text-danger"></i>
                     {% elif n.typ == 'komentar' %}
                         <i class="fas fa-comment text-primary"></i>
+                    {% elif n.typ == 'recenze' %}
+                        <i class="fas fa-star text-warning"></i>
                     {% elif n.typ == 'zdravi_urgent' %}
                         <i class="{{ n.ikona_zdravi }} text-white"></i>
                     {% else %}
@@ -151,10 +157,14 @@
                 <div class="flex-grow-1 min-width-0">
                     <div class="mb-1 text-dark">
                         {% if n.typ == 'moje_aktivita' or n.typ == 'moje_inzerce' %}
-                            <strong style="color: var(--primary-brown);">Ty:</strong> <span class="text-muted" style="font-size: 0.9rem;">{{ n.text }}</span>
+                            <strong class="username">Ty:</strong>
+                            <span class="action-text">{{ n.text }}</span>
                         {% elif n.typ == 'zdravi_urgent' %}
                             <strong class="text-danger">{% if n.pes.druh == 'kocka' %}KOČIČÍ{% endif %} ZDRAVOTNÍ TERMÍN</strong><br>
                             <span class="action-text">{{ n.text }}</span>
+                        {% elif n.typ == 'recenze' %}
+                            <strong class="username">@{{ n.odesilatel.username }}</strong>
+                            <span class="action-text">napsal hodnocení k tvojí službě</span>
                         {% else %}
                             <strong class="username">@{{ n.odesilatel.username }}</strong>
                             <span class="action-text">
@@ -162,6 +172,7 @@
                             </span>
                         {% endif %}
 
+                        {# TAGY SEKCÍ #}
                         {% if n.prispevek %}
                             <span class="section-tag">
                                 {% if n.prispevek.plemeno %}
@@ -171,6 +182,12 @@
                                 {% endif %}
                             </span>
                         {% endif %}
+
+                        {% if n.typ == 'recenze' or n.sluzba %}
+                            <span class="section-tag">
+                                <i class="fas fa-map-marker-alt ms-1"></i>Mapa
+                            </span>
+                        {% endif %}
                     </div>
                     <small class="time-stamp">
                         <i class="far fa-clock me-1"></i>{{ n.datum_vytvoreni|timesince }} zpět
@@ -178,22 +195,19 @@
                 </div>
 
                 {# TLAČÍTKA AKCÍ #}
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center gap-2">
                     {% if n.typ == 'zdravi_urgent' %}
-                        <a href="{% url 'veterinar' pes_id=n.pes.id %}" class="btn-view-sm ms-2 {% if not n.pes.druh == 'kocka' %}btn-danger-custom{% endif %}" {% if n.pes.druh == 'kocka' %}style="background: var(--cat-purple);"{% endif %}>
-                            VYŘÍDIT
-                        </a>
+                        <a href="{% url 'veterinar' pes_id=n.pes.id %}" class="btn-view-sm">VYŘÍDIT</a>
+                    {% elif n.typ == 'recenze' and n.sluzba %}
+                        <a href="{% url 'detail_sluzby' n.sluzba.id %}" class="btn-view-sm">K recenzi</a>
+                    {% elif n.sluzba %}
+                         <a href="{% url 'detail_sluzby' n.sluzba.id %}" class="btn-view-sm">Zobrazit</a>
                     {% elif n.prispevek %}
-                        <a href="{% if n.prispevek.plemeno %}{% url 'zed_plemene' n.prispevek.plemeno.slug %}{% else %}{% url 'seznam_zdi' %}{% endif %}" class="btn-view-sm ms-2" {% if n.typ == 'moje_aktivita' %}style="background: #6c757d;"{% endif %}>
-                            Zobrazit
-                        </a>
+                        <a href="{% if n.prispevek.plemeno %}{% url 'zed_plemene' n.prispevek.plemeno.slug %}{% else %}{% url 'seznam_zdi' %}{% endif %}" class="btn-view-sm" {% if n.typ == 'moje_aktivita' %}style="background: #6c757d;"{% endif %}>Zobrazit</a>
                     {% elif n.inzerat %}
-                        <a href="{% url 'detail_inzeratu' n.inzerat.id %}" class="btn-view-sm ms-2" style="background: #6c757d;">
-                            Detail
-                        </a>
+                        <a href="{% url 'detail_inzeratu' n.inzerat.id %}" class="btn-view-sm" style="background: #6c757d;">Detail</a>
                     {% endif %}
 
-                    {# KŘÍŽEK SMAZÁNÍ #}
                     {% if n.id %}
                         <a href="{% url 'smazat_notifikaci' n.id %}" class="delete-link" title="Smazat">
                             <i class="fas fa-times"></i>

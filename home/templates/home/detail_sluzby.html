@@ -95,7 +95,9 @@
                 <div class="col-md-6 mb-3">
                     <div class="p-3 border-0 rounded-4 shadow-sm" style="background: #f8f9fa;">
                         <small class="text-muted text-uppercase fw-bold">📞 Telefonní kontakt</small>
-                        <p class="h5 mt-1 mb-0"><a href="tel:{{ sluzba.telefon }}" class="text-decoration-none text-brown">{{ sluzba.telefon }}</a></p>
+                        <p class="h5 mt-1 mb-0">
+                            <a href="tel:{{ sluzba.telefon }}" class="text-decoration-none text-brown">{{ sluzba.telefon }}</a>
+                        </p>
                     </div>
                 </div>
                 {% endif %}
@@ -104,7 +106,9 @@
                 <div class="col-md-6 mb-3">
                     <div class="p-3 border-0 rounded-4 shadow-sm" style="background: #f8f9fa;">
                         <small class="text-muted text-uppercase fw-bold">🌐 Web / Sítě</small>
-                        <p class="mt-1 mb-0"><a href="{{ sluzba.web }}" target="_blank" class="text-break text-decoration-none">{{ sluzba.web }}</a></p>
+                        <p class="mt-1 mb-0">
+                            <a href="{{ sluzba.web }}" target="_blank" class="text-break text-decoration-none">{{ sluzba.web }}</a>
+                        </p>
                     </div>
                 </div>
                 {% endif %}
@@ -172,13 +176,18 @@
                                 <input type="radio" id="s1" name="hvezdy" value="1"><label for="s1">★</label>
                             </div>
                             <textarea name="text" class="form-control border-0 shadow-sm rounded-3 mb-3" rows="4" placeholder="Jaké to tam bylo? Co by ostatní měli vědět?" required></textarea>
-                            <button type="submit" class="btn btn-warning w-100 fw-800 py-3 rounded-pill shadow-sm" style="background: var(--epes-gold); color: white; border: none;">
+
+                            <button type="submit" class="btn w-100 fw-bold py-3 rounded-pill shadow"
+                                    style="background-color: #3e2723 !important; color: #ffffff !important; border: none !important; display: block !important; opacity: 1 !important;">
                                 ODESLAT HODNOCENÍ
                             </button>
                         </form>
                     {% else %}
                         <p class="text-muted mb-3">Chcete hodnotit? Musíte se nejdříve přihlásit.</p>
-                        <a href="{% url 'login' %}" class="btn btn-outline-brown rounded-pill px-4">Přihlásit se</a>
+                        <a href="{% url 'login' %}" class="btn w-100 rounded-pill px-4 shadow-sm"
+                           style="background-color: #ffffff !important; color: #3e2723 !important; border: 2px solid #c5a059 !important; font-weight: bold; text-decoration: none;">
+                            PŘIHLÁSIT SE
+                        </a>
                     {% endif %}
                 </div>
             </div>

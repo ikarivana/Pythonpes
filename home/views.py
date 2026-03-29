@@ -1,4 +1,4 @@
-import json
+from django.db.models import Avg, Count
 from datetime import timedelta, date
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
@@ -14,9 +14,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 
 # Importy tvých modelů a forem
-from .models import Sluzba, KontaktniZprava
+from .models import Sluzba, Recenze
 from .forms import SluzbaForm, KontaktForm
-from users.models import Prispevek, Pes, ProfilMajitele
+from users.models import Prispevek, Pes, ProfilMajitele, Notifikace
+
 
 def index(request):
     # 1. Zabezpečení proti chybám v Premium
@@ -285,8 +286,11 @@ def upravit_sluzbu(request, pk):
 
 def detail_sluzby(request, pk):
     sluzba = get_object_or_404(Sluzba, pk=pk)
-    # Spočítá průměr hvězd a počet recenzí
-    stats = sluzba.recenze_set.aggregate(prumer=Avg('hvezdy'), pocet=models.Count('id'))
+    # Tady se volají ty funkce Avg a Count, které musíme nahoře importovat
+    stats = sluzba.recenze_set.aggregate(
+        prumer=Avg('hvezdy'),
+        pocet=Count('id')
+    )
 
     return render(request, 'home/detail_sluzby.html', {
         'sluzba': sluzba,
@@ -297,19 +301,42 @@ def detail_sluzby(request, pk):
 
 @login_required
 def pridat_recenzi(request, pk):
-    if request.method == "POST":
-        sluzba = get_object_or_404(Sluzba, pk=pk)
-        hvezdy = request.POST.get('hvezdy')
-        text = request.POST.get('text')
+    # Importy uvnitř funkce jsou fajn, ale raději je měj nahoře v souboru
+    from users.models import Notifikace
+    from .models import Sluzba
+    from .forms import RecenzeForm  # <--- Ujisti se, že importuješ správný FORM!
 
-        if hvezdy and text:
-            Recenze.objects.create(
-                sluzba=sluzba,
-                uzivatel=request.user,
-                hvezdy=int(hvezdy),
-                text=text
-            )
-    return redirect('detail_sluzby', pk=pk)  # Změň 'detail_sluzby' na název tvého URL pro detail
+    sluzba_obj = get_object_or_404(Sluzba, pk=pk)
+
+    if request.method == 'POST':
+        # TENTO ŘÁDEK TI TAM CHYBĚL (proto bylo 'form' podtržené):
+        form = RecenzeForm(request.POST)
+
+        if form.is_valid():
+            nova_recenze = form.save(commit=False)
+            # Tady pozor: v modelu Recenze se to pole jmenuje 'vhome' nebo 'sluzba'?
+            # Podle tvého kódu předpokládám 'vhome'
+            nova_recenze.vhome = sluzba_obj
+            nova_recenze.user = request.user
+            nova_recenze.save()
+
+            # Vytvoření notifikace pro majitele
+            if sluzba_obj.user != request.user:
+                Notifikace.objects.create(
+                    prijemce=sluzba_obj.user,
+                    odesilatel=request.user,
+                    typ='recenze',
+                    text=f"napsal hodnocení k vaší službě {sluzba_obj.nazev}",
+                    sluzba=sluzba_obj,
+                    precteno=False
+                )
+            return redirect('detail_sluzby', pk=pk)
+    else:
+        # Tohle se stane, když uživatel na stránku jen přijde (GET)
+        form = RecenzeForm()
+
+    # Musíš funkci zakončit renderem, jinak ti to hodí chybu, pokud form nebude validní
+    return render(request, 'vhome/detail_sluzby.html', {'form': form, 'sluzba': sluzba_obj})
 
 
 def kontakt(request):

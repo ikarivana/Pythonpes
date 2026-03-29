@@ -283,10 +283,19 @@ class Komentar(models.Model):
 class Notifikace(models.Model):
     prijemce = models.ForeignKey(User, on_delete=models.CASCADE, related_name='prijate_notifikace')
     odesilatel = models.ForeignKey(User, on_delete=models.CASCADE, related_name='odeslane_notifikace')
-    typ = models.CharField(max_length=20)  # 'like', 'komentar'
 
-    # --- OPRAVA: Použití názvu třídy Prispevek ---
+    # Rozšíříme o 'recenze' a 'moje_aktivita'
+    typ = models.CharField(max_length=20)  # 'like', 'komentar', 'recenze', 'moje_aktivita'
+
+    # Propojení na příspěvky ze zdi
     prispevek = models.ForeignKey('Prispevek', on_delete=models.CASCADE, null=True, blank=True)
+
+    # --- NOVÉ: Propojení na služby (vHome / Mapa) ---
+    # Předpokládám, že se tvůj model pro služby jmenuje 'Sluzba'
+    sluzba = models.ForeignKey('home.Sluzba', on_delete=models.CASCADE, null=True, blank=True)
+
+    # --- NOVÉ: Text pro "Moje aktivita" ---
+    text = models.TextField(null=True, blank=True)
     # ---------------------------------------------
 
     precteno = models.BooleanField(default=False)
