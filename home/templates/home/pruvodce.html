@@ -1,0 +1,237 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<style>
+    :root {
+        --epes-gold: #c5a059;
+        --epes-brown: #3e2723;
+        --epes-bg: #fdfaf4;
+        --sos-red: #d63031;
+        --epes-gold-rgb: 197, 160, 89;
+    }
+    .is-kocka {
+        --epes-gold: #9b86bd;
+        --epes-brown: #2d1b4d;
+        --epes-bg: #f9f7ff;
+        --epes-gold-rgb: 155, 134, 189;
+    }
+
+    body { background-color: var(--epes-bg); font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+    .guide-container { padding-top: 20px; padding-bottom: 60px; }
+    .guide-header { padding: 40px 20px; text-align: center; }
+    .guide-header h1 { font-family: 'Playfair Display', serif; font-size: calc(1.8rem + 1vw); color: var(--epes-brown); font-weight: 800; }
+    .guide-timeline { max-width: 900px; margin: 0 auto; padding: 0 15px; }
+
+    /* Karta kroku */
+    .guide-step {
+        background: white; border-radius: 30px; padding: 25px; margin-bottom: 25px;
+        box-shadow: 0 15px 40px rgba(62, 39, 35, 0.05); border: 1px solid rgba(var(--epes-gold-rgb), 0.15);
+        display: grid; grid-template-columns: 1fr; gap: 20px; transition: 0.3s;
+    }
+    @media (min-width: 768px) { .guide-step { grid-template-columns: 85px 1fr; padding: 40px; gap: 30px; } }
+
+    .step-number-circle {
+        width: 60px; height: 60px; background: var(--epes-bg); border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.4rem; font-weight: 800; color: var(--epes-gold); margin: 0 auto;
+    }
+
+    /* --- TLAČÍTKA FIX --- */
+    .btn-guide-final {
+        background-color: var(--epes-gold) !important;
+        color: #ffffff !important;
+        padding: 16px 35px;
+        border-radius: 20px;
+        font-weight: 800;
+        text-align: center;
+        display: inline-block;
+        text-decoration: none !important;
+        border: none !important;
+        transition: 0.3s;
+    }
+    .btn-guide-final:hover { background-color: var(--epes-brown) !important; color: #ffffff !important; transform: translateY(-2px); }
+
+    .guide-btn-secondary {
+        background-color: #ffffff !important;
+        color: var(--epes-brown) !important;
+        border: 2px solid var(--epes-gold) !important;
+        border-radius: 50px;
+        padding: 10px 25px;
+        font-weight: 700;
+        text-decoration: none !important;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+    }
+    .guide-btn-secondary:hover {
+        background-color: var(--epes-gold) !important;
+        color: #ffffff !important;
+        border-color: var(--epes-gold) !important;
+        transform: translateY(-2px);
+    }
+    .guide-btn-secondary:hover i { color: #ffffff !important; }
+
+    /* --- OSTATNÍ STYLY --- */
+    .guide-content h3 { font-weight: 800; color: var(--epes-brown); margin-bottom: 15px; font-size: 1.3rem; }
+    .guide-content p { color: #6c757d; line-height: 1.7; font-size: 0.95rem; }
+    .guide-badge { display: inline-block; padding: 6px 14px; border-radius: 50px; background: var(--epes-bg); color: var(--epes-gold); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; }
+    .info-box-light { background: #f8f9fa; border-radius: 20px; padding: 20px; margin-top: 20px; border-left: 4px solid var(--epes-gold); }
+    .community-list { list-style: none; padding: 0; font-size: 0.85rem; margin: 0; }
+    .community-list li { margin-bottom: 12px; display: flex; align-items: flex-start; gap: 12px; }
+    .community-list i { color: var(--epes-gold); font-size: 1.1rem; margin-top: 2px; width: 20px; text-align: center; }
+
+    .guide-footer-box {
+        background: linear-gradient(135deg, #ffffff 0%, var(--epes-bg) 100%);
+        color: var(--epes-brown); border: 2px solid rgba(var(--epes-gold-rgb), 0.15);
+        border-radius: 40px; padding: 60px 20px; text-align: center; margin: 60px auto; max-width: 900px;
+    }
+
+    @media (min-width: 576px) { .btn-guide-final, .guide-btn-secondary { width: auto; } }
+</style>
+
+<div class="container guide-container {% if user.is_authenticated and user.pes_set.first.druh == 'kocka' %}is-kocka{% endif %}">
+
+    <div class="guide-header">
+        <span class="guide-badge">Vítejte v epes.online</span>
+        <h1>Průvodce vaším <span style="color: var(--epes-gold);">digitálním štítem</span></h1>
+    </div>
+
+    <div class="guide-timeline">
+
+        <div class="guide-step">
+            <div class="step-number-circle">01</div>
+            <div class="guide-content">
+                <span class="guide-badge">Digitální karta zvířete</span>
+                <h3>Kompletní profil v kapse</h3>
+                <p>Vytvořením identity získá váš parťák profesionální kartu, která mu může zachránit život a vám ulehčit každou návštěvu lékaře.</p>
+
+                <div class="info-box-light mb-4" style="background: #fff; border: 1px dashed var(--epes-gold);">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <ul class="community-list">
+                                <li><i class="fas fa-file-pdf text-danger"></i> <div><strong>PDF Export:</strong> Kompletní historie pro veterináře jedním kliknutím.</div></li>
+                                <li><i class="fas fa-hospital-user text-success"></i> <div><strong>Variabilní klinika:</strong> Evidence domovské i náhradní kliniky na cestách.</div></li>
+                                <li><i class="fas fa-notes-medical text-danger"></i> <div><strong>Akutní zápis:</strong> Zápis o úrazu či diagnóze přímo v terénu.</div></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="community-list">
+                                <li><i class="fas fa-trophy text-warning"></i> <div><strong>Kariéra:</strong> Digitální vitrína pro zkoušky, výstavy a tituly.</div></li>
+                                <li><i class="fas fa-sitemap text-primary"></i> <div><strong>Rodokmen online:</strong> PDF a jména předků vždy po ruce.</div></li>
+                                <li><i class="fas fa-history text-info"></i> <div><strong>Zdravotní osa:</strong> Přehledná historie očkování, odčervení a váhy.</div></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                {% if user.is_authenticated and user.pes_set.exists %}
+                <div class="mb-4 p-3 rounded-4" style="background: rgba(var(--epes-gold-rgb), 0.05); border: 1px solid rgba(var(--epes-gold-rgb), 0.1);">
+                    <label class="small fw-800 text-muted text-uppercase mb-2 d-block">Vaše aktuální smečka:</label>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for zvire in user.pes_set.all %}
+                        <a href="{% url 'detail_psa' zvire.id %}" class="guide-btn-secondary shadow-sm">
+                            <i class="fas {% if zvire.druh == 'kocka' %}fa-cat{% else %}fa-dog{% endif %} me-2"></i>{{ zvire.jmeno }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="d-flex flex-column flex-sm-row gap-3">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'pridat_psa' %}" class="btn-guide-final shadow">
+                            <i class="fas fa-plus-circle me-2"></i>PŘIDAT NOVOU IDENTITU
+                        </a>
+                        <a href="{% url 'seznam_psu' %}" class="guide-btn-secondary shadow-sm">
+                            SPRAVOVAT ZVÍŘATA
+                        </a>
+                    {% else %}
+                        <a href="{% url 'register' %}" class="btn-guide-final shadow">REGISTROVAT SE ZDARMA</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="guide-step">
+            <div class="step-number-circle">02</div>
+            <div class="guide-content">
+                <span class="guide-badge">Chytré SOS</span>
+                <h3>Režim "Doma" vs "Hledaný"</h3>
+                <p>Přepínejte profil podle potřeby. V krizové situaci aktivujete SOS mód, který nálezci ukáže GPS tlačítko a skryje soukromé údaje.</p>
+                <div class="row g-3 mt-1">
+                    <div class="col-md-6">
+                        <div class="info-box-light" style="margin-top:0;">
+                            <strong>🏠 Režim "Doma"</strong><br>
+                            <small>Digitální vizitka pro běžné dny.</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-box-light" style="border-left-color: var(--sos-red); margin-top:0;">
+                            <strong style="color: var(--sos-red);">🚨 Režim "Hledaný"</strong><br>
+                            <small>Okamžité GPS sdílení polohy nálezcem.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="guide-step">
+            <div class="step-number-circle">03</div>
+            <div class="guide-content">
+                <span class="guide-badge" style="color: var(--sos-red); background: #fff0f0;">Radar okolí</span>
+                <h3>Interaktivní mapa bezpečí</h3>
+                <p>Na <a href="{% url 'mapa_sluzeb' %}">živé mapě</a> nesledujete jen okolí, ale aktivně ho chráníte pro ostatní.</p>
+
+                <div class="info-box-light" style="background: #fff; border: 1px dashed var(--sos-red);">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <ul class="community-list">
+                                <li><i class="fas fa-exclamation-triangle text-danger"></i> <div><strong>Pozor, nástrahy!</strong> Hlášení o návnadách, skle, honech či agresivních zvířatech.</div></li>
+                                <li><i class="fas fa-bullhorn text-danger"></i> <div><strong>SOS Ztráty:</strong> Prioritní body pro záchranu zvířat v nouzi.</div></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="community-list">
+                                <li><i class="fas fa-filter"></i> <div><strong>Třídění služeb:</strong> Filtrujte veterináře, cvičiště nebo dog-friendly místa.</div></li>
+                                <li><i class="fas fa-star" style="color: #f1c40f;"></i> <div><strong>Hodnocení:</strong> Reálné zkušenosti a hvězdičky od komunity.</div></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <a href="{% url 'mapa_sluzeb' %}" class="guide-btn-secondary mt-3 shadow-sm">
+                    OTEVŘÍT MAPU <i class="fas fa-map-marker-alt ms-2"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="guide-step">
+            <div class="step-number-circle">04</div>
+            <div class="guide-content">
+                <span class="guide-badge">Sociální síť</span>
+                <h3>Živý prostor a bazar</h3>
+                <p>Spojte se s majiteli stejných plemen na <a href="{% url 'seznam_zdi' %}">Zdech plemen</a> nebo využijte <a href="{% url 'seznam_inzeratu' %}">Bazar</a> pro výhodný nákup výbavy.</p>
+            </div>
+        </div>
+
+        <div class="guide-step">
+            <div class="step-number-circle">05</div>
+            <div class="guide-content">
+                <span class="guide-badge">Chytrý asistent</span>
+                <h3>Pohlídáme termíny za vás</h3>
+                <p>V <a href="{% url 'seznam_notifikaci' %}">Notifikacích</a> vás včas upozorníme na blížící se očkování, zdravotní prohlídky nebo zprávy od přátel.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="guide-footer-box shadow-sm">
+        <h2 class="fw-800 mb-3" style="font-family: 'Playfair Display', serif;">
+            {% if user.is_authenticated and user.pes_set.first.druh == 'kocka' %}Vítejte v našem království{% else %}Vítejte v naší smečce{% endif %}
+        </h2>
+        <p class="mb-4 text-muted" style="max-width: 550px; margin: 0 auto;">Váš mazlíček má teď ten nejlepší digitální štít. Stačí vyrazit.</p>
+        <a href="{% url 'home' %}" class="btn-guide-final shadow">ROZUMÍM, JDEME NA TO!</a>
+    </div>
+</div>
+{% endblock %}

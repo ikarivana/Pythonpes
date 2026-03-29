@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -49,6 +50,22 @@ class Sluzba(models.Model):
 
     def __str__(self):
         return f"{self.nazev} ({self.get_typ_display()})"
+
+
+class Recenze(models.Model):
+    sluzba = models.ForeignKey('Sluzba', on_delete=models.CASCADE, related_name='recenze_set')
+    uzivatel = models.ForeignKey(User, on_delete=models.CASCADE)
+    hvezdy = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    text = models.TextField(max_length=1000)
+    vytvoreno = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-vytvoreno'] # Nejnovější nahoře
+
+    def __str__(self):
+        return f"{self.uzivatel.username} - {self.sluzba.nazev} ({self.hvezdy}*)"
 
 
 class KontaktniZprava(models.Model):

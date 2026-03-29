@@ -1,6 +1,7 @@
 {% extends "home/base.html" %}
 {% block content %}
 <style>
+    /* SOS Karta */
     .sos-detail-card {
         border: 3px solid #ff0000;
         background-color: #fff5f5;
@@ -26,6 +27,24 @@
         color: white;
         transform: scale(1.05);
     }
+
+    /* Recenze a hvězdy */
+    .rating-stars-display { color: #f1c40f; font-size: 1.1rem; }
+    .review-card {
+        border-radius: 15px;
+        border-left: 5px solid var(--epes-gold, #c5a059) !important;
+        background: #fff;
+        transition: 0.2s;
+    }
+    .review-card:hover { transform: translateX(5px); }
+
+    /* Hvězdičkový input */
+    .rating-selection { display: flex; flex-direction: row-reverse; justify-content: center; gap: 5px; }
+    .rating-selection input { display: none; }
+    .rating-selection label { cursor: pointer; font-size: 2.5rem; color: #ddd; transition: 0.2s; }
+    .rating-selection label:hover,
+    .rating-selection label:hover ~ label,
+    .rating-selection input:checked ~ label { color: #f1c40f; }
 </style>
 
 <div class="container mt-5">
@@ -40,66 +59,131 @@
     <div class="sos-detail-card p-4 mb-4 text-center shadow">
         <h2 class="text-danger fw-bold"><i class="fas fa-exclamation-triangle"></i> PROBÍHÁ PÁTRÁNÍ!</h2>
         <p class="lead mb-4">Tento záznam se týká pohřešovaného zvířete. Pokud ho zahlédnete, okamžitě kontaktujte majitele.</p>
-
         <a href="#" class="btn btn-sos-profile shadow-lg">
             <i class="fas fa-dog"></i> Zobrazit plný profil psa
         </a>
     </div>
     {% endif %}
 
-    <div class="card shadow-sm mt-4">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-                <h1 class="card-title text-brown">{{ sluzba.nazev }}</h1>
-                <span class="badge {% if sluzba.typ == 'ztrata' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+    <div class="card shadow-sm mt-4 border-0 rounded-4">
+        <div class="card-body p-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
+                <div>
+                    <h1 class="card-title text-brown fw-800 mb-0">{{ sluzba.nazev }}</h1>
+                    {% if sluzba.typ != 'ztrata' and prumer %}
+                        <div class="mt-1 d-flex align-items-center gap-2">
+                            <span class="rating-stars-display">
+                                {{ prumer|stringformat:".1f" }} <i class="fas fa-star"></i>
+                            </span>
+                            <span class="text-muted small">({{ pocet_recenzi }}x hodnoceno)</span>
+                        </div>
+                    {% endif %}
+                </div>
+                <span class="badge {% if sluzba.typ == 'ztrata' %}bg-danger{% else %}bg-warning text-dark{% endif %} px-3 py-2 rounded-pill mt-2 mt-md-0">
                     {{ sluzba.get_typ_display }}
                 </span>
             </div>
 
-            <p class="text-muted"><i class="fas fa-map-marker-alt"></i> {{ sluzba.adresa }}</p>
+            <p class="text-muted"><i class="fas fa-map-marker-alt me-2 text-danger"></i>{{ sluzba.adresa }}</p>
             <hr>
 
-            <h5 class="mt-4">Popis situace / služby</h5>
-            <p class="card-text">{{ sluzba.popis|default:"Pro tuto službu nebyl zadán žádný podrobný popis." }}</p>
+            <h5 class="mt-4 fw-bold">Popis situace / služby</h5>
+            <p class="card-text text-secondary">{{ sluzba.popis|default:"Pro tuto službu nebyl zadán žádný podrobný popis." }}</p>
 
             <div class="row mt-4">
                 {% if sluzba.telefon %}
                 <div class="col-md-6 mb-3">
-                    <div class="p-3 border rounded bg-light">
-                        <strong>📞 Telefonní kontakt:</strong>
-                        <p class="h5 mt-2"><a href="tel:{{ sluzba.telefon }}" class="text-decoration-none">{{ sluzba.telefon }}</a></p>
+                    <div class="p-3 border-0 rounded-4 shadow-sm" style="background: #f8f9fa;">
+                        <small class="text-muted text-uppercase fw-bold">📞 Telefonní kontakt</small>
+                        <p class="h5 mt-1 mb-0"><a href="tel:{{ sluzba.telefon }}" class="text-decoration-none text-brown">{{ sluzba.telefon }}</a></p>
                     </div>
                 </div>
                 {% endif %}
 
                 {% if sluzba.web %}
                 <div class="col-md-6 mb-3">
-                    <div class="p-3 border rounded bg-light">
-                        <strong>🌐 Webové stránky / Sociální sítě:</strong>
-                        <p class="mt-2"><a href="{{ sluzba.web }}" target="_blank" class="text-break">{{ sluzba.web }}</a></p>
+                    <div class="p-3 border-0 rounded-4 shadow-sm" style="background: #f8f9fa;">
+                        <small class="text-muted text-uppercase fw-bold">🌐 Web / Sítě</small>
+                        <p class="mt-1 mb-0"><a href="{{ sluzba.web }}" target="_blank" class="text-break text-decoration-none">{{ sluzba.web }}</a></p>
                     </div>
                 </div>
                 {% endif %}
             </div>
 
-            <div class="mt-4 d-flex flex-wrap gap-2 align-items-center">
-                <a href="{% url 'mapa_sluzeb' %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left"></i> Zpět na mapu
+            <div class="mt-4 d-flex flex-wrap gap-2 align-items-center border-top pt-4">
+                <a href="{% url 'mapa_sluzeb' %}" class="btn btn-outline-secondary rounded-pill px-4">
+                    <i class="fas fa-arrow-left me-2"></i>Zpět na mapu
                 </a>
 
                 {% if user == sluzba.vlastnik %}
                 <div class="ms-md-auto d-flex gap-2">
-                    <a href="{% url 'upravit_sluzbu' sluzba.pk %}" class="btn btn-primary">
-                        <i class="fas fa-edit"></i> Upravit
+                    <a href="{% url 'upravit_sluzbu' sluzba.pk %}" class="btn btn-primary rounded-pill px-4">
+                        <i class="fas fa-edit me-2"></i>Upravit
                     </a>
-
-                    <a href="{% url 'smazat_sluzbu' sluzba.pk %}" class="btn btn-danger" onclick="return confirm('Opravdu smazat?')">
-                        <i class="fas fa-trash"></i> Smazat
+                    <a href="{% url 'smazat_sluzbu' sluzba.pk %}" class="btn btn-danger rounded-pill px-4" onclick="return confirm('Opravdu smazat?')">
+                        <i class="fas fa-trash"></i>
                     </a>
                 </div>
                 {% endif %}
             </div>
         </div>
     </div>
+
+    {% if sluzba.typ != 'ztrata' %}
+    <div class="row mt-5 mb-5">
+        <div class="col-lg-7">
+            <h3 class="fw-800 text-brown mb-4"><i class="fas fa-comments me-2 text-warning"></i>Recenze komunity</h3>
+
+            {% for recenze in sluzba.recenze_set.all %}
+                <div class="card review-card shadow-sm mb-3 border-0">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="fw-bold mb-0 text-brown">{{ recenze.uzivatel.username }}</h6>
+                            <div class="rating-stars-display" style="font-size: 0.9rem;">
+                                {% for i in "12345" %}
+                                    <i class="{% if forloop.counter <= recenze.hvezdy %}fas{% else %}far{% endif %} fa-star"></i>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <p class="text-muted mb-2 small">{{ recenze.text }}</p>
+                        <small class="text-muted fw-bold" style="font-size: 0.7rem;">{{ recenze.vytvoreno|date:"d. m. Y" }}</small>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="text-center p-5 bg-white rounded-4 shadow-sm border">
+                    <i class="far fa-star fa-3x text-light mb-3"></i>
+                    <p class="text-muted mb-0">Zatím nikdo nehodnotil. Buďte první!</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 20px; background: #fdfaf4;">
+                <div class="card-body p-4 text-center">
+                    <h5 class="fw-800 text-brown mb-3">Přidat zkušenost</h5>
+                    {% if user.is_authenticated %}
+                        <form action="{% url 'pridat_recenzi' sluzba.pk %}" method="POST">
+                            {% csrf_token %}
+                            <div class="rating-selection mb-3">
+                                <input type="radio" id="s5" name="hvezdy" value="5" required><label for="s5">★</label>
+                                <input type="radio" id="s4" name="hvezdy" value="4"><label for="s4">★</label>
+                                <input type="radio" id="s3" name="hvezdy" value="3"><label for="s3">★</label>
+                                <input type="radio" id="s2" name="hvezdy" value="2"><label for="s2">★</label>
+                                <input type="radio" id="s1" name="hvezdy" value="1"><label for="s1">★</label>
+                            </div>
+                            <textarea name="text" class="form-control border-0 shadow-sm rounded-3 mb-3" rows="4" placeholder="Jaké to tam bylo? Co by ostatní měli vědět?" required></textarea>
+                            <button type="submit" class="btn btn-warning w-100 fw-800 py-3 rounded-pill shadow-sm" style="background: var(--epes-gold); color: white; border: none;">
+                                ODESLAT HODNOCENÍ
+                            </button>
+                        </form>
+                    {% else %}
+                        <p class="text-muted mb-3">Chcete hodnotit? Musíte se nejdříve přihlásit.</p>
+                        <a href="{% url 'login' %}" class="btn btn-outline-brown rounded-pill px-4">Přihlásit se</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

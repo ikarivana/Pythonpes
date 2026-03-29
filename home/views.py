@@ -282,9 +282,34 @@ def upravit_sluzbu(request, pk):
     # Použijeme tvou existující šablonu pro přidání
     return render(request, 'home/pridat_sluzbu.html', {'form': form, 'editace': True})
 
+
 def detail_sluzby(request, pk):
     sluzba = get_object_or_404(Sluzba, pk=pk)
-    return render(request, 'home/detail_sluzby.html', {'sluzba': sluzba})
+    # Spočítá průměr hvězd a počet recenzí
+    stats = sluzba.recenze_set.aggregate(prumer=Avg('hvezdy'), pocet=models.Count('id'))
+
+    return render(request, 'home/detail_sluzby.html', {
+        'sluzba': sluzba,
+        'prumer': stats['prumer'],
+        'pocet_recenzi': stats['pocet']
+    })
+
+
+@login_required
+def pridat_recenzi(request, pk):
+    if request.method == "POST":
+        sluzba = get_object_or_404(Sluzba, pk=pk)
+        hvezdy = request.POST.get('hvezdy')
+        text = request.POST.get('text')
+
+        if hvezdy and text:
+            Recenze.objects.create(
+                sluzba=sluzba,
+                uzivatel=request.user,
+                hvezdy=int(hvezdy),
+                text=text
+            )
+    return redirect('detail_sluzby', pk=pk)  # Změň 'detail_sluzby' na název tvého URL pro detail
 
 
 def kontakt(request):
@@ -363,3 +388,6 @@ def dekujeme_za_nakup(request):
 
 def dekujeme_za_znamku(request):
     return render(request, 'home/dekujeme_za_znamku.html')
+
+def pruvodce(request):
+    return render(request, 'home/pruvodce.html')

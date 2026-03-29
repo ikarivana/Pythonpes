@@ -18,17 +18,38 @@
         --epes-bg: #f9f7ff;
     }
 
-    body { background-color: var(--epes-bg); font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.3s ease; }
-    .home-container { max-width: 1100px; margin: 0 auto; padding: 15px; }
+    body {
+        background-color: var(--epes-bg);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        transition: background-color 0.3s ease;
+    }
+
+    .home-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 15px;
+    }
 
     /* Hero sekce */
     .hero-alfa { padding: 30px 5px; }
-    .hero-alfa h2 { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--epes-brown); margin-bottom: 5px; }
+    .hero-alfa h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        color: var(--epes-brown);
+        margin-bottom: 5px;
+    }
 
     .status-badge {
-        display: inline-flex; align-items: center; gap: 8px; background: white;
-        padding: 8px 18px; border-radius: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        color: var(--epes-gold); font-weight: 700; font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: white;
+        padding: 8px 18px;
+        border-radius: 50px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        color: var(--epes-gold);
+        font-weight: 700;
+        font-size: 0.85rem;
     }
 
     /* Hlavní rozcestník */
@@ -52,17 +73,33 @@
         align-items: center;
         gap: 20px;
     }
+
     .main-card:hover { transform: translateY(-5px); border-color: var(--epes-gold); }
+
     .icon-box {
-        width: 60px; height: 60px; background: var(--epes-bg);
-        border-radius: 20px; display: flex; align-items: center;
-        justify-content: center; font-size: 1.8rem; flex-shrink: 0;
+        width: 60px;
+        height: 60px;
+        background: var(--epes-bg);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        flex-shrink: 0;
         transition: 0.3s;
     }
 
     /* Sekce Komunita */
     .section-label { display: flex; align-items: center; gap: 15px; margin: 45px 0 20px 0; }
-    .section-label h4 { font-weight: 800; color: var(--epes-brown); margin: 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6; }
+    .section-label h4 {
+        font-weight: 800;
+        color: var(--epes-brown);
+        margin: 0;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: 0.6;
+    }
     .section-label .line { flex-grow: 1; height: 1px; background: var(--epes-gold); opacity: 0.2; }
 
     .community-full-row {
@@ -73,12 +110,19 @@
     }
 
     .sub-card {
-        background: white; border-radius: 18px; padding: 15px;
-        text-align: center; text-decoration: none !important;
-        color: var(--epes-brown); font-weight: 700; font-size: 0.95rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.04); border: 1px solid transparent;
+        background: white;
+        border-radius: 18px;
+        padding: 15px;
+        text-align: center;
+        text-decoration: none !important;
+        color: var(--epes-brown);
+        font-weight: 700;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        border: 1px solid transparent;
         transition: 0.2s;
     }
+
     .sub-card:hover { border-color: var(--epes-gold); background: var(--epes-bg); color: var(--epes-gold); }
 
     /* Profesionální info sekce (Karty) */
@@ -107,6 +151,7 @@
         transition: 0.3s ease;
         height: 100%;
     }
+
     .feature-card:hover { transform: translateY(-5px); border-color: var(--epes-gold); }
 
     .feature-icon {
@@ -162,13 +207,13 @@
     <div class="hero-alfa text-center">
         <div class="mb-3">
             {% if user.pes_set.first.druh == 'kocka' %}
-            <span style="font-size: 2.5rem;">🐈</span>
-            <span style="font-size: 1.5rem; color: var(--epes-gold); margin: 0 15px; vertical-align: middle;">&</span>
-            <span style="font-size: 1.8rem; opacity: 0.5;">🐕</span>
+                <span style="font-size: 2.5rem;">🐈</span>
+                <span style="font-size: 1.5rem; color: var(--epes-gold); margin: 0 15px; vertical-align: middle;">&</span>
+                <span style="font-size: 1.8rem; opacity: 0.5;">🐕</span>
             {% else %}
-            <span style="font-size: 2.5rem;">🐕</span>
-            <span style="font-size: 1.5rem; color: var(--epes-gold); margin: 0 15px; vertical-align: middle;">&</span>
-            <span style="font-size: 1.8rem; opacity: 0.5;">🐈</span>
+                <span style="font-size: 2.5rem;">🐕</span>
+                <span style="font-size: 1.5rem; color: var(--epes-gold); margin: 0 15px; vertical-align: middle;">&</span>
+                <span style="font-size: 1.8rem; opacity: 0.5;">🐈</span>
             {% endif %}
         </div>
         <h2>Ahoj, {{ user.username }}!</h2>
@@ -176,52 +221,53 @@
 
         <div class="status-badge">
             {% if user.profil.is_premium %}
-            <i class="fas fa-crown"></i> ALFA PROFIL AKTIVNÍ
+                <i class="fas fa-crown"></i> ALFA PROFIL AKTIVNÍ
             {% else %}
-            <i class="fas fa-heart"></i> MILOVNÍK ZVÍŘAT
+                <i class="fas fa-heart"></i> MILOVNÍK ZVÍŘAT
             {% endif %}
         </div>
     </div>
 
     {% if krizova_hlaseni %}
-    <div class="container mt-4">
-        <div class="p-3 shadow-sm border-start border-danger border-4"
-             style="background-color: #fffafa; border-radius: 15px;">
-            <h5 class="fw-bold mb-3" style="color: #8b0000;">
-                <i class="fas fa-exclamation-triangle pulse-search"></i> AKTUÁLNÍ VAROVÁNÍ Z MAPY
-            </h5>
-            <div class="list-group list-group-flush">
-                {% for hlace in krizova_hlaseni %}
-                <div class="list-group-item bg-transparent border-0 ps-0">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <strong>
-                                {% if hlace.typ == 'ztrata' %}🔍{% else %}⚠️{% endif %}
-                                {{ hlace.nazev }}
-                            </strong>
-                            <p class="mb-0 text-muted small">📍 {{ hlace.adresa|truncatechars:60 }}</p>
+        <div class="container mt-4">
+            <div class="p-3 shadow-sm border-start border-danger border-4" style="background-color: #fffafa; border-radius: 15px;">
+                <h5 class="fw-bold mb-3" style="color: #8b0000;">
+                    <i class="fas fa-exclamation-triangle pulse-search"></i> AKTUÁLNÍ VAROVÁNÍ Z MAPY
+                </h5>
+                <div class="list-group list-group-flush">
+                    {% for hlace in krizova_hlaseni %}
+                        <div class="list-group-item bg-transparent border-0 ps-0">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>
+                                        {% if hlace.typ == 'ztrata' %}🔍{% else %}⚠️{% endif %}
+                                        {{ hlace.nazev }}
+                                    </strong>
+                                    <p class="mb-0 text-muted small">📍 {{ hlace.adresa|truncatechars:60 }}</p>
+                                </div>
+                                <a href="{% url 'mapa_sluzeb' %}" class="btn btn-sm btn-outline-danger" style="border-radius: 20px; font-size: 0.7rem;">
+                                    KDE TO JE?
+                                </a>
+                            </div>
                         </div>
-                        <a href="{% url 'mapa_sluzeb' %}" class="btn btn-sm btn-outline-danger"
-                           style="border-radius: 20px; font-size: 0.7rem;">
-                            KDE TO JE?
-                        </a>
-                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
         </div>
-    </div>
     {% endif %}
 
     {# HLAVNÍ ROZCESTNÍK #}
     <div class="main-grid">
-        <a href="{% url 'seznam_inzeratu' %}" class="main-card">
-            <div class="icon-box">📦</div>
+        <a href="{% url 'pruvodce' %}" class="main-card">
+            <div class="icon-box" style="background: white; box-shadow: 0 4px 10px rgba(197, 160, 89, 0.2);">
+                <i class="fas fa-magic" style="color: var(--epes-gold);"></i>
+            </div>
             <div>
-                <h5 class="fw-bold m-0">Zvířecí Bazar</h5>
-                <p class="text-muted small m-0">Vybavení z druhé ruky</p>
+                <h5 class="fw-bold m-0" style="color: var(--epes-brown);">Průvodce webem 🐾</h5>
+                <p class="text-muted small m-0">Jak to u nás funguje? Zorientujte se během minuty.</p>
             </div>
         </a>
+
         <a href="{% url 'mapa_sluzeb' %}" class="main-card">
             <div class="icon-box">📍</div>
             <div>
@@ -229,6 +275,7 @@
                 <p class="text-muted small m-0">Prověřená místa v okolí</p>
             </div>
         </a>
+
         <a href="{% url 'seznam_psu' %}" class="main-card">
             <div class="icon-box">{% if user.pes_set.first.druh == 'kocka' %}🐈{% else %}📑{% endif %}</div>
             <div>
@@ -255,10 +302,9 @@
     {# INFO SEKCE - DIGITÁLNÍ ŠTÍT #}
     <div class="info-section-premium">
         <div class="text-center mb-5">
-        <span class="badge-intro"
-              style="color: var(--epes-gold); font-weight: 800; letter-spacing: 1px; text-transform: uppercase; font-size: 0.7rem;">
-              Ekosystém ePes.online
-        </span>
+            <span class="badge-intro" style="color: var(--epes-gold); font-weight: 800; letter-spacing: 1px; text-transform: uppercase; font-size: 0.7rem;">
+                Ekosystém ePes.online
+            </span>
             <h3 class="fw-800" style="font-size: 2rem; color: var(--epes-brown); letter-spacing: -1px;">
                 Společně tvoříme <span style="color: var(--epes-gold);">nejbezpečnější prostor</span> pro vaše mazlíčky.
             </h3>
@@ -302,17 +348,17 @@
             <p class="m-0 text-secondary" style="font-size: 0.95rem; line-height: 1.6;">
                 <i class="fas fa-shield-heart text-warning me-2"></i>
                 <strong>Doplňujeme oficiální registry.</strong> Registr je nezbytný základ, ale
-                <strong>ePes.online</strong> je váš aktivní štít pro každodenní bezpečí.
+                <strong>epes.online</strong> je váš aktivní štít pro každodenní bezpečí.
             </p>
         </div>
 
         <div class="text-center slogan-footer">
             {% if user.pes_set.first.druh == 'kocka' %}
-            <i class="fas fa-fingerprint me-2" style="font-size: 0.8rem; opacity: 0.7;"></i>
-            RYCHLÁ CESTA DOMŮ ZAČÍNÁ TADY. DIGITÁLNÍ IDENTITA PRO KAŽDOU KOČIČÍ TLAPKU.
+                <i class="fas fa-fingerprint me-2" style="font-size: 0.8rem; opacity: 0.7;"></i>
+                RYCHLÁ CESTA DOMŮ ZAČÍNÁ TADY. DIGITÁLNÍ IDENTITA PRO KAŽDOU KOČIČÍ TLAPKU.
             {% else %}
-            <i class="fas fa-shield-halved me-2" style="font-size: 0.8rem; opacity: 0.7;"></i>
-            VAŠE POJISTKA PRO NEČEKANÉ SITUACE. CHYTRÝ PROFIL, KTERÝ MLUVÍ ZA VAŠEHO PSA.
+                <i class="fas fa-shield-halved me-2" style="font-size: 0.8rem; opacity: 0.7;"></i>
+                VAŠE POJISTKA PRO NEČEKANÉ SITUACE. CHYTRÝ PROFIL, KTERÝ MLUVÍ ZA VAŠEHO PSA.
             {% endif %}
         </div>
     </div>
