@@ -304,7 +304,8 @@ def pridat_recenzi(request, pk):
     # Importy uvnitř funkce jsou fajn, ale raději je měj nahoře v souboru
     from users.models import Notifikace
     from .models import Sluzba
-    from .forms import RecenzeForm  # <--- Ujisti se, že importuješ správný FORM!
+    from .forms import RecenzeForm
+
 
     sluzba_obj = get_object_or_404(Sluzba, pk=pk)
 
@@ -314,9 +315,7 @@ def pridat_recenzi(request, pk):
 
         if form.is_valid():
             nova_recenze = form.save(commit=False)
-            # Tady pozor: v modelu Recenze se to pole jmenuje 'vhome' nebo 'sluzba'?
-            # Podle tvého kódu předpokládám 'vhome'
-            nova_recenze.vhome = sluzba_obj
+            nova_recenze.home = sluzba_obj
             nova_recenze.user = request.user
             nova_recenze.save()
 
@@ -335,8 +334,7 @@ def pridat_recenzi(request, pk):
         # Tohle se stane, když uživatel na stránku jen přijde (GET)
         form = RecenzeForm()
 
-    # Musíš funkci zakončit renderem, jinak ti to hodí chybu, pokud form nebude validní
-    return render(request, 'vhome/detail_sluzby.html', {'form': form, 'sluzba': sluzba_obj})
+    return render(request, 'home/detail_sluzby.html', {'form': form, 'sluzba': sluzba_obj})
 
 
 def kontakt(request):

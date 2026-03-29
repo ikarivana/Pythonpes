@@ -1,140 +1,144 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from . import models
-from .models import ZdravotniZaznam
 
 
-# --- INLINES ---
-class GalerieFotkaInline(admin.TabularInline):
-    model = models.GalerieFotka
-    extra = 1
-    readonly_fields = ('nahled',)
-
-    def nahled(self, obj):
-        # OPRAVA: V modelu GalerieFotka máš pole 'obrazek', ne 'soubor'
-        if obj.obrazek:
-            return format_html('<img src="{}" style="width: 50px; height: auto; border-radius: 5px;" />',
-                               obj.obrazek.url)
-        return "-"
-
-
-class GalerieVideoInline(admin.TabularInline):
-    # OPRAVA: V modelu GalerieVideo máš pole 'video_soubor'
-    model = models.GalerieVideo
-    extra = 1
-
+# --- INLINES (Všechny související věci v jednom detailu psa) ---
 
 class OckovaniInline(admin.TabularInline):
     model = models.Ockovani
     extra = 1
 
 
-# --- ADMIN PSA (HLAVNÍ) ---
+class GalerieFotkaInline(admin.TabularInline):
+    model = models.GalerieFotka
+    extra = 1
+    readonly_fields = ('nahled',)
+
+    def nahled(self, obj):
+        if obj.obrazek:
+            return format_html('<img src="{}" style="height: 50px;"/>', obj.obrazek.url)
+        return "-"
+
+
+class GalerieVideoInline(admin.TabularInline):
+    model = models.GalerieVideo
+    extra = 1
+
+
+class VystavaInline(admin.TabularInline):
+    model = models.Vystava
+    extra = 1
+
+
+class VrhInline(admin.TabularInline):
+    model = models.Vrh
+    fk_name = 'rodic'  # Musíme specifikovat, protože model Vrh používá název 'rodic'
+    extra = 1
+
+
+class UspechInline(admin.TabularInline):
+    model = models.Uspech
+    extra = 1
+
+
+class ZdravotniZaznamInline(admin.TabularInline):
+    model = models.ZdravotniZaznam
+    extra = 1
+
+
+# --- ADMIN PSA ---
 @admin.register(models.Pes)
 class PesAdmin(admin.ModelAdmin):
-    # Přidal jsem lat a lon do zobrazení v seznamu, abyste hned viděl, kdo má polohu
-    list_display = ('nahled_foto', 'jmeno', 'druh_ikona', 'rasa', 'majitel', 'je_ztraceny', 'lat', 'lon')
-    list_filter = ('je_ztraceny', 'druh', 'rasa')
-    list_editable = ('je_ztraceny',)
-    search_fields = ('jmeno', 'cip', 'majitel__uzivatel__username', 'majitel__uzivatel__email')
-    readonly_fields = ('qr_kod', 'nahled_velky')
-    inlines = [OckovaniInline, GalerieFotkaInline, GalerieVideoInline]
+    list_display = ('nahled_foto', 'jmeno', 'druh_ikona', 'rasa', 'majitel', 'je_ztraceny')
+    list_filter = ('druh', 'je_ztraceny', 'rasa')
+    search_fields = ('jmeno', 'cip', 'majitel__uzivatel__username')
+    readonly_fields = ('qr_kod', 'nahled_velky', 'vytvoreno')
+
+    # Registrace všech Inlines najednou
+    inlines = [
+        OckovaniInline,
+        ZdravotniZaznamInline,
+        UspechInline,
+        VystavaInline,
+        VrhInline,
+        GalerieFotkaInline,
+        GalerieVideoInline
+    ]
 
     fieldsets = (
         ('Základní informace', {
-            'fields': (('jmeno', 'druh'), ('rasa', 'majitel'), 'cip')
+            'fields': (('jmeno', 'druh'), ('rasa', 'majitel'), ('datum_narozeni', 'vaha'), 'cip', 'fotka')
         }),
-        ('Zdraví a Status', {
-            # PŘIDEJTE lat a lon SEM:
-            'fields': ('je_ztraceny', 'lat', 'lon', 'qr_kod', 'nahled_velky'),
+        ('Zdraví, RTG a Dokumentace', {
+            'fields': (('rtg_hd', 'rtg_ed', 'rtg_pater'), 'bonitace', 'rodokmen_pdf'),
+        }),
+        ('Rodokmen (Rodiče)', {
+            'fields': (('otec_manualni', 'matka_manualni'), 'chovna_stanice'),
+            'classes': ('collapse',),
+        }),
+        ('SOS & Lokalizace', {
+            'fields': ('je_ztraceny', 'je_u_nalezece', ('lat', 'lon'), 'qr_kod', 'nahled_velky'),
         }),
         ('SOS Kontakty', {
-            'fields': (('kontaktni_jmeno', 'kontaktni_telefon'), 'kontaktni_email', 'adresa_pro_darky'),
+            'fields': ('kontaktni_jmeno', 'kontaktni_telefon', 'kontaktni_email', 'adresa_pro_darky'),
             'classes': ('collapse',),
+        }),
+        ('Prevence a Texty', {
+            'fields': (('hlavni_veterinar_nazev', 'hlavni_veterinar_telefon'),
+                       ('posledni_ockovani', 'posledni_odcerveni', 'posledni_klistata'),
+                       'zdravotni_poznamky', 'popis'),
         }),
     )
 
     def nahled_foto(self, obj):
-        prvni_foto = obj.galerie_fotky.first()
-        if prvni_foto and prvni_foto.obrazek:
+        if obj.fotka:
             return format_html(
-                '<img src="{}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" />',
-                prvni_foto.obrazek.url)
-        return format_html('<span style="color: #ccc;">🐾</span>')
-
-    nahled_foto.short_description = "Foto"
+                '<img src="{}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;" />',
+                obj.fotka.url)
+        return "🐾"
 
     def nahled_velky(self, obj):
-        prvni_foto = obj.galerie_fotky.first()
-        if prvni_foto and prvni_foto.obrazek:
-            return format_html('<img src="{}" style="max-width: 200px; border-radius: 10px;" />', prvni_foto.obrazek.url)
-        return "Není nahrána žádná fotka."
+        if obj.fotka:
+            return format_html('<img src="{}" style="max-width: 200px; border-radius: 10px;" />', obj.fotka.url)
+        return "Bez fotky"
 
     def druh_ikona(self, obj):
-        ikony = {'pes': '🐕', 'kocka': '🐈'}
-        return ikony.get(obj.druh, '🐾')
+        return "🐕" if obj.druh == 'pes' else "🐈"
 
-    druh_ikona.short_description = "Druh"
 
-# --- SOCIÁLNÍ SÍŤ ---
+# --- SOCIÁLNÍ SÍŤ A OSTATNÍ ---
+
 @admin.register(models.Prispevek)
 class PrispevekAdmin(admin.ModelAdmin):
-    list_display = ('autor', 'nahled_media', 'zkraceny_text', 'datum_pridani', 'plemeno')
+    list_display = ('autor', 'plemeno', 'datum_pridani', 'pocet_lajku')
     list_filter = ('datum_pridani', 'plemeno')
-    search_fields = ('text', 'autor__username')
 
-    def zkraceny_text(self, obj):
-        return obj.text[:50] + "..." if len(obj.text) > 50 else obj.text
-
-    def nahled_media(self, obj):
-        if obj.obrazek:
-            return format_html('<img src="{}" style="width: 50px; border-radius: 5px;" />', obj.obrazek.url)
-        elif obj.video:
-            return "🎥 Video"
-        return "Text"
+    def pocet_lajku(self, obj):
+        return obj.likes.count()
 
 
-# --- PLEMENA A ZDI ---
 @admin.register(models.Plemeno)
 class PlemenoAdmin(admin.ModelAdmin):
-    list_display = ('nazev', 'kategorie', 'slug', 'pocet_prispevku')
+    list_display = ('nazev', 'kategorie', 'slug')
     prepopulated_fields = {'slug': ('nazev',)}
-    list_filter = ('kategorie',)
-    search_fields = ('nazev', 'slug')
-
-    def pocet_prispevku(self, obj):
-        # OPRAVA: Related name je 'prispevky_na_zed'
-        return obj.prispevky_na_zed.count()
 
 
-# --- SYSTÉMOVÉ ---
 @admin.register(models.Notifikace)
 class NotifikaceAdmin(admin.ModelAdmin):
-    # OPRAVA: Pole 'datum' v modelu nemáš, jmenuje se 'datum_vytvoreni'
-    list_display = ('prijemce', 'typ', 'precteno', 'datum_vytvoreni')
+    list_display = ('prijemce', 'odesilatel', 'typ', 'precteno', 'datum_vytvoreni')
     list_filter = ('precteno', 'typ')
-    search_fields = ('prijemce__username',)
 
-
-@admin.register(ZdravotniZaznam)
-class ZdravotniZaznamAdmin(admin.ModelAdmin):
-    list_display = ('pes', 'typ', 'datum', 'titulek')
-    list_filter = ('typ', 'datum')
-    search_fields = ('pes__jmeno', 'titulek', 'poznamka')
-
+#@admin.register(models.ProfilMajitele)
+#class ProfilMajiteleAdmin(admin.ModelAdmin):
+   # list_display = ('uzivatel', 'is_premium', 'premium_do', 'mesto')
+    #list_editable = ('is_premium',)
 
 @admin.register(models.PromoKod)
 class PromoKodAdmin(admin.ModelAdmin):
     list_display = ('kod', 'pocet_dni', 'je_aktivni', 'poznamka')
-    list_editable = ('je_aktivni',)
-    search_fields = ('kod',)
 
-
-# Ostatní jednoduché registrace
+# Pouze ty modely, které nemají nahoře definovanou vlastní třídu (Class)
 admin.site.register(models.Komentar)
-admin.site.register(models.Uspech)
+admin.site.register(models.Like)
 
-# Vlastní titulek administrace
-admin.site.site_header = "🐾 HeroPets: Administrace smečky"
-admin.site.site_title = "HeroPets Admin"
-admin.site.index_title = "Správa hrdinů a komunity"

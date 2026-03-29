@@ -1,14 +1,11 @@
 import os
 import json
 import io
-import uuid
-from datetime import timedelta, timezone, date
+from datetime import timedelta, timezone
 
 from PIL import Image, ImageOps
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.messages import info
 from django.core.paginator import Paginator
-from django.db.models.functions import datetime
 from django.urls import reverse
 from pillow_heif import register_heif_opener
 
@@ -20,7 +17,6 @@ from django.template.loader import get_template
 from django.utils.text import slugify
 from django.views.decorators.csrf import csrf_exempt
 import qrcode
-from datetime import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.core.files.base import ContentFile
@@ -858,24 +854,23 @@ def link_callback(uri, rel):
 
 @login_required
 def export_pes_pdf(request, pes_id):
-    # BEZPEČNOST: Kontrola, že pes patří přihlášenému uživateli
+    # Načteme psa (kontrola majitele je v pořádku)
     pes = get_object_or_404(Pes, id=pes_id, majitel=request.user.profil)
 
-    # Získání profilu uživatele pro kontrolu is_premium
-    profil = request.user.profil
+    # Použijeme přímý filtr, abychom se vyhnuli chybám s '_set'
+    zaznamy = ZdravotniZaznam.objects.filter(pes=pes).order_by('-datum')
 
-    # Definice cesty k fontu
+    # Registrace fontu (v pořádku)
     font_path = os.path.join(settings.MEDIA_ROOT, 'fonts', 'DejaVuSans.ttf')
-
-    # REGISTRACE: Název 'DejaVu Sans' musí být PŘESNĚ jako v HTML šabloně
-    pdfmetrics.registerFont(TTFont('DejaVu Sans', font_path))
+    if os.path.exists(font_path):
+        pdfmetrics.registerFont(TTFont('DejaVu Sans', font_path))
 
     template = get_template('users/pdf_sablona.html')
 
-    # PŘIDÁNO: 'profil': profil
+    # Context - sem musíme dát VŠE, co chceme v PDF vidět
     context = {
         'pes': pes,
-        'profil': profil,
+        'posledni_zaznamy': zaznamy,
         'media_root': settings.MEDIA_ROOT,
     }
 
@@ -883,17 +878,9 @@ def export_pes_pdf(request, pes_id):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="export_{pes.jmeno}.pdf"'
 
-    pisa_status = pisa.CreatePDF(
-        html,
-        dest=response,
-        encoding='utf-8',
-        link_callback=link_callback
-    )
-
-    if pisa_status.err:
-        return HttpResponse(f'Chyba při generování PDF: {pisa_status.err}')
-
+    pisa_status = pisa.CreatePDF(html, dest=response, encoding='utf-8', link_callback=link_callback)
     return response
+
 
 
 def nahrat_rodokmen(request, pes_id):

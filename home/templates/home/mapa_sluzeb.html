@@ -101,6 +101,16 @@
                 </div>
 
                 <div id="map" style="min-height: 400px; height: 70vh !important;"></div>
+
+                <div class="mt-4 p-3 text-center" style="background-color: #fcfaf8; border-radius: 15px; border: 1px solid var(--border-tan);">
+                    <p class="m-0" style="color: #6d4c41; font-size: 0.85rem;">
+                        <i class="fas fa-info-circle" style="color: var(--gold);"></i>
+                        Vložená data pocházejí z <strong>veřejně dostupných informačních zdrojů</strong>.
+                        Pokud si přejete údaje upravit nebo odstranit, prosíme,
+                        <a href="elivdruhy@gmail.com" style="color: var(--mid-brown); font-weight: bold; text-decoration: underline;">kontaktujte nás</a>.
+                    </p>
+                </div>
+
             </div>
         </div>
     </div>
@@ -127,12 +137,10 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
-        // Ošetření čárky z URL parametrů
         const urlLat = parseFloat(String(urlParams.get('lat') || '').replace(',', '.'));
         const urlLon = parseFloat(String(urlParams.get('lon') || '').replace(',', '.'));
         const urlZoom = parseInt(urlParams.get('zoom')) || 12;
 
-        // 1. NASTAVENÍ STARTOVNÍ POZICE
         let startPos = [49.8, 15.5];
         let startZoom = 7;
 
@@ -141,20 +149,17 @@
             startZoom = urlZoom;
         }
 
-        // 2. INICIALIZACE MAPY (rovnou na cíl)
         map = L.map('map').setView(startPos, startZoom);
 
         L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // Pojistka pro správné vykreslení velikosti
         setTimeout(function() {
             map.invalidateSize();
             if (!isNaN(urlLat)) map.panTo([urlLat, urlLon]);
         }, 300);
 
-        // 3. PROCHÁZENÍ SLUŽEB
         sluzby.forEach(function(s) {
             var lat = parseFloat(String(s.lat).replace(',', '.'));
             var lon = parseFloat(String(s.lon).replace(',', '.'));
@@ -187,9 +192,7 @@
                 </div>`;
             marker.bindPopup(popupHtml);
 
-            // AUTO-OPEN POPUP (pokud se souřadnice blíží těm v URL)
             if (!isNaN(urlLat) && Math.abs(lat - urlLat) < 0.01 && Math.abs(lon - urlLon) < 0.01) {
-                // Otevřeme bublinu s malým zpožděním, aby to vypadalo čistě
                 setTimeout(function() {
                     marker.openPopup();
                 }, 800);
@@ -197,6 +200,7 @@
 
             allMarkers.push({ instance: marker, typ: s.typ_slug });
         });
+
         if (!isNaN(urlLat) && !isNaN(urlLon)) {
             filtrujMapu('ztrata');
         }

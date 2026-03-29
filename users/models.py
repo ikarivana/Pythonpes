@@ -135,12 +135,13 @@ class Pes(models.Model):
         return reverse('detail_psa', kwargs={'pes_id': self.id})
 
     def save(self, *args, **kwargs):
+        # 1. Nejdřív uložíme základní data
         super().save(*args, **kwargs)
+
+        # 2. QR kód vygenerujeme jen, pokud pole qr_kod v DB zatím není
         if not self.qr_kod:
             try:
-                # Opravená URL pro QR kód podle tvého urls.py
                 qr_url = f"https://epes.online/users/pes/{self.id}/"
-
                 qr = qrcode.QRCode(version=1, box_size=10, border=5)
                 qr.add_data(qr_url)
                 qr.make(fit=True)
@@ -150,9 +151,14 @@ class Pes(models.Model):
                 img.save(canvas, format='PNG')
                 canvas.seek(0)
 
-                # Uložíme soubor a updatujeme jen pole qr_kod, aby se necyklilo save()
-                self.qr_kod.save(f'qr_pes_{self.id}.png', File(canvas), save=False)
-                super(Pes, self).save(update_fields=['qr_kod'])
+                filename = f'qr_pes_{self.id}.png'
+
+                # save=False je ZÁSADNÍ - uloží soubor, ale nespustí znovu save()
+                self.qr_kod.save(filename, File(canvas), save=False)
+
+                # Tichý zápis do DB přes update (nepouští signály ani save())
+                self.__class__.objects.filter(pk=self.pk).update(qr_kod=self.qr_kod.name)
+
             except Exception as e:
                 print(f"Chyba při tvorbě QR: {e}")
 

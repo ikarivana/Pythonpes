@@ -39,10 +39,7 @@
         height: 100%;
         overflow: hidden;
     }
-
-    .dog-term-card:hover {
-        transform: translateY(-5px);
-    }
+    .dog-term-card:hover { transform: translateY(-5px); }
 
     .dog-name-bar {
         padding: 15px 20px;
@@ -50,20 +47,9 @@
         justify-content: space-between;
         align-items: center;
     }
-
-    .bar-pes {
-        background: var(--t-soft-gold);
-        border-bottom: 1px solid #f8f1e5;
-    }
-
-    .bar-kocka {
-        background: var(--cat-soft-lila);
-        border-bottom: 1px solid var(--cat-soft-lila);
-    }
-
-    .bar-kocka h5 {
-        color: var(--cat-lila) !important;
-    }
+    .bar-pes { background: var(--t-soft-gold); border-bottom: 1px solid #f8f1e5; }
+    .bar-kocka { background: var(--cat-soft-lila); border-bottom: 1px solid var(--cat-soft-lila); }
+    .bar-kocka h5 { color: var(--cat-lila) !important; }
 
     .health-badge-mini {
         background: #fff;
@@ -74,7 +60,7 @@
         height: 100%;
     }
 
-    /* --- HISTORIE ZÁZNAMŮ --- */
+    /* --- HISTORIE --- */
     .incident-card {
         background: #fff;
         border-radius: 20px;
@@ -86,86 +72,39 @@
         align-items: center;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
     }
-
-    .incident-card.cat-border {
-        border-left-color: var(--cat-lila);
-    }
-
-    .incident-card.urgent {
-        border-left-color: var(--t-danger);
-        background: #fffafa;
-    }
-
-    .qr-badge-sos {
-        flex-shrink: 0;
-        width: 80px;
-        height: 80px;
-        border-radius: 12px;
-        padding: 6px;
-        background: white;
-        border: 1.5px solid #f0f0f0;
-        text-align: center;
-    }
-
-    .qr-badge-sos img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        border-radius: 5px;
-    }
+    .incident-card.cat-border { border-left-color: var(--cat-lila); }
+    .incident-card.urgent { border-left-color: var(--t-danger); background: #fffafa; }
 
     /* --- TLAČÍTKA A FORMULÁŘ --- */
-    .btn-lux-add {
-        background: var(--t-brown);
-        color: white !important;
-        border-radius: 12px;
-        padding: 8px 18px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        border: 1.5px solid var(--t-gold);
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        text-decoration: none;
-    }
-
-    .btn-lux-add:hover {
-        background: var(--t-gold);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(197, 160, 89, 0.2);
-    }
-
-    .page-link-lux {
-        background: white;
-        border: none;
-        color: var(--t-brown);
-        padding: 10px 18px;
-        border-radius: 12px;
-        font-weight: 700;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        transition: 0.3s;
-        text-decoration: none;
-    }
-
-    .page-link-lux:hover {
-        background: var(--t-soft-gold);
-        color: var(--t-gold);
-    }
-
-    .page-current-lux {
-        background: var(--t-brown);
-        color: white;
-        padding: 10px 20px;
-        border-radius: 12px;
-        font-weight: 800;
-        box-shadow: 0 4px 12px rgba(62, 39, 35, 0.2);
-    }
-    #divKlinika {
+   .btn-lux-add {
+    background: var(--t-brown) !important;
+    color: white !important; /* Vynutí bílý text vždy */
+    border: 1.5px solid var(--t-gold) !important;
     transition: all 0.3s ease-in-out;
 }
+
+.btn-lux-add i {
+    color: var(--t-gold) !important; /* Ikonka plus bude zlatá */
+}
+
+.btn-lux-add:hover {
+    background: #4e342e !important; /* Jen lehce zesvětlí hnědou, nezbělá */
+    color: white !important;        /* Text MUSÍ zůstat bílý */
+    border-color: var(--t-gold) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(62, 39, 35, 0.3);
+}
+
+/* Pokud by se tam pletla ikonka při najetí */
+.btn-lux-add:hover i {
+    color: white !important; /* Při najetí zbělá i ta ikonka pro lepší efekt */
+}
+
+    .border-dashed { border-style: dashed !important; }
+
+    #divKlinika, #extra-fields-container {
+        transition: all 0.3s ease-in-out;
+    }
 </style>
 
 <div class="container py-4">
@@ -193,9 +132,7 @@
         <div class="col-md-6 col-12">
             <div class="dog-term-card shadow-sm">
                 <div class="dog-name-bar {% if mazlicek.druh == 'kocka' %}bar-kocka{% else %}bar-pes{% endif %}">
-                    <h5 class="fw-bold m-0">
-                        {% if mazlicek.druh == 'kocka' %}🐱{% else %}🐶{% endif %} {{ mazlicek.jmeno }}
-                    </h5>
+                    <h5 class="fw-bold m-0">{% if mazlicek.druh == 'kocka' %}🐱{% else %}🐶{% endif %} {{ mazlicek.jmeno }}</h5>
                     <a href="{% url 'detail_psa' mazlicek.id %}" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold" style="font-size: 0.7rem;">DETAIL</a>
                 </div>
                 <div class="p-3">
@@ -228,7 +165,7 @@
         {% endfor %}
     </div>
 
-    {# HISTORIE #}
+    {# HISTORIE ZÁZNAMŮ #}
     <div class="vet-report-section shadow-sm bg-white p-4 p-md-5 mt-4" style="border-radius: 35px;">
         <div class="d-flex justify-content-between align-items-end mb-4">
             <div>
@@ -246,89 +183,26 @@
             {% for zaznam in posledni_zaznamy %}
             <div class="col-lg-6">
                 <div class="incident-card shadow-sm {% if zaznam.typ == 'urgentni' %}urgent{% elif zaznam.pes.druh == 'kocka' %}cat-border{% endif %}">
-                    <div class="qr-badge-sos d-none d-sm-block">
-                        {% if zaznam.pes.qr_kod %}
-                        <img src="{{ zaznam.pes.qr_kod.url }}" alt="QR">
-                        {% else %}
-                        <i class="fas fa-qrcode text-muted opacity-25 mt-3 d-block"></i>
-                        {% endif %}
-                    </div>
-
                     <div class="flex-grow-1">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <span class="badge {% if zaznam.typ == 'urgentni' %}bg-danger{% else %}bg-secondary{% endif %} mb-1" style="font-size: 0.6rem; letter-spacing: 0.5px;">{{ zaznam.get_typ_display|upper }}</span>
+                                <span class="badge {% if zaznam.typ == 'urgentni' %}bg-danger{% else %}bg-secondary{% endif %} mb-1" style="font-size: 0.6rem;">{{ zaznam.get_typ_display|upper }}</span>
                                 <h6 class="fw-bold mb-1" style="color: var(--t-brown);">{{ zaznam.titulek }}</h6>
                             </div>
-                            <div class="d-flex gap-2">
-                                {% if request.user.is_authenticated %}
-                                <a href="{% url 'upravit_zaznam' zaznam.pk %}" class="text-muted"><i class="fas fa-edit"></i></a>
-                                <form action="{% url 'smazat_zaznam' zaznam.pk %}" method="POST" class="d-inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="border-0 bg-transparent text-danger p-0" onclick="return confirm('Opravdu smazat?')">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </form>
-                                {% endif %}
-                            </div>
                         </div>
-
-                        {# ZOBRAZENÍ KLINIKY (Změněno z osetrujici_lekar na klinika) #}
-                        {% if zaznam.klinika %}
-                        <div class="mb-1">
-                            <small class="fw-bold" style="color: var(--t-success); font-size: 0.75rem;">
-                                <i class="fas fa-hospital me-1"></i> {{ zaznam.klinika }}
-                            </small>
-                        </div>
-                        {% endif %}
-
-                        <p class="small text-muted mb-2 text-truncate" style="max-width: 250px;">{{ zaznam.poznamka }}</p>
-
+                        {% if zaznam.klinika %}<small class="fw-bold d-block mb-1" style="color: var(--t-success); font-size: 0.75rem;"><i class="fas fa-hospital me-1"></i> {{ zaznam.klinika }}</small>{% endif %}
+                        <p class="small text-muted mb-2 text-truncate">{{ zaznam.poznamka }}</p>
                         <div class="d-flex justify-content-between align-items-center border-top pt-2">
                             <span class="small fw-bold text-muted"><i class="far fa-calendar-alt me-1"></i>{{ zaznam.datum|date:"d. m. Y" }}</span>
-                            <span class="badge rounded-pill px-2 py-1 {% if zaznam.pes.druh == 'kocka' %}bg-light text-primary border-primary{% else %}bg-light text-dark border{% endif %} border" style="font-size: 0.7rem;">
-                                {{ zaznam.pes.jmeno }}
-                            </span>
+                            <span class="badge rounded-pill bg-light text-dark border px-2 py-1" style="font-size: 0.7rem;">{{ zaznam.pes.jmeno }}</span>
                         </div>
                     </div>
                 </div>
             </div>
             {% empty %}
-            <div class="col-12 text-center py-5">
-                <i class="fas fa-notes-medical fs-1 text-muted opacity-25"></i>
-                <p class="text-muted mt-2">Zatím žádné lékařské zprávy v deníku.</p>
-            </div>
+            <div class="col-12 text-center py-5"><p class="text-muted">Zatím žádné lékařské zprávy.</p></div>
             {% endfor %}
         </div>
-
-        {# PAGINACE #}
-        {% if posledni_zaznamy.has_other_pages %}
-        <nav class="mt-5">
-            <ul class="pagination justify-content-center border-0 gap-2">
-                {% if posledni_zaznamy.has_previous %}
-                <li class="page-item">
-                    <a class="page-link-lux" href="?page={{ posledni_zaznamy.previous_page_number }}">
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
-                </li>
-                {% endif %}
-
-                <li class="page-item disabled">
-                    <span class="page-current-lux">
-                        {{ posledni_zaznamy.number }} / {{ posledni_zaznamy.paginator.num_pages }}
-                    </span>
-                </li>
-
-                {% if posledni_zaznamy.has_next %}
-                <li class="page-item">
-                    <a class="page-link-lux" href="?page={{ posledni_zaznamy.next_page_number }}">
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
-                </li>
-                {% endif %}
-            </ul>
-        </nav>
-        {% endif %}
     </div>
 </div>
 
@@ -344,32 +218,52 @@
 
                 <form method="POST" action="{% url 'veterinar' pes_id=pes.id %}">
                     {% csrf_token %}
-
-                    <div class="row g-3">
-                        <div class="col-md-6">
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
                             <label class="small fw-bold text-muted mb-1 text-uppercase">Pacient</label>
                             <select name="pes_id" class="form-select border-0 bg-light p-3 rounded-4" required>
                                 {% for mazlicek in psi %}
-                                <option value="{{ mazlicek.id }}" {% if mazlicek.id == pes.id %}selected{% endif %}>
-                                    {% if mazlicek.druh == 'kocka' %}🐱{% else %}🐶{% endif %} {{ mazlicek.jmeno }}
-                                </option>
+                                <option value="{{ mazlicek.id }}" {% if mazlicek.id == pes.id %}selected{% endif %}>{{ mazlicek.jmeno }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-6">
                             <label class="small fw-bold text-muted mb-1 text-uppercase">Datum</label>
                             <input type="date" name="datum" class="form-control border-0 bg-light p-3 rounded-4" value="{{ today|date:'Y-m-d' }}">
                         </div>
                     </div>
 
-                    <div class="mb-3 mt-3">
+                    <div class="mb-3">
                         <label class="small fw-bold text-muted mb-1 text-uppercase">Typ návštěvy</label>
                         <div class="d-flex gap-2">
-                            <input type="radio" class="btn-check" name="typ" id="typ1" value="zaznam" checked onclick="toggleUrgentFields(false)">
+                            <input type="radio" class="btn-check" name="typ" id="typ1" value="zaznam" checked onclick="toggleExtraFields(true)">
                             <label class="btn btn-outline-secondary flex-grow-1 rounded-4 py-3 fw-bold" for="typ1">📝 Kontrola</label>
 
-                            <input type="radio" class="btn-check" name="typ" id="typ2" value="urgentni" onclick="toggleUrgentFields(true)">
+                            <input type="radio" class="btn-check" name="typ" id="typ2" value="urgentni" onclick="toggleExtraFields(false)">
                             <label class="btn btn-outline-danger flex-grow-1 rounded-4 py-3 fw-bold" for="typ2">🚨 Urgentní</label>
+                        </div>
+                    </div>
+
+                    <div id="extra-fields-container">
+                        <div class="mb-3 mt-4">
+                            <label class="small fw-bold text-muted mb-2 text-uppercase">Provedené úkony</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                <input type="checkbox" class="btn-check" name="ockovani" id="check_ocko">
+                                <label class="btn btn-outline-secondary rounded-pill px-3 py-2 border-dashed" for="check_ocko">💉 Očkování</label>
+
+                                <input type="checkbox" class="btn-check" name="odcerveni" id="check_odcerveni">
+                                <label class="btn btn-outline-secondary rounded-pill px-3 py-2 border-dashed" for="check_odcerveni">💊 Odčervení</label>
+
+                                <input type="checkbox" class="btn-check" name="osetreni" id="check_osetreni">
+                                <label class="btn btn-outline-secondary rounded-pill px-3 py-2 border-dashed" for="check_osetreni">🩹 Ošetření</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="small fw-bold text-muted mb-1 text-uppercase">Váha pacienta</label>
+                            <div class="input-group" style="max-width: 140px;">
+                                <input type="number" step="0.1" name="vaha" class="form-control rounded-start-4 border-0 bg-light" placeholder="0.0">
+                                <span class="input-group-text bg-light border-0 rounded-end-4 text-muted">kg</span>
+                            </div>
                         </div>
                     </div>
 
@@ -379,16 +273,13 @@
                     </div>
 
                     <div class="mb-3" id="divKlinika">
-                        <label class="small fw-bold text-muted mb-1 text-uppercase">Veterinární klinika / Lékař</label>
-                        <div class="input-group">
-                            <span class="input-group-text border-0 bg-light rounded-start-4 text-muted"><i class="fas fa-hospital"></i></span>
-                            <input type="text" name="klinika" class="form-control border-0 bg-light p-3 rounded-end-4" placeholder="Jméno lékaře nebo kliniky">
-                        </div>
+                        <label class="small fw-bold text-muted mb-1 text-uppercase">Klinika / Lékař</label>
+                        <input type="text" name="klinika" class="form-control border-0 bg-light p-3 rounded-4" placeholder="Jméno lékaře nebo kliniky">
                     </div>
 
                     <div class="mb-4">
                         <label class="small fw-bold text-muted mb-1 text-uppercase" id="labelZprava">Lékařská zpráva</label>
-                        <textarea name="popis" id="inputZprava" class="form-control border-0 bg-light p-3 rounded-4" rows="3" placeholder="Výsledek vyšetření, doporučení..."></textarea>
+                        <textarea name="popis" id="inputZprava" class="form-control border-0 bg-light p-3 rounded-4" rows="3" placeholder="Výsledek vyšetření..."></textarea>
                     </div>
 
                     <button type="submit" id="btnUlozit" class="btn btn-lux-add w-100 py-3 shadow">ULOŽIT ZÁZNAM</button>
@@ -399,46 +290,39 @@
 </div>
 
 <script>
-    function toggleUrgentFields(isUrgent) {
+    function toggleExtraFields(isKontrola) {
+        const extraFields = document.getElementById('extra-fields-container');
         const divKlinika = document.getElementById('divKlinika');
         const labelTitulek = document.getElementById('labelTitulek');
         const inputTitulek = document.getElementById('inputTitulek');
-        const labelZprava = document.getElementById('labelZprava');
-        const inputZprava = document.getElementById('inputZprava');
         const btnUlozit = document.getElementById('btnUlozit');
 
-        if (isUrgent) {
-            divKlinika.classList.add('d-none'); // Schová kliniku
-            labelTitulek.innerText = '🚨 CO SE DĚJE?';
-            inputTitulek.placeholder = 'Stručně popište problém (např. Průjem, Úraz)';
-            labelZprava.innerText = 'RYCHLÁ POZNÁMKA';
-            inputZprava.placeholder = 'První příznaky, čas...';
-            btnUlozit.style.background = '#d63031'; // Změní tlačítko na červené
-            btnUlozit.style.borderColor = '#d63031';
-        } else {
-            divKlinika.classList.remove('d-none'); // Ukáže kliniku
+        if (isKontrola) {
+            extraFields.style.display = 'block';
+            divKlinika.classList.remove('d-none');
             labelTitulek.innerText = 'PŘEDMĚT / DIAGNÓZA';
             inputTitulek.placeholder = 'např. Roční vakcinace';
-            labelZprava.innerText = 'LÉKAŘSKÁ ZPRÁVA';
-            inputZprava.placeholder = 'Výsledek vyšetření, doporučení...';
             btnUlozit.style.background = 'var(--t-brown)';
             btnUlozit.style.borderColor = 'var(--t-gold)';
-        }
-    }
-    function shareDiary() {
-        const currentUrl = window.location.href;
-        const shareData = {
-            title: 'Lékařský deník - {{ vybrany_pes.jmeno|default:"Moji mazlíčci" }}',
-            text: 'Podívejte se na zdravotní historii a záznamy mého parťáka.',
-            url: currentUrl
-        };
-
-        if (navigator.share) {
-            navigator.share(shareData).catch((err) => console.log('Sdílení selhalo:', err));
         } else {
-            navigator.clipboard.writeText(currentUrl);
-            alert('Odkaz na deník byl zkopírován do schránky!');
+            extraFields.style.display = 'none';
+            divKlinika.classList.add('d-none');
+            labelTitulek.innerText = '🚨 CO SE DĚJE?';
+            inputTitulek.placeholder = 'Stručně popište problém...';
+            btnUlozit.style.background = 'var(--t-danger)';
+            btnUlozit.style.borderColor = 'var(--t-danger)';
         }
     }
+
+    function shareDiary() {
+        if (navigator.share) {
+            navigator.share({ title: 'Lékařský deník', url: window.location.href });
+        } else {
+            navigator.clipboard.writeText(window.location.href);
+            alert('Odkaz zkopírován!');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => toggleExtraFields(true));
 </script>
 {% endblock %}
