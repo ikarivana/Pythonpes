@@ -1,5 +1,5 @@
 from django import forms
-from .models import Sluzba
+from .models import Sluzba, Recenze
 
 
 class SluzbaForm(forms.ModelForm):
@@ -45,6 +45,18 @@ class SluzbaForm(forms.ModelForm):
                 'style': 'border-radius: 12px; border: 1.5px solid var(--border-tan); padding: 10px;'
             })
 
+class RecenzeForm(forms.ModelForm):
+    class Meta:
+        model = Recenze
+        fields = ['hvezdy', 'text']
+        widgets = {
+            'text': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Jaké to tam bylo? Co by ostatní měli vědět?',
+                'rows': 3
+            }),
+            'hvezdy': forms.HiddenInput(), # Hvězdičky řešíme přes JS, tak stačí skryté pole
+        }
 
 class KontaktForm(forms.Form):
     jmeno = forms.CharField(

@@ -13,6 +13,8 @@ urlpatterns = [
     path('mapa/smazat/<int:pk>/', views.smazat_sluzbu, name='smazat_sluzbu'),
     path('detail-sluzby/<int:pk>/', views.detail_sluzby, name='detail_sluzby'),
     path('sluzba/<int:pk>/recenze/', views.pridat_recenzi, name='pridat_recenzi'),
+    path('recenze/upravit/<int:pk>/', views.upravit_recenzi, name='upravit_recenzi'),
+    path('recenze/smazat/<int:pk>/', views.smazat_recenzi, name='smazat_recenzi'),
 
     # Komunitní tlačítka na mapě (pro Nebezpečí)
     path('mapa/nahlasit-neaktualni/<int:id>/', views.nahlasit_neaktualni, name='nahlasit_neaktualni'),

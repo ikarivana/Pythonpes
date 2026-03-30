@@ -11,8 +11,8 @@
             --bg-page: #f9f7ff;
             --card-border: #e2d9f3;
             --text-dark: #2d1b4d;
-            --primary-brown: #673ab7; /* Fialová pro kočky */
-            --gold-accent: #9b86bd;   /* Cat purple */
+            --primary-brown: #673ab7;
+            --gold-accent: #9b86bd;
             --gold-light: #f0ebf8;
         }
     </style>
@@ -70,11 +70,13 @@
     .post-media { background: var(--bg-page); display: flex; justify-content: center; width: 100%; }
     .post-media img, .post-media video { width: 100%; max-height: 500px; object-fit: contain; }
 
+    /* KOMENTÁŘE */
     .comment-section { background: var(--bg-page); padding: 20px; border-top: 1px solid var(--gold-light); }
     .comment-bubble {
         background: white; border-radius: 18px; padding: 10px 15px;
-        margin-bottom: 8px; border: 1px solid var(--card-border); max-width: 90%; display: inline-block;
+        border: 1px solid var(--card-border); max-width: 90%; display: inline-block;
     }
+    .dropdown-item.text-danger:hover { background-color: #fff5f5; }
 
     .back-arrow-container { margin-bottom: 25px; }
     .back-link {
@@ -168,6 +170,27 @@
                         <small class="text-muted">{{ post.datum_pridani|date:"j. n. Y H:i" }}</small>
                     </div>
                 </div>
+
+                {# OVLÁDÁNÍ PŘÍSPĚVKU PRO MAJITELE #}
+                {% if post.autor == request.user %}
+                <div class="dropdown">
+                    <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4">
+                        <li>
+                            <a class="dropdown-item small py-2 fw-bold" href="{% url 'upravit_prispevek' post.id %}">
+                                <i class="fas fa-edit me-2 text-primary"></i> Upravit příspěvek
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item small py-2 fw-bold text-danger" href="{% url 'smazat_prispevek' post.id %}" onclick="return confirm('Opravdu smazat tento příspěvek?')">
+                                <i class="fas fa-trash-alt me-2"></i> Smazat příspěvek
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                {% endif %}
             </div>
 
             {% if post.obrazek %}
@@ -195,9 +218,32 @@
 
             <div class="comment-section">
                 {% for komentar in post.komentare.all %}
-                <div class="comment-bubble">
-                    <strong class="small" style="color: var(--gold-accent);">@{{ komentar.autor.username }}</strong>
-                    <p class="mb-0 small">{{ komentar.text }}</p>
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="comment-bubble">
+                        <strong class="small" style="color: var(--gold-accent);">@{{ komentar.autor.username }}</strong>
+                        <p class="mb-0 small">{{ komentar.text }}</p>
+                    </div>
+
+                    {# OVLÁDÁNÍ KOMENTÁŘE PRO MAJITELE #}
+                    {% if komentar.autor == request.user %}
+                    <div class="dropdown ms-2">
+                        <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown" style="font-size: 0.8rem;">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
+                            <li>
+                                <a class="dropdown-item small" href="{% url 'upravit_komentar' komentar.id %}">
+                                    <i class="fas fa-pen me-2"></i> Upravit
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item small text-danger font-weight-bold" href="{% url 'smazat_komentar' komentar.id %}" onclick="return confirm('Smazat komentář?')">
+                                    <i class="fas fa-trash-alt me-2"></i> Smazat
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    {% endif %}
                 </div>
                 {% empty %}
                 <p class="text-muted small">Zatím žádné komentáře...</p>
@@ -219,7 +265,6 @@
     </div>
 </div>
 
-{# SCRIPT ZŮSTÁVÁ STEJNÝ #}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const photoLabel = document.getElementById('label-photo');
@@ -228,6 +273,7 @@
         const videoInput = document.querySelector('input[name="video"]');
         const previewDiv = document.getElementById('preview-container');
         const previewImg = document.getElementById('image-preview');
+        const clearMedia = document.getElementById('clear-media');
 
         if (photoLabel) photoLabel.addEventListener('click', () => photoInput.click());
         if (videoLabel) videoLabel.addEventListener('click', () => videoInput.click());
@@ -238,7 +284,16 @@
                     const reader = new FileReader();
                     reader.onload = (e) => { previewImg.src = e.target.result; previewDiv.style.display = 'block'; }
                     reader.readAsDataURL(this.files[0]);
+                    if(videoInput) videoInput.value = "";
                 }
+            });
+        }
+
+        if (clearMedia) {
+            clearMedia.addEventListener('click', () => {
+                photoInput.value = "";
+                videoInput.value = "";
+                previewDiv.style.display = 'none';
             });
         }
 
@@ -256,7 +311,7 @@
                         countSpan.innerText = (parseInt(countSpan.innerText) + 1) + " lajků";
                     } else {
                         icon.innerText = '🤍';
-                        countSpan.innerText = (parseInt(countSpan.innerText) - 1) + " lajků";
+                        countSpan.innerText = (parseInt(countSpan.innerText) - 1) - " lajků";
                     }
                 });
             });

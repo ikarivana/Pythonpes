@@ -3,34 +3,125 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <style>
-        @font-face {
-            font-family: 'DejaVu Sans';
-            src: url("{{ media_root }}/fonts/DejaVuSans.ttf");
-        }
-        @page { size: A4; margin: 0; }
-        * { font-family: 'DejaVu Sans', sans-serif !important; box-sizing: border-box; }
-        body { margin: 0; padding: 0; background-color: #ffffff; color: #000000; line-height: 1.4; }
-        .wrapper { width: 100%; border-collapse: collapse; }
-        .sidebar {
-            width: 240px;
-            background-color: {% if pes.druh == 'kocka' %}#f8f4ff{% else %}#fcfaf5{% endif %};
-            vertical-align: top; text-align: center; padding: 40px 15px; border-right: 1px solid #ddd;
-        }
-        .main-content { vertical-align: top; padding: 40px 40px; }
-        .profile-img { width: 180px; height: 180px; border-radius: 12px; object-fit: cover; border: 2px solid #ffffff; margin-bottom: 20px; }
-        .dog-name { font-size: 34px; font-weight: bold; color: {% if pes.druh == 'kocka' %}#5b21b6{% else %}#5d4037{% endif %}; margin: 0; }
-        .breed-sub { font-size: 18px; color: #222; font-weight: bold; margin: 5px 0 30px 0; }
-        .section-title { font-size: 12px; font-weight: bold; text-transform: uppercase; color: #000; border-bottom: 2px solid #000; margin: 25px 0 10px 0; padding-bottom: 3px; }
-        .data-table { width: 100%; border-collapse: collapse; }
-        .data-table td { padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
-        .label { color: #555; width: 45%; }
-        .value { text-align: right; font-weight: bold; }
-        .history-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .history-table th { font-size: 11px; text-align: left; padding: 10px; background: #f8f8f8; border-bottom: 1px solid #ddd; }
-        .history-table td { font-size: 12px; padding: 12px 10px; border-bottom: 1px solid #eee; vertical-align: top; }
-        .badge { padding: 3px 6px; background: #000; color: #fff; border-radius: 4px; font-size: 10px; font-weight: bold; }
-        .footer { margin-top: 50px; font-size: 10px; color: #888; }
-    </style>
+    @font-face {
+        font-family: 'DejaVu Sans';
+        src: url("{{ media_root }}/fonts/DejaVuSans.ttf");
+    }
+
+    @page { size: A4; margin: 0; }
+
+    * {
+        font-family: 'DejaVu Sans', sans-serif !important;
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #ffffff;
+        color: #000000;
+        line-height: 1.4;
+    }
+
+    .wrapper { width: 100%; border-collapse: collapse; }
+
+    /* Dynamické pozadí postranního panelu podle druhu zvířete */
+    .sidebar {
+        width: 240px;
+        background-color: {% if pes.druh == 'kocka' %}#f8f4ff{% else %}#fcfaf5{% endif %};
+        vertical-align: top;
+        text-align: center;
+        padding: 40px 15px;
+        border-right: 1px solid #ddd;
+    }
+
+    .main-content { vertical-align: top; padding: 40px 40px; }
+
+    .profile-img {
+        width: 180px;
+        height: 180px;
+        border-radius: 12px;
+        object-fit: cover;
+        border: 2px solid #ffffff;
+        margin-bottom: 20px;
+    }
+
+    /* Dynamická barva jména podle druhu zvířete */
+    .dog-name {
+        font-size: 34px;
+        font-weight: bold;
+        color: {% if pes.druh == 'kocka' %}#5b21b6{% else %}#5d4037{% endif %};
+        margin: 0;
+    }
+
+    .breed-sub {
+        font-size: 18px;
+        color: #222;
+        font-weight: bold;
+        margin: 5px 0 30px 0;
+    }
+
+    .section-title {
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+        color: #000;
+        border-bottom: 2px solid #000;
+        margin: 25px 0 10px 0;
+        padding-bottom: 3px;
+    }
+
+    .data-table { width: 100%; border-collapse: collapse; }
+
+    .data-table td {
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 14px;
+    }
+
+    .label { color: #555; width: 45%; }
+
+    .value { text-align: right; font-weight: bold; }
+
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    .history-table th {
+        font-size: 11px;
+        text-align: left;
+        padding: 10px;
+        background: #f8f8f8;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .history-table td {
+        font-size: 12px;
+        padding: 12px 10px;
+        border-bottom: 1px solid #eee;
+        vertical-align: top;
+    }
+
+    /* OPRAVENÝ BADGE: Lepší čitelnost pro datum příští návštěvy */
+    .badge {
+        padding: 3px 8px;
+        background: #f0f0f0;
+        color: #333;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: bold;
+        display: inline-block;
+    }
+
+    .footer {
+        margin-top: 50px;
+        font-size: 10px;
+        color: #888;
+    }
+</style>
 </head>
 <body>
 
@@ -70,8 +161,7 @@
                     <tr><th>Datum</th><th>Vakcína</th><th>Příště</th></tr>
                 </thead>
                 <tbody>
-                    {% for o in pes.ockovani_set.all %}
-                    <tr>
+                    {% for o in ockovani_list %} <tr>
                         <td><strong>{{ o.datum_ockovani|date:"d.m.Y" }}</strong></td>
                         <td>{{ o.nazev_vakciny }}</td>
                         <td><span class="badge">{{ o.datum_pristi_navstevy|date:"d.m.Y"|default:"-" }}</span></td>
@@ -85,14 +175,15 @@
             <div class="section-title">Lékařská historie</div>
             <table class="history-table">
                 <thead>
-                    <tr><th width="20%">Datum</th><th>Popis zákroku / Poznámka</th></tr>
+                    <tr><th width="20%">Datum</th><th>Zákrok / Klinika / Poznámka</th></tr>
                 </thead>
                 <tbody>
-                    {% for z in pes.zdravotnizaznam_set.all %}
-                    <tr>
+                    {% for z in posledni_zaznamy %} <tr>
                         <td><strong>{{ z.datum|date:"d.m.Y" }}</strong></td>
                         <td>
-                            <strong>{{ z.popis }}</strong><br>
+                            <strong>{{ z.titulek }}</strong><br> {% if z.klinika %}
+                                <div style="font-size: 10px; color: #444; font-style: italic;">Klinika: {{ z.klinika }}</div>
+                            {% endif %}
                             <span style="color: #666;">{{ z.poznamka|default:"" }}</span>
                         </td>
                     </tr>

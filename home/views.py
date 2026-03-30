@@ -15,8 +15,9 @@ from django.contrib.auth.models import User
 
 # Importy tvých modelů a forem
 from .models import Sluzba, Recenze
-from .forms import SluzbaForm, KontaktForm
+from .forms import SluzbaForm, KontaktForm, RecenzeForm
 from users.models import Prispevek, Pes, ProfilMajitele, Notifikace
+
 
 
 def index(request):
@@ -301,41 +302,71 @@ def detail_sluzby(request, pk):
 
 @login_required
 def pridat_recenzi(request, pk):
-    # Importy uvnitř funkce jsou fajn, ale raději je měj nahoře v souboru
-    from users.models import Notifikace
-    from .models import Sluzba
-    from .forms import RecenzeForm
-
-
     sluzba_obj = get_object_or_404(Sluzba, pk=pk)
 
     if request.method == 'POST':
-        # TENTO ŘÁDEK TI TAM CHYBĚL (proto bylo 'form' podtržené):
         form = RecenzeForm(request.POST)
 
         if form.is_valid():
             nova_recenze = form.save(commit=False)
-            nova_recenze.home = sluzba_obj
-            nova_recenze.user = request.user
+            nova_recenze.sluzba = sluzba_obj
+            nova_recenze.uzivatel = request.user
             nova_recenze.save()
 
-            # Vytvoření notifikace pro majitele
-            if sluzba_obj.user != request.user:
+            # 1. Notifikace pro VLASTNÍKA služby
+            if sluzba_obj.vlastnik and sluzba_obj.vlastnik != request.user:
                 Notifikace.objects.create(
-                    prijemce=sluzba_obj.user,
-                    odesilatel=request.user,
+                    prijemce=sluzba_obj.vlastnik,
+                    odesilatel=request.user, # Odesílatel jsi ty
                     typ='recenze',
                     text=f"napsal hodnocení k vaší službě {sluzba_obj.nazev}",
-                    sluzba=sluzba_obj,
-                    precteno=False
+                    sluzba=sluzba_obj
                 )
+
+            # 2. Záznam pro TEBE (Tady byla ta poslední chyba!)
+            Notifikace.objects.create(
+                prijemce=request.user,
+                odesilatel=request.user,  # <--- TOTO PŘIDEJ (řeší IntegrityError)
+                typ='recenze',
+                text=f"Publikovala jsi recenzi pro {sluzba_obj.nazev}",
+                sluzba=sluzba_obj
+            )
+
             return redirect('detail_sluzby', pk=pk)
     else:
-        # Tohle se stane, když uživatel na stránku jen přijde (GET)
         form = RecenzeForm()
 
     return render(request, 'home/detail_sluzby.html', {'form': form, 'sluzba': sluzba_obj})
 
+@login_required
+def upravit_recenzi(request, pk):
+    # Najdeme recenzi, kterou chceš upravit (jen pokud je tvoje)
+    recenze = get_object_or_404(Recenze, pk=pk, uzivatel=request.user)
+    sluzba_obj = recenze.sluzba
+
+    if request.method == 'POST':
+        form = RecenzeForm(request.POST, instance=recenze)
+        if form.is_valid():
+            form.save()
+            return redirect('detail_sluzby', pk=sluzba_obj.pk)
+    else:
+        # Načteme formulář s daty té konkrétní recenze
+        form = RecenzeForm(instance=recenze)
+
+    return render(request, 'home/upravit_recenzi.html', {
+        'form': form,
+        'recenze': recenze,
+        'sluzba': sluzba_obj
+    })
+
+@login_required
+def smazat_recenzi(request, pk):
+    # Najde recenzi podle ID, ale jen pokud patří přihlášenému uživateli
+    # (To je pojistka, aby nikdo nemohl mazat cizí recenze přes URL)
+    recenze = get_object_or_404(Recenze, pk=pk, uzivatel=request.user)
+    sluzba_id = recenze.sluzba.id
+    recenze.delete()
+    return redirect('detail_sluzby', pk=sluzba_id)
 
 def kontakt(request):
     if request.method == 'POST':

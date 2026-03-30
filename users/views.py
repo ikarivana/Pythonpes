@@ -21,13 +21,14 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.core.files.base import ContentFile
 
+from home.models import Recenze
 from inzerce.models import Inzerat
 from .forms import UserUpdateForm, PlemenoForm, PrispevekForm, ExtendedRegistrationForm, OckovaniForm, PesForm, \
     ProfilUpdateForm
 from .models import (
     Plemeno, Prispevek, Komentar, GalerieFotka, GalerieVideo,
     Uspech, Pes, ZdravotniZaznam, Notifikace, Like,
-    ProfilMajitele, PromoKod, Vrh
+    ProfilMajitele, PromoKod, Vrh, Ockovani
 )
 
 # Ostatní nástroje
@@ -87,13 +88,12 @@ def register(request):
         form = ExtendedRegistrationForm()
     return render(request, 'users/register.html', {'form': form})
 
-# --- PROFIL ---
+
+# --- ZOBRAZENÍ PROFILU ---
 @login_required
 def profil_uzivatele(request):
-    # Získání nebo vytvoření profilu
     profil, created = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
 
-    # Statistiky pro šablonu
     lajky = Like.objects.filter(uzivatel=request.user)
     komentare = Komentar.objects.filter(autor=request.user)
 
@@ -105,20 +105,24 @@ def profil_uzivatele(request):
     return render(request, 'users/profil.html', context)
 
 
-# --- UPRAVIT PROFIL ---
+# --- ÚPRAVA PROFILU (To, co jsme teď tvořili) ---
 @login_required
 def upravit_profil(request):
+    # Získáme profil (pokud neexistuje, vytvoříme ho)
     profil, created = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
 
     if request.method == 'POST':
+        # Pro UserUpdateForm (first_name, last_name, email)
         user_form = UserUpdateForm(request.POST, instance=request.user)
+        # Pro ProfilUpdateForm (fotka, telefon, adresa)
+        # request.FILES je klíčový pro nahrávání fotky!
         profil_form = ProfilUpdateForm(request.POST, request.FILES, instance=profil)
 
         if user_form.is_valid() and profil_form.is_valid():
             user_form.save()
-            profil_form.save()
-            messages.success(request, "Profil byl úspěšně upraven.")
-            return redirect('profil')
+            profil_form.save()  # Zde se spustí to automatické otočení fotky z models.py
+            messages.success(request, 'Tvůj profil byl úspěšně aktualizován!')
+            return redirect('profil')  # Název tvého URL pro zobrazení profilu
     else:
         user_form = UserUpdateForm(instance=request.user)
         profil_form = ProfilUpdateForm(instance=profil)
@@ -126,11 +130,9 @@ def upravit_profil(request):
     context = {
         'user_form': user_form,
         'profil_form': profil_form,
-        'profil': profil,
-        # Přidáme informaci o VOP pro šablonu (volitelné)
-        'vop_chybi': not profil.souhlas_podminky
     }
     return render(request, 'users/upravit_profil.html', context)
+
 
 @login_required
 def aktivovat_promokod(request):
@@ -860,6 +862,8 @@ def export_pes_pdf(request, pes_id):
     # Použijeme přímý filtr, abychom se vyhnuli chybám s '_set'
     zaznamy = ZdravotniZaznam.objects.filter(pes=pes).order_by('-datum')
 
+    ockovani = Ockovani.objects.filter(pes=pes).order_by('-datum_ockovani')
+
     # Registrace fontu (v pořádku)
     font_path = os.path.join(settings.MEDIA_ROOT, 'fonts', 'DejaVuSans.ttf')
     if os.path.exists(font_path):
@@ -871,6 +875,7 @@ def export_pes_pdf(request, pes_id):
     context = {
         'pes': pes,
         'posledni_zaznamy': zaznamy,
+        'ockovani_list': ockovani,  # Přidáno do contextu
         'media_root': settings.MEDIA_ROOT,
     }
 
@@ -1395,14 +1400,25 @@ def seznam_notifikaci(request):
             'inzerat': i,
             'moje': True
         })
+    # --- 5. MOJE RECENZE
+    moje_recenze = Recenze.objects.filter(uzivatel=request.user).order_by('-vytvoreno')
+    for r in moje_recenze:
+        nots_list.append({
+            'typ': 'moje_recenze',
+            'text': f'Napsala jsi recenzi ({r.hvezdy}⭐) pro: {r.sluzba.nazev}',
+            'datum_vytvoreni': r.vytvoreno,
+            'recenze': r,
+            'moje': True,
+            'odesilatel': request.user
+        })
 
-    # --- 5. SEŘAZENÍ ---
+    # --- 6. SEŘAZENÍ ---
     nots_list.sort(
         key=lambda x: x.datum_vytvoreni if hasattr(x, 'datum_vytvoreni') else x.get('datum_vytvoreni', timezone.now()),
         reverse=True
     )
 
-    # --- 6. PAGINACE ---
+    # --- 7. PAGINACE ---
     paginator = Paginator(nots_list, 10)  #
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)

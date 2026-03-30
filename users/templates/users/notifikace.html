@@ -41,7 +41,6 @@
         border-left: 4px solid var(--sos-red);
     }
 
-    /* Styl pro "Moje aktivita" - jemnější ohraničení */
     .notification-card.my-activity {
         opacity: 0.9;
         border: 1px dashed #ced4da;
@@ -128,13 +127,12 @@
 
     <div class="list-group border-0 px-2">
         {% for n in nots %}
-            {# Definice třídy pro Moje Aktivitu #}
             <div class="notification-card d-flex align-items-center mb-3
                 {% if n.urgent %}urgent-alert{% elif not n.precteno and n.typ != 'moje_aktivita' and n.typ != 'moje_inzerce' %}unread{% endif %}
                 {% if n.pes.druh == 'kocka' %}is-cat{% endif %}
                 {% if n.typ == 'moje_aktivita' or n.typ == 'moje_inzerce' %}my-activity{% endif %}">
 
-                {# IKONA #}
+                {# 1. IKONA (Vlevo) #}
                 <div class="icon-wrapper me-3">
                     {% if n.typ == 'moje_inzerce' %}
                         <i class="fas fa-shopping-bag text-muted"></i>
@@ -153,7 +151,7 @@
                     {% endif %}
                 </div>
 
-                {# TEXT #}
+                {# 2. TEXT (Střed) #}
                 <div class="flex-grow-1 min-width-0">
                     <div class="mb-1 text-dark">
                         {% if n.typ == 'moje_aktivita' or n.typ == 'moje_inzerce' %}
@@ -163,8 +161,12 @@
                             <strong class="text-danger">{% if n.pes.druh == 'kocka' %}KOČIČÍ{% endif %} ZDRAVOTNÍ TERMÍN</strong><br>
                             <span class="action-text">{{ n.text }}</span>
                         {% elif n.typ == 'recenze' %}
-                            <strong class="username">@{{ n.odesilatel.username }}</strong>
-                            <span class="action-text">napsal hodnocení k tvojí službě</span>
+                            {% if n.moje %}
+                                <strong class="username">Ty:</strong>
+                            {% else %}
+                                <strong class="username">@{{ n.odesilatel.username }}</strong>
+                            {% endif %}
+                            <span class="action-text">{{ n.text }}</span>
                         {% else %}
                             <strong class="username">@{{ n.odesilatel.username }}</strong>
                             <span class="action-text">
@@ -174,18 +176,18 @@
 
                         {# TAGY SEKCÍ #}
                         {% if n.prispevek %}
-                            <span class="section-tag">
+                            <span class="section-tag ms-1">
                                 {% if n.prispevek.plemeno %}
-                                    <i class="fas fa-hashtag ms-1"></i>{{ n.prispevek.plemeno.nazev }}
+                                    <i class="fas fa-hashtag me-1"></i>{{ n.prispevek.plemeno.nazev }}
                                 {% else %}
-                                    <i class="fas fa-layer-group ms-1"></i>Hřiště
+                                    <i class="fas fa-layer-group me-1"></i>Hřiště
                                 {% endif %}
                             </span>
                         {% endif %}
 
                         {% if n.typ == 'recenze' or n.sluzba %}
-                            <span class="section-tag">
-                                <i class="fas fa-map-marker-alt ms-1"></i>Mapa
+                            <span class="section-tag ms-1">
+                                <i class="fas fa-map-marker-alt me-1"></i>Mapa
                             </span>
                         {% endif %}
                     </div>
@@ -194,18 +196,25 @@
                     </small>
                 </div>
 
-                {# TLAČÍTKA AKCÍ #}
+                {# 3. TLAČÍTKA (Vpravo) #}
                 <div class="d-flex align-items-center gap-2">
                     {% if n.typ == 'zdravi_urgent' %}
                         <a href="{% url 'veterinar' pes_id=n.pes.id %}" class="btn-view-sm">VYŘÍDIT</a>
-                    {% elif n.typ == 'recenze' and n.sluzba %}
-                        <a href="{% url 'detail_sluzby' n.sluzba.id %}" class="btn-view-sm">K recenzi</a>
+                    {% elif n.typ == 'recenze' %}
+                        {% if n.sluzba %}
+                            <a href="{% url 'detail_sluzby' n.sluzba.id %}" class="btn-view-sm">K recenzi</a>
+                        {% else %}
+                            <a href="{% url 'seznam_zdi' %}" class="btn-view-sm">Zobrazit</a>
+                        {% endif %}
                     {% elif n.sluzba %}
-                         <a href="{% url 'detail_sluzby' n.sluzba.id %}" class="btn-view-sm">Zobrazit</a>
+                        <a href="{% url 'detail_sluzby' n.sluzba.id %}" class="btn-view-sm">Zobrazit</a>
                     {% elif n.prispevek %}
                         <a href="{% if n.prispevek.plemeno %}{% url 'zed_plemene' n.prispevek.plemeno.slug %}{% else %}{% url 'seznam_zdi' %}{% endif %}" class="btn-view-sm" {% if n.typ == 'moje_aktivita' %}style="background: #6c757d;"{% endif %}>Zobrazit</a>
                     {% elif n.inzerat %}
                         <a href="{% url 'detail_inzeratu' n.inzerat.id %}" class="btn-view-sm" style="background: #6c757d;">Detail</a>
+                    {% else %}
+                        {# Pojistka pro ostatní případy #}
+                        <a href="{% url 'seznam_zdi' %}" class="btn-view-sm">Zobrazit</a>
                     {% endif %}
 
                     {% if n.id %}
@@ -214,7 +223,7 @@
                         </a>
                     {% endif %}
                 </div>
-            </div>
+            </div> {# KONEC notification-card #}
         {% empty %}
             <div class="text-center py-5 bg-white rounded-4 shadow-sm border">
                 <div class="empty-icon">📬</div>

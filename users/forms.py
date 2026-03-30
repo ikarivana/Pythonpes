@@ -145,7 +145,8 @@ class UserUpdateForm(forms.ModelForm):
 class ProfilUpdateForm(forms.ModelForm):
     class Meta:
         model = ProfilMajitele
-        fields = ['telefon', 'ulice_cp', 'mesto', 'psc']
+        # PŘIDÁNO: 'fotka' do seznamu polí
+        fields = ['fotka', 'telefon', 'ulice_cp', 'mesto', 'psc']
         widgets = {
             'telefon': forms.TextInput(attrs={'placeholder': 'Telefon'}),
             'ulice_cp': forms.TextInput(attrs={'placeholder': 'Ulice a č.p.'}),
@@ -156,6 +157,8 @@ class ProfilUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for name, field in self.fields.items():
+            # Pro ImageField obvykle nepotřebujeme třídu form-control,
+            # ale ničemu neuškodí.
             field.widget.attrs.update({'class': 'form-control'})
 
 class PlemenoForm(forms.ModelForm):

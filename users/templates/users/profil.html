@@ -107,6 +107,7 @@
                     </div>
                 {% endif %}
             </div>
+
             <div class="col-md ms-md-3 text-center text-md-start">
                 <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2 mb-1">
                     <h2 class="fw-bold m-0" style="font-family: 'Playfair Display', serif; color: var(--primary-brown);">{{ user.first_name }} {{ user.last_name }}</h2>
@@ -114,8 +115,12 @@
                         <span class="alfa-badge"><i class="fas fa-crown me-1"></i> ALFA</span>
                     {% endif %}
                 </div>
-                <p class="text-muted small mb-0">{{ user.email }}</p>
+                <p class="text-muted small mb-1">{{ user.email }}</p>
+                <p class="text-muted mb-0" style="font-size: 0.75rem;">
+                    <i class="far fa-calendar-alt me-1"></i> Členem od: <strong>{{ user.date_joined|date:"d. m. Y" }}</strong>
+                </p>
             </div>
+
             <div class="col-md-auto mt-3 mt-md-0">
                 <a href="{% url 'upravit_profil' %}" class="btn px-4 py-2 fw-bold w-100 shadow-sm" style="background: var(--primary-brown); color: white; border-radius: 12px;">
                     <i class="fas fa-pen me-2"></i> UPRAVIT PROFIL
