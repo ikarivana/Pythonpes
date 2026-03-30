@@ -1345,7 +1345,7 @@ def upravit_chovnost(request, pes_id):
 
     return render(request, 'users/upravit_chovnost.html', {'pes': pes})
 
-
+@login_required
 def seznam_notifikaci(request):
     profil = request.user.profil
     nots_list = []
