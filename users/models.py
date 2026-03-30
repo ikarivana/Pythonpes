@@ -22,8 +22,17 @@ class PromoKod(models.Model):
     def __str__(self):
         return f"{self.kod} ({self.pocet_dni} dní)"
 
+
+from django.db import models
+from django.contrib.auth.models import User
+from PIL import Image, ExifTags  # Nutné pro práci s obrázky
+
+
 class ProfilMajitele(models.Model):
     uzivatel = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profil')
+    # Přidáno pole pro fotku:
+    fotka = models.ImageField(upload_to='profily/', null=True, blank=True, verbose_name="Profilová fotka")
+
     is_premium = models.BooleanField(default=False)
     premium_do = models.DateField(null=True, blank=True, verbose_name="Premium platné do")
     ulice_cp = models.CharField(max_length=255, blank=True, verbose_name="Ulice a č.p.")
@@ -34,6 +43,34 @@ class ProfilMajitele(models.Model):
 
     def __str__(self):
         return f"Profil: {self.uzivatel.username}"
+
+    def save(self, *args, **kwargs):
+        # Nejdříve uložíme soubor standardně
+        super().save(*args, **kwargs)
+
+        if self.fotka:
+            filepath = self.fotka.path
+            img = Image.open(filepath)
+
+            # Automatické otočení podle EXIF dat
+            try:
+                for orientation in ExifTags.TAGS.keys():
+                    if ExifTags.TAGS[orientation] == 'Orientation':
+                        break
+
+                exif = dict(img._getexif().items())
+
+                if exif[orientation] == 3:
+                    img = img.rotate(180, expand=True)
+                elif exif[orientation] == 6:
+                    img = img.rotate(270, expand=True)
+                elif exif[orientation] == 8:
+                    img = img.rotate(90, expand=True)
+
+                img.save(filepath)
+            except (AttributeError, KeyError, IndexError):
+                # Fotka nemá EXIF data (např. screenshot) nebo je již v pořádku
+                pass
 
 # --- 1. MODEL PSA ---
 class Pes(models.Model):
