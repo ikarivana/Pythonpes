@@ -1,192 +1,142 @@
 {% extends 'home/base.html' %}
+{% load static %}
+
+{% block title %}O mně a Kontakt | epes.online{% endblock %}
 
 {% block content %}
 <style>
     :root {
-        --border-tan: rgba(197, 160, 89, 0.2);
+        /* Dynamické barvy: lila pro kočky, zlato-hnědá pro ostatní */
+        --main-color: {% if user_has_cat_only %}#b39ddb{% else %}#d4af37{% endif %};
+        --bg-gradient: {% if user_has_cat_only %}linear-gradient(135deg, #4527a0 0%, #b39ddb 100%){% else %}linear-gradient(135deg, #3d2b26 0%, #d4af37 100%){% endif %};
+        --accent-box: {% if user_has_cat_only %}#f3e5f5{% else %}#fdfaf7{% endif %};
     }
 
-    /* Hlavní box - neumorfní stínování s adaptivní barvou */
-    .contact-info-card {
-        background: white;
-        border-radius: 30px;
-        border: 1px solid var(--border-tan);
-        padding: 40px;
-        box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.05);
-        position: relative;
-        overflow: hidden;
-    }
+    .about-wrapper { padding: 20px; max-width: 1000px; margin: 0 auto; }
+    .about-card { background: white; border-radius: 30px; overflow: hidden; box-shadow: 0 15px 50px rgba(0,0,0,0.1); position: relative; border: 1px solid #eee; }
 
-    /* Dekorativní prvek na pozadí karty */
-    .contact-info-card::after {
-        content: '🐾';
-        position: absolute;
-        bottom: -20px;
-        right: -10px;
-        font-size: 8rem;
-        opacity: 0.03;
-        color: var(--gold);
-    }
-
-    .icon-box-styled {
-        background: var(--bg-page);
-        color: var(--gold);
-        width: 55px;
-        height: 55px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 18px;
-        box-shadow: 4px 4px 12px rgba(0,0,0,0.05);
-        font-size: 1.3rem;
-        transition: 0.3s ease;
-    }
-
-    .contact-info-card:hover .icon-box-styled {
-        transform: scale(1.1) rotate(-5deg);
-        background: var(--gold);
+    /* Banner */
+    .about-hero {
+        background: var(--bg-gradient);
+        padding: 60px 20px 110px;
+        text-align: center;
         color: white;
+        position: relative;
+    }
+    .hero-main-title { font-family: 'Playfair Display', serif; font-size: 2.8rem; margin-bottom: 10px; }
+
+    /* Fotky - responzivní mřížka */
+    .photo-grid {
+        display: flex; justify-content: center; gap: 12px;
+        position: absolute; bottom: -50px; left: 0; right: 0; z-index: 10;
+        padding: 0 15px;
+    }
+    .photo-item {
+        width: 22%; max-width: 140px; aspect-ratio: 1/1;
+        border-radius: 20px; border: 4px solid white;
+        object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.15); background: #f8f9fa;
     }
 
-    /* Formulářová pole */
-    input, textarea, select {
-        border: 2px solid var(--bg-page) !important;
-        background-color: var(--bg-page) !important;
-        border-radius: 16px !important;
-        padding: 14px 20px !important;
-        transition: 0.3s !important;
-        width: 100%;
+    /* Obsah */
+    .content-padding { padding: 90px 40px 40px; }
+    .intro-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; }
+
+    .section-title {
+        color: #3d2b26; font-weight: 800; font-size: 2rem;
+        border-left: 5px solid var(--main-color); padding-left: 20px; margin-bottom: 25px;
     }
 
-    input:focus, textarea:focus {
-        border-color: var(--gold) !important;
-        background-color: #fff !important;
-        box-shadow: 0 8px 20px rgba(197, 160, 89, 0.1) !important;
-        outline: none !important;
+    .highlight-box {
+        background: var(--accent-box); border-radius: 25px; padding: 25px;
+        border: 1px dashed var(--main-color); position: relative;
     }
 
-    /* Tlačítko s adaptivním stínem */
-    .btn-shadow-gold {
-        background: var(--gold) !important;
-        color: white !important;
-        border: none;
-        border-radius: 18px;
-        padding: 16px 35px;
-        font-weight: 800;
-        letter-spacing: 0.5px;
-        box-shadow: 0 10px 25px rgba(197, 160, 89, 0.25);
-        transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Tlačítko kontakt */
+    .btn-contact {
+        display: inline-block; background: var(--main-color); color: white !important;
+        padding: 12px 25px; border-radius: 50px; text-decoration: none;
+        font-weight: bold; margin-top: 20px; transition: transform 0.2s;
     }
+    .btn-contact:hover { transform: scale(1.05); }
 
-    .btn-shadow-gold:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px rgba(197, 160, 89, 0.35);
-        background-color: var(--mid-brown) !important;
+    /* Kontakt Footer */
+    .contact-footer {
+        background: #fafafa; border-top: 1px solid #eee; padding: 40px;
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px;
     }
+    .contact-item h6 { color: var(--main-color); font-weight: 800; margin-bottom: 10px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+    .contact-item p { margin: 0; color: #555; line-height: 1.5; }
 
-    .contact-title {
-        color: var(--dark-cocoa);
-        font-family: 'Playfair Display', serif;
-        font-weight: 800;
-        letter-spacing: -1px;
-    }
-
-    .contact-label {
-        font-size: 0.75rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        color: var(--mid-brown);
-        margin-bottom: 8px;
-        display: block;
+    /* Mobilní zobrazení */
+    @media (max-width: 768px) {
+        .hero-main-title { font-size: 1.8rem; }
+        .intro-grid { grid-template-columns: 1fr; }
+        .content-padding { padding: 70px 25px 30px; }
+        .photo-grid { bottom: -40px; gap: 8px; }
+        .photo-item { border-radius: 15px; border-width: 3px; }
+        .section-title { font-size: 1.6rem; }
     }
 </style>
 
-<div class="container py-4">
-    <div class="row g-5 align-items-stretch">
-        <div class="col-lg-5">
-            <div class="contact-info-card h-100">
-                <h2 class="contact-title mb-3">Kontaktujte nás</h2>
+<div class="about-wrapper">
+    <div class="about-card">
+        <div class="about-hero">
+            <h1 class="hero-main-title">Můj příběh & epes.online</h1>
+            <p style="opacity: 0.9;">Digitální domov pro vaše zvířecí parťáky</p>
 
-                <p class="mb-5 text-muted" style="line-height: 1.6;">
-                    Potřebujete poradit s registrací, Premium členstvím nebo máte nápad na vylepšení <strong>epes.online</strong>? Jsme jedno velké ucho!
-                </p>
+            <div class="photo-grid">
+                <img src="{% static 'images/Screenshot_ja.jpg' %}" alt="Ivana" class="photo-item">
+                <img src="{% static 'images/FB_IMG_izzy.jpg' %}" alt="Pes" class="photo-item">
+                <img src="{% static 'images/Screenshot_ikar.jpg' %}" alt="Kůň" class="photo-item">
+                <img src="{% static 'images/Screenshot_cvicak.jpg' %}" alt="Kočka" class="photo-item" style="border-color: #b39ddb;">
+            </div>
+        </div>
 
-                <div class="space-y-4">
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="icon-box-styled me-3">
-                            <i class="fas fa-envelope"></i>
-                        </div>
-                        <div>
-                            <span class="contact-label">Napište nám</span>
-                            <a href="mailto:{{ kontaktni_info.email|default:'elivdruhy@gmail.com' }}" class="text-dark fw-bold text-decoration-none fs-5">
-                                {{ kontaktni_info.email|default:'elivdruhy@gmail.com' }}
-                            </a>
-                        </div>
-                    </div>
+        <div class="content-padding">
+            <div class="intro-grid">
+                <div>
+                    <h2 class="section-title">Ahoj, já jsem Ivana</h2>
+                    <div style="color: #5d4037; line-height: 1.8;">
+                        <p>Zvířata mě provázejí celý život. Odmalička jsem se pohybovala mezi psy, kočkami a koňmi, a právě tato vášeň mě dovedla k vytvoření <strong>epes.online</strong>.</p>
+                        <p>Vždycky mě mrzelo, že důležité informace o našich parťácích jsou roztroušené po papírech a na x webech. Chtěla jsem vytvořit místo, kde bude <strong>všechno na jednom místě</strong> – přehledně, moderně a bezpečně přístupné odkudkoliv.</p>
 
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="icon-box-styled me-3">
-                            <i class="fas fa-map-marker-alt"></i>
-                        </div>
-                        <div>
-                            <span class="contact-label">Kde nás najdete</span>
-                            <span class="fw-bold d-block text-dark">{{ kontaktni_info.jmeno|default:'Ivana Elšíková' }}</span>
-                            <small class="text-muted">{{ kontaktni_info.adresa|default:'Sokolská 29, Hvozdná' }}</small>
-                        </div>
-                    </div>
-
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="icon-box-styled me-3">
-                            <i class="fas fa-hashtag"></i>
-                        </div>
-                        <div>
-                            <span class="contact-label">Komunita</span>
-                            <span class="fw-bold text-dark">Sledujte naši smečku</span>
-                        </div>
+                        <a href="mailto:elivdruhy@gmail.com" class="btn-contact">
+                            <i class="fas fa-envelope me-2"></i>Napište mi zprávu
+                        </a>
                     </div>
                 </div>
 
-                <div class="mt-5 p-4 rounded-4" style="background: var(--bg-page); border: 2px dashed var(--border-tan);">
-                    <p class="small text-muted mb-0 italic text-center">
-                        <i class="fas fa-clock me-2" style="color: var(--gold);"></i>
-                        Odpovídáme obvykle do 24 hodin.
-                    </p>
+                <div>
+                    <div class="highlight-box">
+                        <h5 class="fw-bold mb-3">
+                            <i class="fas fa-laptop-code me-2"></i>Srdcem developerka
+                        </h5>
+                        <p class="small mb-0">
+                            Programování je můj velký koníček. Celý tento portál jsem pro vás (i pro sebe) sama naprogramovala v <strong>Django & Pythonu</strong>. Díky tomu můžu web neustále vylepšovat a přidávat funkce, které my pejskaři a kočičkáři opravdu potřebujeme.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-7">
-            <div class="ps-lg-4 py-2">
-                {% if success %}
-                    <div class="text-center py-5 h-100 d-flex flex-column justify-content-center align-items-center">
-                        <div class="icon-box-styled mb-4" style="width: 120px; height: 120px; font-size: 3.5rem;">
-                            <i class="fas fa-paper-plane"></i>
-                        </div>
-                        <h2 class="contact-title">Zpráva odeslána!</h2>
-                        <p class="text-muted fs-5 mb-4">Děkujeme za váš vzkaz. Brzy se vám ozveme zpět.</p>
-                        <a href="{% url 'kontakt' %}" class="btn-shadow-gold">POSLAT DALŠÍ ZPRÁVU</a>
-                    </div>
-                {% else %}
-                    <h3 class="contact-title mb-4">Pošlete nám vzkaz</h3>
-                    <form method="post" class="mt-2">
-                        {% csrf_token %}
-                        {% for field in form %}
-                            <div class="mb-4">
-                                <label class="contact-label">{{ field.label }}</label>
-                                {{ field }}
-                                {% if field.errors %}
-                                    <div class="text-danger extra-small mt-1">{{ field.errors }}</div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                        <button type="submit" class="btn btn-shadow-gold w-100 py-3 mt-2">
-                            ODESLAT ZPRÁVU <i class="fas fa-paper-plane ms-2"></i>
-                        </button>
-                    </form>
-                {% endif %}
+        <div class="contact-footer">
+            <div class="contact-item">
+                <h6>E-mail</h6>
+                <p><strong>elivdruhy@gmail.com</strong></p>
+            </div>
+            <div class="contact-item">
+                <h6>Fakturační údaje</h6>
+                <p><strong>Ivana Elšíková</strong><br>IČO: 23834838</p>
+            </div>
+            <div class="contact-item">
+                <h6>Lokalita</h6>
+                <p><strong>Hvozdná, Sokolská 29</strong></p>
             </div>
         </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="/" style="text-decoration: none; color: #999; font-weight: 500;">← Zpět na hlavní stránku</a>
     </div>
 </div>
 {% endblock %}
