@@ -1,15 +1,22 @@
 {
-  "name": "EPES.ONLINE",
-  "short_name": "EPES",
+  "name": "epes.online",
+  "short_name": "epes.online",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#2d1b19",
-  "theme_color": "#c5a059",
+  "theme_color": "#2d1b19",
   "icons": [
     {
-      "src": "/static/icons/icon-192.png",
+      "src": "images/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
