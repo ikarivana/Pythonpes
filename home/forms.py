@@ -48,7 +48,7 @@ class SluzbaForm(forms.ModelForm):
 class RecenzeForm(forms.ModelForm):
     class Meta:
         model = Recenze
-        fields = ['hvezdy', 'text']
+        fields = ['hvezdy', 'text', 'media_soubor']
         widgets = {
             'text': forms.Textarea(attrs={
                 'class': 'form-control',

@@ -69,12 +69,39 @@
 
     /* Mobilní zobrazení */
     @media (max-width: 768px) {
-        .hero-main-title { font-size: 1.8rem; }
-        .intro-grid { grid-template-columns: 1fr; }
-        .content-padding { padding: 70px 25px 30px; }
-        .photo-grid { bottom: -40px; gap: 8px; }
-        .photo-item { border-radius: 15px; border-width: 3px; }
-        .section-title { font-size: 1.6rem; }
+        .about-hero {
+            padding: 40px 15px 80px; /* Zmenšen horní i spodní padding */
+        }
+        .hero-main-title {
+            font-size: 1.6rem; /* Trochu menší písmo pro nadpis */
+            line-height: 1.2;
+        }
+        .about-hero p {
+            font-size: 0.9rem; /* Zmenšení podnadpisu */
+            margin-bottom: 10px;
+        }
+        .intro-grid {
+            grid-template-columns: 1fr;
+            gap: 20px; /* Menší mezera mezi textem a boxem */
+        }
+        .content-padding {
+            padding: 60px 20px 30px; /* Menší horní odsazení pod fotkami */
+        }
+        .photo-grid {
+            bottom: -35px; /* Přisunutí fotek blíž k banneru */
+            gap: 6px;
+        }
+        .photo-item {
+            border-radius: 12px;
+            border-width: 3px;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        .about-wrapper {
+            padding: 10px; /* Menší okraje celé stránky na mobilu */
+        }
     }
 </style>
 
@@ -109,7 +136,7 @@
                 <div>
                     <div class="highlight-box">
                         <h5 class="fw-bold mb-3">
-                            <i class="fas fa-laptop-code me-2"></i>Srdcem developerka
+                            <i class="fas fa-laptop-code me-2"></i>Jak web vznikal
                         </h5>
                         <p class="small mb-0">
                             Programování je můj velký koníček. Celý tento portál jsem pro vás (i pro sebe) sama naprogramovala v <strong>Django & Pythonu</strong>. Díky tomu můžu web neustále vylepšovat a přidávat funkce, které my pejskaři a kočičkáři opravdu potřebujeme.

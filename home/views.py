@@ -305,7 +305,8 @@ def pridat_recenzi(request, pk):
     sluzba_obj = get_object_or_404(Sluzba, pk=pk)
 
     if request.method == 'POST':
-        form = RecenzeForm(request.POST)
+        # PŘIDÁNO request.FILES pro zachycení fotek/videí
+        form = RecenzeForm(request.POST, request.FILES)
 
         if form.is_valid():
             nova_recenze = form.save(commit=False)
@@ -313,20 +314,19 @@ def pridat_recenzi(request, pk):
             nova_recenze.uzivatel = request.user
             nova_recenze.save()
 
-            # 1. Notifikace pro VLASTNÍKA služby
+            # --- Notifikace zůstávají stejné ---
             if sluzba_obj.vlastnik and sluzba_obj.vlastnik != request.user:
                 Notifikace.objects.create(
                     prijemce=sluzba_obj.vlastnik,
-                    odesilatel=request.user, # Odesílatel jsi ty
+                    odesilatel=request.user,
                     typ='recenze',
                     text=f"napsal hodnocení k vaší službě {sluzba_obj.nazev}",
                     sluzba=sluzba_obj
                 )
 
-            # 2. Záznam pro TEBE (Tady byla ta poslední chyba!)
             Notifikace.objects.create(
                 prijemce=request.user,
-                odesilatel=request.user,  # <--- TOTO PŘIDEJ (řeší IntegrityError)
+                odesilatel=request.user,
                 typ='recenze',
                 text=f"Publikovala jsi recenzi pro {sluzba_obj.nazev}",
                 sluzba=sluzba_obj
@@ -340,17 +340,16 @@ def pridat_recenzi(request, pk):
 
 @login_required
 def upravit_recenzi(request, pk):
-    # Najdeme recenzi, kterou chceš upravit (jen pokud je tvoje)
     recenze = get_object_or_404(Recenze, pk=pk, uzivatel=request.user)
     sluzba_obj = recenze.sluzba
 
     if request.method == 'POST':
-        form = RecenzeForm(request.POST, instance=recenze)
+        # PŘIDÁNO request.FILES
+        form = RecenzeForm(request.POST, request.FILES, instance=recenze)
         if form.is_valid():
             form.save()
             return redirect('detail_sluzby', pk=sluzba_obj.pk)
     else:
-        # Načteme formulář s daty té konkrétní recenze
         form = RecenzeForm(instance=recenze)
 
     return render(request, 'home/upravit_recenzi.html', {
@@ -358,6 +357,7 @@ def upravit_recenzi(request, pk):
         'recenze': recenze,
         'sluzba': sluzba_obj
     })
+
 
 @login_required
 def smazat_recenzi(request, pk):

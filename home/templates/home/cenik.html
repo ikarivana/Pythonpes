@@ -19,12 +19,47 @@
     {% endif %}
 
     .pricing-container { padding: 40px 15px; }
-    .card-plan { border-radius: 30px; border: 1px solid var(--border-tan); transition: all 0.4s ease; height: 100%; background: white; display: flex; flex-direction: column; position: relative; }
-    .card-plan:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.05) !important; }
-    .card-featured { border: 2px solid var(--brand-color); background: linear-gradient(180deg, #ffffff 0%, var(--subtle-cream) 100%); }
 
-    .discount-tag { position: absolute; top: -15px; left: 30px; background: var(--brand-color); color: white !important; padding: 6px 16px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; z-index: 10; }
-    .price-large { font-size: 2.8rem; font-weight: 800; color: var(--mid-brown); letter-spacing: -1px; }
+    .card-plan {
+        border-radius: 30px;
+        border: 1px solid var(--border-tan);
+        transition: all 0.4s ease;
+        height: 100%;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+    .card-plan:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.05) !important;
+    }
+
+    .card-featured {
+        border: 2px solid var(--brand-color);
+        background: linear-gradient(180deg, #ffffff 0%, var(--subtle-cream) 100%);
+    }
+
+    .discount-tag {
+        position: absolute;
+        top: -15px;
+        left: 30px;
+        background: var(--brand-color);
+        color: white !important;
+        padding: 6px 16px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        z-index: 10;
+    }
+
+    .price-large {
+        font-size: 2.8rem;
+        font-weight: 800;
+        color: var(--mid-brown);
+        letter-spacing: -1px;
+    }
 
     .feature-important {
         font-weight: 800;
@@ -36,7 +71,6 @@
         border: 1px solid rgba(197, 160, 89, 0.1);
     }
 
-    /* Sjednocení horních boxů */
     .plan-badge-box {
         min-height: 55px;
         display: flex;
@@ -49,7 +83,6 @@
         text-decoration: none !important;
     }
 
-    /* Box pro nákup známky s fotkou navrchu */
     .buy-tag-top {
         background: #fdfdfd;
         border: 1px dashed var(--border-tan);
@@ -63,16 +96,82 @@
         text-decoration: none !important;
         transition: 0.3s;
     }
-    .buy-tag-top:hover { background: #fffcf5; border-style: solid; }
-    .tag-img-top { width: 60px; height: 60px; border-radius: 12px; object-fit: cover; margin-bottom: 8px; border: 1px solid var(--border-tan); }
-    .tag-text-top b { display: block; font-size: 0.85rem; color: var(--mid-brown); }
-    .tag-text-top span { font-size: 0.75rem; color: var(--brand-color); font-weight: 800; }
 
-    .btn-alfa-gold { background: var(--brand-color); color: white !important; border-radius: 16px; padding: 16px; font-weight: 800; text-decoration: none !important; transition: 0.3s; text-align: center; width: 100%; display: block; border: none; }
-    .btn-alfa-outline { border: 2px solid var(--mid-brown); color: var(--mid-brown) !important; border-radius: 16px; padding: 16px; font-weight: 800; text-decoration: none !important; transition: 0.3s; text-align: center; width: 100%; display: block; }
+    .buy-tag-top:hover {
+        background: #fffcf5;
+        border-style: solid;
+    }
 
-    .feature-item { margin-bottom: 12px; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; color: #444; }
-    .feature-item i { color: var(--brand-color); width: 20px; text-align: center; }
+    .tag-img-top {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        object-fit: cover;
+        margin-bottom: 8px;
+        border: 1px solid var(--border-tan);
+    }
+
+    .tag-text-top b {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--mid-brown);
+    }
+
+    .tag-text-top span {
+        font-size: 0.75rem;
+        color: var(--brand-color);
+        font-weight: 800;
+    }
+
+    .btn-alfa-gold {
+        background: var(--brand-color);
+        color: white !important;
+        border-radius: 16px;
+        padding: 16px;
+        font-weight: 800;
+        text-decoration: none !important;
+        transition: 0.3s;
+        text-align: center;
+        width: 100%;
+        display: block;
+        border: none;
+    }
+
+    .btn-alfa-outline {
+        border: 2px solid var(--mid-brown);
+        color: var(--mid-brown) !important;
+        border-radius: 16px;
+        padding: 16px;
+        font-weight: 800;
+        text-decoration: none !important;
+        transition: 0.3s;
+        text-align: center;
+        width: 100%;
+        display: block;
+    }
+
+    .feature-item {
+        margin-bottom: 12px;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #444;
+    }
+
+    .feature-item i {
+        color: var(--brand-color);
+        width: 20px;
+        text-align: center;
+    }
+
+    .cancel-anytime {
+        font-size: 0.8rem;
+        color: var(--brand-color);
+        font-weight: 700;
+        margin-top: 10px;
+        display: block;
+    }
 </style>
 
 <div class="container pricing-container">
@@ -93,11 +192,11 @@
                         <i class="fas fa-infinity me-2"></i>NAVŽDY ZDARMA
                     </div>
 
-                    <a href="https://form.simpleshop.cz/JmGWQ/buy/?custom_params[user_id]={{ user.id }}" class="buy-tag-top">
-                        <img src="{% static 'images/qr-znamka.jpg' %}" class="tag-img-top" alt="QR Známka" onerror="this.src='https://via.placeholder.com/60?text=Známka'">
+                    <a href="https://form.simpleshop.cz/JmGWQ/buy{% if user.is_authenticated %}?custom_params[user_id]={{ user.id }}{% endif %}" class="buy-tag-top">
+                        <img src="{% static 'images/qr-znamka.jpg' %}" class="tag-img-top" alt="QR Známka">
                         <div class="tag-text-top">
                             <b>Známka není v ceně</b>
-                            <span>Dokoupit samostatně za 490 Kč</span>
+                            <span>Koupit samostatně za 400 Kč</span>
                         </div>
                     </a>
 
@@ -137,7 +236,8 @@
                         <div class="feature-item feature-important"><i class="fas fa-heartbeat"></i> Kompletní zdravotní deník</div>
                         <div class="feature-item"><i class="fas fa-star"></i> Nerezová QR známka v ceně</div>
                     </div>
-                    <a href="https://form.simpleshop.cz/144631/buy/?custom_params[user_id]={{ user.id }}" class="btn-alfa-gold mt-4 shadow">
+
+                    <a href="https://form.simpleshop.cz/8oPjA/buy{% if user.is_authenticated %}?custom_params[user_id]={{ user.id }}{% endif %}" class="btn-alfa-gold mt-4 shadow">
                         ZÍSKAT PLÁN I ZNÁMKU
                     </a>
                 </div>
@@ -155,11 +255,11 @@
                         <i class="fas fa-calendar-check me-2"></i>FLEXIBILNÍ PLATBA
                     </div>
 
-                    <a href="https://form.simpleshop.cz/JmGWQ/buy/?custom_params[user_id]={{ user.id }}" class="buy-tag-top">
-                        <img src="{% static 'images/qr-znamka.jpg' %}" class="tag-img-top" alt="QR Známka" onerror="this.src='https://via.placeholder.com/60?text=Známka'">
+                    <a href="https://form.simpleshop.cz/JmGWQ/buy{% if user.is_authenticated %}?custom_params[user_id]={{ user.id }}{% endif %}" class="buy-tag-top">
+                        <img src="{% static 'images/qr-znamka.jpg' %}" class="tag-img-top" alt="QR Známka">
                         <div class="tag-text-top">
                             <b>Známka není v ceně</b>
-                            <span>Dokoupit samostatně za 490 Kč</span>
+                            <span>Koupit samostatně za 400 Kč</span>
                         </div>
                     </a>
 
@@ -168,10 +268,30 @@
                         <div class="feature-item feature-important"><i class="fas fa-shield-alt"></i> SOS Nouzový profil</div>
                         <div class="feature-item feature-important"><i class="fas fa-heartbeat"></i> Zdravotní deník</div>
                     </div>
-                    <a href="https://form.simpleshop.cz/144632/buy/?custom_params[user_id]={{ user.id }}" class="btn-alfa-outline mt-4">
-                        ZVOLIT MĚSÍČNĚ
-                    </a>
+
+                    <div class="text-center">
+                        <span class="cancel-anytime"><i class="fas fa-info-circle me-1"></i> Možnost kdykoliv zrušit / ukončit</span>
+                        <a href="https://form.simpleshop.cz/RYD2D/buy{% if user.is_authenticated %}?custom_params[user_id]={{ user.id }}{% endif %}" class="btn-alfa-outline mt-2">
+                            ZVOLIT MĚSÍČNĚ
+                        </a>
+                    </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5 pt-4">
+        <div class="col-12 text-center">
+            <p class="text-muted small mb-4" style="letter-spacing: 1px; text-transform: uppercase; font-size: 0.7rem;">Zabezpečené platby a partneři</p>
+            <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 px-3">
+                <img src="{% static 'images/imggoplay.png' %}" alt="GoPay" style="height: 40px;">
+                <img src="{% static 'images/imgkarta.png' %}" alt="Karty" style="height: 35px;">
+                <img src="{% static 'images/karta.png' %}" alt="Karta detail" style="height: 35px;">
+                <img src="{% static 'images/mc_vrt_opt_pos_73_2x.png' %}" alt="Mastercard" style="height: 35px;">
+                <img src="{% static 'images/mc_securecode_156px_width.png' %}" alt="SecureCode" style="height: 35px;">
+                <img src="{% static 'images/img.png' %}" alt="Info 1" style="height: 30px; opacity: 0.8;">
+                <img src="{% static 'images/img (1).png' %}" alt="Info 2" style="height: 30px; opacity: 0.8;">
+                <img src="{% static 'images/img (2).png' %}" alt="Info 3" style="height: 30px; opacity: 0.8;">
             </div>
         </div>
     </div>

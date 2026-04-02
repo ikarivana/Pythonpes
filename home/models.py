@@ -1,8 +1,14 @@
+import os
+from io import BytesIO
+
+import pillow_heif
+from PIL import Image
+from django.core.files.base import ContentFile
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth.models import User
 
-
+pillow_heif.register_heif_opener()
 
 class Sluzba(models.Model):
     TYPY_SLUZEB = [
@@ -16,6 +22,7 @@ class Sluzba(models.Model):
         ('cvicak', '🎾 Cvičiště'),
         ('utulek', '🐕 Útulek'),
         ('chovna_stanice', '🧬 Chovná stanice'),
+        ('gastro', 'Kavárny a restaurace ☕'),
     ]
 
     vlastnik = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='moje_sluzby', null=True, blank=True)
@@ -61,12 +68,41 @@ class Recenze(models.Model):
     text = models.TextField(max_length=1000)
     vytvoreno = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        ordering = ['-vytvoreno'] # Nejnovější nahoře
+    # NOVÁ POLE PRO MÉDIA
+    media_soubor = models.FileField(upload_to='recenze_media/', null=True, blank=True)
 
-    def __str__(self):
-        return f"{self.uzivatel.username} - {self.sluzba.nazev} ({self.hvezdy}*)"
+    def save(self, *args, **kwargs):
+        # Kontrola, zda máme soubor a zda je to HEIC
+        if self.media_soubor and hasattr(self.media_soubor, 'name'):
+            ext = os.path.splitext(self.media_soubor.name)[1].lower()
 
+            if ext in ['.heic', '.heif']:
+                # Otevření HEIC obrázku
+                img = Image.open(self.media_soubor)
+
+                # Konverze do RGB (HEIC je často v jiném barevném prostoru)
+                if img.mode != 'RGB':
+                    img = img.convert('RGB')
+
+                # Příprava bufferu pro uložení JPEG
+                output = BytesIO()
+                img.save(output, format='JPEG', quality=90)  # Snížíme lehce kvalitu pro úsporu místa
+                output.seek(0)
+
+                # Změna názvu souboru na .jpg
+                new_name = os.path.splitext(self.media_soubor.name)[0] + ".jpg"
+
+                # Nahrazení původního souboru zkonvertovaným JPEGem
+                self.media_soubor.save(new_name, ContentFile(output.read()), save=False)
+
+        super().save(*args, **kwargs)
+
+    @property
+    def je_video(self):
+        if not self.media_soubor:
+            return False
+        ext = os.path.splitext(self.media_soubor.name)[1].lower()
+        return ext in ['.mp4', '.mov', '.avi', '.webm']
 
 class KontaktniZprava(models.Model):
     jmeno = models.CharField(max_length=100, verbose_name="Jméno")

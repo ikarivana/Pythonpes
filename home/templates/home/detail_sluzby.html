@@ -45,6 +45,28 @@
     .rating-selection label:hover,
     .rating-selection label:hover ~ label,
     .rating-selection input:checked ~ label { color: #f1c40f; }
+
+    /* Média v recenzích */
+    .review-media-container {
+        max-width: 100%;
+        margin-top: 15px;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .review-img, .review-video {
+        max-height: 300px;
+        width: auto;
+        max-width: 100%;
+        display: block;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .file-input-wrapper {
+        background: #fff;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px dashed #c5a059;
+    }
 </style>
 
 <div class="container mt-5">
@@ -154,6 +176,21 @@
                         </div>
                         <p class="text-muted mb-0 small">{{ recenze.text }}</p>
 
+                        {% if recenze.media_soubor %}
+                            <div class="review-media-container">
+                                {% if recenze.je_video %}
+                                    <video controls class="review-video">
+                                        <source src="{{ recenze.media_soubor.url }}" type="video/mp4">
+                                        Váš prohlížeč nepodporuje přehrávání videa.
+                                    </video>
+                                {% else %}
+                                    <a href="{{ recenze.media_soubor.url }}" target="_blank">
+                                        <img src="{{ recenze.media_soubor.url }}" style="width: 200px; height: auto; display: block !important;" alt="TEST">
+                                    </a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
                         {# SEKCE PRO MOJE RECENZE (UPRAVIT / SMAZAT) #}
                         {% if recenze.uzivatel == request.user %}
                             <div class="mt-3 pt-2 border-top d-flex justify-content-end gap-3">
@@ -182,8 +219,9 @@
                 <div class="card-body p-4 text-center">
                     <h5 class="fw-800 text-brown mb-3">Přidat zkušenost</h5>
                     {% if user.is_authenticated %}
-                        <form action="{% url 'pridat_recenzi' sluzba.pk %}" method="POST">
+                        <form action="{% url 'pridat_recenzi' sluzba.pk %}" method="POST" enctype="multipart/form-data">
                             {% csrf_token %}
+
                             <div class="rating-selection mb-3">
                                 <input type="radio" id="s5" name="hvezdy" value="5" required><label for="s5">★</label>
                                 <input type="radio" id="s4" name="hvezdy" value="4"><label for="s4">★</label>
@@ -191,7 +229,13 @@
                                 <input type="radio" id="s2" name="hvezdy" value="2"><label for="s2">★</label>
                                 <input type="radio" id="s1" name="hvezdy" value="1"><label for="s1">★</label>
                             </div>
+
                             <textarea name="text" class="form-control border-0 shadow-sm rounded-3 mb-3" rows="4" placeholder="Jaké to tam bylo? Co by ostatní měli vědět?" required></textarea>
+
+                            <div class="file-input-wrapper mb-3 text-start">
+                                <label class="small fw-bold text-muted d-block mb-2">Přidat fotku nebo video:</label>
+                                <input type="file" name="media_soubor" class="form-control form-control-sm border-0" accept="image/*,video/*">
+                            </div>
 
                             <button type="submit" class="btn w-100 fw-bold py-3 rounded-pill shadow"
                                     style="background-color: #3e2723 !important; color: #ffffff !important; border: none !important; display: block !important; opacity: 1 !important;">

@@ -1,4 +1,7 @@
+from django.template.context_processors import static
 from django.urls import path
+
+from pes import settings
 from . import views
 from .views import simpleshop_webhook
 
@@ -32,3 +35,4 @@ urlpatterns = [
     path('dekujeme-za-nakup/', views.dekujeme_za_nakup, name='dekujeme_za_nakup'),
     path('dekujeme-za-znamku/', views.dekujeme_za_znamku, name='dekujeme_za_znamku'),
 ]
+
