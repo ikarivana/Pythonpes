@@ -78,19 +78,21 @@
                         <i class="fas fa-microchip me-2" style="width: 15px;"></i>ČIP: {{ pes.cip|default:"Neevidován" }}
                     </div>
 
-                   {% if pes.hlavni_veterinar_nazev %}
-<div class="d-flex align-items-center flex-wrap"> <div class="small fw-700" style="color: var(--alfa-brown);">
-        <i class="fas fa-hospital-user text-success me-2" style="width: 15px;"></i>RODINNÝ VETERINÁŘ:
-        <span class="text-dark">{{ pes.hlavni_veterinar_nazev }}</span>
-    </div> {% if pes.hlavni_veterinar_telefon %}
-        <a href="tel:{{ pes.hlavni_veterinar_telefon }}"
-           class="ms-2 badge bg-success text-white text-decoration-none hover-opacity shadow-sm"
-           style="font-size: 0.75rem; padding: 5px 10px; border-radius: 8px;">
-            <i class="fas fa-phone-alt me-1"></i> {{ pes.hlavni_veterinar_telefon }}
-        </a>
-    {% endif %}
-</div>
-{% endif %}
+                    {% if pes.hlavni_veterinar_nazev %}
+                        <div class="d-flex align-items-center flex-wrap">
+                            <div class="small fw-700" style="color: var(--alfa-brown);">
+                                <i class="fas fa-hospital-user text-success me-2" style="width: 15px;"></i>RODINNÝ VETERINÁŘ:
+                                <span class="text-dark">{{ pes.hlavni_veterinar_nazev }}</span>
+                            </div>
+                            {% if pes.hlavni_veterinar_telefon %}
+                                <a href="tel:{{ pes.hlavni_veterinar_telefon }}"
+                                   class="ms-2 badge bg-success text-white text-decoration-none hover-opacity shadow-sm"
+                                   style="font-size: 0.75rem; padding: 5px 10px; border-radius: 8px;">
+                                    <i class="fas fa-phone-alt me-1"></i> {{ pes.hlavni_veterinar_telefon }}
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -131,17 +133,11 @@
             <div class="info-card">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div class="m-0">
-                        {% if je_majitel %}
                             <a href="{% url 'veterinar' pes_id=pes.id %}" class="text-decoration-none">
                                 <h6 class="fw-bold text-danger m-0 hover-opacity">
                                     <i class="fas fa-notes-medical me-2"></i>DENÍK <small class="ms-1" style="font-size: 0.6rem; vertical-align: middle;">(VETERINÁŘ ➔)</small>
                                 </h6>
                             </a>
-                        {% else %}
-                            <h6 class="fw-bold text-danger m-0">
-                                <i class="fas fa-notes-medical me-2"></i>DENÍK
-                            </h6>
-                        {% endif %}
                     </div>
                     {% if je_majitel %}
                         <div class="d-flex gap-1">
