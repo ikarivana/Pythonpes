@@ -100,7 +100,10 @@
         <div class="row align-items-center">
             <div class="col-md-auto text-center mb-3 mb-md-0">
                 {% if user.profil.fotka %}
-                    <img src="{{ user.profil.fotka.url }}" class="rounded-circle shadow-sm" style="width: 100px; height: 100px; object-fit: cover; border: 4px solid white;">
+                    <img src="{{ user.profil.fotka.url }}"
+                         alt="Profilová fotka {{ user.first_name }}"
+                         class="rounded-circle shadow-sm"
+                         style="width: 100px; height: 100px; object-fit: cover; border: 4px solid white;">
                 {% else %}
                     <div class="bg-light rounded-circle mx-auto d-flex align-items-center justify-content-center" style="width: 100px; height: 100px; border: 4px solid white;">
                         <i class="fas fa-user text-muted fa-2x"></i>

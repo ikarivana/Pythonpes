@@ -18,7 +18,7 @@
         margin-bottom: 25px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.03);
         border: 1px solid rgba(197, 160, 89, 0.1);
-        position: relative; /* Nutné pro overlay */
+        position: relative;
     }
 
     /* Zamčená sekce styling */
@@ -190,6 +190,7 @@
             </div>
         </div>
 
+        {# CHOVATELSKÁ SEKCE - Pouze pro psy, u koček se skryje přes JS #}
         <div class="edit-card {% if not user.profil.is_premium %}locked-section{% endif %}" id="chovatelska-sekce">
             {% if not user.profil.is_premium %}
             <div class="locked-overlay">
@@ -250,25 +251,27 @@
             optKocka.classList.add('active');
             optPes.classList.remove('active');
             {% if not pes.id %} title.innerText = 'Registrace kočičky'; {% endif %}
-            labelName.innerText = 'Jméno kočky *';
+            labelName.innerText = 'Jméno kočičky *';
             labelBreed.innerText = 'Plemeno kočky *';
-            // Kočky obvykle nemají RTG HD/ED jako povinnost, ale necháme to zamčené/skryté
-            chovatelskaSekce.style.opacity = '0.3';
-            chovatelskaSekce.style.pointerEvents = 'none';
+
+            // Kočky nemají tyto chovatelské údaje, sekci skryjeme úplně
+            chovatelskaSekce.style.display = 'none';
         } else {
             document.body.classList.remove('is-kocka');
             optPes.classList.add('active');
             optKocka.classList.remove('active');
             {% if not pes.id %} title.innerText = 'Registrace pejska'; {% endif %}
-            labelName.innerText = 'Jméno psa *';
+            labelName.innerText = 'Jméno pejska *';
             labelBreed.innerText = 'Rasa / Plemeno *';
-            chovatelskaSekce.style.opacity = '1';
-            chovatelskaSekce.style.pointerEvents = 'auto';
+
+            // Pro psy sekci zobrazíme (pokud uživatel nemá premium, overlay zůstane díky CSS/HTML)
+            chovatelskaSekce.style.display = 'block';
         }
     }
 
     window.onload = function() {
-        const stavajiciDruh = "{{ pes.druh|default:'pes' }}";
+        // Načte druh z hidden inputu nebo defaultně 'pes'
+        const stavajiciDruh = document.getElementById('id_druh').value || 'pes';
         setSpecies(stavajiciDruh);
     };
 </script>

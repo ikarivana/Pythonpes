@@ -134,12 +134,20 @@ class Pes(models.Model):
 
     @property
     def je_premium(self):
-        # Kontroluje, zda má majitel aktivní is_premium a zda nevypršelo datum
-        if self.majitel and self.majitel.is_premium:
-            if self.majitel.premium_do:
-                return self.majitel.premium_do >= date.today()
-            return True  # Má is_premium, ale nemá nastavené datum = platí napořád
-        return False
+        try:
+            profil = self.majitel
+            if profil.is_premium:
+                if profil.premium_do:
+                    return profil.premium_do >= date.today()
+                return True
+            return False
+        except AttributeError:
+            return False
+
+    def je_prvni_v_poradi(self):
+        # Najde úplně první zvíře stejného druhu (pes/kočka), které si majitel registroval
+        prvni = Pes.objects.filter(majitel=self.majitel, druh=self.druh).order_by('vytvoreno').first()
+        return prvni and prvni.id == self.id
 
     @property
     def vek(self):

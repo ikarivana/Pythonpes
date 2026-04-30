@@ -12,7 +12,6 @@
         --card-bg: #ffffff;
         --unread-bg: #fffbf4;
         --sos-red: #dc3545;
-        --activity-grey: #f8f9fa;
     }
 
     .notification-card {
@@ -22,7 +21,9 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         border: 1px solid rgba(0,0,0,0.05);
         transition: transform 0.2s ease;
-        position: relative;
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
     }
 
     .notification-card:hover { transform: scale(1.01); }
@@ -32,19 +33,9 @@
         border-left: 4px solid var(--gold-accent);
     }
 
-    .notification-card.is-cat.unread {
-        border-left: 4px solid var(--cat-purple);
-    }
-
     .notification-card.urgent-alert {
         background-color: #fff5f5;
         border-left: 4px solid var(--sos-red);
-    }
-
-    .notification-card.my-activity {
-        opacity: 0.9;
-        border: 1px dashed #ced4da;
-        background-color: #fafafa;
     }
 
     .icon-wrapper {
@@ -52,30 +43,16 @@
         background: #f8f9fa;
         border-radius: 15px;
         display: flex; align-items: center; justify-content: center;
-        font-size: 1.1rem; flex-shrink: 0;
+        font-size: 1.1rem; flex-shrink: 0; margin-right: 15px;
     }
 
     .urgent-alert .icon-wrapper {
         background: var(--sos-red) !important;
-        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+        color: white;
     }
 
     .username { color: var(--primary-brown); font-weight: 700; }
-    .action-text { color: #555; font-size: 0.9rem; line-height: 1.4; }
-
-    .section-tag {
-        color: var(--gold-accent);
-        font-weight: 600; font-size: 0.85rem;
-        background: rgba(197, 160, 89, 0.1);
-        padding: 2px 8px; border-radius: 6px;
-        white-space: nowrap;
-    }
-
-    .is-cat .section-tag {
-        color: var(--cat-purple);
-        background: rgba(142, 68, 173, 0.1);
-    }
-
+    .action-text { color: #555; font-size: 0.9rem; }
     .time-stamp { color: #aaa; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
 
     .btn-view-sm {
@@ -84,167 +61,78 @@
         text-decoration: none;
         padding: 8px 15px; border-radius: 12px;
         font-size: 0.8rem; font-weight: 800;
-        transition: 0.3s; flex-shrink: 0; border: none;
+        transition: 0.3s; white-space: nowrap;
     }
 
-    .is-cat .btn-view-sm { background: var(--cat-purple); }
     .btn-view-sm:hover { opacity: 0.9; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
-    .delete-link {
-        color: #ced4da;
-        transition: 0.2s;
-        padding: 5px;
-        margin-left: 10px;
-        font-size: 0.9rem;
-    }
+    .delete-link { color: #ced4da; transition: 0.2s; padding: 5px; margin-left: 10px; }
     .delete-link:hover { color: var(--sos-red); }
-
-    .empty-icon { font-size: 3.5rem; opacity: 0.2; }
-
-    @media (max-width: 576px) {
-        .notification-card { padding: 12px 15px; }
-        .icon-wrapper { width: 40px; height: 40px; font-size: 1rem; }
-    }
 </style>
 
 <div class="container mt-4 mb-5" style="max-width: 700px;">
-    {# HLAVIČKA #}
-    <div class="d-flex align-items-center justify-content-between mb-4 px-2">
-        <h2 class="fw-bold m-0" style="color: var(--primary-brown); font-size: 1.5rem;">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h2 class="fw-bold m-0" style="color: var(--primary-brown);">
             <i class="fas fa-bell me-2" style="color: var(--gold-accent);"></i>Tvoje novinky
         </h2>
         {% if nots %}
-            <div class="d-flex align-items-center gap-3">
-                <a href="{% url 'smazat_vsechny_notifikace' %}" class="text-muted small text-decoration-none" onclick="return confirm('Opravdu chceš vymazat celou historii?')">
-                    <i class="fas fa-trash-alt me-1"></i> Smazat vše
-                </a>
-                <span class="badge rounded-pill bg-light text-muted border px-3 py-2" style="font-size: 0.75rem;">
-                    {{ nots.paginator.count }} celkem
-                </span>
-            </div>
+            <a href="{% url 'smazat_vsechny_notifikace' %}" class="text-muted small text-decoration-none" onclick="return confirm('Smazat celou historii?')">
+                <i class="fas fa-trash-alt me-1"></i> Smazat vše
+            </a>
         {% endif %}
     </div>
 
-    <div class="list-group border-0 px-2">
+    <div class="list-group border-0">
         {% for n in nots %}
-            <div class="notification-card d-flex align-items-center mb-3
-                {% if n.urgent %}urgent-alert{% elif not n.precteno and n.typ != 'moje_aktivita' and n.typ != 'moje_inzerce' %}unread{% endif %}
-                {% if n.pes.druh == 'kocka' %}is-cat{% endif %}
-                {% if n.typ == 'moje_aktivita' or n.typ == 'moje_inzerce' %}my-activity{% endif %}">
+            <div class="notification-card {% if n.urgent %}urgent-alert{% endif %}">
 
-                {# 1. IKONA (Vlevo) #}
-                <div class="icon-wrapper me-3">
-                    {% if n.typ == 'moje_inzerce' %}
-                        <i class="fas fa-shopping-bag text-muted"></i>
-                    {% elif n.typ == 'moje_aktivita' %}
-                        <i class="fas fa-history text-muted"></i>
-                    {% elif n.typ == 'like' %}
+                {# 1. IKONA #}
+                <div class="icon-wrapper">
+                    {% if n.typ == 'zdravi_urgent' %}
+                        <i class="{{ n.ikona_zdravi }}"></i>
+                    {% elif n.typ == 'socialni' %}
                         <i class="fas fa-heart text-danger"></i>
-                    {% elif n.typ == 'komentar' %}
-                        <i class="fas fa-comment text-primary"></i>
-                    {% elif n.typ == 'recenze' %}
-                        <i class="fas fa-star text-warning"></i>
-                    {% elif n.typ == 'zdravi_urgent' %}
-                        <i class="{{ n.ikona_zdravi }} text-white"></i>
                     {% else %}
-                        <i class="fas {% if n.pes.druh == 'kocka' %}fa-cat{% else %}fa-paw{% endif %} text-warning"></i>
+                        <i class="fas fa-paw text-warning"></i>
                     {% endif %}
                 </div>
 
-                {# 2. TEXT (Střed) #}
-                <div class="flex-grow-1 min-width-0">
-                    <div class="mb-1 text-dark">
-                        {% if n.typ == 'moje_aktivita' or n.typ == 'moje_inzerce' %}
-                            <strong class="username">Ty:</strong>
-                            <span class="action-text">{{ n.text }}</span>
-                        {% elif n.typ == 'zdravi_urgent' %}
-                            <strong class="text-danger">{% if n.pes.druh == 'kocka' %}KOČIČÍ{% endif %} ZDRAVOTNÍ TERMÍN</strong><br>
-                            <span class="action-text">{{ n.text }}</span>
-                        {% elif n.typ == 'recenze' %}
-                            {% if n.moje %}
-                                <strong class="username">Ty:</strong>
-                            {% else %}
-                                <strong class="username">@{{ n.odesilatel.username }}</strong>
-                            {% endif %}
-                            <span class="action-text">{{ n.text }}</span>
-                        {% else %}
+                {# 2. TEXT #}
+                <div class="flex-grow-1">
+                    <div class="mb-1">
+                        {% if n.typ == 'zdravi_urgent' %}
+                            <strong class="text-danger">ZDRAVOTNÍ TERMÍN</strong><br>
+                        {% elif n.odesilatel %}
                             <strong class="username">@{{ n.odesilatel.username }}</strong>
-                            <span class="action-text">
-                                {% if n.typ == 'like' %}líbí se mu tvůj příspěvek{% elif n.typ == 'komentar' %}napsal komentář{% else %}reagoval na příspěvek{% endif %}
-                            </span>
                         {% endif %}
-
-                        {# TAGY SEKCÍ #}
-                        {% if n.prispevek %}
-                            <span class="section-tag ms-1">
-                                {% if n.prispevek.plemeno %}
-                                    <i class="fas fa-hashtag me-1"></i>{{ n.prispevek.plemeno.nazev }}
-                                {% else %}
-                                    <i class="fas fa-layer-group me-1"></i>Hřiště
-                                {% endif %}
-                            </span>
-                        {% endif %}
-
-                        {% if n.typ == 'recenze' or n.sluzba %}
-                            <span class="section-tag ms-1">
-                                <i class="fas fa-map-marker-alt me-1"></i>Mapa
-                            </span>
-                        {% endif %}
+                        <span class="action-text">{{ n.text }}</span>
                     </div>
                     <small class="time-stamp">
                         <i class="far fa-clock me-1"></i>{{ n.datum_vytvoreni|timesince }} zpět
                     </small>
                 </div>
 
-                {# 3. TLAČÍTKA (Vpravo) #}
+                {# 3. TLAČÍTKA #}
                 <div class="d-flex align-items-center gap-2">
-                    {% if n.typ == 'zdravi_urgent' %}
-                        <a href="{% url 'veterinar' pes_id=n.pes.id %}" class="btn-view-sm">VYŘÍDIT</a>
-                    {% elif n.typ == 'recenze' %}
-                        {% if n.sluzba %}
-                            <a href="{% url 'detail_sluzby' n.sluzba.id %}" class="btn-view-sm">K recenzi</a>
-                        {% else %}
-                            <a href="{% url 'seznam_zdi' %}" class="btn-view-sm">Zobrazit</a>
-                        {% endif %}
-                    {% elif n.sluzba %}
-                        <a href="{% url 'detail_sluzby' n.sluzba.id %}" class="btn-view-sm">Zobrazit</a>
-                    {% elif n.prispevek %}
-                        <a href="{% if n.prispevek.plemeno %}{% url 'zed_plemene' n.prispevek.plemeno.slug %}{% else %}{% url 'seznam_zdi' %}{% endif %}" class="btn-view-sm" {% if n.typ == 'moje_aktivita' %}style="background: #6c757d;"{% endif %}>Zobrazit</a>
-                    {% elif n.inzerat %}
-                        <a href="{% url 'detail_inzeratu' n.inzerat.id %}" class="btn-view-sm" style="background: #6c757d;">Detail</a>
+                    {% if n.pes %}
+                        <a href="{% url 'detail_psa' n.pes.id %}" class="btn-view-sm">Zobrazit</a>
                     {% else %}
-                        {# Pojistka pro ostatní případy #}
+                        {# Pojistka pro notifikace bez vazby na psa #}
                         <a href="{% url 'seznam_zdi' %}" class="btn-view-sm">Zobrazit</a>
                     {% endif %}
 
                     {% if n.id %}
-                        <a href="{% url 'smazat_notifikaci' n.id %}" class="delete-link" title="Smazat">
+                        <a href="{% url 'smazat_notifikaci' n.id %}" class="delete-link">
                             <i class="fas fa-times"></i>
                         </a>
                     {% endif %}
                 </div>
-            </div> {# KONEC notification-card #}
+            </div>
         {% empty %}
-            <div class="text-center py-5 bg-white rounded-4 shadow-sm border">
-                <div class="empty-icon">📬</div>
-                <p class="text-muted mt-3 fw-bold mb-0">Zatím žádné nové novinky.</p>
+            <div class="text-center py-5 bg-white rounded-4 border">
+                <p class="text-muted fw-bold">Zatím žádné novinky.</p>
             </div>
         {% endfor %}
-
-        {# PAGINACE #}
-        {% if nots.has_other_pages %}
-            <nav class="mt-4">
-                <ul class="pagination justify-content-center border-0">
-                    {% if nots.has_previous %}
-                        <li class="page-item"><a class="page-link shadow-sm border-0 px-3" href="?page={{ nots.previous_page_number }}" style="color: var(--primary-brown); border-radius: 12px 0 0 12px;"><i class="fas fa-chevron-left"></i></a></li>
-                    {% endif %}
-                    <li class="page-item disabled"><span class="page-link border-0 bg-light text-muted px-4" style="font-weight: 600;">{{ nots.number }} / {{ nots.paginator.num_pages }}</span></li>
-                    {% if nots.has_next %}
-                        <li class="page-item"><a class="page-link shadow-sm border-0 px-3" href="?page={{ nots.next_page_number }}" style="color: var(--primary-brown); border-radius: 0 12px 12px 0;"><i class="fas fa-chevron-right"></i></a></li>
-                    {% endif %}
-                </ul>
-            </nav>
-        {% endif %}
     </div>
 </div>
 {% endblock %}

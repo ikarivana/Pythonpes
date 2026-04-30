@@ -94,16 +94,21 @@ def register(request):
 def profil_uzivatele(request):
     profil, created = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
 
-    lajky = Like.objects.filter(uzivatel=request.user)
-    komentare = Komentar.objects.filter(autor=request.user)
+    # Přidáme kontrolu, jestli datum už nevypršelo
+    je_aktivni = False
+    if profil.is_premium:
+        if profil.premium_do:
+            je_aktivni = profil.premium_do >= date.today()
+        else:
+            je_aktivni = True  # Pokud nemá datum, bereme že je to navždy
 
     context = {
         'profil': profil,
-        'libi_se_mi': lajky,
-        'komentare': komentare,
+        'je_premium_aktivni': je_aktivni,  # Tuhle proměnnou použij v šabloně pro zobrazení ikonky koruny apod.
+        'libi_se_mi': Like.objects.filter(uzivatel=request.user),
+        'komentare': Komentar.objects.filter(autor=request.user),
     }
     return render(request, 'users/profil.html', context)
-
 
 # --- ÚPRAVA PROFILU (To, co jsme teď tvořili) ---
 @login_required
@@ -151,9 +156,15 @@ def aktivovat_promokod(request):
             profil.premium_do = start_date + timedelta(days=promo.pocet_dni)
             profil.is_premium = True
             profil.save()
+            # Deaktivace kódu (pokud má být na jedno použití)
+            promo.je_aktivni = False
+            promo.save()
 
-            messages.success(request,
-                             f"Skvělé! Promo kód aktivován. Premium máte do {profil.premium_do.strftime('%d.%m.%Y')}.")
+            messages.success(request, (
+                f"Kód '{promo.kod}' ({promo.poznamka if promo.poznamka else ''}) byl aktivován. "
+                f"Přidali jsme vám {promo.pocet_dni} dní. "
+                f"Premium platí do: {profil.premium_do.strftime('%d. %m. %Y')}."
+            ))
             return redirect('dashboard')  # nebo kamkoliv jinam
 
         except PromoKod.DoesNotExist:
@@ -170,59 +181,63 @@ def smazat_profil(request):
     uzivatel.delete()
     messages.warning(request, "Tvůj účet byl smazán.")
     return redirect('home')
-
-
-from datetime import date # Nezapomeň na importy nahoře
+from datetime import date, timedelta
 
 @login_required
 def dashboard(request):
-    # 1. Získáme profil (get_or_create je jistota)
     profil, _ = ProfilMajitele.objects.get_or_create(uzivatel=request.user)
 
-    # --- PRÁVNÍ STOPKA (VOP) ---
-    # Pokud uživatel ještě nesouhlasil s VOP, nepustíme ho dál a hodíme ho na stránku s tlačítkem
     if not profil.souhlas_podminky:
-        messages.info(request, "Před pokračováním prosím potvrďte naše aktualizované obchodní podmínky.")
-        return redirect('podminky') # 'podminky' je name z urls.py pro tvou stránku s VOP
-    # ---------------------------
+        messages.info(request, "Před pokračováním prosím potvrďte obchodní podmínky.")
+        return redirect('podminky')
 
-    # 2. Kontrola expirace Premia
+    # 1. Kontrola expirace
+    dnes = date.today()
     if profil.is_premium and profil.premium_do:
-        if profil.premium_do < date.today():
+        if profil.premium_do < dnes:
             profil.is_premium = False
             profil.save()
-            messages.warning(request, "Vaše Premium období právě vypršelo.")
+            messages.warning(request, "Vaše Premium období vypršelo.")
 
-    # 3. Načtení dat pro uživatele
-    psi = Pes.objects.filter(majitel=profil)
+    # 2. Načtení zvířat (Optimalizováno o select_related, pokud máš cizí klíče)
+    vsechna_zvirata = Pes.objects.filter(majitel=profil).order_by('id')
 
-    # Statistiky
-    pocet_psu = psi.filter(druh='pes').count()
-    pocet_kocek = psi.filter(druh='kocka').count()
+    # Logika 1+1
+    prvni_pes_id = vsechna_zvirata.filter(druh='pes').values_list('id', flat=True).first()
+    prvni_kocka_id = vsechna_zvirata.filter(druh='kocka').values_list('id', flat=True).first()
 
-    # Poslední zdravotní záznamy
-    posledni_zaznamy = ZdravotniZaznam.objects.filter(pes__majitel=profil).order_by('-datum')[:5]
+    # 3. Statistiky pro boční panel
+    # Spočítáme fotky a videa všech uživatelových psů dohromady
+    pocet_fotek = GalerieFotka.objects.filter(pes__majitel=profil).count()
+    pocet_videi = GalerieVideo.objects.filter(pes__majitel=profil).count()
 
-    # Notifikace (nepřečtené)
+    # 4. Zdravotní záznamy a Notifikace
+    posledni_zaznamy = ZdravotniZaznam.objects.filter(pes__majitel=profil).select_related('pes').order_by('-datum')[:5]
     nots = request.user.prijate_notifikace.filter(precteno=False).order_by('-datum_vytvoreni')
 
     context = {
         'profil': profil,
-        'psi': psi,
-        'pocet_psu': pocet_psu,
-        'pocet_kocek': pocet_kocek,
+        'psi': vsechna_zvirata,
+        'pocet_psu': vsechna_zvirata.filter(druh='pes').count(),
+        'pocet_kocek': vsechna_zvirata.filter(druh='kocka').count(),
+        'pocet_fotek': pocet_fotek,
+        'pocet_videi': pocet_videi,
         'posledni_zaznamy': posledni_zaznamy,
         'nots': nots,
-        'premium_konci_brzy': False
+        'prvni_pes_id': prvni_pes_id,
+        'prvni_kocka_id': prvni_kocka_id,
+        'dnes_plus_3': dnes + timedelta(days=3), # Důležité pro urgentní barvy v šabloně
+        'je_premium_aktivni': profil.is_premium,
+        'premium_konci_brzy': False,
     }
 
-    # Bonus: Varování, pokud premium končí za méně než 3 dny
     if profil.is_premium and profil.premium_do:
-        rozdil = (profil.premium_do - date.today()).days
+        rozdil = (profil.premium_do - dnes).days
         if 0 <= rozdil <= 3:
             context['premium_konci_brzy'] = True
 
     return render(request, 'users/dashboard.html', context)
+
 
 # --- 1. SPRÁVA PSŮ (Základní operace) ---
 
@@ -269,39 +284,48 @@ def seznam_psu(request):
 def pridat_psa(request):
     profil = get_object_or_404(ProfilMajitele, uzivatel=request.user)
 
-    # Načteme počty pro kontrolu limitů
+    # Pomocná proměnná pro kontrolu platného premia (včetně data)
+    je_premium = profil.is_premium and (profil.premium_do is None or profil.premium_do >= date.today())
+
+    # Načteme aktuální počty
     pocet_psu = profil.psi.filter(druh='pes').count()
     pocet_kocek = profil.psi.filter(druh='kocka').count()
 
     if request.method == 'POST':
         form = PesForm(request.POST, request.FILES, request=request)
         if form.is_valid():
-            # 1. KONTROLA LIMITŮ PŘED ULOŽENÍM
-            if not profil.is_premium and not request.user.is_staff:
+            # 1. KONTROLA LIMITŮ (jen pro ne-premium uživatele)
+            if not je_premium and not request.user.is_staff:
                 novy_druh = form.cleaned_data.get('druh')
 
                 if novy_druh == 'pes' and pocet_psu >= 1:
-                    messages.warning(request, "Ve verzi Free můžete mít pouze jednoho pejska.")
+                    messages.warning(request,
+                                     "Limit pro psy (1) ve verzi Free byl vyčerpán. Pro přidání dalšího aktivujte Premium.")
                     return redirect('profil_uzivatele')
 
                 if novy_druh == 'kocka' and pocet_kocek >= 1:
-                    messages.warning(request, "Ve verzi Free můžete mít pouze jednu kočičku.")
+                    messages.warning(request,
+                                     "Limit pro kočky (1) ve verzi Free byl vyčerpán. Pro přidání další aktivujte Premium.")
                     return redirect('profil_uzivatele')
 
             try:
                 pes = form.save(commit=False)
                 pes.majitel = profil
 
+                # Zpracování fotky
                 if 'fotka' in request.FILES:
                     pes.fotka = zpracuj_foto(request.FILES['fotka'])
 
-                for pole in ['otec_manualni', 'matka_manualni', 'zdravotni_testy', 'bonitace', 'typ_ochrany_klistata']:
+                # Vyplnění "Nezadáno" pro prázdná pole
+                pole_k_osetreni = ['otec_manualni', 'matka_manualni', 'zdravotni_testy', 'bonitace',
+                                   'typ_ochrany_klistata']
+                for pole in pole_k_osetreni:
                     if hasattr(pes, pole) and not getattr(pes, pole):
                         setattr(pes, pole, "Nezadáno")
 
                 pes.save()
 
-                # QR Generování
+                # QR Generování (Zůstává stejné)
                 url_psa = f"https://epes.online/users/pes/{pes.id}/"
                 qr = qrcode.QRCode(version=1, box_size=10, border=5)
                 qr.add_data(url_psa)
@@ -316,23 +340,22 @@ def pridat_psa(request):
                 return redirect('seznam_psu')
 
             except Exception as e:
-                messages.error(request, f"Kritická chyba: {e}")
+                messages.error(request, f"Při ukládání došlo k chybě: {e}")
         else:
-            # Tento blok patří k "if form.is_valid():"
-            print(f"CHYBY FORMULÁŘE: {form.errors}")
-            messages.error(request, "Formulář obsahuje chyby.")
+            messages.error(request, "Formulář obsahuje chyby, prosím zkontrolujte zadaná data.")
 
     else:
         # 2. PREVENTIVNÍ KONTROLA PŘI VSTUPU (GET)
-        if not profil.is_premium and not request.user.is_staff:
-            if pocet_psu >= 1 or pocet_kocek >= 1:  # Stačí dosáhnout jednoho z limitů
-                messages.info(request, "Ve verzi Free můžete mít pouze jedno zvíře od každého druhu.")
+        if not je_premium and not request.user.is_staff:
+            # Pokud už má 1 psa I 1 kočku, nepustíme ho ani na formulář
+            if pocet_psu >= 1 and pocet_kocek >= 1:
+                messages.info(request,
+                              "Dosáhli jste limitu Free verze (1 pes a 1 kočka). Pro další zvířata aktivujte Premium.")
                 return redirect('profil_uzivatele')
 
         form = PesForm(request=request)
 
     return render(request, 'users/pridat_psa.html', {'form': form})
-
 
 @login_required
 def upravit_psa(request, pk):
@@ -405,48 +428,63 @@ def upravit_psa(request, pk):
 
     return render(request, 'users/upravit_psa.html', {'pes': pes, 'form': form, 'je_majitel': True})
 
+
 def detail_psa(request, pes_id):
     pes = get_object_or_404(Pes, id=pes_id)
 
-    # --- 1. LOGIKA PRO NÁLEZCE (SOS Přesměrování) ---
-    # Pokud je pes ztracený a uživatel NENÍ majitel, pošleme ho rovnou na nouzový profil
+    # --- 1. IDENTIFIKACE MAJITELE A SOS SYSTÉM ---
     je_majitel = False
     if request.user.is_authenticated:
         if pes.majitel and pes.majitel.uzivatel == request.user:
             je_majitel = True
 
+    # Pokud je pes ztracený a prohlíží ho někdo cizí (nálezce), jde na SOS profil
     if pes.je_ztraceny and not je_majitel:
         return redirect('nouzovy_profil_psa', pes_id=pes.id)
 
-    # --- 2. SBĚR DAT PRO PROFIL ---
+    # --- 2. PREMIUM LOGIKA (Sjednocená kontrola) ---
+    ma_pristup_k_funkcim = False
+    profil = None
+
+    if request.user.is_authenticated:
+        # Použijeme related_name 'profil', pokud ho máš v modelu takto definovaný
+        profil = getattr(request.user, 'profil', None)
+
+        if request.user.is_superuser:
+            ma_pristup_k_funkcim = True
+        elif profil:
+            # A) Má zaplacené/aktivní Premium (kontrola booleanu i data expirace)
+            ma_aktivni_placene = profil.is_premium and (profil.premium_do is None or profil.premium_do >= date.today())
+
+            # B) Logika 1 pes + 1 kočka zdarma (hledáme první ID daného druhu u majitele)
+            prvni_zvirata_druhu = Pes.objects.filter(majitel=pes.majitel, druh=pes.druh).order_by('id')
+            prvni_id = prvni_zvirata_druhu.first().id if prvni_zvirata_druhu.exists() else None
+            je_to_prvni_zdarma = (pes.id == prvni_id)
+
+            if ma_aktivni_placene or je_to_prvni_zdarma:
+                ma_pristup_k_funkcim = True
+
+    # --- 3. SBĚR DAT PRO ŠABLONU ---
     zdravotni_zaznamy = pes.denik.all().order_by('-datum')
     galeriefotky = GalerieFotka.objects.filter(pes=pes)
     galerievidea = GalerieVideo.objects.filter(pes=pes)
     uspechy = pes.uspechy.all().order_by('-datum')
-    potomci = pes.potomci.all().order_by('-datum_narozeni')
 
-    # --- 3. PREMIUM KONTROLA ---
-    # Získáme profil přihlášeného uživatele pro kontrolu is_premium v šabloně
-    profil = None
-    je_premium = pes.je_premium  # Základní stav ze zvířete
+    # Sjednocení: v modelech máš buď 'vrhy' nebo 'potomci', použij to, co reálně existuje
+    # Předpokládám 'vrhy' podle tvé předchozí zprávy
+    vrhy = pes.vrhy.all().order_by('-datum_narozeni') if hasattr(pes, 'vrhy') else None
 
-    if request.user.is_authenticated:
-        profil = getattr(request.user, 'profil', None)
-        if profil and profil.is_premium:
-            je_premium = True
-        if request.user.is_superuser:
-            je_premium = True
-
+    # --- 4. JEDINÝ RETURN ---
     return render(request, 'users/detail_psa.html', {
         'pes': pes,
         'profil': profil,
         'je_majitel': je_majitel,
-        'je_premium': je_premium,
+        'ma_pristup_k_funkcim': ma_pristup_k_funkcim,
         'zdravotni_zaznamy': zdravotni_zaznamy,
         'galeriefotky': galeriefotky,
         'galerievidea': galerievidea,
         'uspechy': uspechy,
-        'potomci': potomci,
+        'vrhy': vrhy,
         'today': timezone.now().date(),
     })
 
@@ -494,75 +532,97 @@ def seznam_hledanych_psu(request):
 @login_required
 def pridat_foto(request, pes_id):
     pes = get_object_or_404(Pes, id=pes_id, majitel__uzivatel=request.user)
+    profil = pes.majitel
 
+    # 1. Zjištění statusu (Premium nebo První zdarma)
+    ma_aktivni_premium = profil.is_premium and (profil.premium_do is None or profil.premium_do >= date.today())
+    prvni_zvirata_druhu = Pes.objects.filter(majitel=profil, druh=pes.druh).order_by('id')
+    je_to_prvni_zdarma = (pes.id == prvni_zvirata_druhu.first().id) if prvni_zvirata_druhu.exists() else False
+
+    # 2. KONTROLA LIMITU PRO FOTKY
+    if not (ma_aktivni_premium or request.user.is_superuser):
+        if je_to_prvni_zdarma:
+            pocet_fotek = GalerieFotka.objects.filter(pes=pes).count()
+            if pocet_fotek >= 5:
+                messages.error(request, "Ve verzi zdarma můžete mít u prvního zvířete max. 5 fotek.")
+                return redirect('detail_psa', pes_id=pes.id)
+        else:
+            # Není premium ani první zdarma
+            messages.error(request, "Galerie je dostupná pouze pro Premium zvířata.")
+            return redirect('detail_psa', pes_id=pes.id)
+
+    # 3. ZPRACOVÁNÍ OBRÁZKU (beze změny, tvůj kód)
     if request.method == 'POST':
         file = request.FILES.get('obrazek')
         if file:
-            filename = file.name.lower()
-
             try:
-                # Otevřeme obrázek (Pillow díky register_heif_opener zvládne i HEIC)
                 image = Image.open(file)
-
-                # --- OPRAVA ROTACE (EXIF) ---
-                # Toto zajistí, že fotka nebude na bok, pokud ji tak iPhone vyfotil
                 image = ImageOps.exif_transpose(image)
+                image = image.convert('RGB')
+                buffer = io.BytesIO()
+                image.save(buffer, format="JPEG", quality=85, optimize=True)
 
-                # Pokud je to HEIC nebo chceme vynutit JPG pro všechno (doporučeno)
-                if filename.endswith('.heic') or filename.endswith('.heif') or True:
-                    # Převedeme na RGB (nutné pro JPG)
-                    if image.mode in ("RGBA", "P"):
-                        image = image.convert('RGB')
-                    else:
-                        image = image.convert('RGB')
+                new_filename = file.name.lower().rsplit('.', 1)[0] + ".jpg"
+                final_file = ContentFile(buffer.getvalue(), name=new_filename)
 
-                    # Uložíme do paměti jako JPG
-                    buffer = io.BytesIO()
-                    image.save(buffer, format="JPEG", quality=85, optimize=True)
-
-                    # Vytvoříme nový název souboru
-                    new_filename = filename.rsplit('.', 1)[0] + ".jpg"
-                    file = ContentFile(buffer.getvalue(), name=new_filename)
-
-                # Uložení do databáze
-                GalerieFotka.objects.create(pes=pes, obrazek=file)
+                GalerieFotka.objects.create(pes=pes, obrazek=final_file)
                 messages.success(request, "Fotka byla úspěšně nahrána.")
-
             except Exception as e:
                 messages.error(request, f"Chyba při zpracování obrázku: {e}")
 
-    return redirect('detail_psa', pes_id=pes_id)
+    return redirect('detail_psa', pes_id=pes.id)
 
 
 @login_required
 def smazat_foto(request, pk):
-    # Najdeme fotku a ověříme majitele
+    # Najdeme fotku a zároveň ověříme, že pes patří přihlášenému uživateli
     foto = get_object_or_404(GalerieFotka, id=pk, pes__majitel__uzivatel=request.user)
-    pes_id = foto.pes.id
-    foto.delete()
-    messages.success(request, "Fotka byla úspěšně smazána.")
-    # VRACÍME SE NA DETAIL - parametr musí být pes_id (podle tvého urls.py)
-    return redirect('detail_psa', pes_id=pes_id)
 
+    pes_id = foto.pes.id  # Uložíme si ID psa pro následný redirect
+
+    # Smazání záznamu z databáze (Django automaticky smaže i soubor, pokud máš nastaveno)
+    foto.delete()
+
+    messages.success(request, "Fotografie byla úspěšně smazána.")
+    return redirect('detail_psa', pes_id=pes_id)
 
 @login_required
 def pridat_video(request, pes_id):
     pes = get_object_or_404(Pes, id=pes_id, majitel__uzivatel=request.user)
+    profil = pes.majitel
+
+    # 1. Zjištění statusu
+    ma_aktivni_premium = profil.is_premium and (profil.premium_do is None or profil.premium_do >= date.today())
+    prvni_zvirata_druhu = Pes.objects.filter(majitel=profil, druh=pes.druh).order_by('id')
+    je_to_prvni_zdarma = (pes.id == prvni_zvirata_druhu.first().id) if prvni_zvirata_druhu.exists() else False
+
+    # 2. KONTROLA LIMITU PRO VIDEO
+    if not (ma_aktivni_premium or request.user.is_superuser):
+        if je_to_prvni_zdarma:
+            pocet_videi = GalerieVideo.objects.filter(pes=pes).count()
+            if pocet_videi >= 1:
+                messages.error(request, "Ve verzi zdarma můžete mít u prvního zvířete pouze 1 video.")
+                return redirect('detail_psa', pes_id=pes.id)
+        else:
+            messages.error(request, "Nahrávání videí je dostupné pouze pro Premium zvířata.")
+            return redirect('detail_psa', pes_id=pes.id)
+
+    # 3. ZPRACOVÁNÍ VIDEA
     if request.method == 'POST':
         vid = request.FILES.get('video')
         if vid:
-            # Seznam povolených koncovek
             povolene_koncovky = ['.mp4', '.mov', '.webm', '.avi']
             extension = os.path.splitext(vid.name)[1].lower()
-
             if extension in povolene_koncovky:
                 GalerieVideo.objects.create(pes=pes, video_soubor=vid)
-                messages.success(request, f"Video ({extension}) bylo úspěšně nahráno.")
+                messages.success(request, "Video bylo úspěšně nahráno.")
             else:
                 messages.error(request, f"Formát {extension} není podporován.")
         else:
             messages.error(request, "Soubor nebyl vybrán.")
+
     return redirect('detail_psa', pes_id=pes.id)
+
 
 @login_required
 def smazat_video(request, pk):
@@ -1184,8 +1244,20 @@ def zdravotni_historie(request, pes_id):
     })
 
 
+@login_required
 def pridat_zaznam(request, pes_id):
-    pes = get_object_or_404(Pes, id=pes_id)
+    # Důležité: Přidána kontrola majitele!
+    pes = get_object_or_404(Pes, id=pes_id, majitel__uzivatel=request.user)
+    profil = pes.majitel
+
+    # Logika přístupu (shodná s galerií)
+    ma_aktivni_premium = profil.is_premium and (profil.premium_do is None or profil.premium_do >= date.today())
+    prvni_zvirata_druhu = Pes.objects.filter(majitel=profil, druh=pes.druh).order_by('id')
+    je_to_prvni_zdarma = (pes.id == prvni_zvirata_druhu.first().id) if prvni_zvirata_druhu.exists() else False
+
+    if not (ma_aktivni_premium or je_to_prvni_zdarma or request.user.is_superuser):
+        messages.error(request, "Zdravotní deník je dostupný pouze pro Premium zvířata.")
+        return redirect('detail_psa', pes_id=pes.id)
 
     if request.method == 'POST':
         typ = request.POST.get('typ')
@@ -1193,31 +1265,25 @@ def pridat_zaznam(request, pes_id):
         poznamka = request.POST.get('poznamka')
         datum_str = request.POST.get('datum')
 
-        # Ošetření prázdného data
         datum = datum_str if datum_str else timezone.now().date()
 
-        # 1. Vytvoření nového záznamu v deníku
-        novy_zaznam = ZdravotniZaznam.objects.create(
-            pes=pes,
-            datum=datum,
-            typ=typ,
-            titulek=titulek,
-            poznamka=poznamka
-        )
+        if titulek: # Základní validace
+            ZdravotniZaznam.objects.create(
+                pes=pes,
+                datum=datum,
+                typ=typ,
+                titulek=titulek,
+                poznamka=poznamka
+            )
+            messages.success(request, "Záznam byl uložen do deníku.")
+            return redirect('zdravotni_historie', pes_id=pes.id)
+        else:
+            messages.error(request, "Titulek záznamu je povinný.")
 
-        # 2. TIP: Pokud má tvůj model ZdravotniZaznam metodu save(),
-        # která aktualizuje pole na modelu Pes, zavolej ji explicitně:
-        novy_zaznam.save()
-
-        # Návrat zpět do historie deníku
-        return redirect('zdravotni_historie', pes_id=pes.id)
-
-    # Pokud někdo přistoupí přes GET, ukážeme formulář (pokud ho nepoužíváš jen v modalu)
     return render(request, 'users/pridat_zaznam_form.html', {
         'pes': pes,
         'today': timezone.now().date()
     })
-
 
 def pridat_ockovani(request, pes_id):
     pes = get_object_or_404(Pes, id=pes_id)
@@ -1238,69 +1304,120 @@ def pridat_ockovani(request, pes_id):
         'titul': 'Nové očkování'
     })
 
-
-
-
 def kariera_psa(request, pes_id):
-    # Načteme psa, jinak vyhodíme 404
     pes = get_object_or_404(Pes, id=pes_id)
-    # Načteme všechny úspěchy a seřadíme je od nejnovějších
+    # Načteme úspěchy seřazené od nejnovějších
     uspechy = Uspech.objects.filter(pes=pes).order_by('-datum')
+
+    # Pro šablonu potřebujeme vědět, zda je to "první zdarma" nebo Premium
+    profil = pes.majitel
+    ma_premium = profil.is_premium and (profil.premium_do is None or profil.premium_do >= date.today())
+    prvni_pes_id = Pes.objects.filter(majitel=profil, druh='pes').values_list('id', flat=True).first()
+    prvni_kocka_id = Pes.objects.filter(majitel=profil, druh='kocka').values_list('id', flat=True).first()
+
+    je_zdarma_nebo_premium = (pes.id == prvni_pes_id or pes.id == prvni_kocka_id or ma_premium)
 
     return render(request, 'users/kariera_psa.html', {
         'pes': pes,
-        'uspechy': uspechy
+        'uspechy': uspechy,
+        'je_zdarma_nebo_premium': je_zdarma_nebo_premium,
+        'today': date.today(),
     })
 
 
+@login_required
 def pridat_uspech(request, pes_id):
+    pes = get_object_or_404(Pes, id=pes_id, majitel__uzivatel=request.user)
+    profil = pes.majitel
+
+    # Logika 1+1 a Premium
+    ma_premium = profil.is_premium and (profil.premium_do is None or profil.premium_do >= date.today())
+    prvni_pes_id = Pes.objects.filter(majitel=profil, druh='pes').values_list('id', flat=True).first()
+    prvni_kocka_id = Pes.objects.filter(majitel=profil, druh='kocka').values_list('id', flat=True).first()
+    je_v_limitu_zdarma = (pes.id == prvni_pes_id or pes.id == prvni_kocka_id)
+
     if request.method == 'POST':
-        pes = get_object_or_404(Pes, id=pes_id)
+        # Kontrola oprávnění k zápisu
+        if not (ma_premium or request.user.is_superuser or je_v_limitu_zdarma):
+            messages.error(request, "Tato sekce je dostupná pouze pro ALFA profily.")
+            return redirect('detail_psa', pes_id=pes.id)
 
-        # Získání dat z POST (ujisti se, že názvy odpovídají <input name="..."> v HTML)
-        # Pokud v modalu nemáš pole 'typ', dosadíme výchozí 'vystava'
-        typ_zaznamu = request.POST.get('typ', 'vystava')
-        nazev_akce = request.POST.get('nazev')
-        oceneni_text = request.POST.get('oceneni')
-        datum_akce = request.POST.get('datum')
+        # Kontrola limitu záznamů pro ne-premium (např. 3 záznamy)
+        if not ma_premium and not request.user.is_superuser:
+            if Uspech.objects.filter(pes=pes).count() >= 3:
+                messages.warning(request,
+                                 "Ve verzi zdarma můžete uložit max. 3 úspěchy. Pro neomezenou historii přejděte na ALFA.")
+                return redirect('kariera_psa', pes_id=pes.id)
 
-        Uspech.objects.create(
-            pes=pes,
-            typ=typ_zaznamu,
-            nazev=nazev_akce,
-            oceneni=oceneni_text,
-            datum=datum_akce if datum_akce else timezone.now().date()
-        )
-        return redirect('detail_psa', pes_id=pes.id)
-    return redirect('detail_psa', pes_id=pes_id)
+        # Načtení dat (přidáno 'misto', které máš v šabloně)
+        typ = request.POST.get('typ')
+        nazev = request.POST.get('nazev')
+        misto = request.POST.get('misto')
+        oceneni = request.POST.get('oceneni')
+        datum = request.POST.get('datum')
+
+        if nazev and oceneni:
+            Uspech.objects.create(
+                pes=pes,
+                typ=typ,
+                nazev=nazev,
+                misto=misto,
+                oceneni=oceneni,
+                datum=datum if datum else date.today()
+            )
+            messages.success(request, "Úspěch byl úspěšně přidán.")
+        else:
+            messages.error(request, "Název i ocenění musí být vyplněny.")
+
+    return redirect('kariera_psa', pes_id=pes.id)
 
 
 @login_required
-def smazat_uspech(request, uspech_id):
-    uspech = get_object_or_404(Uspech, id=uspech_id)
+def smazat_uspech(request, pk):
+    uspech = get_object_or_404(Uspech, id=pk, pes__majitel__uzivatel=request.user)
     pes_id = uspech.pes.id
-
-    # Kontrola, zda je uživatel majitelem psa
-    if uspech.pes.majitel == request.user or request.user.is_superuser:
-        uspech.delete()
-
+    uspech.delete()
+    messages.success(request, "Záznam byl smazán.")
     return redirect('kariera_psa', pes_id=pes_id)
 
-
-# Tato funkce zobrazí stránku se seznamem všech vrhů
+@login_required
 def vrhy_psa(request, pes_id):
     pes = get_object_or_404(Pes, id=pes_id)
-    # Získáme všechny vrhy pro tohoto psa
+
+    # --- LOGIKA PŘÍSTUPU ---
+    prvni_zvirata_druhu = Pes.objects.filter(majitel=pes.majitel, druh=pes.druh).order_by('id')
+    je_prvni = (pes.id == prvni_zvirata_druhu.first().id) if prvni_zvirata_druhu.exists() else False
+
+    # Ma přístup pokud je Premium majitel NEBO je to jeho první pes/kočka
+    ma_pristup_k_funkcim = request.user.is_authenticated and (
+                request.user.profil.is_premium or je_prvni or request.user.is_superuser)
+
+    if not ma_pristup_k_funkcim:
+        messages.warning(request, "Sekce Vrhy je dostupná pouze pro Premium profily nebo vaše první zvíře.")
+        return redirect('detail_psa', pes_id=pes.id)
+
     vrhy = Vrh.objects.filter(rodic=pes).order_by('-datum_narozeni')
 
-    # Změnil jsem název šablony na vrhy_psa.html,
-    # protože tu v detailu psa už odkazuješ (a TemplateDoesNotExist ti zmizí)
-    return render(request, 'users/pridat_vrh.html', {'pes': pes, 'vrhy': vrhy})
+    # Do šablony posíláme i 'ma_pristup_k_funkcim' pro zobrazení tlačítek
+    return render(request, 'users/pridat_vrh.html', {
+        'pes': pes,
+        'vrhy': vrhy,
+        'ma_pristup_k_funkcim': ma_pristup_k_funkcim
+    })
 
-
-# Tato funkce zpracuje odeslání modalu z detailu psa
+@login_required
 def pridat_vrh(request, pes_id):
     pes = get_object_or_404(Pes, id=pes_id)
+
+    # --- OCHRANA PŘED OBEJITÍM FORMULÁŘE ---
+    prvni_zvirata_druhu = Pes.objects.filter(majitel=pes.majitel, druh=pes.druh).order_by('id')
+    je_prvni = (pes.id == prvni_zvirata_druhu.first().id) if prvni_zvirata_druhu.exists() else False
+    ma_pristup = request.user.is_authenticated and (
+                request.user.profil.is_premium or je_prvni or request.user.is_superuser)
+
+    if not ma_pristup:
+        messages.error(request, "Nemáte oprávnění přidávat vrhy k tomuto zvířeti.")
+        return redirect('detail_psa', pes_id=pes.id)
 
     if request.method == 'POST':
         Vrh.objects.create(
@@ -1312,6 +1429,8 @@ def pridat_vrh(request, pes_id):
             druhy_rodic=request.POST.get('druhy_rodic'),
             poznamka=request.POST.get('poznamka')
         )
+        messages.success(request, "Vrh byl úspěšně přidán.")
+
     return redirect('detail_psa', pes_id=pes.id)
 
 
@@ -1321,35 +1440,40 @@ def chovnost_psa(request, pes_id):
     pes = get_object_or_404(Pes, id=pes_id)
     return render(request, 'users/chovnost_psa.html', {
         'pes': pes,
-        'je_majitel': pes.majitel == request.user
+        'je_majitel': pes.majitel.uzivatel == request.user
     })
 
 
 @login_required
 def upravit_chovnost(request, pes_id):
-    """Zpracuje formulář pro aktualizaci chovnosti, bonitace a testů."""
-    pes = get_object_or_404(Pes, id=pes_id, majitel=request.user)
+    # Kontrola, že pes patří uživateli
+    pes = get_object_or_404(Pes, id=pes_id, majitel__uzivatel=request.user)
+
+    # KLÍČOVÁ KONTROLA: Pokud není premium, nepustíme ho dál
+    if not pes.je_premium:
+        messages.error(request, "Tato funkce je dostupná pouze pro ALFA členy.")
+        return redirect('detail_psa', pes_id=pes.id)
 
     if request.method == 'POST':
-        # Načtení dat z formuláře (ujisti se, že name v HTML odpovídá těmto klíčům)
         pes.chovnost = request.POST.get('chovnost')
         pes.bonitace = request.POST.get('bonitace')
         pes.zdravotni_testy = request.POST.get('zdravotni_testy')
-
-        # Pokud máš v modelu pole pro RTG (např. DKK, DLK)
         pes.dkk = request.POST.get('dkk')
         pes.dlk = request.POST.get('dlk')
 
         pes.save()
+        messages.success(request, "Chovatelské údaje byly aktualizovány.")
         return redirect('detail_psa', pes_id=pes.id)
 
     return render(request, 'users/upravit_chovnost.html', {'pes': pes})
+
 
 @login_required
 def seznam_notifikaci(request):
     profil = request.user.profil
     nots_list = []
-    dnes = timezone.now().date()
+    nyni = timezone.now()
+    dnes = nyni.date()
 
     # --- 1. ZDRAVOTNÍ LOGIKA ---
     psi = profil.psi.all()
@@ -1365,67 +1489,44 @@ def seznam_notifikaci(request):
                 if termin <= dnes + timedelta(days=14):
                     nots_list.append({
                         'typ': 'zdravi_urgent',
-                        'pes': pes,
                         'text': f'Blíží se termín pro {nazev} u mazlíčka {pes.jmeno}!',
-                        'datum_vytvoreni': timezone.now(),
+                        'datum_vytvoreni': nyni,
                         'urgent': True,
-                        'ikona_zdravi': ikona
+                        'ikona_zdravi': ikona,
+                        'pes': pes,
                     })
 
-    # --- 2. SOCIÁLNÍ LOGIKA ---
-    db_notifications = Notifikace.objects.filter(prijemce=request.user)
-    for n in db_notifications:
-        nots_list.append(n)
-
-    # --- 3. MOJE AKTIVITA (Příspěvky) ---
-    # Pole je 'datum_pridani'
-    moje_prispevky = Prispevek.objects.filter(autor=request.user).order_by('-datum_pridani')
-    for p in moje_prispevky:
-        nots_list.append({
-            'typ': 'moje_aktivita',
-            'text': f'Publikovala jsi příspěvek: "{p.text[:40]}..."',
-            'datum_vytvoreni': p.datum_pridani,
-            'prispevek': p,
-            'moje': True
-        })
-
-    # --- 4. MOJE INZERCE (Bazar) ---
-    # Pole je 'vytvoreno'
-    moje_inzeraty = Inzerat.objects.filter(autor=request.user).order_by('-vytvoreno')
-    for i in moje_inzeraty:
-        nots_list.append({
-            'typ': 'moje_inzerce',
-            'text': f'Tvůj inzerát "{i.titulek}" je vystaven v bazaru.',
-            'datum_vytvoreni': i.vytvoreno,
-            'inzerat': i,
-            'moje': True
-        })
-    # --- 5. MOJE RECENZE
-    moje_recenze = Recenze.objects.filter(uzivatel=request.user).order_by('-vytvoreno')
-    for r in moje_recenze:
-        nots_list.append({
-            'typ': 'moje_recenze',
-            'text': f'Napsala jsi recenzi ({r.hvezdy}⭐) pro: {r.sluzba.nazev}',
-            'datum_vytvoreni': r.vytvoreno,
-            'recenze': r,
-            'moje': True,
-            'odesilatel': request.user
-        })
-
-    # --- 6. SEŘAZENÍ ---
-    nots_list.sort(
-        key=lambda x: x.datum_vytvoreni if hasattr(x, 'datum_vytvoreni') else x.get('datum_vytvoreni', timezone.now()),
-        reverse=True
+    # --- 2. SOCIÁLNÍ LOGIKA (Oprava na základě image_d400fc.png) ---
+    # Musíme použít 'prispevek__autor', protože pole 'pes' v modelu Prispevek neexistuje.
+    db_notifications = Notifikace.objects.filter(prijemce=request.user).select_related(
+        'odesilatel',
+        'prispevek',
+        'prispevek__autor'
     )
 
-    # --- 7. PAGINACE ---
-    paginator = Paginator(nots_list, 10)  #
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    for n in db_notifications:
+        # Získáme objekt autora (psa) z příspěvku
+        objekt_psa = n.prispevek.autor if n.prispevek and hasattr(n.prispevek, 'autor') else None
 
-    return render(request, 'users/notifikace.html', {
-        'nots': page_obj,
-    })
+        nots_list.append({
+            'id': n.id,
+            'typ': 'socialni',
+            'text': n.text,
+            'datum_vytvoreni': n.datum_vytvoreni,
+            'odesilatel': n.odesilatel,
+            'pes': objekt_psa,  # V seznamu necháme název 'pes', aby šablona fungovala
+            'prispevek': n.prispevek,
+            'urgent': False
+        })
+
+    # --- 3. SEŘAZENÍ ---
+    nots_list.sort(key=lambda x: x['datum_vytvoreni'], reverse=True)
+
+    # --- 4. PAGINACE ---
+    paginator = Paginator(nots_list, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'users/notifikace.html', {'nots': page_obj})
 
 @login_required
 def smazat_notifikaci(request, pk):

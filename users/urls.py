@@ -8,12 +8,11 @@ urlpatterns = [
     path('pridat/', views.pridat_psa, name='pridat_psa'),
     path('upravit/<int:pk>/', views.upravit_psa, name='upravit_psa'),
     path('smazat/<int:pk>/', views.smazat_psa, name='smazat_psa'),
-    path('veterinar/<int:pes_id>/', views.veterinar, name='veterinar_s_id'),
     path('dashboard/', views.dashboard, name='dashboard'),
 
     # --- DETAIL A NOUZOVÝ SYSTÉM (SOS) ---
     path('pes/<int:pes_id>/', views.detail_psa, name='detail_psa'),
-    path('veterinar/', views.veterinar, name='veterinar'),
+    path('veterinar/', views.veterinar, name='veterinar_obecny'),
     path('veterinar/<int:pes_id>/', views.veterinar, name='veterinar'),
     path('zaznam/upravit/<int:pk>/', views.upravit_zaznam, name='upravit_zaznam'),
 

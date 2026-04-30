@@ -94,6 +94,7 @@
             </div>
         </div>
 
+        {% if user.profil.is_premium or user.is_superuser %}
         <div class="edit-card">
             <h5 class="section-title"><i class="fas fa-award text-warning"></i> Chovnost a Původ</h5>
             <div class="row g-3">
@@ -114,6 +115,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
 
         <div class="edit-card" style="background: #fffcf9; border: 1.5px solid rgba(220, 53, 69, 0.2);">
             <h5 class="section-title"><i class="fas fa-shield-alt text-danger"></i> SOS Kontakty a Adresa</h5>

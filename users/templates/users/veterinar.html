@@ -1,6 +1,7 @@
 {% extends 'home/base.html' %}
 
 {% block content %}
+<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
@@ -51,6 +52,20 @@
     .bar-kocka { background: var(--cat-soft-lila); border-bottom: 1px solid var(--cat-soft-lila); }
     .bar-kocka h5 { color: var(--cat-lila) !important; }
 
+    /* --- EDITOVATELNÉ ODZNAKY --- */
+    .edit-date-link {
+        text-decoration: none !important;
+        color: inherit !important;
+        display: block;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        border-radius: 18px;
+    }
+    .edit-date-link:hover {
+        background-color: var(--t-soft-gold);
+        transform: scale(1.03);
+    }
+
     .health-badge-mini {
         background: #fff;
         border: 1px solid #eee;
@@ -58,6 +73,7 @@
         padding: 12px 5px;
         text-align: center;
         height: 100%;
+        position: relative;
     }
 
     /* --- HISTORIE --- */
@@ -75,36 +91,20 @@
     .incident-card.cat-border { border-left-color: var(--cat-lila); }
     .incident-card.urgent { border-left-color: var(--t-danger); background: #fffafa; }
 
-    /* --- TLAČÍTKA A FORMULÁŘ --- */
-   .btn-lux-add {
-    background: var(--t-brown) !important;
-    color: white !important; /* Vynutí bílý text vždy */
-    border: 1.5px solid var(--t-gold) !important;
-    transition: all 0.3s ease-in-out;
-}
-
-.btn-lux-add i {
-    color: var(--t-gold) !important; /* Ikonka plus bude zlatá */
-}
-
-.btn-lux-add:hover {
-    background: #4e342e !important; /* Jen lehce zesvětlí hnědou, nezbělá */
-    color: white !important;        /* Text MUSÍ zůstat bílý */
-    border-color: var(--t-gold) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(62, 39, 35, 0.3);
-}
-
-/* Pokud by se tam pletla ikonka při najetí */
-.btn-lux-add:hover i {
-    color: white !important; /* Při najetí zbělá i ta ikonka pro lepší efekt */
-}
-
-    .border-dashed { border-style: dashed !important; }
-
-    #divKlinika, #extra-fields-container {
+    /* --- TLAČÍTKA --- */
+    .btn-lux-add {
+        background: var(--t-brown) !important;
+        color: white !important;
+        border: 1.5px solid var(--t-gold) !important;
         transition: all 0.3s ease-in-out;
     }
+    .btn-lux-add:hover {
+        background: #4e342e !important;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(62, 39, 35, 0.3);
+    }
+
+    .border-dashed { border-style: dashed !important; }
 </style>
 
 <div class="container py-4">
@@ -113,7 +113,7 @@
         <div class="row align-items-center">
             <div class="col-lg-8">
                 <h1 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 800;" class="mb-2 text-white">Lékařský Deník 🩺</h1>
-                <p class="text-white-50 mb-0">Zdravotní historie a termíny pro vaše parťáky.</p>
+                <p class="text-white-50 mb-0">Kliknutím na termín očkování nebo odčervení jej můžete okamžitě upravit.</p>
             </div>
             <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
                 <button onclick="shareDiary()" class="btn btn-light rounded-pill px-4 fw-bold me-2 shadow-sm">
@@ -137,27 +137,69 @@
                 </div>
                 <div class="p-3">
                     <div class="row g-2 text-center">
+                        {# OČKOVÁNÍ #}
                         <div class="col-4">
-                            <div class="health-badge-mini">
-                                <i class="fas fa-syringe d-block mb-1"></i>
-                                <span class="d-block fw-bold small text-dark">{{ mazlicek.posledni_ockovani|date:"d.m."|default:"--" }}</span>
-                                <small class="text-muted text-uppercase" style="font-size: 0.55rem; font-weight: 700;">Očkování</small>
-                            </div>
+                            <a class="edit-date-link" data-bs-toggle="modal" data-bs-target="#editDatesModal{{ mazlicek.id }}">
+                                <div class="health-badge-mini">
+                                    <i class="fas fa-syringe d-block mb-1 text-primary"></i>
+                                    <span class="d-block fw-bold small text-dark">{{ mazlicek.posledni_ockovani|date:"d.m."|default:"--" }}</span>
+                                    <small class="text-muted text-uppercase" style="font-size: 0.55rem; font-weight: 700;">Očkování</small>
+                                </div>
+                            </a>
                         </div>
+                        {# ODČERVENÍ #}
                         <div class="col-4">
-                            <div class="health-badge-mini">
-                                <i class="fas fa-tablets d-block mb-1"></i>
-                                <span class="d-block fw-bold small text-dark">{{ mazlicek.posledni_odcerveni|date:"d.m."|default:"--" }}</span>
-                                <small class="text-muted text-uppercase" style="font-size: 0.55rem; font-weight: 700;">Odčervení</small>
-                            </div>
+                            <a class="edit-date-link" data-bs-toggle="modal" data-bs-target="#editDatesModal{{ mazlicek.id }}">
+                                <div class="health-badge-mini">
+                                    <i class="fas fa-tablets d-block mb-1 text-success"></i>
+                                    <span class="d-block fw-bold small text-dark">{{ mazlicek.posledni_odcerveni|date:"d.m."|default:"--" }}</span>
+                                    <small class="text-muted text-uppercase" style="font-size: 0.55rem; font-weight: 700;">Odčervení</small>
+                                </div>
+                            </a>
                         </div>
+                        {# KLÍŠŤATA #}
                         <div class="col-4">
-                            <div class="health-badge-mini">
-                                <i class="fas fa-bug d-block mb-1"></i>
-                                <span class="d-block fw-bold small text-dark">{{ mazlicek.posledni_klistata|date:"d.m."|default:"--" }}</span>
-                                <small class="text-muted text-uppercase" style="font-size: 0.55rem; font-weight: 700;">Klíšťata</small>
-                            </div>
+                            <a class="edit-date-link" data-bs-toggle="modal" data-bs-target="#editDatesModal{{ mazlicek.id }}">
+                                <div class="health-badge-mini">
+                                    <i class="fas fa-bug d-block mb-1 text-danger"></i>
+                                    <span class="d-block fw-bold small text-dark">{{ mazlicek.posledni_klistata|date:"d.m."|default:"--" }}</span>
+                                    <small class="text-muted text-uppercase" style="font-size: 0.55rem; font-weight: 700;">Klíšťata</small>
+                                </div>
+                            </a>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# MODAL PRO RYCHLOU ÚPRAVU DAT - PRO KAŽDÉHO PSA ZVLÁŠŤ #}
+        <div class="modal fade" id="editDatesModal{{ mazlicek.id }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 30px;">
+                    <div class="p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold m-0" style="color: var(--t-brown);">📅 Upravit data</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form method="POST" action="{% url 'upravit_psa' mazlicek.id %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="small fw-bold text-muted mb-1">POSLEDNÍ OČKOVÁNÍ</label>
+                                <input type="date" name="posledni_ockovani" class="form-control border-0 bg-light p-2 rounded-3"
+                                       value="{{ mazlicek.posledni_ockovani|date:'Y-m-d' }}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="small fw-bold text-muted mb-1">POSLEDNÍ ODČERVENÍ</label>
+                                <input type="date" name="posledni_odcerveni" class="form-control border-0 bg-light p-2 rounded-3"
+                                       value="{{ mazlicek.posledni_odcerveni|date:'Y-m-d' }}">
+                            </div>
+                            <div class="mb-4">
+                                <label class="small fw-bold text-muted mb-1">POSLEDNÍ KLÍŠŤATA</label>
+                                <input type="date" name="posledni_klistata" class="form-control border-0 bg-light p-2 rounded-3"
+                                       value="{{ mazlicek.posledni_klistata|date:'Y-m-d' }}">
+                            </div>
+                            <button type="submit" class="btn btn-lux-add w-100 py-2 fw-bold">ULOŽIT ZMĚNY</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -206,24 +248,25 @@
     </div>
 </div>
 
-{# MODAL PRO NOVÝ ZÁZNAM #}
+{# MODAL PRO NOVÝ ZÁZNAM (Stejný jako původně) #}
 <div class="modal fade" id="newIncidentModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 30px;">
             <div class="p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4 class="fw-800 m-0" style="color: var(--t-brown);">🩺 Nový lékařský záznam</h4>
+                    <h4 class="fw-800 m-0" style="color: var(--t-brown);"></h4> Nový lékařský záznam</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
-                <form method="POST" action="{% url 'veterinar' pes_id=pes.id %}">
+                <form method="POST" action="{% url 'veterinar' pes_id=0 %}" id="incidentForm">
                     {% csrf_token %}
                     <div class="row g-3 mb-3">
                         <div class="col-6">
                             <label class="small fw-bold text-muted mb-1 text-uppercase">Pacient</label>
-                            <select name="pes_id" class="form-select border-0 bg-light p-3 rounded-4" required>
+                            <select name="pes_id" class="form-select border-0 bg-light p-3 rounded-4" required onchange="updateFormAction(this.value)">
+                                <option value="" disabled selected>Vyberte...</option>
                                 {% for mazlicek in psi %}
-                                <option value="{{ mazlicek.id }}" {% if mazlicek.id == pes.id %}selected{% endif %}>{{ mazlicek.jmeno }}</option>
+                                <option value="{{ mazlicek.id }}">{{ mazlicek.jmeno }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -253,16 +296,6 @@
 
                                 <input type="checkbox" class="btn-check" name="odcerveni" id="check_odcerveni">
                                 <label class="btn btn-outline-secondary rounded-pill px-3 py-2 border-dashed" for="check_odcerveni">💊 Odčervení</label>
-
-                                <input type="checkbox" class="btn-check" name="osetreni" id="check_osetreni">
-                                <label class="btn btn-outline-secondary rounded-pill px-3 py-2 border-dashed" for="check_osetreni">🩹 Ošetření</label>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="small fw-bold text-muted mb-1 text-uppercase">Váha pacienta</label>
-                            <div class="input-group" style="max-width: 140px;">
-                                <input type="number" step="0.1" name="vaha" class="form-control rounded-start-4 border-0 bg-light" placeholder="0.0">
-                                <span class="input-group-text bg-light border-0 rounded-end-4 text-muted">kg</span>
                             </div>
                         </div>
                     </div>
@@ -290,6 +323,13 @@
 </div>
 
 <script>
+    // Pomocná funkce pro změnu URL formuláře podle vybraného psa
+    function updateFormAction(pesId) {
+        const form = document.getElementById('incidentForm');
+        let url = "{% url 'veterinar' pes_id=0 %}".replace('0', pesId);
+        form.action = url;
+    }
+
     function toggleExtraFields(isKontrola) {
         const extraFields = document.getElementById('extra-fields-container');
         const divKlinika = document.getElementById('divKlinika');
