@@ -50,12 +50,12 @@ class ZdravotniZaznamInline(admin.TabularInline):
 # --- ADMIN PSA ---
 @admin.register(models.Pes)
 class PesAdmin(admin.ModelAdmin):
-    list_display = ('nahled_foto', 'jmeno', 'druh_ikona', 'rasa', 'majitel', 'je_ztraceny')
-    list_filter = ('druh', 'je_ztraceny', 'rasa')
+    # Přidáno 'pohlavi_ikona' do seznamu
+    list_display = ('nahled_foto', 'jmeno', 'druh_ikona', 'pohlavi_ikona', 'rasa', 'majitel', 'je_ztraceny')
+    list_filter = ('druh', 'pohlavi', 'je_ztraceny', 'rasa')  # Přidán filtr na pohlaví
     search_fields = ('jmeno', 'cip', 'majitel__uzivatel__username')
     readonly_fields = ('qr_kod', 'nahled_velky', 'vytvoreno')
 
-    # Registrace všech Inlines najednou
     inlines = [
         OckovaniInline,
         ZdravotniZaznamInline,
@@ -68,8 +68,10 @@ class PesAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Základní informace', {
-            'fields': (('jmeno', 'druh'), ('rasa', 'majitel'), ('datum_narozeni', 'vaha'), 'cip', 'fotka')
+            # Tady jsme přidali 'pohlavi' k jménu a druhu
+            'fields': (('jmeno', 'druh', 'pohlavi'), ('rasa', 'majitel'), ('datum_narozeni', 'vaha'), 'cip', 'fotka')
         }),
+        # ... zbytek fieldsetů zůstává stejný, jako ho máš ...
         ('Zdraví, RTG a Dokumentace', {
             'fields': (('rtg_hd', 'rtg_ed', 'rtg_pater'), 'bonitace', 'rodokmen_pdf'),
         }),
@@ -91,6 +93,8 @@ class PesAdmin(admin.ModelAdmin):
         }),
     )
 
+    # --- Pomocné metody pro ikony ---
+
     def nahled_foto(self, obj):
         if obj.fotka:
             return format_html(
@@ -106,6 +110,13 @@ class PesAdmin(admin.ModelAdmin):
     def druh_ikona(self, obj):
         return "🐕" if obj.druh == 'pes' else "🐈"
 
+    # Nová ikona pro pohlaví v seznamu
+    def pohlavi_ikona(self, obj):
+        if obj.pohlavi == 'm':
+            return format_html('<span style="color: #3498db; font-weight: bold;">♂ Samec</span>')
+        return format_html('<span style="color: #e91e63; font-weight: bold;">♀ Samice</span>')
+
+    pohlavi_ikona.short_description = "Pohlaví"
 
 # --- SOCIÁLNÍ SÍŤ A OSTATNÍ ---
 

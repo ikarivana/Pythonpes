@@ -39,6 +39,10 @@
     .species-option.active { opacity: 1; transform: scale(1.15); color: var(--t-gold); filter: grayscale(0); }
     .species-option i { font-size: 2.5rem; margin-bottom: 5px; }
 
+    /* POHLAVÍ SPECIFICKÉ BARVY */
+    #opt-male.active i { color: #3498db !important; }
+    #opt-female.active i { color: #e91e63 !important; }
+
     .sos-warning { background: #fff5f5; border: 1px solid #feb2b2; padding: 15px; border-radius: 15px; margin-top: 15px; font-size: 0.85rem; color: #c53030; }
     .btn-save-main { background: var(--t-brown); color: white; padding: 18px; border-radius: 20px; font-weight: 800; width: 100%; transition: 0.3s; cursor: pointer; border: none; font-size: 1.1rem; }
     .btn-save-main:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(62, 39, 35, 0.2); }
@@ -52,6 +56,7 @@
 
     <form method="POST" enctype="multipart/form-data"> {% csrf_token %}
         <input type="hidden" name="druh" id="id_druh" value="{{ pes.druh|default:'pes' }}">
+        <input type="hidden" name="pohlavi" id="id_pohlavi" value="{{ pes.pohlavi|default:'m' }}">
         <input type="hidden" name="foto_rotace" id="id_foto_rotace" value="{{ pes.foto_rotace|default:0 }}">
 
         <div class="edit-card text-center">
@@ -73,12 +78,25 @@
                 <label class="label-gold">Změnit fotografii</label>
                 <input type="file" name="fotka" class="input-clean" onchange="previewFile()">
             </div>
+
             <div class="species-toggle">
                 <div class="species-option" id="opt-pes" onclick="setSpecies('pes')">
                     <i class="fas fa-dog"></i><br><span class="fw-bold">Pejsek</span>
                 </div>
                 <div class="species-option" id="opt-kocka" onclick="setSpecies('kocka')">
                     <i class="fas fa-cat"></i><br><span class="fw-bold">Kočička</span>
+                </div>
+            </div>
+
+            <hr class="my-4 opacity-10">
+
+            <h5 class="section-title justify-content-center" style="border:none; font-size: 0.9rem;">Pohlaví</h5>
+            <div class="species-toggle" style="gap: 60px;">
+                <div class="species-option" id="opt-male" onclick="setPohlavi('m')">
+                    <i class="fas fa-mars"></i><br><span class="fw-bold">On</span>
+                </div>
+                <div class="species-option" id="opt-female" onclick="setPohlavi('f')">
+                    <i class="fas fa-venus"></i><br><span class="fw-bold">Ona</span>
                 </div>
             </div>
         </div>
@@ -203,6 +221,20 @@
         }
     }
 
+    function setPohlavi(pohlavi) {
+        document.getElementById('id_pohlavi').value = pohlavi;
+        const optMale = document.getElementById('opt-male');
+        const optFemale = document.getElementById('opt-female');
+
+        if (pohlavi === 'f') {
+            optFemale.classList.add('active');
+            optMale.classList.remove('active');
+        } else {
+            optMale.classList.add('active');
+            optFemale.classList.remove('active');
+        }
+    }
+
     function rotateImage() {
         let rotationInput = document.getElementById('id_foto_rotace');
         let currentRotation = (parseInt(rotationInput.value) + 90) % 360;
@@ -228,6 +260,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         setSpecies(document.getElementById('id_druh').value);
+        setPohlavi(document.getElementById('id_pohlavi').value);
     });
 </script>
 {% endblock %}

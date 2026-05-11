@@ -71,6 +71,11 @@
     .species-option i { font-size: 2.5rem; display: block; color: var(--t-gold); margin-bottom: 5px; }
     .species-option span { font-weight: 800; font-size: 0.8rem; text-transform: uppercase; }
 
+    /* POHLAVÍ SPECIFICKÉ BARVY */
+    #opt-male.active i { color: #3498db !important; }
+    #opt-female.active i { color: #e91e63 !important; }
+    .species-option i.fa-mars, .species-option i.fa-venus { font-size: 2.2rem; }
+
     .qr-preview-box {
         background: #fcfcfc; border: 2px dashed var(--t-gold); border-radius: 20px;
         padding: 20px; text-align: center; height: 100%; display: flex;
@@ -81,19 +86,42 @@
 <div class="form-container">
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
+
         <input type="hidden" name="druh" id="id_druh" value="{{ pes.druh|default:'pes' }}">
 
         <div class="edit-card text-center">
-            <h5 class="section-title justify-content-center">Koho registrujete?</h5>
-            <div class="species-toggle">
-                <div class="species-option" id="opt-pes" onclick="setSpecies('pes')">
-                    <i class="fas fa-dog"></i>
-                    <span>Pejsek</span>
+            <div class="row align-items-center">
+
+                <div class="col-md-6 border-end-md">
+                    <h5 class="section-title justify-content-center" style="border:none; font-size: 0.95rem;">
+                        <i class="fas fa-paw"></i> Koho registrujete
+                    </h5>
+                    <div class="species-toggle">
+                        <div class="species-option" id="opt-pes" onclick="setSpecies('pes')">
+                            <i class="fas fa-dog"></i><br><span class="fw-bold">Pejsek</span>
+                        </div>
+                        <div class="species-option" id="opt-kocka" onclick="setSpecies('kocka')">
+                            <i class="fas fa-cat"></i><br><span class="fw-bold">Kočička</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="species-option" id="opt-kocka" onclick="setSpecies('kocka')">
-                    <i class="fas fa-cat"></i>
-                    <span>Kočička</span>
+
+                <div class="d-md-none"><hr class="my-4 opacity-10"></div>
+
+                <div class="col-md-6">
+                    <h5 class="section-title justify-content-center" style="border:none; font-size: 0.95rem;">
+                        <i class="fas fa-venus-mars"></i> Pohlaví
+                    </h5>
+                    <div class="species-toggle">
+                        <div class="species-option" id="opt-male" onclick="setPohlavi('m')">
+                            <i class="fas fa-mars"></i><br><span class="fw-bold">On</span>
+                        </div>
+                        <div class="species-option" id="opt-female" onclick="setPohlavi('f')">
+                            <i class="fas fa-venus"></i><br><span class="fw-bold">Ona</span>
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </div>
 
@@ -190,7 +218,7 @@
             </div>
         </div>
 
-        {# CHOVATELSKÁ SEKCE - Pouze pro psy, u koček se skryje přes JS #}
+        {# CHOVATELSKÁ SEKCE #}
         <div class="edit-card {% if not user.profil.is_premium %}locked-section{% endif %}" id="chovatelska-sekce">
             {% if not user.profil.is_premium %}
             <div class="locked-overlay">
@@ -235,6 +263,7 @@
 </div>
 
 <script>
+    // PŘEPÍNAČ DRUHU (Pes / Kočka)
     function setSpecies(druh) {
         const idDruh = document.getElementById('id_druh');
         const optKocka = document.getElementById('opt-kocka');
@@ -250,29 +279,46 @@
             document.body.classList.add('is-kocka');
             optKocka.classList.add('active');
             optPes.classList.remove('active');
-            {% if not pes.id %} title.innerText = 'Registrace kočičky'; {% endif %}
-            labelName.innerText = 'Jméno kočičky *';
-            labelBreed.innerText = 'Plemeno kočky *';
-
-            // Kočky nemají tyto chovatelské údaje, sekci skryjeme úplně
-            chovatelskaSekce.style.display = 'none';
+            {% if not pes.id %} if(title) title.innerText = 'Registrace kočičky'; {% endif %}
+            if(labelName) labelName.innerText = 'Jméno kočičky *';
+            if(labelBreed) labelBreed.innerText = 'Plemeno kočky *';
+            if(chovatelskaSekce) chovatelskaSekce.style.display = 'none';
         } else {
             document.body.classList.remove('is-kocka');
             optPes.classList.add('active');
             optKocka.classList.remove('active');
-            {% if not pes.id %} title.innerText = 'Registrace pejska'; {% endif %}
-            labelName.innerText = 'Jméno pejska *';
-            labelBreed.innerText = 'Rasa / Plemeno *';
+            {% if not pes.id %} if(title) title.innerText = 'Registrace pejska'; {% endif %}
+            if(labelName) labelName.innerText = 'Jméno pejska *';
+            if(labelBreed) labelBreed.innerText = 'Rasa / Plemeno *';
+            if(chovatelskaSekce) chovatelskaSekce.style.display = 'block';
+        }
+    }
 
-            // Pro psy sekci zobrazíme (pokud uživatel nemá premium, overlay zůstane díky CSS/HTML)
-            chovatelskaSekce.style.display = 'block';
+    // PŘEPÍNAČ POHLAVÍ (On / Ona)
+    function setPohlavi(pohlavi) {
+        const idPohlavi = document.getElementById('id_pohlavi');
+        const optMale = document.getElementById('opt-male');
+        const optFemale = document.getElementById('opt-female');
+
+        if(idPohlavi) idPohlavi.value = pohlavi;
+
+        if (pohlavi === 'f') {
+            if(optFemale) optFemale.classList.add('active');
+            if(optMale) optMale.classList.remove('active');
+        } else {
+            if(optMale) optMale.classList.add('active');
+            if(optFemale) optFemale.classList.remove('active');
         }
     }
 
     window.onload = function() {
-        // Načte druh z hidden inputu nebo defaultně 'pes'
+        // Inicializace druhu
         const stavajiciDruh = document.getElementById('id_druh').value || 'pes';
         setSpecies(stavajiciDruh);
+
+        // Inicializace pohlaví
+        const stavajiciPohlavi = document.getElementById('id_pohlavi').value || 'm';
+        setPohlavi(stavajiciPohlavi);
     };
 </script>
 {% endblock %}

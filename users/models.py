@@ -8,9 +8,9 @@ from django.contrib.auth.models import User
 from django.http import request
 from django.template.defaultfilters import slugify
 from django.urls import reverse
-from django.utils import timezone
-
-import pes
+from django.db import models
+from django.contrib.auth.models import User
+from PIL import Image, ExifTags  # Nutné pro práci s obrázky
 
 
 class PromoKod(models.Model):
@@ -21,11 +21,6 @@ class PromoKod(models.Model):
 
     def __str__(self):
         return f"{self.kod} ({self.pocet_dni} dní)"
-
-
-from django.db import models
-from django.contrib.auth.models import User
-from PIL import Image, ExifTags  # Nutné pro práci s obrázky
 
 
 class ProfilMajitele(models.Model):
@@ -75,10 +70,12 @@ class ProfilMajitele(models.Model):
 # --- 1. MODEL PSA ---
 class Pes(models.Model):
     DRUH_CHOICES = [('pes', 'Pes'), ('kocka', 'Kočka')]
+    POHLAVI_CHOICES = [('m', 'Samec'), ('f', 'Samice')]
     druh = models.CharField(max_length=10, choices=DRUH_CHOICES, default='pes')
     majitel = models.ForeignKey(ProfilMajitele, on_delete=models.CASCADE, related_name='psi')
     jmeno = models.CharField(max_length=100)
     rasa = models.CharField(max_length=100)
+    pohlavi = models.CharField(max_length=1, choices=POHLAVI_CHOICES, default='m', verbose_name="Pohlaví")
 
     # SOS Kontakty
     kontaktni_jmeno = models.CharField(max_length=100)

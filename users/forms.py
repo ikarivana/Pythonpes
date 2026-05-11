@@ -34,10 +34,11 @@ class PesForm(forms.ModelForm):
         widgets = {
             'jmeno': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Jméno parťáka'}),
             'rasa': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Např. Border kolie'}),
-            # V modelu máš rasa, ne plemeno
             'datum_narozeni': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'cip': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Číslo mikročipu'}),
             'vaha': forms.NumberInput(attrs={'step': '0.1', 'class': 'form-control'}),
+            'pohlavi': forms.HiddenInput(),
+            'druh': forms.HiddenInput(),
 
             # Zdravotní sekce
             'posledni_ockovani': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
