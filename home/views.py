@@ -3,10 +3,11 @@ from datetime import timedelta, date
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.db.models import Q
+from django.template.defaultfilters import slugify
 from django.urls import reverse
 from django.utils import timezone
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 import json
 from datetime import date
 from django.http import HttpResponse
@@ -14,10 +15,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 
 # Importy tvých modelů a forem
-from .models import Sluzba, Recenze
-from .forms import SluzbaForm, KontaktForm, RecenzeForm
+from .models import Sluzba, Recenze, Clanek  # PŘIDÁN MODEL CLANEK
+from .forms import SluzbaForm, KontaktForm, RecenzeForm, ClanekForm
 from users.models import Prispevek, Pes, ProfilMajitele, Notifikace
-
 
 
 def index(request):
@@ -66,7 +66,7 @@ def index(request):
             'adresa': "Poslední známá poloha (GPS)",
             'foto_url': f_url,
             'objekt_id': p.id,
-            'is_dog_profile': True # Pomůcka pro šablonu, abys mohl odkázat na SOS profil
+            'is_dog_profile': True  # Pomůcka pro šablonu, abys mohl odkázat na SOS profil
         })
 
     # Pak přidáme ostatní hlášení z mapy (nebezpečí, návnady)
@@ -80,10 +80,25 @@ def index(request):
             'is_dog_profile': False
         })
 
-    # 5. Context pro šablonu (zobrazíme max 3 nejnovější)
+    # --- NOVÉ: NAČTENÍ NEJNOVĚJŠÍHO ČLÁNKU PRO INDEX ---
+    nejnovejsi_clanek = None
+    celkovy_pocet_clanku = 0
+    try:
+        nejnovejsi_clanek = Clanek.objects.filter(
+            publikovan=True,
+            datum_publikace__lte=timezone.now()
+        ).order_by('-datum_publikace').first()
+
+        celkovy_pocet_clanku = Clanek.objects.filter(publikovan=True).count()
+    except Exception:
+        pass
+
+    # 5. Context pro šablonu (zobrazíme max 3 nejnovější varování)
     context = {
         'is_premium': is_premium,
         'krizova_hlaseni': krizova_hlaseni[:3],
+        'nejnovejsi_clanek': nejnovejsi_clanek,  # PŘIDÁNO DO CONTEXTU
+        'celkovy_pocet_clanku': celkovy_pocet_clanku,  # PŘIDÁNO DO CONTEXTU
     }
 
     return render(request, 'home/index.html', context)
@@ -238,6 +253,7 @@ def smazat_sluzbu(request, pk):
     messages.success(request, "Záznam byl úspěšně odstraněn.")
     return redirect('mapa_sluzeb')
 
+
 def stale_aktualni(request, id):
     from django.utils import timezone
     from django.http import JsonResponse
@@ -338,6 +354,7 @@ def pridat_recenzi(request, pk):
 
     return render(request, 'home/detail_sluzby.html', {'form': form, 'sluzba': sluzba_obj})
 
+
 @login_required
 def upravit_recenzi(request, pk):
     recenze = get_object_or_404(Recenze, pk=pk, uzivatel=request.user)
@@ -367,6 +384,7 @@ def smazat_recenzi(request, pk):
     sluzba_id = recenze.sluzba.id
     recenze.delete()
     return redirect('detail_sluzby', pk=sluzba_id)
+
 
 def kontakt(request):
     if request.method == 'POST':
@@ -421,8 +439,10 @@ def gdpr(request):
     }
     return render(request, 'home/gdpr.html', context)
 
+
 def cookies(request):
     return render(request, 'home/cookies.html')
+
 
 def cenik(request):
     mazlicek = None
@@ -442,8 +462,84 @@ def dekujeme_za_nakup(request):
     """Zobrazí stránku po úspěšné platbě."""
     return render(request, 'home/dekujeme.html')
 
+
 def dekujeme_za_znamku(request):
     return render(request, 'home/dekujeme_za_znamku.html')
 
+
 def pruvodce(request):
     return render(request, 'home/pruvodce.html')
+
+
+# =========================================================================
+# --- POHLEDY PRO BLOG ---
+# =========================================================================
+
+def blog_seznam(request):
+    """Archiv a výpis všech publikovaných článků s možností filtrování."""
+    clanky_queryset = Clanek.objects.filter(
+        publikovan=True,
+        datum_publikace__lte=timezone.now()
+    ).order_by('-datum_publikace')
+
+    zvolena_kategorie = request.GET.get('kategorie', 'vse')
+    if zvolena_kategorie != 'vse':
+        clanky_queryset = clanky_queryset.filter(kategorie=zvolena_kategorie)
+
+    return render(request, 'home/blog/blog_list.html', {
+        'clanky': clanky_queryset,
+        'zvolena_kategorie': zvolena_kategorie
+    })
+
+
+def blog_detail(request, slug):
+    """Zobrazení konkrétního článku na základě jeho textového identifikátoru (slug)."""
+    clanek = get_object_or_404(Clanek, slug=slug, publikovan=True)
+
+    return render(request, 'home/blog/blog_detail.html', {
+        'clanek': clanek
+    })
+
+
+# --- ADMIN VYCHYTÁVKY PRO SPRÁVU BLOGU ---
+
+def je_admin(user):
+    return user.is_authenticated and user.is_superuser
+
+
+@user_passes_test(je_admin)
+def clanek_vytvor(request):
+    if request.method == 'POST':
+        form = ClanekForm(request.POST, request.FILES)
+        if form.is_valid():
+            clanek = form.save(commit=False)
+            clanek.slug = slugify(clanek.titulek)
+            clanek.save()
+            return redirect('blog_seznam')
+    else:
+        form = ClanekForm()
+    return render(request, 'home/blog/clanek_form.html', {'form': form, 'akce': 'Nový článek'})
+
+
+@user_passes_test(je_admin)
+def clanek_uprav(request, slug):
+    clanek = get_object_or_404(Clanek, slug=slug)
+    if request.method == 'POST':
+        form = ClanekForm(request.POST, request.FILES, instance=clanek)
+        if form.is_valid():
+            clanek = form.save(commit=False)
+            clanek.slug = slugify(clanek.titulek)
+            clanek.save()
+            return redirect('blog_detail', slug=clanek.slug)
+    else:
+        form = ClanekForm(instance=clanek)
+    return render(request, 'home/blog/clanek_form.html', {'form': form, 'akce': 'Upravit článek', 'clanek': clanek})
+
+
+@user_passes_test(je_admin)
+def clanek_smaz(request, slug):
+    clanek = get_object_or_404(Clanek, slug=slug)
+    if request.method == 'POST':
+        clanek.delete()
+        return redirect('blog_seznam')
+    return render(request, 'home/blog/clanek_potvrdit_smazani.html', {'clanek': clanek})

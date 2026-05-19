@@ -89,7 +89,7 @@
         transition: 0.3s;
     }
 
-    /* Sekce Komunita */
+    /* Sekce Komunita a nadpisy */
     .section-label { display: flex; align-items: center; gap: 15px; margin: 45px 0 20px 0; }
     .section-label h4 {
         font-weight: 800;
@@ -124,6 +124,18 @@
     }
 
     .sub-card:hover { border-color: var(--epes-gold); background: var(--epes-bg); color: var(--epes-gold); }
+
+    /* Speciální úprava pro kartu článku, aby se netloukla s rozcestníkem */
+    .blog-feature-card {
+        background: #ffffff;
+        border-radius: 25px;
+        text-decoration: none !important;
+        color: var(--epes-brown);
+        box-shadow: 0 10px 30px var(--card-shadow);
+        border: 1px solid rgba(197, 160, 89, 0.1);
+        transition: 0.3s ease;
+    }
+    .blog-feature-card:hover { border-color: var(--epes-gold); }
 
     /* Profesionální info sekce (Karty) */
     .info-section-premium {
@@ -285,6 +297,41 @@
         </a>
     </div>
 
+    {% if nejnovejsi_clanek %}
+    <div class="section-label">
+        <h4>Čtení na dnešek</h4>
+        <div class="line"></div>
+    </div>
+
+    <div class="blog-feature-card p-0 overflow-hidden d-flex flex-column flex-md-row align-items-stretch" style="min-height: 250px;">
+        {% if nejnovejsi_clanek.obrazek %}
+        <div class="col-md-5 position-relative" style="background: url('{{ nejnovejsi_clanek.obrazek.url }}') center/cover no-repeat; min-height: 200px;">
+            <span class="badge position-absolute top-0 start-0 m-3 shadow-sm" style="background: var(--epes-brown); color: white; font-size: 0.75rem; letter-spacing: 1px; padding: 6px 12px; border-radius: 8px;">
+                {{ nejnovejsi_clanek.get_kategorie_display }}
+            </span>
+        </div>
+        {% endif %}
+
+        <div class="p-4 p-lg-5 d-flex flex-column justify-content-center col-md-{% if nejnovejsi_clanek.obrazek %}7{% else %}12{% endif %}">
+            {% if not nejnovejsi_clanek.obrazek %}
+                <span class="badge align-self-start mb-2" style="background: var(--epes-bg); color: var(--epes-gold); font-size: 0.75rem; padding: 6px 12px; border-radius: 8px;">{{ nejnovejsi_clanek.get_kategorie_display }}</span>
+            {% endif %}
+            <span class="text-muted small fw-bold mb-1">{{ nejnovejsi_clanek.datum_publikace|date:"d. m. Y" }}</span>
+            <h3 class="fw-bold mb-3" style="color: var(--epes-brown); font-family: 'Playfair Display', serif;">{{ nejnovejsi_clanek.titulek }}</h3>
+            <p class="text-muted small mb-4" style="line-height: 1.6;">{{ nejnovejsi_clanek.perex|truncatechars:180 }}</p>
+
+            <div class="d-flex align-items-center justify-content-between mt-auto">
+                <a href="{% url 'blog_detail' nejnovejsi_clanek.slug %}" class="btn btn-sm fw-bold px-4 py-2" style="background: var(--epes-gold); color: white; border-radius: 12px; font-size: 0.85rem; border: none;">
+                    Číst článek <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+                <a href="{% url 'blog_seznam' %}" class="text-decoration-none small fw-bold" style="color: var(--epes-brown); opacity: 0.7;">
+                    Všechny články ({{ celkovy_pocet_clanku }}) <i class="fas fa-chevron-right ms-1" style="font-size: 0.7rem;"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     {# KOMUNITA #}
     <div class="section-label">
         <h4>Komunita a vyžití</h4>
@@ -315,7 +362,7 @@
             <div class="feature-card">
                 <i class="fas fa-map-marked-alt feature-icon"></i>
                 <h4>Interaktivní mapa</h4>
-                <p>Nejsme seznam, jsme živý prostor pro váš bezpečný pohyb v terénu.</p>
+                <p>Nejsme seznam, jsme živý prostor pro váš safe pohyb v terénu.</p>
             </div>
             <div class="feature-card">
                 <i class="fas fa-bell feature-icon"></i>

@@ -1,13 +1,55 @@
 from django import forms
-from .models import Sluzba, Recenze
+# UPRAVENO: Přidán import modelu Clanek
+from .models import Sluzba, Recenze, Clanek
 
 
+# =====================================================================
+# --- FORMULÁŘ PRO BLOG (NOVÉ) ---
+# =====================================================================
+class ClanekForm(forms.ModelForm):
+    class Meta:
+        model = Clanek
+        # Použijeme '__all__', což automaticky natáhne VŠECHNA pole z tvého modelu
+        fields = '__all__'
+
+        # Z pole slug uděláme skryté nebo nepovinné, protože ho generujeme automaticky ve views
+        exclude = ['slug']
+
+        labels = {
+            'titulek': 'Název článku',
+            'kategorie': 'Kategorie',
+            'perex': 'Perex (krátký úvodní text na kartě)',
+            'obrazek': 'Úvodní obrázek článku',
+            'publikovan': 'Publikovat hned',
+        }
+        widgets = {
+            'perex': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Krátký popis...'}),
+            'obrazek': forms.ClearableFileInput(),
+            'publikovan': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            if name != 'publikovan':
+                if name == 'kategorie':
+                    css_class = 'form-select custom-brown-input'
+                else:
+                    css_class = 'form-control custom-brown-input'
+
+                field.widget.attrs.update({
+                    'class': css_class,
+                    'style': 'border-radius: 12px; border: 1.5px solid var(--border-tan); padding: 10px;'
+                })
+
+# =====================================================================
+# --- TVÉ STÁVAJÍCÍ FORMULÁŘE ---
+# =====================================================================
 class SluzbaForm(forms.ModelForm):
-    # Přidáme explicitně pole typ s ikonkami
     typ = forms.ChoiceField(
         choices=Sluzba.TYPY_SLUZEB,
         label="Co je to za místo?",
-        required=False  # Uděláme i typ nepovinný, pokud by zlobil
+        required=False
     )
 
     class Meta:
@@ -32,18 +74,17 @@ class SluzbaForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # KLÍČOVÁ ZMĚNA: Nastavíme pole jako nepovinná
         self.fields['nazev'].required = False
         self.fields['adresa'].required = False
         self.fields['lat'].required = False
         self.fields['lon'].required = False
 
-        # Hromadné přidání třídy pro stylování
         for field in self.fields.values():
             field.widget.attrs.update({
                 'class': 'form-control custom-brown-input',
                 'style': 'border-radius: 12px; border: 1.5px solid var(--border-tan); padding: 10px;'
             })
+
 
 class RecenzeForm(forms.ModelForm):
     class Meta:
@@ -55,8 +96,9 @@ class RecenzeForm(forms.ModelForm):
                 'placeholder': 'Jaké to tam bylo? Co by ostatní měli vědět?',
                 'rows': 3
             }),
-            'hvezdy': forms.HiddenInput(), # Hvězdičky řešíme přes JS, tak stačí skryté pole
+            'hvezdy': forms.HiddenInput(),
         }
+
 
 class KontaktForm(forms.Form):
     jmeno = forms.CharField(
@@ -93,7 +135,6 @@ class KontaktForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Sjednocení stylu i pro kontaktní formulář
         for field in self.fields.values():
             field.widget.attrs.update({
                 'class': 'form-control custom-brown-input',

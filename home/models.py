@@ -7,6 +7,8 @@ from django.core.files.base import ContentFile
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone  # PŘIDÁN IMPORT PRO BLOG
+from django.utils.text import slugify  # PŘIDÁN IMPORT PRO GENEROVÁNÍ URL SLUGU
 
 pillow_heif.register_heif_opener()
 
@@ -104,6 +106,7 @@ class Recenze(models.Model):
         ext = os.path.splitext(self.media_soubor.name)[1].lower()
         return ext in ['.mp4', '.mov', '.avi', '.webm']
 
+
 class KontaktniZprava(models.Model):
     jmeno = models.CharField(max_length=100, verbose_name="Jméno")
     email = models.EmailField(verbose_name="E-mail")
@@ -117,3 +120,38 @@ class KontaktniZprava(models.Model):
 
     def __str__(self):
         return f"Zpráva od {self.jmeno} - {self.predmet}"
+
+
+# =========================================================================
+# --- NOVÝ MODEL PRO BLOG ---
+# =========================================================================
+class Clanek(models.Model):
+    KATEGORIE_CHOICES = [
+        ('vychova', 'Výchova a výcvik'),
+        ('zdravi', 'Zdraví a první pomoc'),
+        ('stravovani', 'Strava a krmení'),
+        ('pribehy', 'Příběhy nálezů'),
+    ]
+
+    titulek = models.CharField(max_length=200, verbose_name="Titulek článku")
+    slug = models.SlugField(unique=True, blank=True, max_length=250, verbose_name="URL Slug")
+    kategorie = models.CharField(max_length=20, choices=KATEGORIE_CHOICES, default='vychova', verbose_name="Kategorie")
+    perex = models.TextField(max_length=500, verbose_name="Krátký popis (zobrazuje se v úvodu)")
+    text = models.TextField(verbose_name="Celý text článku")
+    obrazek = models.ImageField(upload_to="blog_images/", blank=True, null=True, verbose_name="Úvodní obrázek")
+    datum_publikace = models.DateTimeField(default=timezone.now, verbose_name="Datum publikace")
+    publikovan = models.BooleanField(default=False, verbose_name="Je publikován?")
+
+    class Meta:
+        verbose_name = "Článek"
+        verbose_name_plural = "Články"
+        ordering = ['-datum_publikace']
+
+    def save(self, *args, **kwargs):
+        # Automatické generování slugu z titulku, pokud není zadán ručně
+        if not self.slug:
+            self.slug = slugify(self.titulek)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.titulek

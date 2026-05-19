@@ -1,0 +1,153 @@
+{% extends 'home/base.html' %}
+
+{% block title %}Blog a rady | epes.online 🐾{% endblock %}
+
+{% block content %}
+<style>
+    :root { 
+        --epes-gold: #c5a059; 
+        --epes-brown: #3e2723; 
+        --epes-bg: #fdfaf4;
+        --card-shadow: rgba(62, 39, 35, 0.05);
+    }
+
+    .is-kocka {
+        --epes-gold: #9b86bd;
+        --epes-brown: #2d1b4d;
+        --epes-bg: #f9f7ff;
+    }
+
+    .blog-container { max-width: 1100px; margin: 0 auto; padding: 15px; }
+    
+    .blog-header { padding: 40px 5px 20px; }
+    .blog-header h1 { font-family: 'Playfair Display', serif; font-size: 2.8rem; color: var(--epes-brown); font-weight: 800; }
+
+    .category-pill {
+        display: inline-block; padding: 8px 16px; border-radius: 50px;
+        background: white; color: var(--epes-brown); font-weight: 600; font-size: 0.85rem;
+        text-decoration: none !important; box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        border: 1px solid rgba(0,0,0,0.05); transition: 0.2s;
+    }
+    .category-pill:hover, .category-pill.active { background: var(--epes-gold); color: white; border-color: var(--epes-gold); }
+
+    .blog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 25px;
+        margin-top: 30px;
+    }
+
+    .blog-card {
+        background: white; border-radius: 25px; display: flex; flex-direction: column;
+        box-shadow: 0 10px 30px var(--card-shadow); border: 1px solid rgba(197, 160, 89, 0.05);
+        overflow: hidden; transition: 0.3s ease; height: 100%; text-decoration: none !important; color: inherit;
+        position: relative;
+    }
+    .blog-card:hover { transform: translateY(-5px); border-color: var(--epes-gold); }
+
+    .blog-card-img { height: 200px; background-size: cover; background-position: center; position: relative; }
+    .blog-card-body { padding: 25px; display: flex; flex-direction: column; flex-grow: 1; }
+    .blog-card-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--epes-brown); margin-bottom: 10px; }
+
+    .section-label { display: flex; align-items: center; gap: 15px; margin: 40px 0 20px 0; }
+    .section-label h4 { font-weight: 800; color: var(--epes-brown); margin: 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6; }
+    .section-label .line { flex-grow: 1; height: 1px; background: var(--epes-gold); opacity: 0.2; }
+
+    .admin-card-actions {
+        position: absolute; top: 15px; right: 15px; z-index: 10; display: flex; gap: 8px;
+    }
+    .admin-btn {
+        width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+        border-radius: 50px; background: rgba(255, 255, 255, 0.9); box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        color: var(--epes-brown); transition: 0.2s; font-size: 0.85rem;
+    }
+    .admin-btn:hover { transform: scale(1.1); background: white; text-decoration: none; }
+    .admin-btn-edit:hover { color: #ffc107; }
+    .admin-btn-delete:hover { color: #dc3545; }
+</style>
+
+<div class="blog-container {% if user.pes_set.first.druh == 'kocka' %}is-kocka{% endif %}">
+
+    {# Hlavička blogu #}
+    <div class="blog-header text-center">
+        <h1>Čtení pro páníčky 📖</h1>
+        <p class="text-muted">Rady od expertů, příběhy z komunity a tipy pro bezpečný život.</p>
+
+        {# OPRAVENO: Přepsáno na formulář běžící přímo na tvém webu #}
+        {% if user.is_superuser %}
+            <div class="mt-3">
+                <a href="{% url 'clanek_vytvor' %}" class="btn btn-sm text-white fw-bold px-3 py-2" style="background: var(--epes-gold); border-radius: 12px; font-size: 0.8rem;">
+                    <i class="fas fa-plus me-2"></i> Nový článek
+                </a>
+            </div>
+        {% endif %}
+
+        {# Filtry kategorií #}
+        <div class="d-flex justify-content-center gap-2 flex-wrap mt-4">
+            <a href="?kategorie=vse" class="category-pill active">Všechny články</a>
+            <a href="?kategorie=vychova" class="category-pill">Výchova a výcvik</a>
+            <a href="?kategorie=zdravi" class="category-pill">Zdraví a první pomoc</a>
+            <a href="?kategorie=stravovani" class="category-pill">Strava</a>
+            <a href="?kategorie=pribehy" class="category-pill">Příběhy nálezů</a>
+        </div>
+    </div>
+
+    <div class="section-label">
+        <h4>Archiv článků</h4>
+        <div class="line"></div>
+    </div>
+
+    {# Mřížka s články #}
+    <div class="blog-grid">
+        {% for clanek in clanky %}
+        <div style="position: relative;">
+
+            {# OPRAVENO: Přepsáno na webové formuláře pro úpravu a smazání článku #}
+            {% if user.is_superuser %}
+                <div class="admin-card-actions">
+                    <a href="{% url 'clanek_uprav' clanek.slug %}" class="admin-btn admin-btn-edit" title="Upravit článek">
+                        <i class="fas fa-pen"></i>
+                    </a>
+                    <a href="{% url 'clanek_smaz' clanek.slug %}" class="admin-btn admin-btn-delete" title="Smazat článek">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
+            {% endif %}
+
+            <a href="{% url 'blog_detail' clanek.slug %}" class="blog-card">
+                {% if clanek.obrazek %}
+                <div class="blog-card-img" style="background-image: url('{{ clanek.obrazek.url }}');">
+                    <span class="badge position-absolute bottom-0 start-0 m-3" style="background: rgba(255,255,255,0.9); color: var(--epes-brown); font-size: 0.7rem; font-weight: 700;">
+                        {{ clanek.get_kategorie_display }}
+                    </span>
+                </div>
+                {% else %}
+                <div class="blog-card-img bg-secondary-subtle d-flex align-items-center justify-content-center">
+                    <span class="text-muted">🐾 epes.online</span>
+                    <span class="badge position-absolute bottom-0 start-0 m-3" style="background: rgba(255,255,255,0.9); color: var(--epes-brown); font-size: 0.7rem; font-weight: 700;">
+                        {{ clanek.get_kategorie_display }}
+                    </span>
+                </div>
+                {% endif %}
+
+                <div class="blog-card-body">
+                    <span class="text-muted small fw-bold mb-1">{{ clanek.datum_publikace|date:"d. m. Y" }}</span>
+                    <h3 class="blog-card-title">{{ clanek.titulek }}</h3>
+
+                    <p class="text-muted small m-0" style="line-height: 1.5;">{{ clanek.perex|truncatechars:110 }}</p>
+
+                    <div class="mt-4 pt-3 fw-bold small text-end" style="color: var(--epes-gold); border-top: 1px solid #f8f8f8;">
+                        Číst dále <i class="fas fa-chevron-right ms-1" style="font-size: 0.7rem;"></i>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% empty %}
+        <div class="text-center w-100 py-5">
+            <p class="text-muted m-0">Zatím tu žádné články nejsou, ale už na nich usilovně pracujeme! 🐾</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}
