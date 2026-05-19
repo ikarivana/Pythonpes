@@ -516,8 +516,14 @@ def clanek_vytvor(request):
             clanek.slug = slugify(clanek.titulek)
             clanek.save()
             return redirect('blog_seznam')
+        else:
+            # Tady Django přejde dál a znovu vykreslí šablonu i s chybami formuláře
+            pass
     else:
         form = ClanekForm()
+
+    # Šablona se vykreslí znovu, a pokud form není validní,
+    # {{ for error in field.errors }} v šabloně vypíše, co je špatně.
     return render(request, 'home/blog/clanek_form.html', {'form': form, 'akce': 'Nový článek'})
 
 

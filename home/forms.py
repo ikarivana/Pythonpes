@@ -15,6 +15,7 @@ class ClanekForm(forms.ModelForm):
         # Z pole slug uděláme skryté nebo nepovinné, protože ho generujeme automaticky ve views
         exclude = ['slug']
 
+
         labels = {
             'titulek': 'Název článku',
             'kategorie': 'Kategorie',
@@ -26,6 +27,7 @@ class ClanekForm(forms.ModelForm):
             'perex': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Krátký popis...'}),
             'obrazek': forms.ClearableFileInput(),
             'publikovan': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'text': forms.Textarea(attrs={'required': False}),
         }
 
     def __init__(self, *args, **kwargs):
