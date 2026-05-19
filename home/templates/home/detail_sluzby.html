@@ -1,258 +1,178 @@
-{% extends "home/base.html" %}
+{% extends 'home/base.html' %}
+
 {% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 <style>
-    /* SOS Karta */
-    .sos-detail-card {
-        border: 3px solid #ff0000;
-        background-color: #fff5f5;
-        border-radius: 15px;
-        animation: border-pulse 2s infinite;
-    }
-    @keyframes border-pulse {
-        0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4); }
-        70% { box-shadow: 0 0 0 15px rgba(255, 0, 0, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
-    }
-    .btn-sos-profile {
-        background-color: #ff0000;
-        color: white;
-        font-weight: bold;
-        padding: 15px 25px;
-        border-radius: 50px;
-        text-transform: uppercase;
-        transition: 0.3s;
-    }
-    .btn-sos-profile:hover {
-        background-color: #8b0000;
-        color: white;
-        transform: scale(1.05);
+    :root {
+        --mid-brown: #3e2723;
+        --gold: #c5a059;
+        --border-tan: #e2d1c3;
     }
 
-    /* Recenze a hvězdy */
-    .rating-stars-display { color: #f1c40f; font-size: 1.1rem; }
-    .review-card {
-        border-radius: 15px;
-        border-left: 5px solid var(--epes-gold, #c5a059) !important;
-        background: #fff;
-        transition: 0.2s;
+    #map-form select {
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%233e2723' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 15px center !important;
+        background-size: 18px !important;
+        padding-right: 45px !important;
     }
-    .review-card:hover { transform: translateX(5px); }
 
-    /* Hvězdičkový input */
-    .rating-selection { display: flex; flex-direction: row-reverse; justify-content: center; gap: 5px; }
-    .rating-selection input { display: none; }
-    .rating-selection label { cursor: pointer; font-size: 2.5rem; color: #ddd; transition: 0.2s; }
-    .rating-selection label:hover,
-    .rating-selection label:hover ~ label,
-    .rating-selection input:checked ~ label { color: #f1c40f; }
+    #map-picker {
+        height: 500px;
+        width: 100%;
+        border-radius: 20px;
+        border: 2px solid var(--border-tan);
+    }
 
-    /* Média v recenzích */
-    .review-media-container {
-        max-width: 100%;
-        margin-top: 15px;
-        border-radius: 10px;
-        overflow: hidden;
+    .gps-status {
+        font-size: 0.85rem; padding: 12px; border-radius: 12px; margin-bottom: 15px; text-align: center; font-weight: bold;
     }
-    .review-img, .review-video {
-        max-height: 300px;
-        width: auto;
-        max-width: 100%;
-        display: block;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .file-input-wrapper {
-        background: #fff;
-        padding: 10px;
-        border-radius: 10px;
-        border: 1px dashed #c5a059;
+    .status-searching { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+    .status-fixed { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+
+    #map-form input, #map-form select, #map-form textarea {
+        width: 100%; padding: 12px; border-radius: 12px; border: 1.5px solid var(--border-tan); margin-bottom: 10px;
     }
 </style>
 
-<div class="container mt-5">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'mapa_sluzeb' %}">Mapa</a></li>
-            <li class="breadcrumb-item active">{{ sluzba.nazev }}</li>
-        </ol>
-    </nav>
-
-    {% if sluzba.typ == 'ztrata' %}
-    <div class="sos-detail-card p-4 mb-4 text-center shadow">
-        <h2 class="text-danger fw-bold"><i class="fas fa-exclamation-triangle"></i> PROBÍHÁ PÁTRÁNÍ!</h2>
-        <p class="lead mb-4">Tento záznam se týká pohřešovaného zvířete. Pokud ho zahlédnete, okamžitě kontaktujte majitele.</p>
-        <a href="#" class="btn btn-sos-profile shadow-lg">
-            <i class="fas fa-dog"></i> Zobrazit plný profil psa
-        </a>
-    </div>
-    {% endif %}
-
-    <div class="card shadow-sm mt-4 border-0 rounded-4">
-        <div class="card-body p-4">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
-                <div>
-                    <h1 class="card-title text-brown fw-800 mb-0">{{ sluzba.nazev }}</h1>
-                    {% if sluzba.typ != 'ztrata' and prumer %}
-                        <div class="mt-1 d-flex align-items-center gap-2">
-                            <span class="rating-stars-display">
-                                {{ prumer|stringformat:".1f" }} <i class="fas fa-star"></i>
-                            </span>
-                            <span class="text-muted small">({{ pocet_recenzi }}x hodnoceno)</span>
-                        </div>
-                    {% endif %}
-                </div>
-                <span class="badge {% if sluzba.typ == 'ztrata' %}bg-danger{% else %}bg-warning text-dark{% endif %} px-3 py-2 rounded-pill mt-2 mt-md-0">
-                    {{ sluzba.get_typ_display }}
-                </span>
-            </div>
-
-            <p class="text-muted"><i class="fas fa-map-marker-alt me-2 text-danger"></i>{{ sluzba.adresa }}</p>
-            <hr>
-
-            <h5 class="mt-4 fw-bold">Popis situace / služby</h5>
-            <p class="card-text text-secondary">{{ sluzba.popis|default:"Pro tuto službu nebyl zadán žádný podrobný popis." }}</p>
-
-            <div class="row mt-4">
-                {% if sluzba.telefon %}
-                <div class="col-md-6 mb-3">
-                    <div class="p-3 border-0 rounded-4 shadow-sm" style="background: #f8f9fa;">
-                        <small class="text-muted text-uppercase fw-bold">📞 Telefonní kontakt</small>
-                        <p class="h5 mt-1 mb-0">
-                            <a href="tel:{{ sluzba.telefon }}" class="text-decoration-none text-brown">{{ sluzba.telefon }}</a>
-                        </p>
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if sluzba.web %}
-                <div class="col-md-6 mb-3">
-                    <div class="p-3 border-0 rounded-4 shadow-sm" style="background: #f8f9fa;">
-                        <small class="text-muted text-uppercase fw-bold">🌐 Web / Sítě</small>
-                        <p class="mt-1 mb-0">
-                            <a href="{{ sluzba.web }}" target="_blank" class="text-break text-decoration-none">{{ sluzba.web }}</a>
-                        </p>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-
-            <div class="mt-4 d-flex flex-wrap gap-2 align-items-center border-top pt-4">
-                <a href="{% url 'mapa_sluzeb' %}" class="btn btn-outline-secondary rounded-pill px-4">
-                    <i class="fas fa-arrow-left me-2"></i>Zpět na mapu
-                </a>
-
-                {% if user == sluzba.vlastnik %}
-                <div class="ms-md-auto d-flex gap-2">
-                    <a href="{% url 'upravit_sluzbu' sluzba.pk %}" class="btn btn-primary rounded-pill px-4">
-                        <i class="fas fa-edit me-2"></i>Upravit službu
-                    </a>
-                    <a href="{% url 'smazat_sluzbu' sluzba.pk %}" class="btn btn-danger rounded-pill px-4" onclick="return confirm('Opravdu smazat celou službu?')">
-                        <i class="fas fa-trash"></i>
-                    </a>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    {% if sluzba.typ != 'ztrata' %}
-    <div class="row mt-5 mb-5">
-        <div class="col-lg-7">
-            <h3 class="fw-800 text-brown mb-4"><i class="fas fa-comments me-2 text-warning"></i>Recenze komunity</h3>
-
-            {% for recenze in sluzba.recenze_set.all %}
-                <div class="card review-card shadow-sm mb-3 border-0">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div>
-                                <h6 class="fw-bold mb-0 text-brown">{{ recenze.uzivatel.username }}</h6>
-                                <small class="text-muted" style="font-size: 0.75rem;">{{ recenze.vytvoreno|date:"d. m. Y" }}</small>
-                            </div>
-                            <div class="rating-stars-display" style="font-size: 0.9rem;">
-                                {% for i in "12345" %}
-                                    <i class="{% if forloop.counter <= recenze.hvezdy %}fas{% else %}far{% endif %} fa-star"></i>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <p class="text-muted mb-0 small">{{ recenze.text }}</p>
-
-                        {% if recenze.media_soubor %}
-                            <div class="review-media-container">
-                                {% if recenze.je_video %}
-                                    <video controls class="review-video">
-                                        <source src="{{ recenze.media_soubor.url }}" type="video/mp4">
-                                        Váš prohlížeč nepodporuje přehrávání videa.
-                                    </video>
-                                {% else %}
-                                    <a href="{{ recenze.media_soubor.url }}" target="_blank">
-                                        <img src="{{ recenze.media_soubor.url }}" style="width: 200px; height: auto; display: block !important;" alt="TEST">
-                                    </a>
-                                {% endif %}
-                            </div>
-                        {% endif %}
-
-                        {# SEKCE PRO MOJE RECENZE (UPRAVIT / SMAZAT) #}
-                        {% if recenze.uzivatel == request.user %}
-                            <div class="mt-3 pt-2 border-top d-flex justify-content-end gap-3">
-                                <a href="{% url 'upravit_recenzi' recenze.id %}" class="text-primary small text-decoration-none fw-bold">
-                                    <i class="fas fa-edit me-1"></i> UPRAVIT
-                                </a>
-                                <a href="{% url 'smazat_recenzi' recenze.id %}"
-                                   class="text-danger small text-decoration-none fw-bold"
-                                   onclick="return confirm('Opravdu chceš smazat tuto recenzi?')">
-                                    <i class="fas fa-trash-alt me-1"></i> SMAZAT
-                                </a>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            {% empty %}
-                <div class="text-center p-5 bg-white rounded-4 shadow-sm border">
-                    <i class="far fa-star fa-3x text-light mb-3"></i>
-                    <p class="text-muted mb-0">Zatím nikdo nehodnotil. Buďte první!</p>
-                </div>
-            {% endfor %}
-        </div>
-
+<div class="container py-4">
+    <div class="row g-4">
         <div class="col-lg-5">
-            <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 20px; background: #fdfaf4;">
-                <div class="card-body p-4 text-center">
-                    <h5 class="fw-800 text-brown mb-3">Přidat zkušenost</h5>
-                    {% if user.is_authenticated %}
-                        <form action="{% url 'pridat_recenzi' sluzba.pk %}" method="POST" enctype="multipart/form-data">
-                            {% csrf_token %}
+            <div class="bg-white p-4 shadow-sm" style="border-radius: 25px;">
+                <h3 class="fw-bold mb-3">📍 Nahlásit událost</h3>
 
-                            <div class="rating-selection mb-3">
-                                <input type="radio" id="s5" name="hvezdy" value="5" required><label for="s5">★</label>
-                                <input type="radio" id="s4" name="hvezdy" value="4"><label for="s4">★</label>
-                                <input type="radio" id="s3" name="hvezdy" value="3"><label for="s3">★</label>
-                                <input type="radio" id="s2" name="hvezdy" value="2"><label for="s2">★</label>
-                                <input type="radio" id="s1" name="hvezdy" value="1"><label for="s1">★</label>
-                            </div>
+                <div id="gps-indicator" class="gps-status status-searching">
+                    <i class="fas fa-location-arrow fa-spin me-2"></i> Zaměřuji vaši polohu...
+                </div>
 
-                            <textarea name="text" class="form-control border-0 shadow-sm rounded-3 mb-3" rows="4" placeholder="Jaké to tam bylo? Co by ostatní měli vědět?" required></textarea>
+                <form method="post" id="map-form">
+                    {% csrf_token %}
 
-                            <div class="file-input-wrapper mb-3 text-start">
-                                <label class="small fw-bold text-muted d-block mb-2">Přidat fotku nebo video:</label>
-                                <input type="file" name="media_soubor" class="form-control form-control-sm border-0" accept="image/*,video/*">
-                            </div>
+                    <label>Co se děje?</label>
+                    {{ form.typ }}
 
-                            <button type="submit" class="btn w-100 fw-bold py-3 rounded-pill shadow"
-                                    style="background-color: #3e2723 !important; color: #ffffff !important; border: none !important; display: block !important; opacity: 1 !important;">
-                                ODESLAT HODNOCENÍ
-                            </button>
-                        </form>
-                    {% else %}
-                        <p class="text-muted mb-3">Chcete hodnotit? Musíte se nejdříve přihlásit.</p>
-                        <a href="{% url 'login' %}" class="btn w-100 rounded-pill px-4 shadow-sm"
-                           style="background-color: #ffffff !important; color: #3e2723 !important; border: 2px solid #c5a059 !important; font-weight: bold; text-decoration: none;">
-                            PŘIHLÁSIT SE
-                        </a>
-                    {% endif %}
+                    <label>Název / Jméno:</label>
+                    {{ form.nazev }}
+
+                    <label>Telefonní kontakt:</label>
+                    {{ form.telefon }}
+
+                    <label>Webová stránka / Odkaz na FB:</label>
+                    {{ form.web }}
+
+                    <label>Přesná adresa (ulice, město):</label>
+                    {{ form.adresa }}
+
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="small text-muted">Zeměpisná šířka (Lat)</label>
+                            {{ form.lat }}
+                        </div>
+                        <div class="col-6">
+                            <label class="small text-muted">Zeměpisná délka (Lon)</label>
+                            {{ form.lon }}
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-dark w-100 fw-bold py-3 mt-3" style="border-radius: 12px;">
+                        ODESLAT
+                    </button>
+                    <a href="{% url 'mapa_sluzeb' %}" class="btn btn-link w-100 text-muted mt-2 text-decoration-none small">Zpět na mapu</a>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="sticky-top" style="top: 20px;">
+                <div class="position-relative">
+                    <button type="button" class="btn btn-white shadow-sm fw-bold border" onclick="najdiMne()"
+                            style="position: absolute; top: 15px; right: 15px; z-index: 1000; background: white; border-radius: 10px;">
+                        <i class="fas fa-crosshairs text-primary"></i> MOJE POLOHA
+                    </button>
+                    <div id="map-picker"></div>
+                </div>
+
+                <div id="info-box" class="p-3 mt-3 rounded-4 bg-light border small text-muted text-center">
+                    <i class="fas fa-info-circle me-1"></i>
+                    <span id="info-text">Klikněte do mapy pro přesné umístění bodu.</span>
                 </div>
             </div>
         </div>
     </div>
-    {% endif %}
 </div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    let mapPicker, marker;
+    const latField = document.getElementById('id_lat');
+    const lonField = document.getElementById('id_lon');
+    const adresaField = document.getElementById('id_adresa');
+    const typSelect = document.getElementById('id_typ');
+
+    function setCoords(lat, lon, updateAddress = true) {
+        latField.value = parseFloat(lat).toFixed(6);
+        lonField.value = parseFloat(lon).toFixed(6);
+
+        if (marker) { marker.setLatLng([lat, lon]); }
+        else { marker = L.marker([lat, lon], {draggable: true}).addTo(mapPicker); }
+
+        if (updateAddress) {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (adresaField) adresaField.value = data.display_name || "";
+                    const ind = document.getElementById('gps-indicator');
+                    ind.className = "gps-status status-fixed";
+                    ind.innerHTML = '<i class="fas fa-check-circle"></i> Poloha nastavena';
+                });
+        }
+    }
+
+    function najdiMne() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(p => {
+                const {latitude, longitude} = p.coords;
+                mapPicker.setView([latitude, longitude], 15);
+                setCoords(latitude, longitude);
+            }, () => {
+                const ind = document.getElementById('gps-indicator');
+                ind.className = "gps-status status-searching text-danger";
+                ind.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Povolte prosím GPS pro zaměření';
+            });
+        }
+    }
+
+    function aktualizujInfo() {
+        const val = typSelect.value.toLowerCase();
+        const info = document.getElementById('info-text');
+        if (val.includes('ztrata') || val.includes('nebezpeci')) {
+            info.innerHTML = "<strong>SOS:</strong> Toto hlášení se zobrazí na mapě okamžitě.";
+        } else {
+            info.innerHTML = "Záznam podléhá schválení administrátorem (obvykle do 24h).";
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        mapPicker = L.map('map-picker').setView([49.8, 15.5], 7);
+        L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(mapPicker);
+
+        // Pokud nemáme souřadnice (nový záznam), zkusíme GPS hned
+        if (!latField.value) {
+            najdiMne();
+        } else {
+            setCoords(latField.value, lonField.value, false);
+            mapPicker.setView([latField.value, lonField.value], 15);
+        }
+
+        mapPicker.on('click', e => setCoords(e.latlng.lat, e.latlng.lng));
+        typSelect.addEventListener('change', aktualizujInfo);
+        aktualizujInfo();
+
+        setTimeout(() => mapPicker.invalidateSize(), 400);
+    });
+</script>
 {% endblock %}

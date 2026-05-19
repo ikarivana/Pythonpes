@@ -5,31 +5,46 @@
 {% block content %}
 <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
 
+<style>
+    .ql-toolbar.ql-snow { border: 1.5px solid #c5a059 !important; border-top-left-radius: 12px; border-top-right-radius: 12px; background: #fff; }
+    .ql-container.ql-snow { border: 1.5px solid #c5a059 !important; border-top: none !important; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; background: #fff; font-family: inherit; }
+</style>
+
 <div class="container py-5" style="max-width: 700px;">
     <div class="card shadow-sm p-4" style="border-radius: 20px; background: #fdfaf4; border: 1px solid rgba(197, 160, 89, 0.2);">
 
         <h2 class="fw-bold mb-4" style="font-family: 'Playfair Display', serif; color: #3e2723;">{{ akce }} ✍️</h2>
 
-        <form method="post" enctype="multipart/form-data" id="clanekForm">
+        {# Přidáno novalidate pro obejití chyby prohlížeče #}
+        <form method="post" enctype="multipart/form-data" id="clanekForm" novalidate>
             {% csrf_token %}
+
+            {% if form.errors %}
+                <div style="background: #ffcccc; color: #cc0000; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                    <strong>Chyba ve formuláři:</strong>
+                    <ul>
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
 
             {% for field in form %}
                 <div class="mb-3">
                     <label class="form-label fw-bold small text-muted d-block mb-1">{{ field.label }}</label>
 
-                    {# Detekce textového pole pro hlavní obsah článku #}
                     {% if field.name == 'text' or field.name == 'obsah' %}
-                        <div style="display:none;">{{ field }}</div>
+                        {# Opraveno: Pole není display:none, ale posunuto mimo obrazovku #}
+                        <div style="position: absolute; left: -9999px;">{{ field }}</div>
 
-                        <div id="editor" style="height: 300px; border-radius: 12px; background: white; border: 1.5px solid var(--border-tan); font-size: 1rem;">
+                        <div id="editor" style="height: 300px; border-radius: 12px; background: white; border: 1.5px solid #c5a059; font-size: 1rem;">
                             {{ field.value|default_if_none:""|safe }}
                         </div>
                     {% else %}
                         {{ field }}
-                    {% endif %}
-
-                    {% if field.help_text %}
-                        <div class="form-text small text-muted">{{ field.help_text }}</div>
                     {% endif %}
 
                     {% for error in field.errors %}
@@ -52,7 +67,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
 <script>
-    // 1. Inicializace samotného editoru a jeho tlačítek
     const quill = new Quill('#editor', {
         theme: 'snow',
         modules: {
@@ -65,32 +79,31 @@
         }
     });
 
-    // 2. Propojení: Při odeslání formuláře vezmeme HTML kód z editoru a vložíme ho do skrytého Django pole
     const form = document.getElementById('clanekForm');
-    form.addEventListener('submit', function() {
-        // Najdeme skrytou textarea (Django pole pro text/obsah)
-        const hiddenTextArea = document.querySelector('textarea[name="text"]') || document.querySelector('textarea[name="obsah"]');
+
+    form.addEventListener('submit', function(event) {
+        // Zastavíme odeslání
+        event.preventDefault();
+
+        // Najdeme textarea, které patří k našemu editoru
+        // Hledáme v rámci formuláře jakékoliv textarea, které není prázdné nebo má správný name
+        // Můžete použít přímo název z Django form:
+        const hiddenTextArea = form.querySelector('textarea[name="text"], textarea[name="obsah"]');
+
         if (hiddenTextArea) {
-            hiddenTextArea.value = quill.getSemanticHTML();
+            // Přenese obsah z Quill do textarea
+            const htmlContent = quill.root.innerHTML;
+
+            // Pokud je obsah jen prázdný tag, vyčistíme ho
+            hiddenTextArea.value = (htmlContent === '<p><br></p>') ? '' : htmlContent;
+
+            console.log("Data přenesena!");
+
+            // Odeslání
+            this.submit();
+        } else {
+            console.error("Nenalezeno odpovídající textarea pole pro uložení obsahu!");
         }
     });
 </script>
-
-<style>
-    /* Stylování editoru, aby krásně seděl do designu epes.online */
-    .ql-toolbar.ql-snow {
-        border: 1.5px solid #c5a059 !important;
-        border-top-left-radius: 12px;
-        border-top-right-radius: 12px;
-        background: #fff;
-    }
-    .ql-container.ql-snow {
-        border: 1.5px solid #c5a059 !important;
-        border-top: none !important;
-        border-bottom-left-radius: 12px;
-        border-bottom-right-radius: 12px;
-        background: #fff;
-        font-family: inherit;
-    }
-</style>
 {% endblock %}

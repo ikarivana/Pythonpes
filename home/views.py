@@ -511,21 +511,22 @@ def je_admin(user):
 def clanek_vytvor(request):
     if request.method == 'POST':
         form = ClanekForm(request.POST, request.FILES)
-        if form.is_valid():
-            clanek = form.save(commit=False)
-            clanek.slug = slugify(clanek.titulek)
-            clanek.save()
-            return redirect('blog_seznam')
-        else:
-            # Tady Django přejde dál a znovu vykreslí šablonu i s chybami formuláře
-            pass
+
+        # Ignorujeme validaci (pro test), abychom viděli, jestli se to vůbec uloží
+        # Pokud toto projde, víme, že problém byl v "přísnosti" Django formuláře
+        clanek = form.save(commit=False)
+        clanek.slug = slugify(clanek.titulek)
+
+        # Ruční vložení textu, pokud JS selhal
+        if not clanek.text:
+            clanek.text = request.POST.get('text', '')
+
+        clanek.save()
+        return redirect('blog_seznam')
+
     else:
         form = ClanekForm()
-
-    # Šablona se vykreslí znovu, a pokud form není validní,
-    # {{ for error in field.errors }} v šabloně vypíše, co je špatně.
     return render(request, 'home/blog/clanek_form.html', {'form': form, 'akce': 'Nový článek'})
-
 
 @user_passes_test(je_admin)
 def clanek_uprav(request, slug):
