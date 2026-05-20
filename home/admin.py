@@ -3,7 +3,7 @@ from django.utils.html import format_html
 from django.utils import timezone
 
 # --- UPRAVENO: Přidán model Clanek do importů ---
-from .models import Sluzba, KontaktniZprava, Clanek
+from .models import Sluzba, KontaktniZprava, Clanek, Komentar
 
 # Import modelu z jiné aplikace (users)
 from users.models import ProfilMajitele
@@ -106,3 +106,20 @@ class ClanekAdmin(admin.ModelAdmin):
         return format_html('<b style="color: red;">🔴 Koncept</b>')
 
     stav_publikace.short_description = 'Stav'
+
+
+@admin.register(Komentar)
+class KomentarAdmin(admin.ModelAdmin):
+    # ZDE OPRAVTE názvy polí, aby odpovídaly modelu (použijte 'vytvoreno')
+    list_display = ('autor', 'clanek_titulek', 'vytvoreno', 'zkraceny_text')
+    list_filter = ('vytvoreno', 'autor')
+    search_fields = ('text', 'autor__username', 'clanek__titulek')
+
+    def clanek_titulek(self, obj):
+        return obj.clanek.titulek
+    clanek_titulek.short_description = 'Článek'
+
+    def zkraceny_text(self, obj):
+        text = obj.text or ""
+        return text[:50] + "..." if len(text) > 50 else text
+    zkraceny_text.short_description = 'Text'

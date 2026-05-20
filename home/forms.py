@@ -1,6 +1,6 @@
 from django import forms
 # UPRAVENO: Přidán import modelu Clanek
-from .models import Sluzba, Recenze, Clanek
+from .models import Sluzba, Recenze, Clanek, Komentar
 
 
 # =====================================================================
@@ -42,7 +42,24 @@ class ClanekForm(forms.ModelForm):
                 field.widget.attrs.update({
                     'class': css_class,
                     'style': 'border-radius: 12px; border: 1.5px solid var(--border-tan); padding: 10px;'
+
                 })
+
+class KomentarForm(forms.ModelForm):
+    class Meta:
+        model = Komentar
+        fields = ['text'] # Případně přidejte 'parent', pokud chcete v budoucnu vybírat rodiče přímo
+        widgets = {
+            'text': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Napište svůj komentář...',
+                'style': 'border-radius: 12px; border: 1.5px solid var(--border-tan);'
+            }),
+        }
+        labels = {
+            'text': '',
+        }
 
 # =====================================================================
 # --- TVÉ STÁVAJÍCÍ FORMULÁŘE ---

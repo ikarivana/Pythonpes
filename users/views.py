@@ -1219,20 +1219,6 @@ def pridej_like(request, post_id):
     return redirect(f"{base_url}#post-{p.id}")
 
 
-@login_required
-def smazat_komentar(request, pk):
-    komentar = get_object_or_404(Komentar, id=pk)
-    # Povolit vlastníkovi komentáře, autorovi příspěvku nebo adminovi
-    if komentar.autor == request.user or komentar.prispevek.autor == request.user or request.user.is_staff:
-        slug = komentar.prispevek.plemeno.slug
-        komentar.delete()
-        messages.success(request, "Komentář byl smazán.")
-        return redirect('zed_plemene', slug=slug)
-    else:
-        messages.error(request, "Nemáte oprávnění.")
-        return redirect(request.META.get('HTTP_REFERER', '/'))
-
-
 def zdravotni_historie(request, pes_id):
     pes = get_object_or_404(Pes, id=pes_id)
 

@@ -6,8 +6,6 @@ from django.conf.urls.static import static
 # --- PŘIDÁNO PRO SITEMAPY ---
 from django.contrib.sitemaps.views import sitemap
 from home.sitemaps import StaticViewSitemap, PesSitemap
-# Pokud už máš sitemaps i pro inzerci, přidej ji sem taky:
-# from inzerce.sitemaps import InzeratSitemap
 
 sitemaps = {
     'static': StaticViewSitemap,

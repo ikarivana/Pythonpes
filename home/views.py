@@ -15,8 +15,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 
 # Importy tvých modelů a forem
-from .models import Sluzba, Recenze, Clanek  # PŘIDÁN MODEL CLANEK
-from .forms import SluzbaForm, KontaktForm, RecenzeForm, ClanekForm
+from .models import Sluzba, Recenze, Clanek, Komentar
+from .forms import SluzbaForm, KontaktForm, RecenzeForm, ClanekForm, KomentarForm
 from users.models import Prispevek, Pes, ProfilMajitele, Notifikace
 
 
@@ -475,6 +475,9 @@ def pruvodce(request):
 # --- POHLEDY PRO BLOG ---
 # =========================================================================
 
+def je_admin(user):
+    return user.is_authenticated and user.is_superuser
+
 def blog_seznam(request):
     """Archiv a výpis všech publikovaných článků s možností filtrování."""
     clanky_queryset = Clanek.objects.filter(
@@ -491,39 +494,49 @@ def blog_seznam(request):
         'zvolena_kategorie': zvolena_kategorie
     })
 
-
 def blog_detail(request, slug):
-    """Zobrazení konkrétního článku na základě jeho textového identifikátoru (slug)."""
+    """Zobrazení konkrétního článku a zpracování komentářů."""
     clanek = get_object_or_404(Clanek, slug=slug, publikovan=True)
 
+    # Načtení pouze hlavních komentářů (odpovědi se vypíší v šabloně)
+    komentare = clanek.komentare.filter(parent__isnull=True).order_by('-vytvoreno')
+
+    if request.method == 'POST':
+        # Pokud uživatel není přihlášen, přesměrujeme ho (zabezpečení)
+        if not request.user.is_authenticated:
+            return redirect('login')
+
+        form = KomentarForm(request.POST)
+        if form.is_valid():
+            komentar = form.save(commit=False)
+            komentar.clanek = clanek
+            komentar.autor = request.user
+
+            # Zjištění, zda jde o odpověď (pokud formulář obsahuje skryté pole parent_id)
+            parent_id = request.POST.get('parent_id')
+            if parent_id:
+                komentar.parent = Komentar.objects.get(id=parent_id)
+
+            komentar.save()
+            return redirect('blog_detail', slug=slug)
+    else:
+        form = KomentarForm()
+
     return render(request, 'home/blog/blog_detail.html', {
-        'clanek': clanek
+        'clanek': clanek,
+        'komentare': komentare,
+        'form': form
     })
-
-
-# --- ADMIN VYCHYTÁVKY PRO SPRÁVU BLOGU ---
-
-def je_admin(user):
-    return user.is_authenticated and user.is_superuser
-
 
 @user_passes_test(je_admin)
 def clanek_vytvor(request):
     if request.method == 'POST':
         form = ClanekForm(request.POST, request.FILES)
-
-        # Ignorujeme validaci (pro test), abychom viděli, jestli se to vůbec uloží
-        # Pokud toto projde, víme, že problém byl v "přísnosti" Django formuláře
-        clanek = form.save(commit=False)
-        clanek.slug = slugify(clanek.titulek)
-
-        # Ruční vložení textu, pokud JS selhal
-        if not clanek.text:
-            clanek.text = request.POST.get('text', '')
-
-        clanek.save()
-        return redirect('blog_seznam')
-
+        if form.is_valid():
+            clanek = form.save(commit=False)
+            clanek.slug = slugify(clanek.titulek)
+            clanek.save()
+            return redirect('blog_seznam')
     else:
         form = ClanekForm()
     return render(request, 'home/blog/clanek_form.html', {'form': form, 'akce': 'Nový článek'})
@@ -542,7 +555,6 @@ def clanek_uprav(request, slug):
         form = ClanekForm(instance=clanek)
     return render(request, 'home/blog/clanek_form.html', {'form': form, 'akce': 'Upravit článek', 'clanek': clanek})
 
-
 @user_passes_test(je_admin)
 def clanek_smaz(request, slug):
     clanek = get_object_or_404(Clanek, slug=slug)
@@ -550,3 +562,49 @@ def clanek_smaz(request, slug):
         clanek.delete()
         return redirect('blog_seznam')
     return render(request, 'home/blog/clanek_potvrdit_smazani.html', {'clanek': clanek})
+
+
+@login_required
+def upravit_komentar(request, pk):
+    """View pro editaci vlastního komentáře."""
+    komentar = get_object_or_404(Komentar, pk=pk)
+
+    # Oprávnění: pouze autor nebo superuser
+    if request.user != komentar.autor and not request.user.is_superuser:
+        return redirect('blog_detail', slug=komentar.clanek.slug)
+
+    if request.method == 'POST':
+        form = KomentarForm(request.POST, instance=komentar)
+        if form.is_valid():
+            form.save()
+            return redirect('blog_detail', slug=komentar.clanek.slug)
+    else:
+        form = KomentarForm(instance=komentar)
+
+    return render(request, 'home/blog/upravit_komentar.html', {'form': form, 'komentar': komentar})
+
+
+@login_required
+def smazat_komentar(request, pk):
+    # Najde komentář
+    komentar = get_object_or_404(Komentar, id=pk)
+
+    # 1. Zjistíme, zda komentář má příspěvek, aniž by to způsobilo chybu
+    prispevek = getattr(komentar, 'prispevek', None)
+
+    # 2. Pokud příspěvek existuje, zkontrolujeme oprávnění
+    if prispevek:
+        if komentar.autor == request.user or prispevek.autor == request.user or request.user.is_staff:
+            slug = prispevek.plemeno.slug
+            komentar.delete()
+            messages.success(request, "Komentář byl smazán.")
+            return redirect('zed_plemene', slug=slug)
+        else:
+            messages.error(request, "Nemáte oprávnění.")
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+
+    # 3. Pokud příspěvek neexistuje (chyba v datech), smažeme komentář a vrátíme se zpět
+    else:
+        komentar.delete()
+        messages.success(request, "Komentář byl smazán.")
+        return redirect('home')

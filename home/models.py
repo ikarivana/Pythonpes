@@ -155,3 +155,18 @@ class Clanek(models.Model):
 
     def __str__(self):
         return self.titulek
+
+
+class Komentar(models.Model):
+    clanek = models.ForeignKey(Clanek, on_delete=models.CASCADE, related_name='komentare')
+    autor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='users_komentare')
+    text = models.TextField(max_length=1000)
+    vytvoreno = models.DateTimeField(auto_now_add=True)
+    # Pole pro odpovědi: pokud je prázdné, jde o hlavní komentář
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='odpovedi')
+
+    class Meta:
+        ordering = ['vytvoreno']
+
+    def __str__(self):
+        return f"Komentář od {self.autor.username} k {self.clanek.titulek}"

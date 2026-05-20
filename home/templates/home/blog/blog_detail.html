@@ -2,44 +2,7 @@
 
 {% block title %}{{ clanek.titulek }} | epes.online{% endblock %}
 
-{% block og_tags %}
-<meta property="og:type" content="article">
-<meta property="og:title" content="{{ clanek.titulek }}">
-<meta property="og:description" content="{{ clanek.perex }}">
-{% if clanek.obrazek %}
-<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ clanek.obrazek.url }}">
-{% endif %}
-{% endblock %}
-
 {% block content %}
-<style>
-    .article-container { 
-        max-width: 800px; 
-        margin: 0 auto; 
-        background: white; 
-        border-radius: 30px; 
-        box-shadow: 0 10px 40px rgba(0,0,0,0.02); 
-        overflow: hidden; 
-        border: 1px solid rgba(197, 160, 89, 0.1); 
-    }
-    .article-content { 
-        padding: 40px; 
-        color: var(--mid-brown, #3e2723); 
-        line-height: 1.8; 
-        font-size: 1.05rem; 
-    }
-    .article-content p { margin-bottom: 1.5rem; }
-    .article-meta { 
-        display: flex; 
-        justify-content: space-between;
-        align-items: center;
-        font-size: 0.85rem;
-        color: #6c757d;
-        font-weight: 600;
-        margin-bottom: 20px;
-    }
-</style>
-
 <div class="container py-4">
     <div class="mb-4">
         <a href="{% url 'blog_seznam' %}" class="text-decoration-none small fw-bold" style="color: var(--mid-brown, #3e2723);">
@@ -47,75 +10,60 @@
         </a>
     </div>
 
-    <article class="article-container">
+    <article class="article-container" style="max-width: 800px; margin: 0 auto; background: white; border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.02); overflow: hidden; border: 1px solid rgba(197, 160, 89, 0.1);">
         {% if clanek.obrazek %}
-            <div style="width: 100%; height: 400px; background: url('{{ clanek.obrazek.url }}') center/cover no-repeat;"></div>
+            <div style="width: 100%; aspect-ratio: 16/9; background: url('{{ clanek.obrazek.url }}') center/cover no-repeat;"></div>
         {% endif %}
 
-        <div class="article-content">
-            <div class="article-meta">
-                <div>
-                    <span class="badge" style="background: var(--mid-brown, #3e2723); color: white; padding: 5px 10px; border-radius: 6px;">
-                        {{ clanek.get_kategorie_display }}
-                    </span>
-                    <span class="ms-2"><i class="far fa-calendar-alt me-1"></i> {{ clanek.datum_publikace|date:"d. m. Y" }}</span>
-                </div>
+        <div class="article-content" style="padding: 40px; color: var(--mid-brown, #3e2723);">
+            <div class="article-meta d-flex justify-content-between align-items-center mb-3">
+                <span class="badge" style="background: var(--mid-brown, #3e2723); color: white; padding: 5px 10px; border-radius: 6px;">
+                    {{ clanek.get_kategorie_display }}
+                </span>
 
-                {# Tlačítka pro úpravu a smazání - viditelné jen pro autora nebo superusera #}
-                {% if request.user == clanek.autor or request.user.is_superuser %}
+                {% if user.is_superuser %}
                     <div class="d-flex gap-2">
-                        <a href="{% url 'clanek_uprav' clanek.slug %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                            <i class="fas fa-edit me-1"></i> Upravit
-                        </a>
-                        <a href="{% url 'clanek_smaz' clanek.slug %}"
-                           class="btn btn-sm btn-outline-danger rounded-pill px-3"
-                           onclick="return confirm('Opravdu chcete tento článek smazat?')">
-                            <i class="fas fa-trash-alt me-1"></i> Smazat
-                        </a>
+                        <a href="{% url 'clanek_uprav' clanek.slug %}" class="btn btn-sm btn-outline-primary rounded-pill">Upravit článek</a>
+                        <a href="{% url 'clanek_smaz' clanek.slug %}" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Smazat?')">Smazat článek</a>
                     </div>
                 {% endif %}
             </div>
 
-            <h1 class="fw-bold mb-4" style="font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--mid-brown, #3e2723); line-height: 1.2;">
-                {{ clanek.titulek }}
-            </h1>
+            <h1 class="fw-bold mb-4">{{ clanek.titulek }}</h1>
+            <div class="article-text-body mb-5">{{ clanek.text|safe }}</div>
 
-            <p class="fw-bold text-muted lead mb-4" style="font-size: 1.2rem; border-left: 4px solid var(--gold, #c5a059); padding-left: 15px;">
-                {{ clanek.perex }}
-            </p>
+            <hr class="my-5">
+            <h4 class="fw-bold mb-4">Komentáře ({{ komentare.count }})</h4>
 
-            <div class="article-text-body">
-                {{ clanek.text|safe }}
-            </div>
+            {% if user.is_authenticated %}
+                <form method="post" class="mb-4">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary rounded-pill">Odeslat komentář</button>
+                </form>
+            {% endif %}
 
-            {# Sekce pro sdílení #}
-            <div class="mt-5 pt-4 border-top">
-                <h6 class="fw-bold mb-3">Sdílejte článek:</h6>
-                <div class="d-flex gap-2">
-                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
-                       target="_blank" class="btn btn-outline-primary rounded-pill px-3">
-                        <i class="fab fa-facebook-f me-2"></i> Facebook
-                    </a>
-                    <button onclick="shareArticle()" class="btn btn-outline-dark rounded-pill px-3">
-                        <i class="fas fa-share-alt me-2"></i> Sdílet (ostatní)
-                    </button>
-                </div>
+            <div class="komentare-list">
+                {% for komentar in komentare %}
+                    <div class="comment-card p-3 mb-3 border rounded-4 bg-light">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ komentar.autor.username }}</strong>
+                            <small class="text-muted">{{ komentar.vytvoreno|date:"d. m. Y H:i" }}</small>
+                        </div>
+                        <p class="mt-2">{{ komentar.text }}</p>
+
+                        {% if user == komentar.autor or user.is_superuser %}
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'upravit_komentar' komentar.pk %}" class="text-decoration-none small">Upravit</a>
+                                <a href="/komentar/smazat/{{ komentar.pk }}/" class="text-decoration-none small text-danger" onclick="return confirm('Opravdu chcete tento komentář smazat?')">Smazat</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <p class="text-muted">Zatím žádné komentáře.</p>
+                {% endfor %}
             </div>
         </div>
     </article>
 </div>
-
-<script>
-    function shareArticle() {
-        if (navigator.share) {
-            navigator.share({
-                title: '{{ clanek.titulek }}',
-                url: window.location.href
-            }).catch(console.error);
-        } else {
-            navigator.clipboard.writeText(window.location.href);
-            alert('Odkaz zkopírován do schránky!');
-        }
-    }
-</script>
 {% endblock %}

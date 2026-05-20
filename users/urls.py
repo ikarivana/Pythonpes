@@ -74,7 +74,6 @@ urlpatterns = [
     path('prispevek/smazat/<int:pk>/', views.smazat_prispevek, name='smazat_prispevek'),
 
     # --- KOMENTÁŘE ---
-    path('komentar/smazat/<int:pk>/', views.smazat_komentar, name='smazat_komentar'),
     path('komentar/upravit/<int:pk>/', views.upravit_komentar, name='upravit_komentar'),
     path('komentar/odpoved/<int:parent_id>/', views.pridat_odpoved, name='pridat_odpoved'),
 

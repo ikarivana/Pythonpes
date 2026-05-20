@@ -15,6 +15,8 @@ urlpatterns = [
     path('blog/novy/pridat/', views.clanek_vytvor, name='clanek_vytvor'),
     path('blog/<slug:slug>/upravit/', views.clanek_uprav, name='clanek_uprav'),
     path('blog/<slug:slug>/smazat/', views.clanek_smaz, name='clanek_smaz'),
+    path('komentar/upravit/<int:pk>/', views.upravit_komentar, name='upravit_komentar'),
+    path('komentar/smazat/<int:pk>/', views.smazat_komentar, name='smazat_komentar'),
 
     # --- MAPA A SLUŽBY ---
     path('mapa/', views.mapa_sluzeb, name='mapa_sluzeb'),
