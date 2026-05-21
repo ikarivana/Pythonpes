@@ -2,6 +2,23 @@
 
 {% block title %}{{ clanek.titulek }} | epes.online{% endblock %}
 
+{% block og_tags %}
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{ clanek.titulek }}">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+<meta property="og:description" content="{{ clanek.text|striptags|truncatewords:30 }}">
+
+{% if clanek.obrazek %}
+    {# Zajištění absolutní URL pomocí build_absolute_uri #}
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ clanek.obrazek.url }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+{% else %}
+    {# Ujistěte se, že toto URL je veřejně dostupné a vrací správný MIME type #}
+    <meta property="og:image" content="https://epes.online/static/images/og-default.jpg">
+{% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="container py-4">
     <div class="mb-4">
@@ -23,14 +40,28 @@
 
                 {% if user.is_superuser %}
                     <div class="d-flex gap-2">
-                        <a href="{% url 'clanek_uprav' clanek.slug %}" class="btn btn-sm btn-outline-primary rounded-pill">Upravit článek</a>
-                        <a href="{% url 'clanek_smaz' clanek.slug %}" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Smazat?')">Smazat článek</a>
+                        <a href="{% url 'clanek_uprav' clanek.slug %}" class="btn btn-sm btn-outline-primary rounded-pill">Upravit</a>
+                        <a href="{% url 'clanek_smaz' clanek.slug %}" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Smazat?')">Smazat</a>
                     </div>
                 {% endif %}
             </div>
 
             <h1 class="fw-bold mb-4">{{ clanek.titulek }}</h1>
             <div class="article-text-body mb-5">{{ clanek.text|safe }}</div>
+
+            <div class="article-share my-4 p-3 rounded-4" style="background: rgba(197, 160, 89, 0.08); border: 1px solid rgba(197, 160, 89, 0.15);">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="fw-bold me-2" style="color: var(--mid-brown, #3e2723);"><i class="fas fa-share-alt me-1"></i> Sdílet:</span>
+
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}" target="_blank" class="btn btn-sm rounded-pill" style="background: #1877f2; color: white;"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri|urlencode }}&text={{ clanek.titulek|urlencode }}" target="_blank" class="btn btn-sm rounded-pill" style="background: #000; color: white;"><i class="fab fa-x-twitter"></i></a>
+                    <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri|urlencode }}" target="_blank" class="btn btn-sm rounded-pill" style="background: #0a66c2; color: white;"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://wa.me/?text={{ clanek.titulek|urlencode }}%20{{ request.build_absolute_uri|urlencode }}" target="_blank" class="btn btn-sm rounded-pill" style="background: #25d366; color: white;"><i class="fab fa-whatsapp"></i></a>
+                    <a href="mailto:?subject={{ clanek.titulek|urlencode }}&body=Podívej se na: {{ request.build_absolute_uri|urlencode }}" class="btn btn-sm btn-outline-secondary rounded-pill"><i class="fas fa-envelope"></i></a>
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill copy-link-btn" data-url="{{ request.build_absolute_uri }}"><i class="fas fa-link"></i></button>
+                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill d-md-none share-native-btn" style="display: none;"><i class="fas fa-share-nodes"></i></button>
+                </div>
+            </div>
 
             <hr class="my-5">
             <h4 class="fw-bold mb-4">Komentáře ({{ komentare.count }})</h4>
@@ -54,8 +85,8 @@
 
                         {% if user == komentar.autor or user.is_superuser %}
                             <div class="d-flex gap-2">
-                                <a href="{% url 'upravit_komentar' komentar.pk %}" class="text-decoration-none small">Upravit</a>
-                                <a href="/komentar/smazat/{{ komentar.pk }}/" class="text-decoration-none small text-danger" onclick="return confirm('Opravdu chcete tento komentář smazat?')">Smazat</a>
+                               <a href="{% url 'upravit_komentar' komentar.pk %}" class="text-decoration-none small">Upravit</a>
+                               <a href="{% url 'smazat_komentar' komentar.pk %}" class="text-decoration-none small text-danger" onclick="return confirm('Opravdu smazat?')">Smazat</a>
                             </div>
                         {% endif %}
                     </div>
@@ -66,4 +97,27 @@
         </div>
     </article>
 </div>
+
+<script>
+document.querySelector('.copy-link-btn')?.addEventListener('click', function() {
+    const url = this.dataset.url;
+    navigator.clipboard.writeText(url).then(() => {
+        const icon = this.querySelector('i');
+        icon.className = 'fas fa-check';
+        setTimeout(() => { icon.className = 'fas fa-link'; }, 2000);
+    });
+});
+
+if (navigator.share) {
+    const nativeBtn = document.querySelector('.share-native-btn');
+    nativeBtn.style.display = 'inline-block';
+    nativeBtn.addEventListener('click', () => {
+        navigator.share({
+            title: '{{ clanek.titulek|escapejs }}',
+            text: '{{ clanek.titulek|escapejs }}',
+            url: '{{ request.build_absolute_uri|escapejs }}'
+        }).catch(err => console.log('Sdílení zrušeno'));
+    });
+}
+</script>
 {% endblock %}
