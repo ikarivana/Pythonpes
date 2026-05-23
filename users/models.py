@@ -12,8 +12,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from PIL import Image, ExifTags  # Nutné pro práci s obrázky
 
-from home.models import Obec, CenikObce
-
 
 class PromoKod(models.Model):
     kod = models.CharField(max_length=50, unique=True, verbose_name="Promo kód")
@@ -124,12 +122,6 @@ class Pes(models.Model):
     posledni_klistata = models.DateField(null=True, blank=True)
     vytvoreno = models.DateTimeField(auto_now_add=True)
 
-    # NOVÁ POLE PRO OBEC
-    obec = models.ForeignKey(Obec, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Registrováno v obci")
-    bydleni_typ = models.CharField(max_length=10, choices=[('byt', 'Bytový dům'), ('dum', 'Rodinný dům')],
-                                   default='byt')
-    poplatek_zaplacen = models.BooleanField(default=False, verbose_name="Poplatek zaplacen")
-
     def __str__(self):
         return self.jmeno
 
@@ -180,7 +172,6 @@ class Pes(models.Model):
 
         return f"{months} měs."
 
-    # bing
     def get_absolute_url(self):
         return reverse('detail_psa', kwargs={'pes_id': self.id})
 
@@ -211,25 +202,6 @@ class Pes(models.Model):
 
             except Exception as e:
                 print(f"Chyba při tvorbě QR: {e}")
-
-    def get_vypoctena_cena(self):
-        if not self.obec: return None
-        try:
-            c = self.obec.cenik
-            # Základ
-            cena = c.sazba_bytovy_dum if self.bydleni_typ == 'byt' else c.sazba_rodinny_dum
-
-            # Sleva útulek (pokud byste měli checkbox 'je_z_utulku', jinak ignorovat)
-            # if self.je_z_utulku: cena -= (cena * (c.sleva_utulek / 100))
-
-            # Pořadí psa (použijeme vaše existující "je_prvni_v_poradi")
-            if not self.je_prvni_v_poradi():
-                cena = cena * c.koeficient_dalsi_pes
-
-            return round(cena, 2)
-        except CenikObce.DoesNotExist:
-            return None
-
 
 
 # --- 2. MODEL PRO VÝSTAVY ---

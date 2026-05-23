@@ -108,25 +108,6 @@
                         <div class="mt-1 fw-bold" style="font-size: 0.65rem;">SOS QR</div>
                         {% endif %}
                     </div>
-
-                    {% if pes.druh == 'pes' %}
-                    <div class="text-start" style="min-width: 120px; max-width: 200px;">
-                        <div class="small fw-bold text-muted mb-1">POPLATEK</div>
-                        <div class="mb-2">
-                            {% if pes.poplatek_zaplacen %}
-                            <span class="badge bg-success">Uhrazeno</span>
-                            {% else %}
-                            <span class="badge bg-danger">Po splatnosti</span>
-                            {% endif %}
-                        </div>
-                        <div class="small text-muted" style="line-height: 1.2;">
-                            <span style="font-size: 0.7rem;">Obec:</span><br>
-                            <strong class="text-dark">{{ pes.obec.nazev|default:"-" }}</strong><br>
-                            <span style="font-size: 0.7rem;">Cena:</span> <strong>{{ pes.get_vypoctena_cena|default:"0"
-                            }} Kč</strong>
-                        </div>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
 

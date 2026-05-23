@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django.utils import timezone
-from .models import Sluzba, KontaktniZprava, Clanek, Komentar, Obec, Platba, CenikObce
+from .models import Sluzba, KontaktniZprava, Clanek, Komentar
 
 # Import modelu z jiné aplikace (users)
 from users.models import ProfilMajitele, Pes
@@ -106,25 +106,5 @@ class ClanekAdmin(admin.ModelAdmin):
     stav_publikace.short_description = 'Stav'
 
 
-# 1. Inline pro platby (uvidíš je přímo v detailu psa)
-class PlatbaInline(admin.TabularInline):
-    model = Platba
-    extra = 1  # Přidá jeden prázdný řádek pro rychlé zadání nové platby
 
-# 2. Inline pro ceník (uvidíš ho přímo v detailu obce)
-class CenikObceInline(admin.StackedInline):
-    model = CenikObce
-    can_delete = False
-
-@admin.register(Platba)
-class PlatbaAdmin(admin.ModelAdmin):
-    list_display = ('pes', 'castka', 'datum')
-    list_filter = ('datum', 'pes__obec') # Přidaný filtr dle obce
-
-@admin.register(Obec)
-class ObecAdmin(admin.ModelAdmin):
-    list_display = ('nazev', 'ico')
-    search_fields = ('nazev', 'ico')
-    filter_horizontal = ('urednici',) # Skvělé pro výběr úředníků
-    inlines = [CenikObceInline]  # Tady se zobrazí ceník obce
 

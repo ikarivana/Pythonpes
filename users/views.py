@@ -5,8 +5,6 @@ from datetime import timedelta, timezone
 
 from PIL import Image, ImageOps
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.models import User
-from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.urls import reverse
 from pillow_heif import register_heif_opener
@@ -23,8 +21,6 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.core.files.base import ContentFile
 
-from home.models import Recenze
-from inzerce.models import Inzerat
 from .forms import UserUpdateForm, PlemenoForm, PrispevekForm, ExtendedRegistrationForm, OckovaniForm, PesForm, \
     ProfilUpdateForm
 from .models import (
@@ -438,7 +434,6 @@ def detail_psa(request, pes_id):
     # 2. Inicializace proměnných (vše začíná jako False)
     is_superuser = False
     je_majitel = False
-    je_urednik_obce = False
 
     # 3. Logika naplnění dat
     if request.user.is_authenticated:
@@ -449,10 +444,6 @@ def detail_psa(request, pes_id):
         if pes.majitel and pes.majitel.uzivatel == request.user:
             je_majitel = True
 
-        # Identifikace úředníka
-        # Pokud máš related_name 'spravovane_obce', takto to zkontroluješ
-        if pes.obec:
-            je_urednik_obce = request.user.spravovane_obce.filter(pk=pes.obec.pk).exists()
 
     # --- 2. PREMIUM LOGIKA (Sjednocená kontrola) ---
     ma_pristup_k_funkcim = False
@@ -492,7 +483,6 @@ def detail_psa(request, pes_id):
         'profil': profil,
         'je_majitel': je_majitel,
         'is_superuser': is_superuser,
-        'je_urednik_obce': je_urednik_obce,
         'ma_pristup_k_funkcim': ma_pristup_k_funkcim,
         'zdravotni_zaznamy': zdravotni_zaznamy,
         'galeriefotky': galeriefotky,

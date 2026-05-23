@@ -171,35 +171,3 @@ class Komentar(models.Model):
         return f"Komentář od {self.autor.username} k {self.clanek.titulek}"
 
 
-class Obec(models.Model):
-    nazev = models.CharField(max_length=255, verbose_name="Název obce/města")
-    ico = models.CharField(max_length=20, unique=True, verbose_name="IČO")
-    adresa_poplatku = models.TextField(verbose_name="Adresa pro platbu poplatku")
-
-    # Pro přístup úředníků:
-    # K obci přiřadíme uživatele (úředníky), kteří ji mohou spravovat
-    urednici = models.ManyToManyField(User, related_name="spravovane_obce", blank=True)
-
-    def __str__(self):
-        return self.nazev
-
-
-class CenikObce(models.Model):
-    obec = models.OneToOneField(Obec, on_delete=models.CASCADE, related_name='cenik')
-    sazba_bytovy_dum = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    sazba_rodinny_dum = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    sleva_senior = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Sleva v %")
-    sleva_utulek = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Sleva v %")
-    koeficient_dalsi_pes = models.DecimalField(max_digits=3, decimal_places=2, default=1.0)
-
-    def __str__(self):
-        return f"Ceník: {self.obec.nazev}"
-
-class Platba(models.Model):
-    pes = models.ForeignKey('users.Pes', on_delete=models.CASCADE, related_name='historie_plateb')
-    castka = models.DecimalField(max_digits=10, decimal_places=2)
-    datum = models.DateField(auto_now_add=True)
-    poznamka = models.CharField(max_length=255, blank=True)
-
-    def __str__(self):
-        return f"{self.pes.jmeno} - {self.castka} Kč"

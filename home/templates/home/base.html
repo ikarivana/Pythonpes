@@ -159,13 +159,6 @@
             <a href="{% url 'seznam_hledanych' %}" class="nav-link-custom nav-link-sos">
                 <i class="fas fa-broadcast-tower"></i> Pátrání / Ztráty
             </a>
-
-            {% if user.is_authenticated and user.spravovane_obce.exists or user.is_superuser %}
-            <a href="{% url 'seznam_psu_urad' %}" class="nav-link-custom">
-                <i class="fas fa-dog"></i> Agenda psů
-            </a>
-            {% endif %}
-
             <div class="sidebar-label">Služby a Komunita</div>
             <a href="{% url 'mapa_sluzeb' %}" class="nav-link-custom"><i class="fas fa-map-marked-alt"></i> Mapa služeb</a>
             <a href="{% url 'seznam_inzeratu' %}" class="nav-link-custom"><i class="fas fa-shopping-basket"></i> Inzerce
