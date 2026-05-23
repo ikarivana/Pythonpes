@@ -9,7 +9,7 @@
         gtag('js', new Date());
         gtag('config', 'G-6ZLZDG54WS');
     </script>
-    <meta name="msvalidate.01" content="335334681C7DCB402663C85BBBC15799" />
+    <meta name="msvalidate.01" content="335334681C7DCB402663C85BBBC15799"/>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,19 +19,20 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="epes.online - Digitální identita pro vašeho mazlíčka">
     <meta property="og:description" content="Chytré známky, digitální profily a záchranná síť pro psy a kočky.">
-    <meta property="og:image" content="https://epes.online/static/images/og-default.jpg"> 
+    <meta property="og:image" content="https://epes.online/static/images/og-default.jpg">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
     {% endblock %}
 
     <link rel="icon" type="image/png" sizes="192x192" href="{% static 'images/icon-192.png' %}?v=1">
     <link rel="apple-touch-icon" href="{% static 'images/icon-192.png' %}?v=1">
     <link rel="manifest" href="{% static 'manifest.json' %}?v=1">
-    
+
     <meta name="theme-color" content="#2d1b19">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+          rel="stylesheet">
 
     <style>
         :root {
@@ -146,7 +147,8 @@
                 <div class="position-relative">
                     <i class="fas fa-bell"></i>
                     {% if pocet_notifikaci > 0 %}
-                    <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle" style="font-size: 0.5rem;">{{ pocet_notifikaci }}</span>
+                    <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle"
+                          style="font-size: 0.5rem;">{{ pocet_notifikaci }}</span>
                     {% endif %}
                 </div>
                 <span class="ms-2">Notifikace</span>
@@ -158,13 +160,22 @@
                 <i class="fas fa-broadcast-tower"></i> Pátrání / Ztráty
             </a>
 
+            {% if user.is_authenticated and user.spravovane_obce.exists or user.is_superuser %}
+            <a href="{% url 'seznam_psu_urad' %}" class="nav-link-custom">
+                <i class="fas fa-dog"></i> Agenda psů
+            </a>
+            {% endif %}
+
             <div class="sidebar-label">Služby a Komunita</div>
             <a href="{% url 'mapa_sluzeb' %}" class="nav-link-custom"><i class="fas fa-map-marked-alt"></i> Mapa služeb</a>
-            <a href="{% url 'seznam_inzeratu' %}" class="nav-link-custom"><i class="fas fa-shopping-basket"></i> Inzerce / Bazar</a>
+            <a href="{% url 'seznam_inzeratu' %}" class="nav-link-custom"><i class="fas fa-shopping-basket"></i> Inzerce
+                / Bazar</a>
             <a href="{% url 'blog_seznam' %}" class="nav-link-custom"><i class="fas fa-book-open"></i> Čtení pro páníčky</a>
             <a href="{% url 'seznam_zdi' %}" class="nav-link-custom"><i class="fas fa-users"></i> Zdi plemen</a>
-            <a href="{% url 'cenik' %}" class="nav-link-custom"><i class="fas fa-crown" style="color: var(--gold);"></i> Premium / Ceník</a>
-            <a href="{% url 'kontakt' %}" class="nav-link-custom"><i class="fas fa-envelope"></i> Kontakt a Můj příběh</a>
+            <a href="{% url 'cenik' %}" class="nav-link-custom"><i class="fas fa-crown" style="color: var(--gold);"></i>
+                Premium / Ceník</a>
+            <a href="{% url 'kontakt' %}" class="nav-link-custom"><i class="fas fa-envelope"></i> Kontakt a Můj
+                příběh</a>
             <a href="{% url 'pruvodce' %}" class="nav-link-custom"><i class="fas fa-magic"></i> Průvodce webem</a>
         </div>
 
@@ -173,7 +184,8 @@
             <div class="user-pill mb-3">
                 <div class="d-flex align-items-center">
                     <div style="color: var(--gold);">
-                        {% if user.profil.is_cat_person %}<i class="fas fa-cat"></i>{% else %}<i class="fas fa-shield-dog"></i>{% endif %}
+                        {% if user.profil.is_cat_person %}<i class="fas fa-cat"></i>{% else %}<i
+                            class="fas fa-shield-dog"></i>{% endif %}
                     </div>
                     <div class="ms-2">
                         <span class="user-name">{{ user.username }}</span>
@@ -188,32 +200,39 @@
 
             {% if not user.profil.is_premium %}
             <div class="d-grid mb-3">
-                <a href="{% url 'cenik' %}" class="btn btn-sm fw-bold shadow-sm" style="background: var(--gold); color: white; border-radius: 10px; font-size: 0.75rem;">👑 AKTIVOVAT PREMIUM</a>
+                <a href="{% url 'cenik' %}" class="btn btn-sm fw-bold shadow-sm"
+                   style="background: var(--gold); color: white; border-radius: 10px; font-size: 0.75rem;">👑 AKTIVOVAT
+                    PREMIUM</a>
             </div>
             {% endif %}
             {% else %}
             <div class="d-grid gap-2 mb-3">
                 <a href="{% url 'login' %}" class="btn btn-sm text-white border-white-50">Přihlásit se</a>
-                <a href="{% url 'register' %}" class="btn btn-sm fw-bold shadow-sm" style="background: var(--gold); color: white;">Registrace</a>
+                <a href="{% url 'register' %}" class="btn btn-sm fw-bold shadow-sm"
+                   style="background: var(--gold); color: white;">Registrace</a>
             </div>
             {% endif %}
 
             <div class="d-flex justify-content-center gap-3 pt-2" style="border-top: 1px solid rgba(255,255,255,0.05);">
-                <a href="{% url 'podminky' %}" style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">Podmínky</a>
-                <a href="{% url 'cookies' %}" style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">Cookies</a>
-                <a href="{% url 'gdpr' %}" style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">GDPR</a>
+                <a href="{% url 'podminky' %}"
+                   style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">Podmínky</a>
+                <a href="{% url 'cookies' %}"
+                   style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">Cookies</a>
+                <a href="{% url 'gdpr' %}"
+                   style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-decoration: none;">GDPR</a>
             </div>
         </div>
     </nav>
 
     <div id="page-content-wrapper">
         {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            {% endfor %}
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm"
+             role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
         {% endif %}
 
         {% block content %}{% endblock %}

@@ -1,3 +1,4 @@
+from django.core.exceptions import PermissionDenied
 from django.db.models import Avg, Count
 from datetime import timedelta, date
 from django.shortcuts import render, redirect, get_object_or_404
@@ -608,3 +609,44 @@ def smazat_komentar(request, pk):
         komentar.delete()
         messages.success(request, "Komentář byl smazán.")
         return redirect('home')
+
+
+@login_required
+def seznam_psu_urad(request):
+    # Superuser vidí vše, ostatní jen to, k čemu jsou přiřazeni
+    if not request.user.is_superuser and not request.user.spravovane_obce.exists():
+        raise PermissionDenied("Přístup povolen pouze úředníkům obcí.")
+
+    if request.user.is_superuser:
+        psi = Pes.objects.all().order_by('jmeno') # Superuser vidí všechny psy
+    else:
+        spravovane_obce = request.user.spravovane_obce.all()
+        psi = Pes.objects.filter(obec__in=spravovane_obce).order_by('jmeno')
+
+    return render(request, 'home/seznam_psu_urad.html', {'psi': psi})
+
+@login_required
+def detail_psa_urad(request, pes_id):
+    # Logika: pokud je superuser, bereme vše, jinak jen spravované obce
+    if request.user.is_superuser:
+        pes = get_object_or_404(Pes, pk=pes_id)
+    else:
+        spravovane_obce = request.user.spravovane_obce.all()
+        pes = get_object_or_404(Pes, pk=pes_id, obec__in=spravovane_obce)
+
+    return render(request, 'home/detail_psa_urad.html', {'pes': pes})
+
+@login_required
+def prepnout_platbu(request, pes_id):
+    # Stejná logika i pro přepnutí platby
+    if request.user.is_superuser:
+        pes = get_object_or_404(Pes, pk=pes_id)
+    else:
+        spravovane_obce = request.user.spravovane_obce.all()
+        pes = get_object_or_404(Pes, pk=pes_id, obec__in=spravovane_obce)
+
+    # Přepnutí hodnoty
+    pes.poplatek_zaplacen = not pes.poplatek_zaplacen
+    pes.save()
+
+    return redirect('detail_psa_urad', pes_id=pes.id)

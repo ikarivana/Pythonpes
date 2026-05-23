@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from . import models
+from home.models import Platba
 
 
 # --- INLINES (Všechny související věci v jednom detailu psa) ---
@@ -46,13 +47,16 @@ class ZdravotniZaznamInline(admin.TabularInline):
     model = models.ZdravotniZaznam
     extra = 1
 
-
 # --- ADMIN PSA ---
+
+class PlatbaInline(admin.TabularInline):
+    model = Platba
+    extra = 1
+
 @admin.register(models.Pes)
 class PesAdmin(admin.ModelAdmin):
-    # Přidáno 'pohlavi_ikona' do seznamu
     list_display = ('nahled_foto', 'jmeno', 'druh_ikona', 'pohlavi_ikona', 'rasa', 'majitel', 'je_ztraceny')
-    list_filter = ('druh', 'pohlavi', 'je_ztraceny', 'rasa')  # Přidán filtr na pohlaví
+    list_filter = ('obec', 'poplatek_zaplacen','druh', 'pohlavi', 'je_ztraceny', 'rasa')
     search_fields = ('jmeno', 'cip', 'majitel__uzivatel__username')
     readonly_fields = ('qr_kod', 'nahled_velky', 'vytvoreno')
 
@@ -63,13 +67,18 @@ class PesAdmin(admin.ModelAdmin):
         VystavaInline,
         VrhInline,
         GalerieFotkaInline,
-        GalerieVideoInline
+        GalerieVideoInline,
+        PlatbaInline,
     ]
 
     fieldsets = (
         ('Základní informace', {
             # Tady jsme přidali 'pohlavi' k jménu a druhu
             'fields': (('jmeno', 'druh', 'pohlavi'), ('rasa', 'majitel'), ('datum_narozeni', 'vaha'), 'cip', 'fotka')
+        }),
+        ('Administrativa obce', {
+            'fields': (('obec', 'bydleni_typ', 'poplatek_zaplacen'),),
+            'description': "Správa poplatků za psa v rámci registrované obce.",
         }),
         # ... zbytek fieldsetů zůstává stejný, jako ho máš ...
         ('Zdraví, RTG a Dokumentace', {

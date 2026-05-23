@@ -1,12 +1,10 @@
-from django.contrib import admin  # HLAVNÍ IMPORT (Django admin)
+from django.contrib import admin
 from django.utils.html import format_html
 from django.utils import timezone
-
-# --- UPRAVENO: Přidán model Clanek do importů ---
-from .models import Sluzba, KontaktniZprava, Clanek, Komentar
+from .models import Sluzba, KontaktniZprava, Clanek, Komentar, Obec, Platba, CenikObce
 
 # Import modelu z jiné aplikace (users)
-from users.models import ProfilMajitele
+from users.models import ProfilMajitele, Pes
 
 
 # --- ADMINISTRACE SLUŽEB ---
@@ -108,18 +106,25 @@ class ClanekAdmin(admin.ModelAdmin):
     stav_publikace.short_description = 'Stav'
 
 
-@admin.register(Komentar)
-class KomentarAdmin(admin.ModelAdmin):
-    # ZDE OPRAVTE názvy polí, aby odpovídaly modelu (použijte 'vytvoreno')
-    list_display = ('autor', 'clanek_titulek', 'vytvoreno', 'zkraceny_text')
-    list_filter = ('vytvoreno', 'autor')
-    search_fields = ('text', 'autor__username', 'clanek__titulek')
+# 1. Inline pro platby (uvidíš je přímo v detailu psa)
+class PlatbaInline(admin.TabularInline):
+    model = Platba
+    extra = 1  # Přidá jeden prázdný řádek pro rychlé zadání nové platby
 
-    def clanek_titulek(self, obj):
-        return obj.clanek.titulek
-    clanek_titulek.short_description = 'Článek'
+# 2. Inline pro ceník (uvidíš ho přímo v detailu obce)
+class CenikObceInline(admin.StackedInline):
+    model = CenikObce
+    can_delete = False
 
-    def zkraceny_text(self, obj):
-        text = obj.text or ""
-        return text[:50] + "..." if len(text) > 50 else text
-    zkraceny_text.short_description = 'Text'
+@admin.register(Platba)
+class PlatbaAdmin(admin.ModelAdmin):
+    list_display = ('pes', 'castka', 'datum')
+    list_filter = ('datum', 'pes__obec') # Přidaný filtr dle obce
+
+@admin.register(Obec)
+class ObecAdmin(admin.ModelAdmin):
+    list_display = ('nazev', 'ico')
+    search_fields = ('nazev', 'ico')
+    filter_horizontal = ('urednici',) # Skvělé pro výběr úředníků
+    inlines = [CenikObceInline]  # Tady se zobrazí ceník obce
+

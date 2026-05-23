@@ -5,6 +5,8 @@ from datetime import timedelta, timezone
 
 from PIL import Image, ImageOps
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.urls import reverse
 from pillow_heif import register_heif_opener
@@ -430,17 +432,27 @@ def upravit_psa(request, pk):
 
 
 def detail_psa(request, pes_id):
+    # 1. Načtení psa
     pes = get_object_or_404(Pes, id=pes_id)
 
-    # --- 1. IDENTIFIKACE MAJITELE A SOS SYSTÉM ---
+    # 2. Inicializace proměnných (vše začíná jako False)
+    is_superuser = False
     je_majitel = False
+    je_urednik_obce = False
+
+    # 3. Logika naplnění dat
     if request.user.is_authenticated:
+        # Použijeme rovnou vlastnosti uživatele
+        is_superuser = request.user.is_superuser
+
+        # Identifikace majitele
         if pes.majitel and pes.majitel.uzivatel == request.user:
             je_majitel = True
 
-    # Pokud je pes ztracený a prohlíží ho někdo cizí (nálezce), jde na SOS profil
-    if pes.je_ztraceny and not je_majitel:
-        return redirect('nouzovy_profil_psa', pes_id=pes.id)
+        # Identifikace úředníka
+        # Pokud máš related_name 'spravovane_obce', takto to zkontroluješ
+        if pes.obec:
+            je_urednik_obce = request.user.spravovane_obce.filter(pk=pes.obec.pk).exists()
 
     # --- 2. PREMIUM LOGIKA (Sjednocená kontrola) ---
     ma_pristup_k_funkcim = False
@@ -479,6 +491,8 @@ def detail_psa(request, pes_id):
         'pes': pes,
         'profil': profil,
         'je_majitel': je_majitel,
+        'is_superuser': is_superuser,
+        'je_urednik_obce': je_urednik_obce,
         'ma_pristup_k_funkcim': ma_pristup_k_funkcim,
         'zdravotni_zaznamy': zdravotni_zaznamy,
         'galeriefotky': galeriefotky,

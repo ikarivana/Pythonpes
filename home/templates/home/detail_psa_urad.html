@@ -1,0 +1,73 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Úřední karta psa: {{ pes.jmeno }}</h2>
+        <a href="{% url 'seznam_psu_urad' %}" class="btn btn-secondary">Zpět na seznam</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header" style="background-color: #3e322d; color: #ffffff;">
+                    Základní údaje
+                </div>
+                <div class="card-body">
+                    <p><strong>Čip:</strong> {{ pes.cip }}</p>
+                    <p><strong>Majitel:</strong> {{ pes.majitel.jmeno }}</p>
+                    <p><strong>Adresa:</strong> {{ pes.majitel.adresa }}</p>
+                    <p><strong>Obec:</strong> {{ pes.obec.nazev }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header" style="background-color: #e9ecef; border-bottom: 2px solid #3e322d;">
+                    Úřední stav
+                </div>
+                <div class="card-body">
+                    <p><strong>Stav poplatku:</strong>
+                        {% if pes.poplatek_zaplacen %}
+                        <span class="badge bg-success">Zaplaceno</span>
+                        {% else %}
+                        <span class="badge bg-danger">Nezaplaceno</span>
+                        {% endif %}
+                    </p>
+                    <a href="{% url 'prepnout_platbu' pes.id %}" class="btn btn-outline-dark btn-sm">Přepnout stav
+                        platby</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header">Historie plateb</div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Datum</th>
+                    <th>Částka</th>
+                    <th>Poznámka</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for platba in historie %}
+                <tr>
+                    <td>{{ platba.datum|date:"d.m.Y" }}</td>
+                    <td>{{ platba.castka }} Kč</td>
+                    <td>{{ platba.poznamka }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center">Žádná historie plateb není k dispozici.</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -40,6 +40,11 @@ urlpatterns = [
     path('cenik/', views.cenik, name='cenik'),
     path('pruvodce/', views.pruvodce, name='pruvodce'),
 
+    # --- AGENDA OBCE ---
+    path('urad/seznam-psu/', views.seznam_psu_urad, name='seznam_psu_urad'),
+    path('pes/urad/<int:pes_id>/', views.detail_psa_urad, name='detail_psa_urad'),
+    path('urad/prepnout-platbu/<int:pes_id>/', views.prepnout_platbu, name='prepnout_platbu'),
+
     # --- INTEGRACE / PLATBY ---
     path('webhook/simpleshop/', views.simpleshop_webhook, name='simpleshop_webhook'),
     path('dekujeme-za-nakup/', views.dekujeme_za_nakup, name='dekujeme_za_nakup'),
